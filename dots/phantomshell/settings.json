@@ -1,0 +1,68 @@
+{
+  "theme": {
+    "mode": "dark",
+    "preset": "p5-crimson",
+    "polygonMode": true,
+    "skewAngle": -10,
+    "transparency": true,
+    "wallpaperPath": "/home/sho/Pictures/Wallpapers/goremagala_iceshard.jpg",
+    "wallpaperParallax": true,
+    "wallpaperZoom": 104
+  },
+  "bar": {
+    "position": "top",
+    "barStyle": "p5-skew",
+    "groupStyle": "pills",
+    "barShowBackground": false,
+    "barAutoHide": false,
+    "workspaceCount": 6,
+    "workspaceNumStyle": "arabic",
+    "showUtilButtons": true,
+    "showUtilSnip": true,
+    "showUtilPicker": true,
+    "showUtilMic": false,
+    "showUtilDark": false,
+    "screenFrame": false,
+    "screenRoundCorner": "no",
+    "frameThickness": 2,
+    "cornerRadius": 14,
+    "showWeatherHud": true,
+    "showWorkspaces": true,
+    "showDynamicIsland": true,
+    "showThemePill": true,
+    "showImPill": true,
+    "showStatsPill": true
+  },
+  "desktop": {
+    "showDesktopClock": true,
+    "desktopClockStyle": "p5-editorial",
+    "desktopClockPosition": "top-left",
+    "desktopClockScale": 100,
+    "desktopClockShowSeconds": false,
+    "desktopClockShowQuote": true,
+    "showDesktopCava": true,
+    "cavaIdleWave": false,
+    "showDesktopLyrics": true,
+    "lyricsShowCard": false,
+    "cavaBarCount": 36,
+    "cavaMaxHeight": 110
+  },
+  "widgets": {
+    "statsStyle": "pentagon",
+    "notifStyle": "p5-bubble"
+  },
+  "hyprland": {
+    "gapsIn": 5,
+    "gapsOut": 10,
+    "borderSize": 2,
+    "rounding": 10,
+    "blurEnabled": true,
+    "blurSize": 6,
+    "blurPasses": 2,
+    "animationsEnabled": true
+  },
+  "sfx": {
+    "enabled": true,
+    "volume": 0.7
+  }
+}

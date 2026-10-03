@@ -1,0 +1,16 @@
+{
+  "name": "P5 Phantom Crimson",
+  "id": "p5-crimson",
+  "primary": "#E60012",
+  "secondary": "#FFD700",
+  "accent": "#FF1E2E",
+  "background": "#0B0B0E",
+  "surface": "#141419",
+  "surfaceAlt": "#1F1F27",
+  "foreground": "#FFFFFF",
+  "muted": "#9E9EAE",
+  "borderLight": "#FFFFFF",
+  "borderDark": "#000000",
+  "urgent": "#FF0033",
+  "success": "#00F59B"
+}

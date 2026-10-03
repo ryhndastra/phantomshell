@@ -1,0 +1,16 @@
+{
+  "name": "P4 Golden Midnight",
+  "id": "p4-golden",
+  "primary": "#FFB703",
+  "secondary": "#FB8500",
+  "accent": "#FFE600",
+  "background": "#100F0C",
+  "surface": "#1C1A14",
+  "surfaceAlt": "#2B271E",
+  "foreground": "#FFFDF7",
+  "muted": "#B5AC96",
+  "borderLight": "#FFF5D6",
+  "borderDark": "#080705",
+  "urgent": "#E63946",
+  "success": "#52B788"
+}

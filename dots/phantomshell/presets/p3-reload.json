@@ -1,0 +1,16 @@
+{
+  "name": "P3 Reload S.E.E.S. Blue",
+  "id": "p3-reload",
+  "primary": "#00B4D8",
+  "secondary": "#90E0EF",
+  "accent": "#00F0FF",
+  "background": "#070C18",
+  "surface": "#0E172C",
+  "surfaceAlt": "#182544",
+  "foreground": "#F8FBFF",
+  "muted": "#8DA4C4",
+  "borderLight": "#E0F7FF",
+  "borderDark": "#040811",
+  "urgent": "#FF2A6D",
+  "success": "#05FFA1"
+}
