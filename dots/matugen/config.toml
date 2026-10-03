@@ -1,0 +1,6 @@
+[config]
+reload_apps = false
+
+[templates.phantomshell]
+input_path = "./templates/phantomshell-colors.json"
+output_path = "../phantomshell/colors.json"
