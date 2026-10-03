@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Determine base config directory (supports XDG_CONFIG_HOME or direct repo execution)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DOTS="$(cd "$SCRIPT_DIR/../dots" 2>/dev/null && pwd || true)"
+
+if [ -n "${PHANTOMSHELL_DOTS:-}" ]; then
+    DOTS_DIR="$PHANTOMSHELL_DOTS"
+elif [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/phantomshell" ] && [ "${XDG_CONFIG_HOME:-}" = "$REPO_DOTS" ]; then
+    DOTS_DIR="$XDG_CONFIG_HOME"
+elif [ -d "$REPO_DOTS/phantomshell" ]; then
+    DOTS_DIR="$REPO_DOTS"
+else
+    DOTS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+fi
+
+QS_DIR="$DOTS_DIR/quickshell"
+STATE_DIR="$DOTS_DIR/phantomshell"
+
+qs_ipc() {
+    qs -p "$QS_DIR" ipc call "$@" 2>/dev/null || true
+}
+
+cmd="${1:-help}"
+shift || true
+
+case "$cmd" in
+    toggle)
+        target="${1:-launcher}"
+        case "$target" in
+            launcher)      qs_ipc phantom toggleLauncher ;;
+            dashboard)     qs_ipc phantom toggleDashboard ;;
+            settings)      qs_ipc phantom toggleSettings ;;
+            notifications) qs_ipc phantom toggleNotifications ;;
+            calendar)      qs_ipc phantom toggleCalendar ;;
+            session)       qs_ipc phantom toggleSession ;;
+            lock)          qs_ipc phantom toggleLock ;;
+            *)
+                echo "Unknown toggle target: $target"
+                exit 1
+                ;;
+        esac
+        ;;
+
+    lock)
+        qs_ipc phantom lock
+        ;;
+
+    theme)
+        preset="${1:-p5-crimson}"
+        case "$preset" in
+            p5|p5-crimson)
+                cp "$STATE_DIR/presets/p5-crimson.json" "$STATE_DIR/colors.json"
+                qs_ipc phantom setPreset "p5-crimson"
+                ;;
+            p3|p3-reload)
+                cp "$STATE_DIR/presets/p3-reload.json" "$STATE_DIR/colors.json"
+                qs_ipc phantom setPreset "p3-reload"
+                ;;
+            p4|p4-golden)
+                cp "$STATE_DIR/presets/p4-golden.json" "$STATE_DIR/colors.json"
+                qs_ipc phantom setPreset "p4-golden"
+                ;;
+            dynamic)
+                wall="${2:-}"
+                if [ -n "$wall" ] && command -v matugen >/dev/null 2>&1; then
+                    matugen image "$wall" -c "$DOTS_DIR/matugen/config.toml" || true
+                fi
+                qs_ipc phantom setPreset "dynamic"
+                ;;
+            *)
+                echo "Usage: phantomshell theme <p5|p3|p4|dynamic> [wallpaper_path]"
+                exit 1
+                ;;
+        esac
+        ;;
+
+    osd)
+        kind="${1:-volume}"
+        action="${2:-up}"
+        case "$kind" in
+            volume)
+                if [ "$action" = "up" ]; then
+                    wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
+                elif [ "$action" = "down" ]; then
+                    wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+                elif [ "$action" = "mute" ]; then
+                    wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+                fi
+                vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{print int($2 * 100)}' || echo 50)"
+                qs_ipc phantom showOsd "VOLUME" "$vol"
+                ;;
+            brightness)
+                if [ "$action" = "up" ]; then
+                    brightnessctl set 5%+ >/dev/null 2>&1 || true
+                elif [ "$action" = "down" ]; then
+                    brightnessctl set 5%- >/dev/null 2>&1 || true
+                fi
+                cur="$(brightnessctl get 2>/dev/null || echo 50)"
+                max="$(brightnessctl max 2>/dev/null || echo 100)"
+                pct=$(( cur * 100 / (max > 0 ? max : 100) ))
+                qs_ipc phantom showOsd "BRIGHTNESS" "$pct"
+                ;;
+        esac
+        ;;
+
+    notify-test)
+        sender="${1:-Futaba (Oracle)}"
+        msg="${2:-Bro! Phantomshell IM Bubble Notification udah jalan mulus di Metaverse! 🎭}"
+        qs_ipc phantom pushImNotification "$sender" "$msg" "CRITICAL"
+        ;;
+
+    start)
+        exec qs -p "$QS_DIR"
+        ;;
+
+    *)
+        cat <<EOF
+🎭 Phantomshell CLI
+Usage:
+  phantomshell toggle <launcher|dashboard|settings|notifications|calendar|session>
+  phantomshell theme <p5|p3|p4|dynamic> [wallpaper_path]
+  phantomshell osd <volume|brightness> <up|down|mute>
+  phantomshell notify-test [sender] [message]
+  phantomshell start
+EOF
+        ;;
+esac
