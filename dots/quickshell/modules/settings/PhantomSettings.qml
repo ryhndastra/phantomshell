@@ -1978,6 +1978,390 @@ Variants {
                                         }
                                     }
                                 }
+                                P5SectionHeader { text: "PHANTOM ENGINE // UPDATER \u0026 SYNC" }
+
+                                // kartu status git dan kontrol sinkronisasi
+                                P5SkewedCard {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 90
+                                    fillColor: {
+                                        if (PhantomState.syncStatus === "ERROR") return "#1A0A0A"
+                                        if (PhantomState.syncStatus === "DONE") return "#0A1A0F"
+                                        if (PhantomState.syncUpdateAvailable) return "#1A1300"
+                                        return "#12121C"
+                                    }
+                                    borderColor: {
+                                        if (PhantomState.syncStatus === "ERROR") return "#FF3333"
+                                        if (PhantomState.syncStatus === "DONE") return PhantomState.success
+                                        if (PhantomState.syncUpdateAvailable) return PhantomState.secondary
+                                        return "#FFFFFF"
+                                    }
+                                    shadowColor: PhantomState.primary
+                                    borderWidth: 2
+                                    skewPx: 8
+
+                                    ColumnLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 14
+                                        spacing: 6
+
+                                        // baris header dan badge status
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 10
+                                            Text {
+                                                text: "★ GIT // UPDATER"
+                                                color: PhantomState.secondary
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.weight: Font.Black
+                                            }
+                                            Item { Layout.fillWidth: true }
+                                            Rectangle {
+                                                width: statusBadgeTxt.implicitWidth + 16
+                                                height: 20
+                                                color: {
+                                                    const s = PhantomState.syncStatus
+                                                    if (s === "ERROR") return "#FF3333"
+                                                    if (s === "DONE") return PhantomState.success
+                                                    if (s === "UPDATE_AVAILABLE") return PhantomState.secondary
+                                                    if (s === "UP_TO_DATE") return "#204020"
+                                                    return "#1E1E2A"
+                                                }
+                                                border.color: "#FFFFFF"
+                                                border.width: 1
+                                                Text {
+                                                    id: statusBadgeTxt
+                                                    anchors.centerIn: parent
+                                                    text: {
+                                                        const s = PhantomState.syncStatus
+                                                        if (s === "IDLE") return "IDLE"
+                                                        if (s === "CHECKING") return "CHECKING..."
+                                                        if (s === "UP_TO_DATE") return "UP TO DATE ✓"
+                                                        if (s === "UPDATE_AVAILABLE") return PhantomState.gitBehind + " COMMITS BEHIND"
+                                                        if (s === "AHEAD") return PhantomState.gitAhead + " AHEAD"
+                                                        if (s === "PULLING") return "PULLING..."
+                                                        if (s === "SYNCING") return "SYNCING..."
+                                                        if (s === "RELOADING") return "RELOADING..."
+                                                        if (s === "DONE") return "DONE ★"
+                                                        if (s === "ERROR") return "ERROR ✗"
+                                                        if (s === "OFFLINE") return "OFFLINE"
+                                                        return s
+                                                    }
+                                                    color: "#FFFFFF"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 9
+                                                    font.weight: Font.Black
+                                                }
+                                            }
+                                        }
+
+                                        // baris hash commit lokal dan remote
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 8
+                                            Text {
+                                                text: PhantomState.gitBranch + " @ " + PhantomState.gitLocalHash
+                                                color: "#FFFFFF"
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 12
+                                                font.weight: Font.Black
+                                                font.italic: true
+                                            }
+                                            Text {
+                                                text: "→ " + PhantomState.gitRemoteHash
+                                                color: PhantomState.secondary
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Black
+                                                visible: PhantomState.gitRemoteHash !== "-------" && PhantomState.gitRemoteHash !== PhantomState.gitLocalHash
+                                            }
+                                            Item { Layout.fillWidth: true }
+                                            Text {
+                                                text: PhantomState.gitLastDate
+                                                color: PhantomState.muted
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                elide: Text.ElideRight
+                                                Layout.maximumWidth: 110
+                                            }
+                                        }
+
+                                        // baris pesan commit dan tombol aksi
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 8
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: PhantomState.gitLastMsg || "No commit info"
+                                                color: PhantomState.muted
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                elide: Text.ElideRight
+                                            }
+
+                                            // tombol check update dari remote
+                                            Rectangle {
+                                                width: checkUpdTxt.implicitWidth + 14
+                                                height: 22
+                                                color: checkUpdMouse.containsMouse ? PhantomState.primary : "#1E1E2E"
+                                                border.color: "#FFFFFF"
+                                                border.width: 1.5
+                                                opacity: PhantomState.syncBusy ? 0.4 : 1.0
+                                                Text {
+                                                    id: checkUpdTxt
+                                                    anchors.centerIn: parent
+                                                    text: "↺ CHECK"
+                                                    color: "#FFFFFF"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 9
+                                                    font.weight: Font.Black
+                                                }
+                                                MouseArea {
+                                                    id: checkUpdMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: PhantomState.checkSyncUpdate()
+                                                }
+                                            }
+
+                                            // tombol apply dev ke sistem tanpa pull
+                                            Rectangle {
+                                                width: applyUpdTxt.implicitWidth + 14
+                                                height: 22
+                                                color: applyUpdMouse.containsMouse ? PhantomState.secondary : "#1E1E2E"
+                                                border.color: PhantomState.secondary
+                                                border.width: 1.5
+                                                opacity: PhantomState.syncBusy ? 0.4 : 1.0
+                                                Text {
+                                                    id: applyUpdTxt
+                                                    anchors.centerIn: parent
+                                                    text: "↗ APPLY"
+                                                    color: applyUpdMouse.containsMouse ? "#09090D" : PhantomState.secondary
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 9
+                                                    font.weight: Font.Black
+                                                }
+                                                MouseArea {
+                                                    id: applyUpdMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: PhantomState.syncToSystem()
+                                                }
+                                            }
+
+                                            // tombol pull dari github + sync
+                                            Rectangle {
+                                                width: pullUpdTxt.implicitWidth + 14
+                                                height: 22
+                                                color: pullUpdMouse.containsMouse ? PhantomState.primary : (PhantomState.syncUpdateAvailable ? "#2A1800" : "#1E1E2E")
+                                                border.color: PhantomState.syncUpdateAvailable ? PhantomState.secondary : "#FFFFFF"
+                                                border.width: PhantomState.syncUpdateAvailable ? 2 : 1.5
+                                                opacity: PhantomState.syncBusy ? 0.4 : 1.0
+                                                Text {
+                                                    id: pullUpdTxt
+                                                    anchors.centerIn: parent
+                                                    text: "↓ PULL \u0026 SYNC"
+                                                    color: "#FFFFFF"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 9
+                                                    font.weight: Font.Black
+                                                }
+                                                MouseArea {
+                                                    id: pullUpdMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: PhantomState.pullAndSync()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // terminal log output sinkronisasi
+                                P5SkewedCard {
+                                    id: syncLogCard
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: syncLogCard.logVisible ? 130 : 34
+                                    fillColor: "#080810"
+                                    borderColor: "#2A2A44"
+                                    shadowColor: PhantomState.primary
+                                    borderWidth: 1
+                                    skewPx: 4
+                                    clip: true
+
+                                    property bool logVisible: PhantomState.syncBusy || PhantomState.syncLog.length > 0
+
+                                    Behavior on Layout.preferredHeight { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+
+                                    ColumnLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 10
+                                        spacing: 4
+
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 6
+                                            Text {
+                                                text: "SYNC LOG //"
+                                                color: PhantomState.muted
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.weight: Font.Black
+                                            }
+                                            Text {
+                                                text: PhantomState.syncBusy ? "RUNNING..." : (PhantomState.syncStatus === "DONE" ? "COMPLETED" : (PhantomState.syncStatus === "ERROR" ? "FAILED" : "READY"))
+                                                color: PhantomState.syncStatus === "ERROR" ? "#FF4444" : (PhantomState.syncStatus === "DONE" ? PhantomState.success : PhantomState.muted)
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.weight: Font.Black
+                                            }
+                                            Item { Layout.fillWidth: true }
+                                            Text {
+                                                text: "CLR"
+                                                color: clrLogMouse.containsMouse ? "#FFFFFF" : PhantomState.muted
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.weight: Font.Black
+                                                MouseArea {
+                                                    id: clrLogMouse
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: PhantomState.clearSyncLog()
+                                                }
+                                            }
+                                        }
+
+                                        Flickable {
+                                            Layout.fillWidth: true
+                                            Layout.fillHeight: true
+                                            contentWidth: width
+                                            contentHeight: syncLogText.implicitHeight
+                                            clip: true
+                                            boundsBehavior: Flickable.StopAtBounds
+                                            onContentHeightChanged: contentY = Math.max(0, contentHeight - height)
+                                            Text {
+                                                id: syncLogText
+                                                width: parent.width
+                                                text: PhantomState.syncLog || "— waiting for operation —"
+                                                color: "#6E7EB8"
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                                lineHeight: 1.4
+                                            }
+                                        }
+                                    }
+                                }
+
+                                P5SectionHeader { text: "KEYBOARD BINDS // PHANTOM THIEF TACTICS COMPENDIUM" }
+
+                                // cheat sheet seluruh keybind aktif hyprland
+                                GridLayout {
+                                    Layout.fillWidth: true
+                                    columns: 2
+                                    rowSpacing: 6
+                                    columnSpacing: 8
+
+                                    Repeater {
+                                        model: [
+                                            { cat: "PHANTOM SHELL // PANELS", key: "SUPER + D", act: "Toggle Launcher (P5 Command Search)" },
+                                            { cat: "", key: "SUPER (tap)", act: "Toggle Launcher (Quick)" },
+                                            { cat: "", key: "SUPER + N", act: "Control Center \u0026 Pentagon Stats" },
+                                            { cat: "", key: "SUPER + I", act: "Unified Settings (Velvet Room)" },
+                                            { cat: "", key: "SUPER + M", act: "SNS Notification Center" },
+                                            { cat: "", key: "SUPER + P", act: "Lock Screen (Calling Card Lock)" },
+                                            { cat: "", key: "SUPER + SHIFT + L", act: "Lock Screen (alternate)" },
+                                            { cat: "", key: "SUPER + Escape", act: "Power Menu (Calling Card Session)" },
+                                            { cat: "APPLICATIONS", key: "SUPER + Return", act: "Launch Kitty Terminal" },
+                                            { cat: "WINDOW MANAGEMENT", key: "SUPER + Q", act: "Close Active Window" },
+                                            { cat: "", key: "SUPER + F", act: "Toggle Fullscreen" },
+                                            { cat: "", key: "SUPER + Space", act: "Toggle Float" },
+                                            { cat: "", key: "SUPER + SHIFT + E", act: "Exit Hyprland" },
+                                            { cat: "FOCUS \u0026 MOVE", key: "SUPER + ← / → / ↑ / ↓", act: "Move Focus (Arrow Keys)" },
+                                            { cat: "", key: "SUPER + H / J / K / L", act: "Move Focus (Vim Keys)" },
+                                            { cat: "", key: "SUPER + SHIFT + ←→↑↓", act: "Move Window in Direction" },
+                                            { cat: "MOUSE", key: "SUPER + LMB drag", act: "Drag \u0026 Move Window" },
+                                            { cat: "", key: "SUPER + RMB drag", act: "Resize Window" },
+                                            { cat: "WORKSPACES", key: "SUPER + 1-9 / 0", act: "Switch to Workspace 1-10" },
+                                            { cat: "", key: "SUPER + SHIFT + 1-9 / 0", act: "Move Window to Workspace 1-10" },
+                                            { cat: "MEDIA \u0026 SYSTEM", key: "XF86AudioRaiseVolume", act: "Volume Up +5% (OSD)" },
+                                            { cat: "", key: "XF86AudioLowerVolume", act: "Volume Down -5% (OSD)" },
+                                            { cat: "", key: "XF86AudioMute", act: "Toggle Mute (OSD)" },
+                                            { cat: "", key: "XF86MonBrightnessUp", act: "Brightness Up +5% (OSD)" },
+                                            { cat: "", key: "XF86MonBrightnessDown", act: "Brightness Down -5% (OSD)" }
+                                        ]
+
+                                        delegate: Item {
+                                            required property var modelData
+                                            required property int index
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: modelData.cat !== "" ? 54 : 32
+
+                                            // label kategori keybind
+                                            Text {
+                                                anchors.top: parent.top
+                                                anchors.left: parent.left
+                                                text: "★ " + modelData.cat
+                                                color: PhantomState.secondary
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.weight: Font.Black
+                                                visible: modelData.cat !== ""
+                                            }
+
+                                            // baris shortcut individual
+                                            P5SkewedCard {
+                                                anchors.bottom: parent.bottom
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                height: 28
+                                                fillColor: "#12121C"
+                                                borderColor: "#2A2A40"
+                                                shadowColor: PhantomState.primary
+                                                borderWidth: 1
+                                                skewPx: 4
+
+                                                RowLayout {
+                                                    anchors.fill: parent
+                                                    anchors.leftMargin: 10
+                                                    anchors.rightMargin: 10
+                                                    spacing: 8
+                                                    Rectangle {
+                                                        width: kbTxt.implicitWidth + 14
+                                                        height: 18
+                                                        color: "#1A1A2E"
+                                                        border.color: PhantomState.secondary
+                                                        border.width: 1
+                                                        radius: 2
+                                                        Text {
+                                                            id: kbTxt
+                                                            anchors.centerIn: parent
+                                                            text: modelData.key
+                                                            color: PhantomState.secondary
+                                                            font.family: "JetBrainsMono NFM"
+                                                            font.pixelSize: 8
+                                                            font.weight: Font.Black
+                                                        }
+                                                    }
+                                                    Text {
+                                                        Layout.fillWidth: true
+                                                        text: modelData.act
+                                                        color: "#FFFFFF"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 9
+                                                        font.weight: Font.Bold
+                                                        elide: Text.ElideRight
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -1985,6 +2369,7 @@ Variants {
 
                 // tombol stempel penutup jendela pengaturan di bagian bawah
                 Item {
+
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 4
                     anchors.horizontalCenter: parent.horizontalCenter
