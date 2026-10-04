@@ -202,7 +202,7 @@ Scope {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: PhantomState.calendarOpen = !PhantomState.calendarOpen
+                        onClicked: PhantomState.toggleCalendar()
                     }
                 }
 
@@ -215,7 +215,13 @@ Scope {
                     Connections {
                         target: Hyprland
                         function onRawEvent(event) {
-                            PhantomState.refreshWorkspaces()
+                            const evName = String(event.name || "")
+                            if (evName === "workspace" || evName === "workspacev2" || evName === "focusedmon" || evName === "focusedmonv2") {
+                                Hyprland.refreshWorkspaces()
+                                PhantomState.refreshWorkspaces()
+                            } else if (evName === "openwindow" || evName === "closewindow" || evName === "movewindow" || evName === "movewindowv2") {
+                                PhantomState.refreshWorkspaces()
+                            }
                         }
                     }
 
@@ -241,7 +247,7 @@ Scope {
                                 id: wsDel
                                 required property int index
                                 readonly property int wsId: index + 1
-                                readonly property bool isActive: (Hyprland.focusedWorkspace?.id ?? 1) === wsId
+                                readonly property bool isActive: (Hyprland.focusedMonitor?.activeWorkspace?.id ?? Hyprland.focusedWorkspace?.id ?? 1) === wsId
                                 readonly property var appList: (PhantomState.workspaceApps && PhantomState.workspaceApps[String(wsId)])
                                     ? PhantomState.workspaceApps[String(wsId)]
                                     : []
@@ -311,10 +317,20 @@ Scope {
 
                                 MouseArea {
                                     anchors.fill: parent
+                                    hoverEnabled: true
+                                    acceptedButtons: Qt.LeftButton
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        Quickshell.execDetached(["hyprctl", "dispatch", "workspace", String(wsDel.wsId)])
+                                        Hyprland.dispatch("hl.dsp.focus({ workspace = " + String(wsDel.wsId) + " })")
+                                        Hyprland.refreshWorkspaces()
                                         PhantomState.refreshWorkspaces()
+                                    }
+                                    onWheel: wheel => {
+                                        if (wheel.angleDelta.y > 0) {
+                                            Hyprland.dispatch("hl.dsp.focus({ workspace = 'r-1' })")
+                                        } else if (wheel.angleDelta.y < 0) {
+                                            Hyprland.dispatch("hl.dsp.focus({ workspace = 'r+1' })")
+                                        }
                                     }
                                 }
                             }
@@ -503,6 +519,7 @@ Scope {
             // deretan komponen kanan bar
             BarRightPills {
                 id: rightRow
+                barWin: barWin
                 anchors.right: parent.right
                 anchors.rightMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
@@ -518,4 +535,7 @@ Scope {
 
     // jendela popup media player mpris
     PhantomMediaPopup {}
+
+    // jendela popup daftar aplikasi system tray jika lebih dari 2 aplikasi
+    PhantomTrayPopup {}
 }

@@ -1,12 +1,16 @@
 import QtQuick
 import Quickshell
+import Quickshell.Widgets
+import Quickshell.Services.SystemTray
 import qs.config
 import qs.components
 
-// deretan komponen kanan bar: media player, tema, wallpaper, notifikasi, statistik, pengaturan, dan sesi
+// deretan komponen kanan bar: system tray, media player, tema, wallpaper, notifikasi, statistik, pengaturan, dan sesi
 Row {
     id: rightRow
     spacing: 6
+
+    property var barWin: null
 
     // pill pengendali media player dan pembuka popup jukebox
     Item {
@@ -297,10 +301,7 @@ Row {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                PhantomState.dashboardOpen = false
-                PhantomState.notificationsOpen = !PhantomState.notificationsOpen
-            }
+            onClicked: PhantomState.toggleNotifications()
         }
     }
 
@@ -345,10 +346,158 @@ Row {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                PhantomState.notificationsOpen = false
-                PhantomState.dashboardOpen = !PhantomState.dashboardOpen
+            onClicked: PhantomState.toggleDashboard()
+        }
+    }
+
+    // pill baki aplikasi latar belakang (maks 2 ikon langsung, selebihnya tombol dropdown persona 5)
+    Item {
+        id: sysTrayPill
+        readonly property int trayCount: SystemTray.items.values.length
+        readonly property bool isDropdownMode: trayCount > 2
+        visible: trayCount > 0
+        width: isDropdownMode ? (trayDropdownRow.implicitWidth + 22) : (trayRow.implicitWidth + 18)
+        height: 30
+
+        P5SkewedCard {
+            anchors.fill: parent
+            fillColor: (sysTrayPill.isDropdownMode && PhantomState.trayPopupOpen)
+                ? PhantomState.primary
+                : (trayDropdownMouse.containsMouse && sysTrayPill.isDropdownMode ? PhantomState.surfaceAlt : PhantomState.surface)
+            borderColor: PhantomState.borderLight
+            shadowColor: (sysTrayPill.isDropdownMode && PhantomState.trayPopupOpen) ? PhantomState.secondary : PhantomState.primary
+            borderWidth: 2
+            skewPx: PhantomState.polygonMode ? 5 : 0
+            shadowOffsetX: 2
+            shadowOffsetY: 2
+        }
+
+        // mode 1-2 aplikasi: tampilkan ikon aplikasi secara langsung
+        Row {
+            id: trayRow
+            visible: !sysTrayPill.isDropdownMode
+            anchors.centerIn: parent
+            spacing: 4
+
+            Repeater {
+                model: SystemTray.items
+
+                delegate: Item {
+                    id: trayItem
+                    required property SystemTrayItem modelData
+                    required property int index
+                    visible: index < 2
+                    width: visible ? 22 : 0
+                    height: 22
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    P5SkewedCard {
+                        anchors.fill: parent
+                        fillColor: trayMouse.containsMouse ? PhantomState.primary : PhantomState.surfaceAlt
+                        borderColor: trayMouse.containsMouse ? PhantomState.borderLight : "transparent"
+                        showShadowOffset: false
+                        borderWidth: trayMouse.containsMouse ? 1 : 0
+                        skewPx: PhantomState.polygonMode ? 3 : 0
+                    }
+
+                    IconImage {
+                        anchors.centerIn: parent
+                        width: 15
+                        height: 15
+                        source: trayItem.modelData.icon
+                        asynchronous: true
+                    }
+
+                    MouseArea {
+                        id: trayMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: mouse => {
+                            if (mouse.button === Qt.LeftButton) {
+                                if (trayItem.modelData.onlyMenu && trayItem.modelData.hasMenu && rightRow.barWin) {
+                                    const pos = trayItem.mapToItem(null, 0, trayItem.height + 4)
+                                    trayItem.modelData.display(rightRow.barWin, Math.max(8, pos.x - 120), pos.y)
+                                } else {
+                                    trayItem.modelData.activate()
+                                }
+                            } else if (mouse.button === Qt.RightButton) {
+                                if (trayItem.modelData.hasMenu && rightRow.barWin) {
+                                    const pos = trayItem.mapToItem(null, 0, trayItem.height + 4)
+                                    trayItem.modelData.display(rightRow.barWin, Math.max(8, pos.x - 120), pos.y)
+                                } else {
+                                    trayItem.modelData.secondaryActivate()
+                                }
+                            } else if (mouse.button === Qt.MiddleButton) {
+                                trayItem.modelData.secondaryActivate()
+                            }
+                        }
+                        onWheel: wheel => {
+                            trayItem.modelData.scroll(wheel.angleDelta.y, false)
+                        }
+                    }
+                }
             }
+        }
+
+        // mode > 2 aplikasi: berubah menjadi tombol dropdown bergaya persona 5
+        Row {
+            id: trayDropdownRow
+            visible: sysTrayPill.isDropdownMode
+            anchors.centerIn: parent
+            spacing: 5
+
+            P5Star {
+                width: 14
+                height: 14
+                anchors.verticalCenter: parent.verticalCenter
+                spinning: PhantomState.trayPopupOpen
+            }
+
+            Text {
+                text: "TRAY"
+                color: PhantomState.foreground
+                font.pixelSize: 10
+                font.weight: Font.Black
+                font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Rectangle {
+                width: trayCountTxt.implicitWidth + 8
+                height: 16
+                color: PhantomState.trayPopupOpen ? PhantomState.background : PhantomState.primary
+                border.color: PhantomState.borderLight
+                border.width: 1
+                anchors.verticalCenter: parent.verticalCenter
+
+                Text {
+                    id: trayCountTxt
+                    anchors.centerIn: parent
+                    text: String(sysTrayPill.trayCount)
+                    color: PhantomState.foreground
+                    font.pixelSize: 9
+                    font.weight: Font.Black
+                }
+            }
+
+            P5Icon {
+                name: PhantomState.trayPopupOpen ? "chevron-up" : "chevron-down"
+                size: 9
+                color: PhantomState.secondary
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        MouseArea {
+            id: trayDropdownMouse
+            anchors.fill: parent
+            enabled: sysTrayPill.isDropdownMode
+            visible: sysTrayPill.isDropdownMode
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: PhantomState.toggleTrayPopup()
         }
     }
 
@@ -378,7 +527,7 @@ Row {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: PhantomState.settingsOpen = !PhantomState.settingsOpen
+            onClicked: PhantomState.toggleSettings()
         }
     }
 
@@ -408,7 +557,7 @@ Row {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: PhantomState.sessionOpen = !PhantomState.sessionOpen
+            onClicked: PhantomState.toggleSession()
         }
     }
 }

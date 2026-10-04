@@ -142,7 +142,7 @@ Scope {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 PhantomState.overviewOpen = false
-                                Hyprland.dispatch("togglespecialworkspace special")
+                                Hyprland.dispatch("hl.dsp.workspace.toggle_special('special')")
                             }
                         }
                     }
@@ -289,11 +289,11 @@ Scope {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: mouse => {
                                     if (mouse.button === Qt.RightButton) {
-                                        Hyprland.dispatch("movetoworkspacesilent " + wsNum)
+                                        Hyprland.dispatch("hl.dsp.window.move({ workspace = " + wsNum + ", follow = false })")
                                         PhantomState.refreshWorkspaces()
                                     } else {
                                         PhantomState.overviewOpen = false
-                                        Hyprland.dispatch("workspace " + wsNum)
+                                        Hyprland.dispatch("hl.dsp.focus({ workspace = " + wsNum + " })")
                                     }
                                 }
                             }

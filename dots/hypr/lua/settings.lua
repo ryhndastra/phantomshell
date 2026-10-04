@@ -2,12 +2,34 @@
 
 Phantom = {}
 
-local home = os.getenv("HOME") or ""
+local home = os.getenv("HOME") or "/home/sho"
 local xdg = os.getenv("XDG_CONFIG_HOME") or (home .. "/.config")
 Phantom.dotsDir = os.getenv("PHANTOMSHELL_DOTS") or xdg
 Phantom.qsDir = Phantom.dotsDir .. "/quickshell"
 Phantom.stateDir = Phantom.dotsDir .. "/phantomshell"
-Phantom.cli = (os.getenv("PHANTOMSHELL_DOTS") and (Phantom.dotsDir .. "/../scripts/phantomshell")) or "phantomshell"
+
+local function file_exists(path)
+    local f = io.open(path, "r")
+    if f then
+        f:close()
+        return true
+    end
+    return false
+end
+
+local cli_candidates = {
+    home .. "/.local/bin/phantomshell",
+    Phantom.dotsDir .. "/../scripts/phantomshell",
+    "/etc/nixos/dotfiles/scripts/phantomshell",
+}
+
+Phantom.cli = "phantomshell"
+for _, candidate in ipairs(cli_candidates) do
+    if file_exists(candidate) then
+        Phantom.cli = candidate
+        break
+    end
+end
 
 -- penentuan tombol modifier utama berdasarkan sesi nested atau sesi utama
 Phantom.isNested = (os.getenv("PHANTOMSHELL_NESTED") == "1")

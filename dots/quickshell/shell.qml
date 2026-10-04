@@ -72,7 +72,7 @@ ShellRoot {
         }
 
         function toggleDashboard(): void {
-            PhantomState.dashboardOpen = !PhantomState.dashboardOpen
+            PhantomState.toggleDashboard()
         }
 
         function toggleSettings(): void {
@@ -84,15 +84,15 @@ ShellRoot {
         }
 
         function toggleNotifications(): void {
-            PhantomState.notificationsOpen = !PhantomState.notificationsOpen
+            PhantomState.toggleNotifications()
         }
 
         function toggleCalendar(): void {
-            PhantomState.calendarOpen = !PhantomState.calendarOpen
+            PhantomState.toggleCalendar()
         }
 
         function toggleSession(): void {
-            PhantomState.sessionOpen = !PhantomState.sessionOpen
+            PhantomState.toggleSession()
         }
 
         function toggleMedia(): void {

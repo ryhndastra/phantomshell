@@ -6,6 +6,7 @@ Item {
     id: leftRadialMenu
 
     required property var dashWin
+    required property var dashCard
     required property var wifiPanel
     required property var btPanel
 
@@ -51,7 +52,7 @@ Item {
     height: 244
 
     // posisi vertikal menu radial sejajar dengan titik tengah kartu terpilih
-    readonly property real targetY: Math.max(6, Math.min(dashWin.height - height - 6, dashWin.clickedCardCenterY - height / 2))
+    readonly property real targetY: dashCard.y + Math.max(6, Math.min(dashCard.height - height - 6, dashWin.clickedCardCenterY - height / 2))
     y: targetY
     Behavior on y {
         enabled: leftRadialMenu.dashWin.animateRadialY

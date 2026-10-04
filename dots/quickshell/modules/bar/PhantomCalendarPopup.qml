@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import qs.config
 import qs.components
 
@@ -8,6 +9,12 @@ import qs.components
 PanelWindow {
     id: calPopupWin
     visible: PhantomState.calendarOpen
+
+    HyprlandFocusGrab {
+        active: PhantomState.calendarOpen
+        windows: [calPopupWin]
+        onCleared: PhantomState.calendarOpen = false
+    }
 
     property string periodStr: "EVENING"
     property string timeStr: "22:25"
@@ -87,18 +94,16 @@ PanelWindow {
     exclusiveZone: 0
 
     anchors {
-        top: !calPopupWin.isBottom
-        bottom: calPopupWin.isBottom
+        top: true
+        bottom: true
         left: true
+        right: true
     }
     margins {
-        top: 42
-        bottom: 42
-        left: 8
+        top: calPopupWin.isBottom ? 0 : 38
+        bottom: calPopupWin.isBottom ? 38 : 0
     }
 
-    implicitWidth: 640
-    implicitHeight: 390
     color: "transparent"
 
     onVisibleChanged: {
@@ -108,10 +113,28 @@ PanelWindow {
         }
     }
 
+    // area klik luar untuk menutup kalender saat klik di tempat kosong
+    MouseArea {
+        anchors.fill: parent
+        onClicked: PhantomState.calendarOpen = false
+    }
+
     Item {
         id: calCard
-        anchors.fill: parent
+        width: 640
+        height: 390
+        anchors.top: !calPopupWin.isBottom ? parent.top : undefined
+        anchors.bottom: calPopupWin.isBottom ? parent.bottom : undefined
+        anchors.left: parent.left
+        anchors.topMargin: 4
+        anchors.bottomMargin: 4
+        anchors.leftMargin: 8
         transformOrigin: calPopupWin.isBottom ? Item.BottomLeft : Item.TopLeft
+
+        // penahan klik agar klik di dalam kartu kalender tidak menutup popup
+        MouseArea {
+            anchors.fill: parent
+        }
 
         ParallelAnimation {
             id: calEntryAnim

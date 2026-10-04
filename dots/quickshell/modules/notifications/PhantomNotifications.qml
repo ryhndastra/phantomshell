@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import qs.config
 import qs.components
 
@@ -69,6 +70,12 @@ Scope {
             screen: modelData
             visible: PhantomState.notificationsOpen
 
+            HyprlandFocusGrab {
+                active: PhantomState.notificationsOpen
+                windows: [snsPhoneWin]
+                onCleared: PhantomState.notificationsOpen = false
+            }
+
             readonly property bool isBottom: PhantomState.barPosition === "bottom"
 
             WlrLayershell.namespace: "phantomshell-sns-phone"
@@ -76,28 +83,44 @@ Scope {
             exclusiveZone: 0
 
             anchors {
-                top: !snsPhoneWin.isBottom
-                bottom: snsPhoneWin.isBottom
+                top: true
+                bottom: true
+                left: true
                 right: true
             }
             margins {
-                top: 42
-                bottom: 42
-                right: 10
+                top: snsPhoneWin.isBottom ? 0 : 38
+                bottom: snsPhoneWin.isBottom ? 38 : 0
             }
 
-            implicitWidth: Math.min(430, (modelData?.width ?? 1280) - 20)
-            implicitHeight: Math.min(490, (modelData?.height ?? 720) - 52)
             color: "transparent"
 
             onVisibleChanged: {
                 if (visible) snsEntryAnim.restart()
             }
 
+            // area klik luar untuk menutup panel sns saat klik di tempat kosong
+            MouseArea {
+                anchors.fill: parent
+                onClicked: PhantomState.notificationsOpen = false
+            }
+
             Item {
                 id: snsCard
-                anchors.fill: parent
+                width: Math.min(430, parent.width - 20)
+                height: Math.min(490, parent.height - 14)
+                anchors.top: !snsPhoneWin.isBottom ? parent.top : undefined
+                anchors.bottom: snsPhoneWin.isBottom ? parent.bottom : undefined
+                anchors.right: parent.right
+                anchors.topMargin: 4
+                anchors.bottomMargin: 4
+                anchors.rightMargin: 10
                 transformOrigin: snsPhoneWin.isBottom ? Item.BottomRight : Item.TopRight
+
+                // penahan klik agar klik di dalam kartu sns tidak menutup panel
+                MouseArea {
+                    anchors.fill: parent
+                }
 
                 ParallelAnimation {
                     id: snsEntryAnim

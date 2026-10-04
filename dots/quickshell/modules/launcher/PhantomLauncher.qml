@@ -97,7 +97,28 @@ Variants {
             var safeIdx = Math.min(Math.max(0, idx), filteredItems.length - 1)
             var item = filteredItems[safeIdx]
             if (item.isApp && item.entryObj) {
-                item.entryObj.execute()
+                if (item.entryObj.runInTerminal) {
+                    var termArgs = ["kitty", "-e"]
+                    var cmdList = item.entryObj.command || []
+                    for (var k = 0; k < cmdList.length; k++) {
+                        termArgs.push(String(cmdList[k]))
+                    }
+                    if (cmdList.length === 0 && item.cmd) {
+                        termArgs.push(item.cmd.replace(/%[fFuUdDnNickvm]/g, "").trim())
+                    }
+                    Quickshell.execDetached(termArgs)
+                } else {
+                    var appCmdList = item.entryObj.command || []
+                    if (appCmdList.length > 0) {
+                        var cleanArgs = ["env", "-u", "QT_PLUGIN_PATH", "-u", "QML2_IMPORT_PATH", "-u", "QML_IMPORT_PATH", "-u", "NIXPKGS_QT6_QML_IMPORT_PATH"]
+                        for (var m = 0; m < appCmdList.length; m++) {
+                            cleanArgs.push(String(appCmdList[m]))
+                        }
+                        Quickshell.execDetached(cleanArgs)
+                    } else {
+                        item.entryObj.execute()
+                    }
+                }
                 PhantomState.launcherOpen = false
                 query = ""
                 return

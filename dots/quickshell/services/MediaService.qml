@@ -75,7 +75,7 @@ Scope {
         id: mediaProc
         command: [
             "bash", "-c",
-            "playerctl -p spotify,%any metadata --format '{{playerName}}|{{status}}|{{artist}}|{{title}}|{{album}}|{{mpris:artUrl}}|{{position}}|{{mpris:length}}|{{shuffle}}|{{loop}}' 2>/dev/null | head -n 1 || echo 'NONE'"
+            "out=$(playerctl -p spotify,%any metadata --format '{{playerName}}|{{status}}|{{artist}}|{{title}}|{{album}}|{{mpris:artUrl}}|{{position}}|{{mpris:length}}|{{shuffle}}|{{loop}}' 2>/dev/null | head -n 1); if [ -n \"$out\" ]; then printf '%s\\n' \"$out\"; else echo 'NONE'; fi"
         ]
         stdout: SplitParser {
             splitMarker: ""
@@ -84,6 +84,15 @@ Scope {
                 if (!line || line === "NONE" || line.indexOf("|") === -1) {
                     root.mediaAvailable = false
                     root.mediaPlaying = false
+                    root.mediaPlayerName = "NO MEDIA"
+                    root.mediaTitle = "No Track Playing"
+                    root.mediaArtist = "Open Spotify or play media"
+                    root.mediaAlbum = ""
+                    root.mediaArtUrl = ""
+                    root.mediaPositionSec = 0
+                    root.mediaLengthSec = 0
+                    root.mediaShuffle = "Off"
+                    root.mediaLoop = "None"
                     return
                 }
                 const p = line.split("|")

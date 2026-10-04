@@ -41,7 +41,7 @@ Scope {
     // konteks pam untuk verifikasi kata sandi pengguna sistem
     PamContext {
         id: pam
-        config: "hyprlock"
+        config: "swaylock"
 
         onResponseRequiredChanged: {
             if (responseRequired && lockScope.pendingPassword !== "") {
@@ -87,7 +87,17 @@ Scope {
         if (pam.active) {
             pam.abort()
         }
-        pam.start()
+        const ok = pam.start()
+        if (!ok) {
+            lockScope.authBusy = false
+            lockScope.authError = true
+            lockScope.statusText = "PAM ERROR // TRY AGAIN"
+            return
+        }
+        if (pam.responseRequired && lockScope.pendingPassword !== "") {
+            pam.respond(lockScope.pendingPassword)
+            lockScope.pendingPassword = ""
+        }
     }
 
     // pengunci sesi wayland pada seluruh layar aktif

@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import qs.config
 import qs.components
 
@@ -15,6 +16,12 @@ Scope {
             required property ShellScreen modelData
             screen: modelData
             visible: PhantomState.dashboardOpen
+
+            HyprlandFocusGrab {
+                active: PhantomState.dashboardOpen
+                windows: [dashWin]
+                onCleared: PhantomState.dashboardOpen = false
+            }
 
             readonly property bool isBottom: PhantomState.barPosition === "bottom"
             property int brightnessPct: 80
@@ -78,27 +85,17 @@ Scope {
             exclusiveZone: 0
 
             anchors {
-                top: !dashWin.isBottom
-                bottom: dashWin.isBottom
+                top: true
+                bottom: true
+                left: true
                 right: true
             }
             margins {
-                top: 42
-                bottom: 42
-                right: 10
+                top: dashWin.isBottom ? 0 : 38
+                bottom: dashWin.isBottom ? 38 : 0
             }
 
-            // ukuran jendela tetap dengan mask input dinamis untuk area menu radial
-            implicitWidth: Math.min(756, (modelData?.width ?? 1280) - 20)
-            implicitHeight: Math.min(640, (modelData?.height ?? 720) - 52)
             color: "transparent"
-
-            mask: Region {
-                item: dashCard
-                Region {
-                    item: (dashWin.radialOpen || leftRadialMenu.openProgress > 0.01) ? leftRadialMenu : dashCard
-                }
-            }
 
             onVisibleChanged: {
                 if (visible) {
@@ -116,13 +113,34 @@ Scope {
                 }
             }
 
+            // area klik luar untuk menutup control center saat klik di tempat kosong
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    if (dashWin.radialOpen) {
+                        dashWin.closeRadialMenu()
+                    } else {
+                        PhantomState.dashboardOpen = false
+                    }
+                }
+            }
+
             Item {
                 id: dashCard
-                width: Math.min(450, parent.width)
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
+                width: Math.min(450, parent.width - 20)
+                height: Math.min(640, parent.height - 14)
+                anchors.top: !dashWin.isBottom ? parent.top : undefined
+                anchors.bottom: dashWin.isBottom ? parent.bottom : undefined
                 anchors.right: parent.right
+                anchors.topMargin: 4
+                anchors.bottomMargin: 4
+                anchors.rightMargin: 10
                 transformOrigin: dashWin.isBottom ? Item.BottomRight : Item.TopRight
+
+                // penahan klik agar klik di dalam kartu tidak menutup panel
+                MouseArea {
+                    anchors.fill: parent
+                }
 
                 ParallelAnimation {
                     id: dashEntryAnim
@@ -185,6 +203,7 @@ Scope {
                 anchors.right: dashCard.left
                 anchors.rightMargin: -6 - (1.0 - openProgress) * 28
                 dashWin: dashWin
+                dashCard: dashCard
                 wifiPanel: wifiSubPanel
                 btPanel: btSubPanel
             }

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import qs.config
 import qs.components
 
@@ -10,6 +11,12 @@ PanelWindow {
     id: mediaPopupWin
     visible: PhantomState.mediaPopupOpen
 
+    HyprlandFocusGrab {
+        active: PhantomState.mediaPopupOpen
+        windows: [mediaPopupWin]
+        onCleared: PhantomState.mediaPopupOpen = false
+    }
+
     readonly property bool isBottom: PhantomState.barPosition === "bottom"
 
     WlrLayershell.namespace: "phantomshell-media-popup"
@@ -17,18 +24,16 @@ PanelWindow {
     exclusiveZone: 0
 
     anchors {
-        top: !mediaPopupWin.isBottom
-        bottom: mediaPopupWin.isBottom
+        top: true
+        bottom: true
+        left: true
         right: true
     }
     margins {
-        top: 42
-        bottom: 42
-        right: 190
+        top: mediaPopupWin.isBottom ? 0 : 38
+        bottom: mediaPopupWin.isBottom ? 38 : 0
     }
 
-    implicitWidth: 420
-    implicitHeight: 196
     color: "transparent"
 
     onVisibleChanged: {
@@ -38,10 +43,28 @@ PanelWindow {
         }
     }
 
+    // area klik luar untuk menutup popup media saat klik di tempat kosong
+    MouseArea {
+        anchors.fill: parent
+        onClicked: PhantomState.mediaPopupOpen = false
+    }
+
     Item {
         id: mediaCard
-        anchors.fill: parent
+        width: 420
+        height: 196
+        anchors.top: !mediaPopupWin.isBottom ? parent.top : undefined
+        anchors.bottom: mediaPopupWin.isBottom ? parent.bottom : undefined
+        anchors.right: parent.right
+        anchors.topMargin: 4
+        anchors.bottomMargin: 4
+        anchors.rightMargin: 190
         transformOrigin: mediaPopupWin.isBottom ? Item.BottomRight : Item.TopRight
+
+        // penahan klik agar klik di dalam kartu media tidak menutup popup
+        MouseArea {
+            anchors.fill: parent
+        }
 
         ParallelAnimation {
             id: mediaPopupAnim

@@ -57,6 +57,7 @@ Singleton {
     property bool lockOpen: false
     property bool wallpaperSelectorOpen: false
     property bool mediaPopupOpen: false
+    property bool trayPopupOpen: false
     property bool cheatsheetOpen: false
     property bool clipboardOpen: false
     property bool emojiOpen: false
@@ -78,6 +79,7 @@ Singleton {
         sessionOpen = false
         wallpaperSelectorOpen = false
         mediaPopupOpen = false
+        trayPopupOpen = false
         cheatsheetOpen = false
         clipboardOpen = false
         emojiOpen = false
@@ -90,10 +92,34 @@ Singleton {
         launcherOpen = next
     }
 
+    function toggleDashboard() {
+        const next = !dashboardOpen
+        if (next) closeAllModals()
+        dashboardOpen = next
+    }
+
     function toggleSettings() {
         const next = !settingsOpen
         if (next) closeAllModals()
         settingsOpen = next
+    }
+
+    function toggleNotifications() {
+        const next = !notificationsOpen
+        if (next) closeAllModals()
+        notificationsOpen = next
+    }
+
+    function toggleCalendar() {
+        const next = !calendarOpen
+        if (next) closeAllModals()
+        calendarOpen = next
+    }
+
+    function toggleSession() {
+        const next = !sessionOpen
+        if (next) closeAllModals()
+        sessionOpen = next
     }
 
     function toggleWallpaperSelector() {
@@ -107,6 +133,12 @@ Singleton {
         if (next) closeAllModals()
         mediaPopupOpen = next
         if (next) refreshMedia()
+    }
+
+    function toggleTrayPopup() {
+        const next = !trayPopupOpen
+        if (next) closeAllModals()
+        trayPopupOpen = next
     }
 
     function toggleCheatsheet() {
@@ -327,7 +359,11 @@ Singleton {
             transitionTick++
 
             const cleanHex = String(p.primary).replace("#", "")
-            Quickshell.execDetached(["hyprctl", "keyword", "general:col.active_border", "rgba(" + cleanHex + "ff)"])
+            Quickshell.execDetached([
+                "hyprctl",
+                "eval",
+                "hl.config({ general = { col = { active_border = 'rgba(" + cleanHex + "ff)' } } })"
+            ])
             saveState()
             playSfx("select")
         }
@@ -351,19 +387,26 @@ Singleton {
 
     function syncHyprland() {
         const cleanHex = String(root.primary).replace("#", "")
-        const cmd = [
-            "hyprctl --batch \"",
-            "keyword general:gaps_in " + root.hyprGapsIn + ";",
-            "keyword general:gaps_out " + root.hyprGapsOut + ";",
-            "keyword general:border_size " + root.hyprBorderSize + ";",
-            "keyword decoration:rounding " + root.hyprRounding + ";",
-            "keyword decoration:blur:enabled " + (root.hyprBlurEnabled ? "true" : "false") + ";",
-            "keyword decoration:blur:size " + root.hyprBlurSize + ";",
-            "keyword decoration:blur:passes " + root.hyprBlurPasses + ";",
-            "keyword animations:enabled " + (root.hyprAnimationsEnabled ? "true" : "false") + ";",
-            "keyword general:col.active_border rgba(" + cleanHex + "ff)\""
-        ].join(" ")
-        Quickshell.execDetached(["bash", "-c", cmd])
+        const luaExpr = "hl.config({ "
+            + "general = { "
+            + "gaps_in = " + root.hyprGapsIn + ", "
+            + "gaps_out = " + root.hyprGapsOut + ", "
+            + "border_size = " + root.hyprBorderSize + ", "
+            + "col = { active_border = 'rgba(" + cleanHex + "ff)' } "
+            + "}, "
+            + "decoration = { "
+            + "rounding = " + root.hyprRounding + ", "
+            + "blur = { "
+            + "enabled = " + (root.hyprBlurEnabled ? "true" : "false") + ", "
+            + "size = " + root.hyprBlurSize + ", "
+            + "passes = " + root.hyprBlurPasses + " "
+            + "} "
+            + "}, "
+            + "animations = { "
+            + "enabled = " + (root.hyprAnimationsEnabled ? "true" : "false") + " "
+            + "} "
+            + "})"
+        Quickshell.execDetached(["hyprctl", "eval", luaExpr])
         saveState()
     }
 
@@ -546,6 +589,7 @@ Singleton {
     property alias sysUptime: systemService.sysUptime
 
     property alias workspaceApps: systemService.workspaceApps
+    property alias activeWorkspaceId: systemService.activeWorkspaceId
 
     function refreshSystemDossier() {
         systemService.refreshSystemInfo()

@@ -250,17 +250,12 @@ hl.bind(mod .. " + mouse:274", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true, description = "Window: Resize (RMB Drag)" })
 
 -- pintasan perpindahan ruang kerja 1-10 dan pemindahan jendela antar ruang kerja
-local numbercodes = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 }
 local numpadcodes = { 87, 88, 89, 83, 84, 85, 79, 80, 81, 90 }
 for i = 1, 10 do
     local key = tostring(i % 10)
     hl.bind(mod .. " + " .. key, function()
         hl.dispatch(hl.dsp.focus({ workspace = i }))
     end, { description = "Workspace: Focus " .. i })
-
-    hl.bind(mod .. " + code:" .. numbercodes[i], function()
-        hl.dispatch(hl.dsp.focus({ workspace = i }))
-    end)
 
     hl.bind(mod .. " + code:" .. numpadcodes[i], function()
         hl.dispatch(hl.dsp.focus({ workspace = i }))
@@ -269,10 +264,6 @@ for i = 1, 10 do
     hl.bind(mod .. " + SHIFT + " .. key, function()
         hl.dispatch(hl.dsp.window.move({ workspace = i, follow = false }))
     end, { description = "Window: Send to Workspace " .. i })
-
-    hl.bind(mod .. " + SHIFT + code:" .. numbercodes[i], function()
-        hl.dispatch(hl.dsp.window.move({ workspace = i, follow = false }))
-    end)
 
     hl.bind(mod .. " + SHIFT + code:" .. numpadcodes[i], function()
         hl.dispatch(hl.dsp.window.move({ workspace = i, follow = false }))
