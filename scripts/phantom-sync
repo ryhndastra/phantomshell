@@ -24,7 +24,11 @@ sync_bundle() {
         fi
         mkdir -p "$dest/$sub"
         local flags="-a"
-        [ "$sub" = "quickshell" ] && flags="-a --delete"
+        if [ "$sub" = "quickshell" ] || [ "$sub" = "matugen" ]; then
+            flags="-a --delete"
+        elif [ "$sub" = "hypr" ]; then
+            flags="-a --delete --exclude=monitors.lua"
+        fi
         if rsync $flags "$DOTS_SRC/$sub/" "$dest/$sub/" 2>&1 | head -n 20 | while IFS= read -r l; do emit "SYNC_LOG|$l"; done; then
             emit "SYNC_OK|${sub} -> ${dest}/${sub}"
         else
@@ -74,6 +78,11 @@ case "$cmd" in
             # sinkronisasi ke /etc/nixos/dotfiles jika tersedia dan dapat ditulis
             if [ -d "$NIXOS_DOTS" ] && [ -w "$NIXOS_DOTS" ]; then
                 sync_bundle "$NIXOS_DOTS"
+                mkdir -p "$NIXOS_DOTS/scripts"
+                cp -f "$REPO_ROOT/scripts/phantomshell" "$NIXOS_DOTS/scripts/phantomshell"
+                cp -f "$REPO_ROOT/scripts/phantom-sync" "$NIXOS_DOTS/scripts/phantom-sync"
+                chmod +x "$NIXOS_DOTS/scripts/phantomshell" "$NIXOS_DOTS/scripts/phantom-sync"
+                emit "SYNC_OK|scripts -> ${NIXOS_DOTS}/scripts"
             fi
 
             # sinkronisasi ke ~/.config untuk setiap folder yang bukan symlink nix-store
