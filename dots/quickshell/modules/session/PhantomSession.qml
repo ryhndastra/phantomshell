@@ -10,10 +10,9 @@ Scope {
     PanelWindow {
         id: sessionWin
 
-        property bool closing: false
         property int selectedIndex: 0
 
-        visible: PhantomState.sessionOpen || sessionWin.closing
+        visible: PhantomState.sessionOpen || cardContainer.opacity > 0.01
 
         WlrLayershell.namespace: "phantomshell-session"
         WlrLayershell.layer: WlrLayer.Overlay
@@ -93,22 +92,10 @@ Scope {
             target: PhantomState
             function onSessionOpenChanged() {
                 if (PhantomState.sessionOpen) {
-                    closeTimer.stop()
-                    sessionWin.closing = false
                     sessionWin.selectedIndex = 0
                     keyCatcher.forceActiveFocus()
-                } else {
-                    sessionWin.closing = true
-                    closeTimer.restart()
                 }
             }
-        }
-
-        Timer {
-            id: closeTimer
-            interval: 260
-            repeat: false
-            onTriggered: sessionWin.closing = false
         }
 
         // penangkap navigasi papan ketik untuk memilih aksi sesi
@@ -141,9 +128,9 @@ Scope {
         Item {
             id: backdropItem
             anchors.fill: parent
-            readonly property bool isOpen: PhantomState.sessionOpen && !sessionWin.closing
+            readonly property bool isOpen: PhantomState.sessionOpen
             opacity: isOpen ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: 190; easing.type: Easing.OutCubic } }
 
             Rectangle {
                 anchors.fill: parent
@@ -191,15 +178,15 @@ Scope {
             height: Math.min(410, parent.height - 72)
             anchors.centerIn: parent
 
-            readonly property bool isOpen: PhantomState.sessionOpen && !sessionWin.closing
+            readonly property bool isOpen: PhantomState.sessionOpen
 
             opacity: isOpen ? 1.0 : 0.0
-            scale: isOpen ? 1.0 : 0.86
-            rotation: isOpen ? (PhantomState.polygonMode ? -0.8 : 0) : -4.5
+            scale: isOpen ? 1.0 : 0.88
+            rotation: isOpen ? (PhantomState.polygonMode ? -0.8 : 0) : -3.5
 
-            Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-            Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
-            Behavior on rotation { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
+            Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+            Behavior on scale { NumberAnimation { duration: 220; easing.type: cardContainer.isOpen ? Easing.OutBack : Easing.InCubic } }
+            Behavior on rotation { NumberAnimation { duration: 220; easing.type: cardContainer.isOpen ? Easing.OutBack : Easing.InCubic } }
 
             MouseArea { anchors.fill: parent }
 

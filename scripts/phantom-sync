@@ -1,22 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# direktori repo sumber phantomshell
+# penentuan direktori repositori sumber phantomshell
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DOTS_SRC="$REPO_ROOT/dots"
-
-# target direktori config sistem
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+NIXOS_DOTS="/etc/nixos/dotfiles"
 
-# perintah utama: check | sync | pull | pull-sync | status
 cmd="${1:-help}"
 
-# tulis baris tunggal ke stdout agar QML bisa parse via SplitParser
 emit() { printf '%s\n' "$1"; }
 
+# fungsi bantu sinkronisasi satu bundel direktori konfigurasi
+sync_bundle() {
+    local dest="$1"
+    emit "SYNC_START|Syncing dots ke ${dest}..."
+
+    for sub in quickshell hypr kitty phantomshell matugen cava; do
+        if [ -L "$dest/$sub" ]; then
+            emit "SYNC_SKIP|${dest}/${sub} adalah symlink nix-store (dilewati, disinkronkan via /etc/nixos/dotfiles)"
+            continue
+        fi
+        mkdir -p "$dest/$sub"
+        local flags="-a"
+        [ "$sub" = "quickshell" ] && flags="-a --delete"
+        if rsync $flags "$DOTS_SRC/$sub/" "$dest/$sub/" 2>&1 | head -n 20 | while IFS= read -r l; do emit "SYNC_LOG|$l"; done; then
+            emit "SYNC_OK|${sub} -> ${dest}/${sub}"
+        else
+            emit "SYNC_WARN|${sub} rsync warning pada ${dest}"
+        fi
+    done
+}
+
 case "$cmd" in
-    # cek apakah ada update di remote tanpa fetch destructive
     check-remote)
         cd "$REPO_ROOT"
         git fetch origin main --quiet 2>/dev/null || { emit "ERR|Gagal fetch remote"; exit 0; }
@@ -30,7 +47,6 @@ case "$cmd" in
         emit "REMOTE_CHECK|${BRANCH}|${LOCAL:0:7}|${REMOTE:0:7}|${AHEAD}|${BEHIND}|${COMMIT_MSG}|${DATE}"
         ;;
 
-    # tarik update terbaru dari github
     pull)
         cd "$REPO_ROOT"
         BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -50,73 +66,51 @@ case "$cmd" in
         fi
         ;;
 
-    # sync dots/ ke ~/.config/ (rsync, bukan destructive delete)
     sync)
-        TARGET="${2:-$CONFIG_DIR}"
-        emit "SYNC_START|Syncing dots ke ${TARGET}..."
-
-        # sync quickshell
-        if rsync -a --delete \
-            "$DOTS_SRC/quickshell/" \
-            "$TARGET/quickshell/" 2>&1 | head -n 50 | while IFS= read -r l; do emit "SYNC_LOG|$l"; done; then
-            emit "SYNC_OK|quickshell"
+        CUSTOM_TARGET="${2:-}"
+        if [ -n "$CUSTOM_TARGET" ]; then
+            sync_bundle "$CUSTOM_TARGET"
         else
-            emit "SYNC_WARN|quickshell rsync exit non-zero (mungkin partial)"
+            # sinkronisasi ke /etc/nixos/dotfiles jika tersedia dan dapat ditulis
+            if [ -d "$NIXOS_DOTS" ] && [ -w "$NIXOS_DOTS" ]; then
+                sync_bundle "$NIXOS_DOTS"
+            fi
+
+            # sinkronisasi ke ~/.config untuk setiap folder yang bukan symlink nix-store
+            if [ -w "$CONFIG_DIR" ]; then
+                sync_bundle "$CONFIG_DIR"
+            fi
         fi
 
-        # sync hypr (tanpa --delete biar keybind custom tidak terhapus)
-        mkdir -p "$TARGET/hypr/lua"
-        if rsync -a \
-            "$DOTS_SRC/hypr/" \
-            "$TARGET/hypr/" 2>&1 | head -n 20 | while IFS= read -r l; do emit "SYNC_LOG|$l"; done; then
-            emit "SYNC_OK|hypr"
-        else
-            emit "SYNC_WARN|hypr rsync exit non-zero"
-        fi
-
-        # sync kitty
-        if rsync -a \
-            "$DOTS_SRC/kitty/" \
-            "$TARGET/kitty/" 2>&1 | head -n 10 | while IFS= read -r l; do emit "SYNC_LOG|$l"; done; then
-            emit "SYNC_OK|kitty"
-        else
-            emit "SYNC_WARN|kitty rsync exit non-zero"
-        fi
-
-        # sync phantomshell state dir
-        mkdir -p "$TARGET/phantomshell"
-        if rsync -a \
-            "$DOTS_SRC/phantomshell/presets/" \
-            "$TARGET/phantomshell/presets/" 2>&1 | head -n 10 | while IFS= read -r l; do emit "SYNC_LOG|$l"; done; then
-            emit "SYNC_OK|phantomshell/presets"
-        fi
-
-        emit "SYNC_DONE|Sync selesai ke ${TARGET}"
+        # pasang kursor persona5-animated dan skrip cli ke direktori lokal pengguna
+        mkdir -p "$HOME/.local/share/icons" "$HOME/.local/bin"
+        rsync -a "$DOTS_SRC/icons/Persona5-Animated" "$HOME/.local/share/icons/" 2>/dev/null || true
+        ln -sf "$REPO_ROOT/scripts/phantomshell" "$HOME/.local/bin/phantomshell"
+        ln -sf "$REPO_ROOT/scripts/phantom-sync" "$HOME/.local/bin/phantom-sync"
+        emit "SYNC_OK|CLI & Persona5-Animated cursors installed to ~/.local"
+        emit "SYNC_DONE|Sinkronisasi selesai"
         ;;
 
-    # pull + sync sekaligus, lalu reload quickshell
     pull-sync)
-        TARGET="${2:-$CONFIG_DIR}"
-        # jalankan pull dulu
+        TARGET="${2:-}"
         "$0" pull
-        # lalu sync
-        "$0" sync "$TARGET"
-        emit "RELOAD_START|Reloading Quickshell..."
-        # soft reload qs jika sedang berjalan
-        if command -v qs &>/dev/null; then
-            qs ipc call phantom reloadShell 2>/dev/null || true
+        if [ -n "$TARGET" ]; then
+            "$0" sync "$TARGET"
+        else
+            "$0" sync
         fi
-        emit "RELOAD_DONE|Phantomshell diupdate dan direload"
+        emit "RELOAD_START|Reloading Hyprland config..."
+        hyprctl reload >/dev/null 2>&1 || true
+        emit "RELOAD_DONE|Phantomshell berhasil disinkronkan"
         ;;
 
-    # tampilkan status git singkat
     status)
         cd "$REPO_ROOT"
         BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
         COMMIT=$(git rev-parse HEAD 2>/dev/null)
         DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
         MSG=$(git log -1 --format='%s' 2>/dev/null | head -c 80)
-        DATE=$(git log -1 --format='%ar' 2>/dev/null)
+        DATE=$(git log -1 --format='%ar' origin/main 2>/dev/null || git log -1 --format='%ar' 2>/dev/null)
         emit "STATUS|${BRANCH}|${COMMIT:0:7}|${DIRTY}|${MSG}|${DATE}"
         ;;
 
@@ -127,8 +121,8 @@ usage:
   phantom-sync status           tampilkan git status repo
   phantom-sync check-remote     cek update di github tanpa pull
   phantom-sync pull             tarik commit terbaru (git pull --rebase)
-  phantom-sync sync [target]    rsync dots/ ke ~/.config/ (default)
-  phantom-sync pull-sync        pull + sync + reload qs sekaligus
+  phantom-sync sync [target]    rsync dots/ ke /etc/nixos/dotfiles & ~/.config
+  phantom-sync pull-sync        pull + sync sekaligus
 EOF
         ;;
 esac

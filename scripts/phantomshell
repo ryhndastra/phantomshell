@@ -22,6 +22,18 @@ qs_ipc() {
     qs -p "$QS_DIR" ipc call "$@" 2>/dev/null || true
 }
 
+# fungsi bantu peluncur aplikasi pertama yang tersedia di sistem
+launch_first() {
+    for candidate in "$@"; do
+        bin="${candidate%% *}"
+        if command -v "$bin" >/dev/null 2>&1; then
+            nohup bash -c "$candidate" >/dev/null 2>&1 &
+            exit 0
+        fi
+    done
+    qs_ipc phantom pushImNotification "Futaba (Oracle)" "Aplikasi tidak ditemukan di sistem." "NORMAL"
+}
+
 cmd="${1:-help}"
 shift || true
 
@@ -36,6 +48,16 @@ case "$cmd" in
             calendar)      qs_ipc phantom toggleCalendar ;;
             session)       qs_ipc phantom toggleSession ;;
             lock)          qs_ipc phantom toggleLock ;;
+            wallpaper)     qs_ipc phantom toggleWallpaperSelector ;;
+            media)         qs_ipc phantom toggleMedia ;;
+            bar)           qs_ipc phantom toggleBar ;;
+            dark)          qs_ipc phantom toggleDarkMode ;;
+            cycle-theme)   qs_ipc phantom cycleTheme ;;
+            cycle-wall)    qs_ipc phantom cycleWallpaper ;;
+            cheatsheet)    qs_ipc phantom toggleCheatsheet ;;
+            clipboard)     qs_ipc phantom toggleClipboard ;;
+            emoji)         qs_ipc phantom toggleEmoji ;;
+            overview)      qs_ipc phantom toggleOverview ;;
             *)
                 echo "Unknown toggle target: $target"
                 exit 1
@@ -45,6 +67,131 @@ case "$cmd" in
 
     lock)
         qs_ipc phantom lock
+        ;;
+
+    launch)
+        app="${1:-terminal}"
+        case "$app" in
+            terminal)
+                launch_first "kitty -1" "kitty" "ghostty" "foot" "alacritty" "wezterm"
+                ;;
+            files)
+                launch_first "nautilus" "dolphin" "nemo" "thunar" "kitty -1 yazi"
+                ;;
+            browser)
+                launch_first "zen-beta" "zen-browser" "zen" "google-chrome-stable" "firefox" "brave" "chromium"
+                ;;
+            code)
+                launch_first "antigravity" "windsurf" "code" "codium" "cursor" "zed" "zeditor" "kitty -1 nvim"
+                ;;
+            editor)
+                launch_first "kate" "gnome-text-editor" "gedit" "kitty -1 nvim"
+                ;;
+            office)
+                launch_first "wps" "onlyoffice-desktopeditors" "libreoffice"
+                ;;
+            mixer)
+                launch_first "pavucontrol-qt" "pavucontrol"
+                ;;
+            tasks)
+                launch_first "gnome-system-monitor" "plasma-systemmonitor --page-name Processes" "kitty -1 btop"
+                ;;
+            *)
+                launch_first "$app"
+                ;;
+        esac
+        ;;
+
+    snip)
+        pidof slurp >/dev/null 2>&1 && exit 0
+        PIC_DIR="$(xdg-user-dir PICTURES 2>/dev/null || echo "$HOME/Pictures")/Screenshots"
+        mkdir -p "$PIC_DIR"
+        OUT_FILE="$PIC_DIR/Snip_$(date '+%Y-%m-%d_%H.%M.%S').png"
+        GEOM="$(slurp 2>/dev/null || true)"
+        [ -z "$GEOM" ] && exit 0
+        if grim -g "$GEOM" "$OUT_FILE" && wl-copy < "$OUT_FILE"; then
+            qs_ipc phantom pushImNotification "Futaba (Oracle)" "Tangkapan area disalin ke clipboard & disimpan!" "NORMAL"
+        fi
+        ;;
+
+    screenshot)
+        mode="${1:-copy}"
+        MON="$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.monitor' 2>/dev/null || true)"
+        if [ "$mode" = "save" ]; then
+            PIC_DIR="$(xdg-user-dir PICTURES 2>/dev/null || echo "$HOME/Pictures")/Screenshots"
+            mkdir -p "$PIC_DIR"
+            OUT_FILE="$PIC_DIR/Screenshot_$(date '+%Y-%m-%d_%H.%M.%S').png"
+            if [ -n "$MON" ] && [ "$MON" != "null" ]; then
+                grim -o "$MON" "$OUT_FILE"
+            else
+                grim "$OUT_FILE"
+            fi
+            wl-copy < "$OUT_FILE"
+            qs_ipc phantom pushImNotification "Futaba (Oracle)" "Layar penuh disimpan ke Screenshots & clipboard!" "NORMAL"
+        else
+            if [ -n "$MON" ] && [ "$MON" != "null" ]; then
+                grim -o "$MON" - | wl-copy
+            else
+                grim - | wl-copy
+            fi
+            qs_ipc phantom pushImNotification "Futaba (Oracle)" "Tangkapan layar penuh disalin ke clipboard!" "NORMAL"
+        fi
+        ;;
+
+    ocr)
+        pidof slurp >/dev/null 2>&1 && exit 0
+        GEOM="$(slurp 2>/dev/null || true)"
+        [ -z "$GEOM" ] && exit 0
+        TMP_IMG="/tmp/phantom_ocr_$$.png"
+        if grim -g "$GEOM" "$TMP_IMG"; then
+            LANGS="$(tesseract --list-langs 2>/dev/null | awk 'NR>1{print $1}' | paste -sd+ - || echo eng)"
+            TEXT="$(tesseract "$TMP_IMG" stdout -l "${LANGS:-eng}" 2>/dev/null || true)"
+            rm -f "$TMP_IMG"
+            if [ -n "$TEXT" ]; then
+                printf '%s' "$TEXT" | wl-copy
+                PREVIEW="$(printf '%s' "$TEXT" | tr '\n' ' ' | head -c 70)"
+                qs_ipc phantom pushImNotification "Oracle OCR" "Teks tersalin: ${PREVIEW}..." "NORMAL"
+            else
+                qs_ipc phantom pushImNotification "Oracle OCR" "Tidak ada teks yang terdeteksi pada area tersebut." "NORMAL"
+            fi
+        fi
+        ;;
+
+    picker)
+        pidof hyprpicker >/dev/null 2>&1 && exit 0
+        COLOR="$(hyprpicker -a 2>/dev/null | tr -d '[:space:]' || true)"
+        if [ -n "$COLOR" ]; then
+            qs_ipc phantom pushImNotification "Velvet Palette" "Warna ${COLOR} disalin ke clipboard!" "NORMAL"
+        fi
+        ;;
+
+    record)
+        mode="${1:-region}"
+        if pidof wf-recorder >/dev/null 2>&1; then
+            pkill -INT wf-recorder || true
+            qs_ipc phantom pushImNotification "Futaba (Oracle)" "Rekaman layar selesai & disimpan di ~/Videos/Recordings!" "CRITICAL"
+            exit 0
+        fi
+        VID_DIR="$(xdg-user-dir VIDEOS 2>/dev/null || echo "$HOME/Videos")/Recordings"
+        mkdir -p "$VID_DIR"
+        OUT_VID="$VID_DIR/Record_$(date '+%Y-%m-%d_%H.%M.%S').mp4"
+        case "$mode" in
+            region)
+                pidof slurp >/dev/null 2>&1 && exit 0
+                GEOM="$(slurp 2>/dev/null || true)"
+                [ -z "$GEOM" ] && exit 0
+                qs_ipc phantom pushImNotification "Futaba (Oracle)" "Merekam area layar... (Tekan shortcut lagi untuk berhenti)" "NORMAL"
+                nohup wf-recorder -g "$GEOM" -f "$OUT_VID" >/dev/null 2>&1 &
+                ;;
+            fullscreen)
+                qs_ipc phantom pushImNotification "Futaba (Oracle)" "Merekam layar penuh... (Tekan shortcut lagi untuk berhenti)" "NORMAL"
+                nohup wf-recorder -f "$OUT_VID" >/dev/null 2>&1 &
+                ;;
+            sound)
+                qs_ipc phantom pushImNotification "Futaba (Oracle)" "Merekam layar penuh + audio... (Tekan shortcut lagi untuk berhenti)" "NORMAL"
+                nohup wf-recorder --audio -f "$OUT_VID" >/dev/null 2>&1 &
+                ;;
+        esac
         ;;
 
     theme)
@@ -70,8 +217,7 @@ case "$cmd" in
                 qs_ipc phantom setPreset "dynamic"
                 ;;
             *)
-                echo "Usage: phantomshell theme <p5|p3|p4|dynamic> [wallpaper_path]"
-                exit 1
+                qs_ipc phantom setPreset "$preset"
                 ;;
         esac
         ;;
@@ -79,23 +225,27 @@ case "$cmd" in
     osd)
         kind="${1:-volume}"
         action="${2:-up}"
+        step="${3:-5}"
         case "$kind" in
             volume)
                 if [ "$action" = "up" ]; then
-                    wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
+                    wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ "${step}%+"
                 elif [ "$action" = "down" ]; then
-                    wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+                    wpctl set-volume @DEFAULT_AUDIO_SINK@ "${step}%-"
                 elif [ "$action" = "mute" ]; then
                     wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+                elif [ "$action" = "micmute" ]; then
+                    wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+                    exit 0
                 fi
                 vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{print int($2 * 100)}' || echo 50)"
                 qs_ipc phantom showOsd "VOLUME" "$vol"
                 ;;
             brightness)
                 if [ "$action" = "up" ]; then
-                    brightnessctl set 5%+ >/dev/null 2>&1 || true
+                    brightnessctl set "${step}%+" >/dev/null 2>&1 || true
                 elif [ "$action" = "down" ]; then
-                    brightnessctl set 5%- >/dev/null 2>&1 || true
+                    brightnessctl set "${step}%-" >/dev/null 2>&1 || true
                 fi
                 cur="$(brightnessctl get 2>/dev/null || echo 50)"
                 max="$(brightnessctl max 2>/dev/null || echo 100)"
@@ -111,6 +261,12 @@ case "$cmd" in
         qs_ipc phantom pushImNotification "$sender" "$msg" "CRITICAL"
         ;;
 
+    restart)
+        pkill -x qs 2>/dev/null || pkill -x quickshell 2>/dev/null || true
+        sleep 0.2
+        nohup qs -p "$QS_DIR" >/dev/null 2>&1 &
+        ;;
+
     start)
         exec qs -p "$QS_DIR"
         ;;
@@ -119,10 +275,17 @@ case "$cmd" in
         cat <<EOF
 🎭 Phantomshell CLI
 Usage:
-  phantomshell toggle <launcher|dashboard|settings|notifications|calendar|session>
-  phantomshell theme <p5|p3|p4|dynamic> [wallpaper_path]
-  phantomshell osd <volume|brightness> <up|down|mute>
+  phantomshell toggle <launcher|dashboard|settings|notifications|calendar|session|lock|wallpaper|media|bar|dark|cycle-theme|cycle-wall|cheatsheet|clipboard|emoji|overview>
+  phantomshell launch <terminal|files|browser|code|editor|office|mixer|tasks>
+  phantomshell snip
+  phantomshell screenshot [copy|save]
+  phantomshell ocr
+  phantomshell picker
+  phantomshell record [region|fullscreen|sound]
+  phantomshell theme <p5|p3|p4|kasumi-violet|akechi-crow|futaba-matrix|monochrome|expressive|tonal-spot>
+  phantomshell osd <volume|brightness> <up|down|mute|micmute> [step]
   phantomshell notify-test [sender] [message]
+  phantomshell restart
   phantomshell start
 EOF
         ;;

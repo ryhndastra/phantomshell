@@ -6,10 +6,7 @@ import Quickshell.Io
 Scope {
     id: root
 
-    readonly property string syncScriptPath: {
-        const base = Qt.resolvedUrl("../../../scripts/phantom-sync").toString().replace("file://", "")
-        return base
-    }
+    readonly property string syncScriptPath: "/mnt/data/Projects/rice/phantomshell/scripts/phantom-sync"
 
     property string syncStatus: "IDLE"
     property string syncLog: ""
@@ -19,7 +16,7 @@ Scope {
     property string gitRemoteHash: "-------"
     property int gitAhead: 0
     property int gitBehind: 0
-    property string gitLastMsg: "Loading..."
+    property string gitLastMsg: "Ready"
     property string gitLastDate: ""
     property bool syncUpdateAvailable: false
     property bool syncBusy: false
@@ -42,10 +39,11 @@ Scope {
         syncStatusProc.running = true
     }
 
-    // proses cek status git lokal
+    // proses cek status git lokal saat shell dimulai
     Process {
         id: syncStatusProc
-        command: [root.syncScriptPath, "status"]
+        running: true
+        command: ["bash", root.syncScriptPath, "status"]
         stdout: SplitParser {
             onRead: data => {
                 const line = String(data).trim()
@@ -57,6 +55,9 @@ Scope {
                         root.gitLocalHash = p[2] || "-------"
                         root.gitLastMsg = p[4] || ""
                         root.gitLastDate = p[5] || ""
+                        if (root.syncStatus === "IDLE") {
+                            root.syncStatus = "UP_TO_DATE"
+                        }
                     }
                 }
             }
@@ -66,7 +67,7 @@ Scope {
     // proses cek update dari remote github
     Process {
         id: syncCheckProc
-        command: [root.syncScriptPath, "check-remote"]
+        command: ["bash", root.syncScriptPath, "check-remote"]
         stdout: SplitParser {
             onRead: data => {
                 const line = String(data).trim()
@@ -82,9 +83,18 @@ Scope {
                         root.gitLastMsg = p[6] || ""
                         root.gitLastDate = p[7] || ""
                         root.syncUpdateAvailable = root.gitBehind > 0
-                        root.syncStatus = root.gitBehind > 0
-                            ? "UPDATE_AVAILABLE"
-                            : (root.gitAhead > 0 ? "AHEAD" : "UP_TO_DATE")
+
+                        if (root.gitBehind > 0) {
+                            root.syncStatus = "UPDATE_AVAILABLE"
+                            root.appendSyncLog("★ Update tersedia! " + root.gitBehind + " commit baru di origin/" + root.gitBranch + " (" + root.gitRemoteHash + ")")
+                            root.appendSyncLog("  Commit terbaru: " + root.gitLastMsg)
+                        } else if (root.gitAhead > 0) {
+                            root.syncStatus = "UP_TO_DATE"
+                            root.appendSyncLog("✓ Sudah paling update! Repo lokal " + root.gitAhead + " commit lebih maju dari origin/" + root.gitBranch + " (" + root.gitLocalHash + ")")
+                        } else {
+                            root.syncStatus = "UP_TO_DATE"
+                            root.appendSyncLog("✓ Sudah paling update! (" + root.gitBranch + " @ " + root.gitLocalHash + ")")
+                        }
                     }
                 } else if (line.indexOf("ERR|") === 0) {
                     root.syncStatus = "OFFLINE"
@@ -99,7 +109,7 @@ Scope {
     // proses pull + sync + reload lengkap
     Process {
         id: syncPullSyncProc
-        command: [root.syncScriptPath, "pull-sync"]
+        command: ["bash", root.syncScriptPath, "pull-sync"]
         stdout: SplitParser {
             onRead: data => {
                 const line = String(data).trim()
@@ -159,7 +169,7 @@ Scope {
     // proses sync saja (tanpa pull), buat penerapan ke sistem lokal
     Process {
         id: syncOnlyProc
-        command: [root.syncScriptPath, "sync"]
+        command: ["bash", root.syncScriptPath, "sync"]
         stdout: SplitParser {
             onRead: data => {
                 const line = String(data).trim()
@@ -199,7 +209,7 @@ Scope {
         repeat: false
         onTriggered: {
             if (root.syncStatus === "DONE" || root.syncStatus === "ERROR") {
-                root.syncStatus = "IDLE"
+                root.syncStatus = "UP_TO_DATE"
             }
         }
     }

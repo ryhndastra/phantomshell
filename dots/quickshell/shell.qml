@@ -18,6 +18,7 @@ import qs.modules.dashboard
 import qs.modules.settings
 import qs.modules.session
 import qs.modules.lock
+import qs.modules.overlays
 
 // titik masuk utama seluruh modul phantomshell
 ShellRoot {
@@ -53,6 +54,12 @@ ShellRoot {
     // modul pemilih wallpaper galeri
     PhantomWallpaperSelector {}
 
+    // modul overlay taktis keybind, clipboard, emoji, dan ikhtisar workspace
+    PhantomCheatsheet {}
+    PhantomClipboard {}
+    PhantomEmoji {}
+    PhantomOverview {}
+
     // modul pengunci layar sesi wayland
     PhantomLock {}
 
@@ -86,6 +93,43 @@ ShellRoot {
 
         function toggleSession(): void {
             PhantomState.sessionOpen = !PhantomState.sessionOpen
+        }
+
+        function toggleMedia(): void {
+            PhantomState.toggleMediaPopup()
+        }
+
+        function toggleBar(): void {
+            PhantomState.barAutoHide = !PhantomState.barAutoHide
+            PhantomState.saveState()
+        }
+
+        function toggleDarkMode(): void {
+            PhantomState.setDarkMode(!PhantomState.darkMode)
+        }
+
+        function cycleTheme(): void {
+            PhantomState.cyclePreset()
+        }
+
+        function cycleWallpaper(): void {
+            PhantomState.cycleWallpaper()
+        }
+
+        function toggleCheatsheet(): void {
+            PhantomState.toggleCheatsheet()
+        }
+
+        function toggleClipboard(): void {
+            PhantomState.toggleClipboard()
+        }
+
+        function toggleEmoji(): void {
+            PhantomState.toggleEmoji()
+        }
+
+        function toggleOverview(): void {
+            PhantomState.toggleOverview()
         }
 
         function toggleLock(): void {

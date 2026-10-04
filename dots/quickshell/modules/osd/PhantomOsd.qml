@@ -10,8 +10,7 @@ Scope {
     PanelWindow {
         id: osdWin
 
-        property bool closing: false
-        visible: PhantomState.osdVisible || osdWin.closing
+        visible: PhantomState.osdVisible || osdBody.opacity > 0.01
 
         WlrLayershell.namespace: "phantomshell-osd"
         WlrLayershell.layer: WlrLayer.Overlay
@@ -26,26 +25,6 @@ Scope {
         implicitHeight: 92
         color: "transparent"
 
-        Connections {
-            target: PhantomState
-            function onOsdVisibleChanged() {
-                if (PhantomState.osdVisible) {
-                    osdExitTimer.stop()
-                    osdWin.closing = false
-                } else {
-                    osdWin.closing = true
-                    osdExitTimer.restart()
-                }
-            }
-        }
-
-        Timer {
-            id: osdExitTimer
-            interval: 230
-            repeat: false
-            onTriggered: osdWin.closing = false
-        }
-
         // kontainer utama osd dengan animasi kemiringan khas persona
         Item {
             id: osdBody
@@ -55,23 +34,23 @@ Scope {
             anchors.topMargin: 16
             anchors.bottomMargin: 10
 
-            readonly property bool isOpen: PhantomState.osdVisible && !osdWin.closing
+            readonly property bool isOpen: PhantomState.osdVisible
             readonly property bool isVolume: PhantomState.osdLabel === "VOLUME"
             readonly property bool isMuted: isVolume && (PhantomState.osdMuted || PhantomState.osdValue <= 0)
             readonly property real ratio: Math.max(0.0, Math.min(1.0, PhantomState.osdValue / 100.0))
 
             opacity: isOpen ? 1.0 : 0.0
-            scale: isOpen ? 1.0 : 0.84
-            rotation: isOpen ? (PhantomState.polygonMode ? -2.2 : 0) : -7.5
+            scale: isOpen ? 1.0 : 0.86
+            rotation: isOpen ? (PhantomState.polygonMode ? -2.2 : 0) : -6.0
 
             transform: Translate {
-                y: osdBody.isOpen ? 0 : 22
-                Behavior on y { NumberAnimation { duration: 230; easing.type: Easing.OutBack } }
+                y: osdBody.isOpen ? 0 : 18
+                Behavior on y { NumberAnimation { duration: 200; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
             }
 
             Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            Behavior on scale { NumberAnimation { duration: 230; easing.type: Easing.OutBack } }
-            Behavior on rotation { NumberAnimation { duration: 230; easing.type: Easing.OutBack } }
+            Behavior on scale { NumberAnimation { duration: 200; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
+            Behavior on rotation { NumberAnimation { duration: 200; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
 
             // kartu poligon miring utama dengan bayangan berlapis
             P5SkewedCard {

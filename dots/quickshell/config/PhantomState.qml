@@ -57,6 +57,10 @@ Singleton {
     property bool lockOpen: false
     property bool wallpaperSelectorOpen: false
     property bool mediaPopupOpen: false
+    property bool cheatsheetOpen: false
+    property bool clipboardOpen: false
+    property bool emojiOpen: false
+    property bool overviewOpen: false
     property bool lockClosing: false
 
     // state animasi transisi tema dan wallpaper
@@ -65,63 +69,7 @@ Singleton {
     property string transitionSub: "PALETTE SYNCHRONIZED"
     property string previousWallpaperPath: ""
 
-    function toggleLauncher() {
-        const next = !launcherOpen
-        if (next) {
-            dashboardOpen = false
-            settingsOpen = false
-            notificationsOpen = false
-            calendarOpen = false
-            sessionOpen = false
-            wallpaperSelectorOpen = false
-            mediaPopupOpen = false
-        }
-        launcherOpen = next
-    }
-
-    function toggleSettings() {
-        const next = !settingsOpen
-        if (next) {
-            launcherOpen = false
-            dashboardOpen = false
-            notificationsOpen = false
-            calendarOpen = false
-            wallpaperSelectorOpen = false
-            mediaPopupOpen = false
-        }
-        settingsOpen = next
-    }
-
-    function toggleWallpaperSelector() {
-        const next = !wallpaperSelectorOpen
-        if (next) {
-            launcherOpen = false
-            dashboardOpen = false
-            settingsOpen = false
-            notificationsOpen = false
-            calendarOpen = false
-            sessionOpen = false
-            mediaPopupOpen = false
-        }
-        wallpaperSelectorOpen = next
-    }
-
-    function toggleMediaPopup() {
-        const next = !mediaPopupOpen
-        if (next) {
-            launcherOpen = false
-            dashboardOpen = false
-            settingsOpen = false
-            notificationsOpen = false
-            calendarOpen = false
-            sessionOpen = false
-            wallpaperSelectorOpen = false
-        }
-        mediaPopupOpen = next
-        if (next) refreshMedia()
-    }
-
-    function lockScreen() {
+    function closeAllModals() {
         launcherOpen = false
         dashboardOpen = false
         settingsOpen = false
@@ -130,6 +78,81 @@ Singleton {
         sessionOpen = false
         wallpaperSelectorOpen = false
         mediaPopupOpen = false
+        cheatsheetOpen = false
+        clipboardOpen = false
+        emojiOpen = false
+        overviewOpen = false
+    }
+
+    function toggleLauncher() {
+        const next = !launcherOpen
+        if (next) closeAllModals()
+        launcherOpen = next
+    }
+
+    function toggleSettings() {
+        const next = !settingsOpen
+        if (next) closeAllModals()
+        settingsOpen = next
+    }
+
+    function toggleWallpaperSelector() {
+        const next = !wallpaperSelectorOpen
+        if (next) closeAllModals()
+        wallpaperSelectorOpen = next
+    }
+
+    function toggleMediaPopup() {
+        const next = !mediaPopupOpen
+        if (next) closeAllModals()
+        mediaPopupOpen = next
+        if (next) refreshMedia()
+    }
+
+    function toggleCheatsheet() {
+        const next = !cheatsheetOpen
+        if (next) closeAllModals()
+        cheatsheetOpen = next
+    }
+
+    function toggleClipboard() {
+        const next = !clipboardOpen
+        if (next) closeAllModals()
+        clipboardOpen = next
+    }
+
+    function toggleEmoji() {
+        const next = !emojiOpen
+        if (next) closeAllModals()
+        emojiOpen = next
+    }
+
+    function toggleOverview() {
+        const next = !overviewOpen
+        if (next) closeAllModals()
+        overviewOpen = next
+        if (next) refreshWorkspaces()
+    }
+
+    function cyclePreset() {
+        const order = [
+            "p5-crimson",
+            "p3-reload",
+            "p4-golden",
+            "kasumi-violet",
+            "akechi-crow",
+            "futaba-matrix",
+            "monochrome",
+            "expressive",
+            "tonal-spot"
+        ]
+        const idx = order.indexOf(root.themeId)
+        const nextIdx = (idx + 1) % order.length
+        applyPreset(order[nextIdx])
+    }
+
+    function lockScreen() {
+        closeAllModals()
         lockClosing = false
         lockOpen = true
     }
