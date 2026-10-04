@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""
-PhantomShell Ultra-Lightweight Weather Service
-Default: Open-Meteo (100% Free, No API Key Required, High Accuracy) + Auto IP Geolocation
-Optional: Supports OpenWeatherMap if OPENWEATHER_API_KEY env var is set.
-Polls only once every 15 minutes (900s) and caches in /tmp/phantomshell-weather.json -> 0% CPU/Network load!
-"""
+# layanan pengambilan data cuaca lokal dengan cache sementara
 
 import json
 import os
@@ -14,11 +9,11 @@ import urllib.parse
 import urllib.request
 
 CACHE_FILE = "/tmp/phantomshell-weather.json"
-CACHE_TTL = 900  # 15 minutes
+CACHE_TTL = 900
 
 
 def map_wmo_code(code: int, is_day: int = 1):
-    # WMO Weather interpretation codes (WW)
+    # pemetaan kode cuaca wmo ke ikon dan label
     if code == 0:
         return ("clear-day" if is_day else "clear-night", "CLEAR")
     if code in (1, 2):
@@ -37,7 +32,7 @@ def map_wmo_code(code: int, is_day: int = 1):
 
 
 def get_location():
-    # Try cached location first
+    # baca lokasi dari cache jika tersedia
     loc_cache = "/tmp/phantomshell-location.json"
     if os.path.exists(loc_cache):
         try:
@@ -62,7 +57,7 @@ def get_location():
         except Exception:
             pass
 
-    # Fallback: Jakarta / Shibuya coordinates
+    # koordinat cadangan jakarta
     return {"lat": -6.2088, "lon": 106.8456, "city": "JAKARTA"}
 
 
@@ -113,7 +108,7 @@ def fetch_weather():
         except Exception:
             pass
 
-    # Default: Open-Meteo (Zero API Key, fast & accurate)
+    # pengambilan data cuaca dari open-meteo
     try:
         params = urllib.parse.urlencode({
             "latitude": lat,

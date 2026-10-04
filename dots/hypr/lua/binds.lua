@@ -1,11 +1,10 @@
--- daftar shortcut keyboard & mouse hyprland
--- variabel mod otomatis berisi "SUPER" di session utama dan "ALT" di nested window
+-- konfigurasi pintasan keyboard dan mouse hyprland
 
 local mod = Phantom.mod
 local qsCall = "qs -p " .. Phantom.qsDir .. " ipc call phantom "
 local cli = Phantom.cli
 
--- buka app launcher (tekan tombol SUPER atau mod + D)
+-- pintasan pembuka aplikasi launcher
 hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd(qsCall .. "toggleLauncher"), {
     release = true,
     description = "Phantomshell: Toggle P5 Command Launcher (SUPER)"
@@ -18,8 +17,7 @@ hl.bind(mod .. " + D", hl.dsp.exec_cmd(qsCall .. "toggleLauncher"), {
     description = "Phantomshell: Toggle P5 Command Launcher"
 })
 
--- shortcut buka panel phantomshell (control center, settings, notifikasi, lock screen, power menu)
--- ganti huruf setelah mod .. " + " kalau mau ubah kombinasi tombol
+-- pintasan pembuka panel antarmuka phantomshell
 hl.bind(mod .. " + N", hl.dsp.exec_cmd(qsCall .. "toggleDashboard"), {
     description = "Phantomshell: Toggle Control Center & Pentagon Stats"
 })
@@ -42,8 +40,7 @@ hl.bind(mod .. " + Escape", hl.dsp.exec_cmd(qsCall .. "toggleSession"), {
     description = "Phantomshell: Toggle Calling Card Power Menu"
 })
 
--- buka terminal & kontrol window aktif
--- ganti "kitty" di bawah ke "ghostty" atau terminal favorit lu
+-- pintasan peluncur terminal dan manajemen jendela aktif
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd("kitty"), {
     description = "App: Launch Kitty Terminal"
 })
@@ -60,7 +57,7 @@ hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hyprctl dispatch exit"), {
     description = "Session: Exit Hyprland"
 })
 
--- pindah fokus & geser posisi window pakai tombol panah atau vim (HJKL)
+-- pintasan navigasi fokus dan pemindahan jendela
 local dirs = {
     { key = "Left",  vim = "H", dir = "l" },
     { key = "Right", vim = "L", dir = "r" },
@@ -73,11 +70,11 @@ for _, d in ipairs(dirs) do
     hl.bind(mod .. " + SHIFT + " .. d.key, hl.dsp.window.move({ direction = d.dir }))
 end
 
--- geser & resize window pakai klik kiri/kanan mouse sambil tahan tombol mod
+-- pintasan geser dan ubah ukuran jendela menggunakan mouse
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- pindah workspace 1-10 & lempar window ke workspace lain
+-- pintasan perpindahan ruang kerja dan pemindahan jendela antar ruang kerja
 for i = 1, 10 do
     local key = tostring(i % 10)
     hl.bind(mod .. " + " .. key, function()
@@ -89,7 +86,7 @@ for i = 1, 10 do
     end, { description = "Workspace: Move window to " .. i })
 end
 
--- tombol multimedia volume & kecerahan layar (otomatis munculin osd phantomshell)
+-- pintasan tombol multimedia volume dan kecerahan layar
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(cli .. " osd volume up"), { locked = true, repeating = true })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(cli .. " osd volume down"), { locked = true, repeating = true })
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd(cli .. " osd volume mute"), { locked = true })

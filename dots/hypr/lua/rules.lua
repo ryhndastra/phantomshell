@@ -1,5 +1,4 @@
--- aturan khusus window & layer quickshell
--- tambahin blok hl.window_rule baru di bawah buat bikin aplikasi tertentu otomatis floating
+-- aturan tata letak jendela aplikasi dan lapisan permukaan quickshell
 
 hl.window_rule({
     match = { class = "^(pavucontrol|org\\.pulseaudio\\.pavucontrol|nm-connection-editor)$" },

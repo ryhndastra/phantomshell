@@ -1,5 +1,4 @@
--- animasi transisi window & workspace
--- kecilin angka speed di masing-masing hl.animation kalau pengen animasi lebih cepet
+-- konfigurasi kurva bezier dan animasi transisi jendela serta ruang kerja
 
 hl.config({
     animations = {
@@ -7,7 +6,7 @@ hl.config({
     }
 })
 
--- kurva bezier pantulan & tebasan ala persona 5
+-- definisi kurva bezier untuk efek pegas dan transisi cepat
 hl.curve("p5Spring", {
     type = "bezier",
     points = {{0.22, 1.48}, {0.18, 0.98}}

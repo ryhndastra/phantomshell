@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
-"""
-PhantomShell Real-Time Synced Lyrics Engine (Spotify / Apple Music Only)
-Rules:
-1. Only tracks dedicated music players (Spotify, Cider/Apple Music, ncspot, spotifyd, etc.).
-   Ignores browsers (YouTube, Zen, Firefox, Chrome), Discord, VLC/MPV, etc. -> outputs empty strings.
-2. When no music player is active -> outputs empty strings (center slot stays completely clean/blank).
-3. When a song is playing on Spotify/Music player but has no lyrics -> outputs "No Lyrics".
-4. Queries `playerctl -p <player> position` directly for exact sub-second seek & playback sync.
-"""
+# layanan sinkronisasi lirik musik via playerctl dan lrclib
 
 import hashlib
 import json
@@ -133,7 +125,7 @@ def fetch_lrc(artist: str, title: str):
     c_title = clean_track_text(title)
     parsed = []
 
-    # 1. Try exact match on LRCLIB first
+    # pencarian kecocokan langsung di lrclib
     try:
         get_params = urllib.parse.urlencode({"artist_name": c_artist, "track_name": c_title})
         get_url = f"https://lrclib.net/api/get?{get_params}"
@@ -148,7 +140,7 @@ def fetch_lrc(artist: str, title: str):
     except Exception:
         pass
 
-    # 2. Fallback to search endpoint on LRCLIB
+    # fallback pencarian lirik di lrclib
     if not parsed:
         try:
             query = urllib.parse.urlencode({"q": f"{c_artist} {c_title}".strip()})
@@ -196,7 +188,7 @@ def find_music_player():
         if res.returncode != 0 or not res.stdout.strip():
             return None
         players = [p.strip() for p in res.stdout.splitlines() if p.strip()]
-        # Filter strictly for allowed music apps (ignore Discord, Firefox, Zen, Chrome, MPV, etc.)
+        # filter khusus aplikasi pemutar musik
         allowed = [
             p for p in players
             if any(p.lower().startswith(prefix) for prefix in ALLOWED_PLAYER_PREFIXES)
@@ -204,8 +196,7 @@ def find_music_player():
         if not allowed:
             return None
 
-        # ONLY return an allowed music player if it is actively "Playing"!
-        # If paused or stopped, return None so lyrics disappear completely.
+        # ambil pemutar musik yang sedang aktif memutar lagu
         for p in allowed:
             st = subprocess.run(
                 ["playerctl", "-p", p, "status"],
@@ -299,7 +290,7 @@ def main():
                 current_track_id = ""
                 current_lrc = []
 
-        # If no music player (Spotify/Apple Music) is open or active -> completely empty!
+        # kirim data kosong jika tidak ada pemutar musik aktif
         if not cached_meta or not cached_meta.get("title"):
             emit_empty()
             time.sleep(1.8)
@@ -310,7 +301,7 @@ def main():
         else:
             est_pos = base_pos_sec
 
-        # Song is loaded on Spotify/Apple Music, but no lyrics exist -> "No Lyrics"
+        # kirim status tanpa lirik jika lagu tidak memiliki data lirik
         if not current_lrc:
             emit({
                 "playing": cached_meta["playing"],
@@ -326,7 +317,7 @@ def main():
             time.sleep(1.0)
             continue
 
-        # Find current active lyric index
+        # penentuan indeks baris lirik aktif berdasarkan posisi waktu
         idx = 0
         lookup_pos = est_pos + 0.15
         for i, (ts, _) in enumerate(current_lrc):

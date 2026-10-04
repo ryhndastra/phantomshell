@@ -1,5 +1,4 @@
--- loader pengaturan & palet warna dari file json phantomshell
--- ubah nilai default di tabel Phantom.settings & Phantom.colors paling bawah kalau mau ganti fallback
+-- pemuat pengaturan dan palet warna dari berkas json phantomshell
 
 Phantom = {}
 
@@ -10,7 +9,7 @@ Phantom.qsDir = Phantom.dotsDir .. "/quickshell"
 Phantom.stateDir = Phantom.dotsDir .. "/phantomshell"
 Phantom.cli = (os.getenv("PHANTOMSHELL_DOTS") and (Phantom.dotsDir .. "/../scripts/phantomshell")) or "phantomshell"
 
--- pakai tombol ALT pas ngetes di nested window, dan SUPER pas jalan di session utama
+-- penentuan tombol modifier utama berdasarkan sesi nested atau sesi utama
 Phantom.isNested = (os.getenv("PHANTOMSHELL_NESTED") == "1")
 Phantom.mod = Phantom.isNested and "ALT" or "SUPER"
 

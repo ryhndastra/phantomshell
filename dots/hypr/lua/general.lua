@@ -1,5 +1,4 @@
--- pengaturan monitor, gaps, border, blur, dan input keyboard/touchpad
--- mode = "highrr" otomatis pilih refresh rate tertinggi (misal 144Hz), ganti ke "1920x1080@60" kalau mau kunci manual
+-- konfigurasi monitor, jarak celah jendela, bingkai, efek blur, dan perangkat input
 
 hl.monitor({
     output = "",

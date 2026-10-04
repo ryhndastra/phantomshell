@@ -52,13 +52,10 @@ Item {
             var cy = height / 2
             var r = Math.min(width, height) / 2
 
-            // Outer white star
+            // lapisan bintang luar, tengah, inti gelap, dan titik pusat
             drawStar(ctx, cx, cy, 5, r, r * 0.42, -0.18, root.starColor)
-            // Middle crimson/accent star
             drawStar(ctx, cx, cy, 5, r * 0.74, r * 0.31, -0.10, root.innerColor)
-            // Inner dark star
             drawStar(ctx, cx, cy, 5, r * 0.46, r * 0.19, -0.18, root.coreColor)
-            // Center white pinpoint star
             drawStar(ctx, cx, cy, 5, r * 0.22, r * 0.09, -0.10, root.starColor)
         }
     }

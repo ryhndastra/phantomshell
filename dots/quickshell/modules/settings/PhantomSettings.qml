@@ -29,13 +29,12 @@ Variants {
             if (visible) PhantomState.refreshMonitors()
         }
 
-        // indeks tab aktif: 0=theme, 1=bar, 2=desktop, 3=ui & im, 4=hypr & display, 5=about
+        // indeks tab pengaturan yang sedang aktif
         property int activeTab: 0
         property int brightnessPct: 80
         property bool showDisplayModeDropdown: false
 
-        // komponen ui reusable buat baris pengatur di velvet room settings
-        // header sub-bagian dengan ikon bintang persona 5
+        // komponen header sub-bagian pengaturan
         component P5SectionHeader: Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 30
@@ -62,7 +61,7 @@ Variants {
             }
         }
 
-        // 2. Persona 5 In-Game Menu Toggle / Cycle Row (`<--- Label   ◀ [ VALUE ]`)
+        // komponen baris tombol toggle pengaturan
         component P5ConfigToggleRow: Item {
             id: toggleRow
             Layout.fillWidth: true
@@ -92,7 +91,7 @@ Variants {
                     var h = height
                     var rightX = w - 210
 
-                    // Left crimson slash bar when active or hovered
+                    // bilah miring kiri saat opsi aktif atau di-hover
                     ctx.fillStyle = (isOn || isHov) ? accent : "#16161F"
                     ctx.beginPath()
                     ctx.moveTo(12, 4)
@@ -103,7 +102,7 @@ Variants {
                     ctx.fill()
 
                     if (isOn || isHov) {
-                        // Left white comic tip highlight
+                        // aksen garis putih di sisi kiri bilah
                         ctx.fillStyle = "#FFFFFF"
                         ctx.beginPath()
                         ctx.moveTo(0, h - 6)
@@ -114,7 +113,7 @@ Variants {
                         ctx.fill()
                     }
 
-                    // Right white comic cutout with left arrow notch `◀`
+                    // bingkai nilai di sisi kanan dengan lekukan panah
                     ctx.fillStyle = "#FFFFFF"
                     ctx.beginPath()
                     ctx.moveTo(rightX, 2)
@@ -197,7 +196,7 @@ Variants {
             }
         }
 
-        // 3. Persona 5 Multi-Choice Cutout Selector Row (for Bar Position, Style, Roman/Kanji, Clock Style, etc.)
+        // komponen baris pemilih multi-opsi pengaturan
         component P5ConfigChoiceRow: Item {
             id: choiceRow
             Layout.fillWidth: true
@@ -206,7 +205,7 @@ Variants {
             property string label: ""
             property string desc: ""
             property string currentValue: ""
-            property var options: [] // [{ id: "top", label: "TOP" }, ...]
+            property var options: []
             signal selected(string val)
 
             Canvas {
@@ -305,7 +304,7 @@ Variants {
             }
         }
 
-        // 4. Persona 5 Star Slider Row (`[-] [--- ★ ---] [+] VAL`)
+        // komponen baris slider nilai numerik pengaturan
         component P5ConfigSliderRow: Item {
             id: sliderRow
             Layout.fillWidth: true
@@ -342,7 +341,7 @@ Variants {
                     ctx.closePath()
                     ctx.fill()
 
-                    // Right white comic cutout with left arrow notch `◀`
+                    // bingkai kontrol slider di sisi kanan
                     ctx.fillStyle = "#FFFFFF"
                     ctx.beginPath()
                     ctx.moveTo(rightX, 2)
@@ -491,8 +490,7 @@ Variants {
             }
         }
 
-        // container utama velvet room settings
-        // ubah width / height di Item bawah kalau mau perbesar ukuran jendela settings
+        // kontainer utama jendela pengaturan
         Rectangle {
             id: fadeBg
             anchors.fill: parent
@@ -512,7 +510,7 @@ Variants {
 
                 MouseArea { anchors.fill: parent }
 
-                // Slanted Persona 5 Stage Card Backplate
+                // latar kartu miring utama jendela pengaturan
                 Canvas {
                     anchors.fill: parent
                     property color accent: PhantomState.primary
@@ -557,12 +555,12 @@ Variants {
                     anchors.rightMargin: 42
                     spacing: 12
 
-                    // bar judul atas + 6 tab kategori miring ala persona 5
+                    // baris judul atas dan deretan tab kategori pengaturan
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
 
-                        // Tilted "SYSTEM CONFIG" Ransom Stamp
+                        // lencana judul pengaturan di kiri atas
                         Item {
                             Layout.preferredWidth: 235
                             Layout.preferredHeight: 54
@@ -629,7 +627,7 @@ Variants {
                             }
                         }
 
-                        // 6 Slanted Persona 5 Tabs
+                        // deretan tombol tab kategori
                         Repeater {
                             model: [
                                 { idx: 0, icon: "palette",  label: "1. THEME" },
@@ -688,7 +686,7 @@ Variants {
                         color: PhantomState.primary
                     }
 
-                    // area konten tab yang bisa di-scroll
+                    // area konten tab yang dapat digulir
                     Flickable {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
@@ -702,7 +700,7 @@ Variants {
                             width: parent.width
                             spacing: 10
 
-                            // tab 0: tema warna, wallpaper engine, dan kemiringan poligon
+                            // halaman tab pengaturan tema, wallpaper, dan sudut kemiringan poligon
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 visible: settingsWin.activeTab === 0
@@ -710,7 +708,7 @@ Variants {
 
                                 P5SectionHeader { text: "WALLPAPER ENGINE & PARALLAX" }
 
-                                // Wallpaper Preview + Cycle Card in Persona 5 Skewed Style
+                                // kartu pratinjau dan kontrol pergantian wallpaper
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 115
@@ -892,7 +890,7 @@ Variants {
                                 }
                             }
 
-                            // tab 1: posisi bar (atas/bawah), gaya bar, dan format nomor workspace
+                            // halaman tab pengaturan posisi bar, gaya bar, dan format nomor workspace
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 visible: settingsWin.activeTab === 1
@@ -1008,7 +1006,7 @@ Variants {
                                 }
                             }
 
-                            // tab 2: widget jam desktop, cava visualizer, dan lirik lagu
+                            // halaman tab pengaturan widget jam desktop, cava visualizer, dan lirik lagu
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 visible: settingsWin.activeTab === 2
@@ -1102,7 +1100,7 @@ Variants {
                                 }
                             }
 
-                            // tab 3: gaya grafik stats sistem & notifikasi im persona 5
+                            // halaman tab pengaturan gaya grafik statistik sistem dan notifikasi pesan
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 visible: settingsWin.activeTab === 3
@@ -1156,7 +1154,7 @@ Variants {
                                 }
                             }
 
-                            // tab 4: pengaturan layar monitor, mode presentasi infocus, audio, & hyprland
+                            // halaman tab pengaturan layar monitor, mode proyektor, audio, dan hyprland
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 visible: settingsWin.activeTab === 4
@@ -1164,7 +1162,7 @@ Variants {
 
                                 P5SectionHeader { text: "DISPLAYS & INFOCUS PROJECTOR MIRROR" }
 
-                                // Visual Monitor Layout Preview Stage (Persona 5 Stylized Version of Displays Preview)
+                                // kartu pratinjau tata letak layar monitor
                                 P5SkewedCard {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 168
@@ -1178,7 +1176,7 @@ Variants {
                                         anchors.margins: 14
                                         spacing: 8
 
-                                        // Monitor Boxes Row
+                                        // deretan kotak pratinjau monitor
                                         Item {
                                             Layout.fillWidth: true
                                             Layout.fillHeight: true
@@ -1256,7 +1254,7 @@ Variants {
                                             }
                                         }
 
-                                        // Bottom Monitor Hardware Description + Rescan Button
+                                        // deskripsi perangkat keras monitor dan tombol pindai ulang
                                         RowLayout {
                                             Layout.fillWidth: true
                                             spacing: 10
@@ -1297,7 +1295,7 @@ Variants {
                                     }
                                 }
 
-                                // InFocus / Projector Presentation Mirror Mode Selector
+                                // pemilih mode proyektor atau perpanjangan layar
                                 P5ConfigChoiceRow {
                                     label: "InFocus / Presentation Mirror"
                                     desc: "Mirror screen to projector/InFocus or extend workspace"
@@ -1311,7 +1309,7 @@ Variants {
                                     onSelected: val => PhantomState.setPresentationMode(val)
                                 }
 
-                                // Per-Monitor Enabled Toggle
+                                // sakelar aktif atau nonaktif untuk monitor terpilih
                                 P5ConfigToggleRow {
                                     label: "Enabled (" + PhantomState.displayName + ")"
                                     desc: "Enable or disable the selected monitor output"
@@ -1325,7 +1323,7 @@ Variants {
                                     }
                                 }
 
-                                // Resolution & Refresh Rate Selector + Expandable Dropdown List
+                                // tombol pembuka daftar resolusi dan refresh rate
                                 P5ConfigToggleRow {
                                     label: "Resolution & Refresh Rate"
                                     desc: "Click to open framerate & resolution options (" + PhantomState.displayAvailableModes.length + " modes available)"
@@ -1334,7 +1332,7 @@ Variants {
                                     onTriggered: settingsWin.showDisplayModeDropdown = !settingsWin.showDisplayModeDropdown
                                 }
 
-                                // Expandable Persona 5 Resolution & Refresh Rate Dropdown Options
+                                // daftar pilihan resolusi dan refresh rate monitor
                                 ColumnLayout {
                                     Layout.fillWidth: true
                                     Layout.leftMargin: 18
@@ -1423,7 +1421,7 @@ Variants {
                                     }
                                 }
 
-                                // Orientation (Transform: Normal / 90° / 180° / 270°)
+                                // pemilih orientasi putaran layar
                                 P5ConfigChoiceRow {
                                     label: "Orientation"
                                     desc: "Rotate display output (Normal, 90°, 180°, 270°)"
@@ -1437,7 +1435,7 @@ Variants {
                                     onSelected: val => PhantomState.setDisplayTransform(Number(val))
                                 }
 
-                                // Display Scale (%)
+                                // pengatur skala tampilan monitor
                                 P5ConfigSliderRow {
                                     label: "Scale"
                                     desc: "Display fractional/integer UI scaling percentage"
@@ -1450,7 +1448,7 @@ Variants {
                                     }
                                 }
 
-                                // Position X
+                                // pengatur koordinat posisi horizontal monitor
                                 P5ConfigSliderRow {
                                     label: "Position X"
                                     desc: "Horizontal monitor layout coordinate in pixels"
@@ -1463,7 +1461,7 @@ Variants {
                                     }
                                 }
 
-                                // Position Y
+                                // pengatur koordinat posisi vertikal monitor
                                 P5ConfigSliderRow {
                                     label: "Position Y"
                                     desc: "Vertical monitor layout coordinate in pixels"
@@ -1569,7 +1567,7 @@ Variants {
                                 }
                             }
 
-                            // tab 5: tentang phantomshell, profil pembuat (sho / joker), & spek sistem
+                            // halaman tab informasi proyek phantomshell, pembuat, dan spesifikasi perangkat keras
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 visible: settingsWin.activeTab === 5
@@ -1577,7 +1575,7 @@ Variants {
 
                                 P5SectionHeader { text: "ABOUT PHANTOMSHELL // CREATOR & PROJECT DOSSIER" }
 
-                                // 1. Hero Shell Identity & Story Card
+                                // kartu identitas utama proyek phantomshell
                                 P5SkewedCard {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 154
@@ -1647,7 +1645,7 @@ Variants {
                                                 lineHeight: 1.15
                                             }
 
-                                            // Action Chips inside Hero Dossier
+                                            // deretan tombol aksi cepat pada kartu informasi
                                             RowLayout {
                                                 spacing: 8
                                                 Layout.topMargin: 4
@@ -1700,7 +1698,7 @@ Variants {
                                     }
                                 }
 
-                                // 2. Creator & Shell Metadata Grid (2x2)
+                                // grid informasi pembuat dan arsitektur shell
                                 GridLayout {
                                     Layout.fillWidth: true
                                     columns: 2
@@ -1813,7 +1811,7 @@ Variants {
 
                                 P5SectionHeader { text: "HOST HARDWARE & OPERATING SYSTEM SPECIFICATIONS" }
 
-                                // 2-Column Persona 5 Hardware Dossier Grid
+                                // grid spesifikasi perangkat keras dan sistem operasi
                                 GridLayout {
                                     Layout.fillWidth: true
                                     columns: 2
@@ -1985,7 +1983,7 @@ Variants {
                     }
                 }
 
-                // Bottom Center Tilted "★ OK" Stamp (Screenshot 4 Style)
+                // tombol stempel penutup jendela pengaturan di bagian bawah
                 Item {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 4

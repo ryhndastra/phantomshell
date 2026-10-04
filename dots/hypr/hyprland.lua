@@ -1,5 +1,4 @@
--- entrypoint utama konfigurasi hyprland (lua engine)
--- tambah atau komen baris require di bawah buat aktifin/nonaktifin modul lua
+-- titik masuk utama konfigurasi hyprland berbasis lua
 
 local base_dots = os.getenv("PHANTOMSHELL_DOTS") or os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")
 local hypr_dir = base_dots .. "/hypr"

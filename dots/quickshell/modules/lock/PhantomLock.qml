@@ -7,8 +7,7 @@ import Quickshell.Services.Pam
 import qs.config
 import qs.components
 
-// lock screen utama dengan autentikasi PAM + tampilan ala calling card persona 5
-// panggil lewat keybind SUPER+L (atau ALT+L di nested), menu session, atau perintah: phantomshell lock
+// modul layar kunci wayland dengan autentikasi pam dan animasi transisi
 Scope {
     id: lockScope
 
@@ -18,10 +17,11 @@ Scope {
     property string statusText: "ENTER PASSCODE TO INFILTRATE"
     property bool authError: false
     property bool authBusy: false
+    property bool authSuccess: false
     property bool showPassword: false
     property string pendingPassword: ""
 
-    // timer update jam di lock screen (jalan cuma pas layar terkunci)
+    // timer pembaruan jam dan tanggal saat layar terkunci
     Timer {
         interval: 1000
         running: PhantomState.lockOpen
@@ -38,8 +38,7 @@ Scope {
         }
     }
 
-    // pam context buat verifikasi password user linux asli
-    // ganti config ke "login" kalau sistem lu ga punya /etc/pam.d/hyprlock
+    // konteks pam untuk verifikasi kata sandi pengguna sistem
     PamContext {
         id: pam
         config: "hyprlock"
@@ -55,9 +54,10 @@ Scope {
             lockScope.authBusy = false
             if (result === PamResult.Success) {
                 lockScope.authError = false
+                lockScope.authSuccess = true
                 lockScope.statusText = "IDENTITY VERIFIED // WELCOME BACK, JOKER"
                 PhantomState.playSfx("select")
-                PhantomState.lockOpen = false
+                PhantomState.unlockScreen()
             } else {
                 lockScope.authError = true
                 lockScope.statusText = "ACCESS DENIED // WRONG PASSCODE"
@@ -73,6 +73,7 @@ Scope {
     }
 
     function submitPassword(pw) {
+        if (PhantomState.lockClosing) return
         const clean = String(pw || "")
         if (clean.length === 0) {
             lockScope.authError = true
@@ -89,7 +90,7 @@ Scope {
         pam.start()
     }
 
-    // wayland session lock surface (mengunci seluruh monitor aktif)
+    // pengunci sesi wayland pada seluruh layar aktif
     WlSessionLock {
         id: sessionLock
         locked: PhantomState.lockOpen
@@ -101,63 +102,141 @@ Scope {
                 id: lockRoot
                 anchors.fill: parent
 
-                // fokus otomatis ke input password pas lock screen kebuka
-                Component.onCompleted: {
-                    pwInput.forceActiveFocus()
-                }
+                property real bgOpacity: 0.0
+                property real clockSlideX: -140.0
+                property real clockOpacity: 0.0
+                property real cardScale: 0.78
+                property real cardRot: -6.5
+                property real cardOpacity: 0.0
+                property real shutterProgress: 1.0
+                property real unlockSlashProgress: 0.0
 
-                // wallpaper background + efek gelap diagonal
-                // ganti opacity di darkOverlay kalau mau background lebih terang/gelap
-                Rectangle {
-                    anchors.fill: parent
-                    color: "#07070B"
-                }
+                onShutterProgressChanged: shutterCanvas.requestPaint()
+                onUnlockSlashProgressChanged: shutterCanvas.requestPaint()
 
-                Image {
-                    anchors.fill: parent
-                    source: PhantomState.wallpaperPath ? ("file://" + PhantomState.wallpaperPath) : ""
-                    fillMode: Image.PreserveAspectCrop
-                    smooth: true
-                    opacity: 0.38
-                }
-
-                Rectangle {
-                    id: darkOverlay
-                    anchors.fill: parent
-                    color: "#B807070C"
-                }
-
-                // dekorasi garis slash merah khas persona 5 di background lock screen
-                Canvas {
-                    anchors.fill: parent
-                    onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.reset()
-                        var w = width
-                        var h = height
-
-                        ctx.fillStyle = "rgba(230, 0, 18, 0.14)"
-                        ctx.beginPath()
-                        ctx.moveTo(0, h * 0.18)
-                        ctx.lineTo(w, h * 0.04)
-                        ctx.lineTo(w, h * 0.22)
-                        ctx.lineTo(0, h * 0.42)
-                        ctx.closePath()
-                        ctx.fill()
-
-                        ctx.fillStyle = "rgba(230, 0, 18, 0.10)"
-                        ctx.beginPath()
-                        ctx.moveTo(0, h * 0.78)
-                        ctx.lineTo(w, h * 0.62)
-                        ctx.lineTo(w, h * 0.74)
-                        ctx.lineTo(0, h * 0.92)
-                        ctx.closePath()
-                        ctx.fill()
+                // animasi saat layar kunci dibuka
+                ParallelAnimation {
+                    id: lockEnterAnim
+                    NumberAnimation { target: lockRoot; property: "bgOpacity"; from: 0.0; to: 1.0; duration: 340; easing.type: Easing.OutCubic }
+                    NumberAnimation { target: lockRoot; property: "shutterProgress"; from: 1.0; to: 0.0; duration: 560; easing.type: Easing.OutCubic }
+                    SequentialAnimation {
+                        PauseAnimation { duration: 90 }
+                        ParallelAnimation {
+                            NumberAnimation { target: lockRoot; property: "clockSlideX"; from: -140.0; to: 0.0; duration: 460; easing.type: Easing.OutBack }
+                            NumberAnimation { target: lockRoot; property: "clockOpacity"; from: 0.0; to: 1.0; duration: 340; easing.type: Easing.OutCubic }
+                            NumberAnimation { target: lockRoot; property: "cardScale"; from: 0.78; to: 1.0; duration: 480; easing.type: Easing.OutBack }
+                            NumberAnimation { target: lockRoot; property: "cardRot"; from: -6.5; to: 0.0; duration: 480; easing.type: Easing.OutBack }
+                            NumberAnimation { target: lockRoot; property: "cardOpacity"; from: 0.0; to: 1.0; duration: 320; easing.type: Easing.OutCubic }
+                        }
                     }
                 }
 
-                // widget jam & tanggal kiri atas
-                // ubah anchors.topMargin / leftMargin buat geser posisi jam di lock screen
+                // animasi saat layar kunci berhasil dibuka kembali
+                SequentialAnimation {
+                    id: lockExitAnim
+                    ParallelAnimation {
+                        NumberAnimation { target: lockRoot; property: "unlockSlashProgress"; from: 0.0; to: 1.0; duration: 520; easing.type: Easing.InOutCubic }
+                        SequentialAnimation {
+                            NumberAnimation { target: lockRoot; property: "cardScale"; to: 1.05; duration: 130; easing.type: Easing.OutQuad }
+                            ParallelAnimation {
+                                NumberAnimation { target: lockRoot; property: "cardScale"; to: 0.76; duration: 360; easing.type: Easing.InBack }
+                                NumberAnimation { target: lockRoot; property: "cardRot"; to: 5.5; duration: 360; easing.type: Easing.InCubic }
+                                NumberAnimation { target: lockRoot; property: "cardOpacity"; to: 0.0; duration: 310; easing.type: Easing.InCubic }
+                            }
+                        }
+                        NumberAnimation { target: lockRoot; property: "clockSlideX"; to: -160.0; duration: 380; easing.type: Easing.InBack }
+                        NumberAnimation { target: lockRoot; property: "clockOpacity"; to: 0.0; duration: 300; easing.type: Easing.InCubic }
+                        SequentialAnimation {
+                            PauseAnimation { duration: 150 }
+                            NumberAnimation { target: lockRoot; property: "bgOpacity"; to: 0.0; duration: 360; easing.type: Easing.InCubic }
+                        }
+                    }
+                    ScriptAction {
+                        script: {
+                            PhantomState.lockClosing = false
+                            PhantomState.lockOpen = false
+                            lockScope.authSuccess = false
+                            lockScope.authError = false
+                            lockScope.statusText = "ENTER PASSCODE TO INFILTRATE"
+                        }
+                    }
+                }
+
+                Connections {
+                    target: PhantomState
+                    function onLockClosingChanged() {
+                        if (PhantomState.lockClosing && !lockExitAnim.running) {
+                            lockEnterAnim.stop()
+                            lockExitAnim.restart()
+                        }
+                    }
+                }
+
+                // inisialisasi fokus dan mulai animasi masuk
+                Component.onCompleted: {
+                    lockScope.authSuccess = false
+                    lockScope.authError = false
+                    lockScope.statusText = "ENTER PASSCODE TO INFILTRATE"
+                    pwInput.forceActiveFocus()
+                    lockEnterAnim.restart()
+                }
+
+                // lapisan latar belakang wallpaper dan redup gelap
+                Item {
+                    anchors.fill: parent
+                    opacity: lockRoot.bgOpacity
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: "#07070B"
+                    }
+
+                    Image {
+                        anchors.fill: parent
+                        source: PhantomState.wallpaperPath ? ("file://" + PhantomState.wallpaperPath) : ""
+                        fillMode: Image.PreserveAspectCrop
+                        smooth: true
+                        opacity: 0.38
+                        scale: 1.0 + (1.0 - lockRoot.bgOpacity) * 0.06
+                    }
+
+                    Rectangle {
+                        id: darkOverlay
+                        anchors.fill: parent
+                        color: "#B807070C"
+                    }
+
+                    // aksen garis diagonal pada latar layar kunci
+                    Canvas {
+                        anchors.fill: parent
+                        onPaint: {
+                            var ctx = getContext("2d")
+                            ctx.reset()
+                            var w = width
+                            var h = height
+
+                            ctx.fillStyle = Qt.rgba(PhantomState.primary.r, PhantomState.primary.g, PhantomState.primary.b, 0.16)
+                            ctx.beginPath()
+                            ctx.moveTo(0, h * 0.18)
+                            ctx.lineTo(w, h * 0.04)
+                            ctx.lineTo(w, h * 0.22)
+                            ctx.lineTo(0, h * 0.42)
+                            ctx.closePath()
+                            ctx.fill()
+
+                            ctx.fillStyle = Qt.rgba(PhantomState.primary.r, PhantomState.primary.g, PhantomState.primary.b, 0.11)
+                            ctx.beginPath()
+                            ctx.moveTo(0, h * 0.78)
+                            ctx.lineTo(w, h * 0.62)
+                            ctx.lineTo(w, h * 0.74)
+                            ctx.lineTo(0, h * 0.92)
+                            ctx.closePath()
+                            ctx.fill()
+                        }
+                    }
+                }
+
+                // kartu jam dan tanggal di pojok kiri atas
                 Item {
                     anchors.top: parent.top
                     anchors.left: parent.left
@@ -165,6 +244,8 @@ Scope {
                     anchors.leftMargin: 52
                     width: 360
                     height: 150
+                    opacity: lockRoot.clockOpacity
+                    transform: Translate { x: lockRoot.clockSlideX }
 
                     P5SkewedCard {
                         anchors.fill: parent
@@ -224,13 +305,15 @@ Scope {
                     }
                 }
 
-                // kartu utama lock screen di tengah layar
-                // ubah width & height di bawah buat atur ukuran kartu input password
+                // kartu autentikasi utama di tengah layar
                 Item {
                     id: centerCard
                     width: 520
                     height: 330
                     anchors.centerIn: parent
+                    opacity: lockRoot.cardOpacity
+                    scale: lockRoot.cardScale
+                    rotation: lockRoot.cardRot
 
                     property real shakeOffset: 0
                     transform: Translate { x: centerCard.shakeOffset }
@@ -256,8 +339,12 @@ Scope {
                     P5SkewedCard {
                         anchors.fill: parent
                         fillColor: "#0D0D14"
-                        borderColor: lockScope.authError ? PhantomState.primary : "#FFFFFF"
-                        shadowColor: lockScope.authError ? "#FF0022" : PhantomState.primary
+                        borderColor: lockScope.authSuccess
+                            ? PhantomState.secondary
+                            : (lockScope.authError ? PhantomState.primary : "#FFFFFF")
+                        shadowColor: lockScope.authSuccess
+                            ? PhantomState.secondary
+                            : (lockScope.authError ? "#FF0022" : PhantomState.primary)
                         borderWidth: 3
                         skewPx: 14
                         shadowOffsetX: 8
@@ -269,13 +356,12 @@ Scope {
                         anchors.margins: 28
                         spacing: 16
 
-                        // bagian atas: foto profil ren + nama user & status
+                        // informasi profil pengguna dan status autentikasi
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 18
 
-                            // frame avatar miring
-                            // ganti source "../assets/ren.png" kalau mau pakai foto profil lain
+                            // bingkai foto profil pengguna
                             Item {
                                 Layout.preferredWidth: 84
                                 Layout.preferredHeight: 84
@@ -284,7 +370,7 @@ Scope {
                                 Rectangle {
                                     x: 5; y: 6
                                     width: parent.width; height: parent.height
-                                    color: PhantomState.primary
+                                    color: lockScope.authSuccess ? PhantomState.secondary : PhantomState.primary
                                 }
 
                                 Rectangle {
@@ -313,11 +399,11 @@ Scope {
                                     Rectangle {
                                         width: 118
                                         height: 22
-                                        color: "#FFFFFF"
+                                        color: lockScope.authSuccess ? PhantomState.secondary : "#FFFFFF"
                                         rotation: -2
                                         Text {
                                             anchors.centerIn: parent
-                                            text: "CALLING CARD LOCK"
+                                            text: lockScope.authSuccess ? "ACCESS GRANTED" : "CALLING CARD LOCK"
                                             color: "#09090D"
                                             font.family: "JetBrainsMono NFM"
                                             font.pixelSize: 10
@@ -345,7 +431,9 @@ Scope {
                                 Text {
                                     Layout.fillWidth: true
                                     text: lockScope.statusText
-                                    color: lockScope.authError ? PhantomState.primary : PhantomState.muted
+                                    color: lockScope.authSuccess
+                                        ? PhantomState.secondary
+                                        : (lockScope.authError ? PhantomState.primary : PhantomState.muted)
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 11
                                     font.weight: Font.Black
@@ -354,8 +442,7 @@ Scope {
                             }
                         }
 
-                        // kolom input password
-                        // tekan Enter buat langsung unlock, atau Escape buat hapus teks
+                        // kotak input kata sandi
                         Item {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 54
@@ -392,7 +479,7 @@ Scope {
                                     passwordCharacter: "★"
                                     focus: true
                                     clip: true
-                                     verticalAlignment: TextInput.AlignVCenter
+                                    verticalAlignment: TextInput.AlignVCenter
 
                                     Keys.onReturnPressed: {
                                         lockScope.submitPassword(pwInput.text)
@@ -419,7 +506,7 @@ Scope {
                                     }
                                 }
 
-                                // tombol intip password (SHOW/HIDE)
+                                // tombol penampil atau penyembunyi karakter kata sandi
                                 Rectangle {
                                     width: 52
                                     height: 26
@@ -450,7 +537,7 @@ Scope {
                             }
                         }
 
-                        // baris bawah: indikator baterai/volume + tombol UNLOCK & SUSPEND
+                        // baris indikator baterai, volume, serta tombol suspend dan unlock
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 10
@@ -564,6 +651,93 @@ Scope {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                // lapisan bilah tebasan diagonal saat mengunci dan membuka kunci layar
+                Canvas {
+                    id: shutterCanvas
+                    anchors.fill: parent
+                    visible: lockRoot.shutterProgress > 0.001 || lockRoot.unlockSlashProgress > 0.001
+
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
+                        var w = width
+                        var h = height
+
+                        // animasi tirai diagonal saat mengunci layar
+                        if (lockRoot.shutterProgress > 0.001) {
+                            var sp = lockRoot.shutterProgress
+                            var reach = h * 0.65 * sp
+
+                            ctx.fillStyle = String(PhantomState.primary)
+                            ctx.beginPath()
+                            ctx.moveTo(0, 0)
+                            ctx.lineTo(w, 0)
+                            ctx.lineTo(w, reach * 0.72)
+                            ctx.lineTo(0, reach * 1.15)
+                            ctx.closePath()
+                            ctx.fill()
+
+                            ctx.fillStyle = "#08080C"
+                            ctx.beginPath()
+                            ctx.moveTo(0, 0)
+                            ctx.lineTo(w, 0)
+                            ctx.lineTo(w, reach * 0.54)
+                            ctx.lineTo(0, reach * 0.92)
+                            ctx.closePath()
+                            ctx.fill()
+
+                            ctx.fillStyle = String(PhantomState.primary)
+                            ctx.beginPath()
+                            ctx.moveTo(0, h - reach * 0.72)
+                            ctx.lineTo(w, h - reach * 1.15)
+                            ctx.lineTo(w, h)
+                            ctx.lineTo(0, h)
+                            ctx.closePath()
+                            ctx.fill()
+
+                            ctx.fillStyle = "#08080C"
+                            ctx.beginPath()
+                            ctx.moveTo(0, h - reach * 0.54)
+                            ctx.lineTo(w, h - reach * 0.92)
+                            ctx.lineTo(w, h)
+                            ctx.lineTo(0, h)
+                            ctx.closePath()
+                            ctx.fill()
+                        }
+
+                        // animasi tebasan diagonal saat membuka kunci layar
+                        if (lockRoot.unlockSlashProgress > 0.001) {
+                            var up = lockRoot.unlockSlashProgress
+                            var alpha = up < 0.5 ? (up * 2.0) : ((1.0 - up) * 2.0)
+                            var bandH = Math.max(12, h * 0.16 * alpha)
+                            var cy = h * 0.5
+
+                            ctx.save()
+                            ctx.globalAlpha = Math.max(0.0, Math.min(1.0, alpha))
+
+                            ctx.fillStyle = String(PhantomState.primary)
+                            ctx.beginPath()
+                            ctx.moveTo(0, cy - bandH * 0.6 + h * 0.12)
+                            ctx.lineTo(w * Math.min(1.0, up * 1.5), cy - bandH * 0.6 - h * 0.14)
+                            ctx.lineTo(w * Math.min(1.0, up * 1.5), cy + bandH * 0.6 - h * 0.14)
+                            ctx.lineTo(0, cy + bandH * 0.6 + h * 0.12)
+                            ctx.closePath()
+                            ctx.fill()
+
+                            ctx.fillStyle = "#FFFFFF"
+                            ctx.beginPath()
+                            ctx.moveTo(0, cy - bandH * 0.18 + h * 0.12)
+                            ctx.lineTo(w * Math.min(1.0, up * 1.6), cy - bandH * 0.18 - h * 0.14)
+                            ctx.lineTo(w * Math.min(1.0, up * 1.6), cy + bandH * 0.18 - h * 0.14)
+                            ctx.lineTo(0, cy + bandH * 0.18 + h * 0.12)
+                            ctx.closePath()
+                            ctx.fill()
+
+                            ctx.restore()
                         }
                     }
                 }

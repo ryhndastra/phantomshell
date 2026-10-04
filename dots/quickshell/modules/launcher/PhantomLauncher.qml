@@ -29,11 +29,10 @@ Variants {
         property string query: ""
         property int selectedIndex: 0
 
-        // daftar aplikasi desktop terinstal dari nixos / xdg_data_dirs
+        // daftar aplikasi desktop terinstal di sistem
         property var rawDesktopApps: DesktopEntries.applications.values
 
-        // daftar command bawaan phantomshell (bisa dicari pakai awalan `>`)
-        // tambahin objek baru di array ini kalau mau bikin command cepat sendiri di launcher
+        // daftar perintah cepat bawaan phantomshell
         readonly property var builtinCommands: [
             { isApp: false, name: ">lock", desc: "Lock Screen (Persona 5 Calling Card Lock)", cmd: "__lock", iconName: "lock", appIcon: "", badge: "LOCK", entryObj: null },
             { isApp: false, name: ">settings", desc: "Open Complete Velvet Room Configuration GUI", cmd: "__settings", iconName: "settings", appIcon: "", badge: "CONFIG", entryObj: null },
@@ -134,7 +133,7 @@ Variants {
             }
         }
 
-        // Clean, sleek translucent dark backdrop (no weird stretched screen-wide red stripes)
+        // lapisan latar redup transparan
         Rectangle {
             id: bgFade
             anchors.fill: parent
@@ -147,17 +146,17 @@ Variants {
                 onClicked: PhantomState.launcherOpen = false
             }
 
-            // Centered Launcher Stage
+            // kontainer utama aplikasi launcher di tengah layar
             Item {
                 id: launcherStage
                 width: Math.min(parent.width - 80, 900)
                 height: Math.min(parent.height - 80, 680)
                 anchors.centerIn: parent
 
-                // Prevent clicks inside stage from closing launcher
+                // penahan klik di dalam area launcher
                 MouseArea { anchors.fill: parent }
 
-                // Subtle slanted dark backing card with Persona 5 crimson corner accents
+                // latar kartu miring launcher beserta aksen sudut
                 Canvas {
                     anchors.fill: parent
                     property color accent: PhantomState.primary
@@ -171,7 +170,7 @@ Variants {
                         var w = width
                         var h = height
 
-                        // Crimson offset shadow frame
+                        // bayangan offset warna aksen
                         ctx.fillStyle = Qt.rgba(accent.r, accent.g, accent.b, 0.28)
                         ctx.beginPath()
                         ctx.moveTo(26, 16)
@@ -181,7 +180,7 @@ Variants {
                         ctx.closePath()
                         ctx.fill()
 
-                        // Main deep dark slanted stage
+                        // bidang gelap utama kartu launcher
                         ctx.fillStyle = "#E80B0B0F"
                         ctx.strokeStyle = "#FFFFFF"
                         ctx.lineWidth = 2.5
@@ -194,7 +193,7 @@ Variants {
                         ctx.fill()
                         ctx.stroke()
 
-                        // Top-right crimson slash accent inside the stage
+                        // aksen pita miring di pojok kanan atas
                         ctx.fillStyle = accent
                         ctx.beginPath()
                         ctx.moveTo(w - 170, 0)
@@ -206,8 +205,7 @@ Variants {
                     }
                 }
 
-                // header atas + kolom input pencarian aplikasi
-                // ubah text atau font.pixelSize di searchInput kalau mau custom tampilan search bar
+                // baris header atas dan kotak pencarian aplikasi
                 RowLayout {
                     id: topHeaderRow
                     anchors.top: parent.top
@@ -218,7 +216,7 @@ Variants {
                     anchors.rightMargin: 42
                     spacing: 18
 
-                    // Tilted P5 Title Stamp
+                    // lencana judul miring launcher
                     Item {
                         Layout.preferredWidth: 270
                         Layout.preferredHeight: 62
@@ -285,7 +283,7 @@ Variants {
                         }
                     }
 
-                    // Search Cutout Box
+                    // kotak input pencarian aplikasi dan perintah
                     Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 56
@@ -394,8 +392,7 @@ Variants {
                     }
                 }
 
-                // daftar aplikasi & command bergaya menu persona 5
-                // ubah height di rowDelegate kalau mau baris aplikasinya lebih rapat atau renggang
+                // daftar hasil pencarian aplikasi dan perintah
                 ListView {
                     id: resultsList
                     anchors.top: topHeaderRow.bottom
@@ -440,7 +437,7 @@ Variants {
                                 var rightBoxX = w - 210
 
                                 if (active) {
-                                    // Long crimson red slash bar shooting to the left (Screenshot 4)
+                                    // bilah miring beraksen saat baris dipilih atau di-hover
                                     ctx.fillStyle = "#08080A"
                                     ctx.beginPath()
                                     ctx.moveTo(18, 10)
@@ -459,7 +456,7 @@ Variants {
                                     ctx.closePath()
                                     ctx.fill()
 
-                                    // Left white comic slash highlight
+                                    // garis sorot putih di tepi kiri bilah
                                     ctx.fillStyle = "#FFFFFF"
                                     ctx.beginPath()
                                     ctx.moveTo(0, h - 8)
@@ -469,7 +466,7 @@ Variants {
                                     ctx.closePath()
                                     ctx.fill()
                                 } else {
-                                    // Clean dark slanted row strip
+                                    // latar baris gelap saat tidak aktif
                                     ctx.fillStyle = "#D0121218"
                                     ctx.beginPath()
                                     ctx.moveTo(56, 6)
@@ -480,7 +477,7 @@ Variants {
                                     ctx.fill()
                                 }
 
-                                // RIGHT SIDE: White comic cutout box with left-pointing arrow notch `◀` (Screenshot 4)
+                                // kotak lencana kanan dengan lekukan panah kiri
                                 ctx.fillStyle = "#FFFFFF"
                                 ctx.beginPath()
                                 ctx.moveTo(rightBoxX, 3)
@@ -488,12 +485,12 @@ Variants {
                                 ctx.lineTo(w - 22, h - 4)
                                 ctx.lineTo(rightBoxX - 10, h - 3)
                                 ctx.lineTo(rightBoxX - 5, h * 0.64)
-                                ctx.lineTo(rightBoxX - 22, h * 0.50) // Left arrow notch `◀`
+                                ctx.lineTo(rightBoxX - 22, h * 0.50)
                                 ctx.lineTo(rightBoxX - 4, h * 0.36)
                                 ctx.closePath()
                                 ctx.fill()
 
-                                // Inner black skewed box inside the white cutout
+                                // latar gelap di dalam kotak lencana kanan
                                 ctx.fillStyle = "#08080A"
                                 ctx.beginPath()
                                 ctx.moveTo(rightBoxX + 7, 8)
@@ -505,7 +502,7 @@ Variants {
                             }
                         }
 
-                        // Left Content: Large Real App Icon (46x46) + App Name & Description
+                        // konten kiri berupa ikon aplikasi, nama, dan deskripsi
                         RowLayout {
                             anchors.left: parent.left
                             anchors.leftMargin: (rowDelegate.isSelected || rowDelegate.isHovered) ? 34 : 68
@@ -518,7 +515,7 @@ Variants {
                                 NumberAnimation { duration: 120; easing.type: Easing.OutBack }
                             }
 
-                            // App Icon Container (46x46 so real desktop icons look big & sharp!)
+                            // bingkai ikon aplikasi
                             Rectangle {
                                 Layout.preferredWidth: 46
                                 Layout.preferredHeight: 46
@@ -527,7 +524,7 @@ Variants {
                                 border.width: 2
                                 rotation: (rowDelegate.isSelected || rowDelegate.isHovered) ? -5 : 0
 
-                                // Real Full-Color Desktop Application Icon
+                                // gambar ikon asli aplikasi desktop
                                 Image {
                                     id: realAppIcon
                                     anchors.fill: parent
@@ -539,7 +536,7 @@ Variants {
                                     visible: modelData.appIcon !== "" && status === Image.Ready
                                 }
 
-                                // Fallback Vector Icon (for built-in commands or apps without icon file)
+                                // ikon vektor cadangan jika aplikasi tidak memiliki file ikon
                                 P5Icon {
                                     anchors.centerIn: parent
                                     name: modelData.iconName || "app"
@@ -576,7 +573,7 @@ Variants {
                             }
                         }
 
-                        // Right Cutout Badge Content
+                        // teks lencana aksi di sisi kanan baris
                         Item {
                             anchors.right: parent.right
                             anchors.rightMargin: 20
@@ -618,7 +615,7 @@ Variants {
                     }
                 }
 
-                // petunjuk shortcut keyboard & tombol tutup "★ OK" di bagian bawah
+                // baris petunjuk navigasi keyboard di bagian bawah
                 RowLayout {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
@@ -665,7 +662,7 @@ Variants {
                     }
                 }
 
-                // Bottom-Center Tilted "★ OK" Stamp — Closes Launcher when clicked!
+                // tombol stempel penutup launcher di bagian bawah
                 Item {
                     id: okStampButton
                     anchors.bottom: parent.bottom

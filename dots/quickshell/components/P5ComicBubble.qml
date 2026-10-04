@@ -14,7 +14,7 @@ Item {
     property string appIcon: ""
     signal dismissed()
 
-    // Resolve notification icon if available, otherwise fallback to ren.png
+    // resolusi path ikon aplikasi notifikasi, fallback ke avatar default ren.png
     readonly property string resolvedIconUrl: {
         if (appIcon && appIcon.trim() !== "") {
             var raw = appIcon.trim()
@@ -32,7 +32,7 @@ Item {
         return Qt.resolvedUrl("../assets/ren.png")
     }
 
-    // Parse sender name into Ransom-Note character array (like Screenshot 2: Ry[u]ji / Mo[r]ga[n]a)
+    // pecah nama pengirim jadi array per karakter buat efek huruf kotak selang-seling
     readonly property var ransomChars: {
         var clean = (sender || "Joker").split("(")[0].trim()
         if (clean.length === 0) clean = "Joker"
@@ -45,7 +45,7 @@ Item {
         return arr
     }
 
-    // Smooth Persona 5 Comic Slam-In Animation
+    // animasi masuk balon notifikasi
     transformOrigin: Item.BottomLeft
     scale: 0.78
     opacity: 0.0
@@ -94,8 +94,7 @@ Item {
         function onBackgroundChanged() { bubbleCanvas.requestPaint() }
     }
 
-    // kotak foto profil miring di sebelah kiri (pakai icon app atau fallback ke ren.png)
-    // ganti "../assets/ren.png" di atas kalau mau ganti foto avatar default notifikasi
+    // kotak avatar pengirim di sebelah kiri
     Item {
         id: portraitBox
         x: 12
@@ -105,7 +104,7 @@ Item {
         rotation: -7
         z: 1
 
-        // Offset crimson/black drop shadow
+        // bayangan kotak avatar
         Rectangle {
             x: 4
             y: 5
@@ -114,7 +113,7 @@ Item {
             color: PhantomState.primary
         }
 
-        // Outer crisp white comic border
+        // bingkai luar putih
         Rectangle {
             anchors.fill: parent
             anchors.margins: -3
@@ -123,13 +122,12 @@ Item {
             border.width: 2
         }
 
-        // Inner portrait container
+        // kontainer gambar avatar / ikon aplikasi
         Rectangle {
             anchors.fill: parent
             color: "#080A0F"
             clip: true
 
-            // Fallback ren.png image (shown when no appIcon or if appIcon fails)
             Image {
                 id: fallbackRenImg
                 anchors.fill: parent
@@ -140,7 +138,6 @@ Item {
                 visible: customAppIconImg.status !== Image.Ready || root.appIcon === ""
             }
 
-            // Real App / Notification Icon (if provided by notification daemon)
             Image {
                 id: customAppIconImg
                 anchors.fill: parent
@@ -154,7 +151,7 @@ Item {
         }
     }
 
-    // balon chat komik hitam + ekor petir nyambung ke kotak profil
+    // balon chat komik hitam + ekor zig-zag ke kotak avatar
     Canvas {
         id: bubbleCanvas
         anchors.fill: parent
@@ -168,23 +165,19 @@ Item {
             var bh = h - 30
 
             ctx.beginPath()
-            // Top-left of main slanted box
             ctx.moveTo(bx + 10, by + 4)
-            // Top-right of main slanted box
             ctx.lineTo(bx + bw - 8, by)
-            // Bottom-right of main slanted box
             ctx.lineTo(bx + bw + 6, by + bh - 4)
-            // Bottom edge going left toward the tail
             ctx.lineTo(bx + 16, by + bh)
 
-            // ekor petir nyambung dari balon chat ke kotak avatar
-            ctx.lineTo(bx + 8, by + bh - 15)    // Inner notch up
-            ctx.lineTo(bx - 10, by + bh - 4)    // First zig-zag down-left
-            ctx.lineTo(bx - 15, by + bh - 17)   // Inner lightning step up
-            ctx.lineTo(62 + ox, h - 8 + oy)     // Sharp spike tip touching Portrait Box!
-            ctx.lineTo(bx - 18, by + bh - 33)   // Upper edge of spike coming back
-            ctx.lineTo(bx - 5, by + bh - 25)    // Upper lightning zig
-            ctx.lineTo(bx - 2, by + bh - 40)    // Base of tail entering left wall of bubble
+            // segmen ekor zig-zag kiri bawah
+            ctx.lineTo(bx + 8, by + bh - 15)
+            ctx.lineTo(bx - 10, by + bh - 4)
+            ctx.lineTo(bx - 15, by + bh - 17)
+            ctx.lineTo(62 + ox, h - 8 + oy)
+            ctx.lineTo(bx - 18, by + bh - 33)
+            ctx.lineTo(bx - 5, by + bh - 25)
+            ctx.lineTo(bx - 2, by + bh - 40)
 
             ctx.closePath()
         }
@@ -196,12 +189,12 @@ Item {
             var w = width
             var h = height
 
-            // A. Soft Offset Drop Shadow
+            // bayangan balon
             traceUnifiedBubblePath(ctx, 5, 7, w, h)
             ctx.fillStyle = "rgba(0, 0, 0, 0.45)"
             ctx.fill()
 
-            // B. Main Unified Black Bubble + Connected Jagged Tail
+            // bidang utama balon + garis tepi
             traceUnifiedBubblePath(ctx, 0, 0, w, h)
             ctx.fillStyle = "#080A0F"
             ctx.fill()
@@ -209,7 +202,7 @@ Item {
             ctx.strokeStyle = root.urgency === "CRITICAL" ? PhantomState.primary : "#FFFFFF"
             ctx.stroke()
 
-            // C. Signature Right White Triangle Wedge Piercing into Bubble
+            // aksen segitiga putih di sisi kanan balon
             var wx = w - 44
             var wy = h * 0.68
             ctx.beginPath()
@@ -233,7 +226,7 @@ Item {
         }
     }
 
-    // pita nama pengirim gaya potongan koran (ransom note) di kiri atas balon
+    // pita nama pengirim di kiri atas balon
     Item {
         id: nameTagContainer
         x: 58
@@ -260,7 +253,7 @@ Item {
                 ctx.lineTo(w - 10, 2)
                 ctx.lineTo(w - 2, h - 10)
                 ctx.lineTo(28, h - 8)
-                // Mini left zig-zag spike on the white name tag
+                // lekukan lancip di ujung kiri pita nama
                 ctx.lineTo(22, h - 2)
                 ctx.lineTo(14, h - 10)
                 ctx.lineTo(2, h + 2)

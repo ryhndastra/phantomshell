@@ -10,7 +10,7 @@ import qs.components
 Scope {
     id: bgScope
 
-    // Live Clock State
+    // state waktu dan tanggal jam desktop
     property string hoursStr: "23"
     property string minsStr: "10"
     property string secsStr: "00"
@@ -18,14 +18,14 @@ Scope {
     property string dateFullStr: "SATURDAY // OCT 03"
     property string periodStr: "EVENING"
 
-    // Live Weather State (Open-Meteo free no-key + OpenWeather support)
+    // state data cuaca desktop
     property string weatherTemp: "24°C"
     property string weatherHumidity: "69%"
     property string weatherIcon: "cloudy"
     property string weatherLabel: "CLOUDY"
     property string weatherCity: "BANDUNG"
 
-    // Live Multi-Line Lyrics State (from scripts/phantom-lyrics.py — Spotify/Apple Music only)
+    // state lirik lagu tersinkronisasi
     property bool musicPlaying: false
     property string musicPlayer: ""
     property string musicTitle: ""
@@ -41,7 +41,7 @@ Scope {
     property var rightBars: []
     property int cavaTick: 0
 
-    // Watchdog timer: when Cava sleeps on silence, automatically hide the Cava canvases
+    // timer penyembunyi visualizer cava saat audio hening
     Timer {
         id: cavaSilenceTimer
         interval: 450
@@ -77,7 +77,7 @@ Scope {
         onTriggered: bgScope.updateDesktopClock()
     }
 
-    // Ultra-lightweight Weather Poller (polls once on startup and every 15 minutes = 0% CPU/GPU load)
+    // proses pengambil data cuaca berkala
     Process {
         id: weatherProc
         command: ["python3", "/mnt/data/Projects/rice/phantomshell/scripts/phantom-weather.py"]
@@ -98,15 +98,14 @@ Scope {
     }
 
     Timer {
-        interval: 900000 // 15 minutes
+        interval: 900000
         running: PhantomState.showDesktopClock
         repeat: true
         triggeredOnStart: true
         onTriggered: weatherProc.running = true
     }
 
-    // Real-time Cava Audio Spectrum Process
-    // Configured with framerate=24 and sleep_timer=1 so Cava automatically sleeps (0% CPU/GPU) and hides when silent!
+    // proses pembaca spektrum audio cava secara real-time
     Process {
         id: cavaProc
         running: PhantomState.showDesktopCava
@@ -166,7 +165,7 @@ Scope {
         }
     }
 
-    // Real-time Synchronized Lyrics Process (Spotify / Apple Music only)
+    // proses pengambil lirik lagu tersinkronisasi
     Process {
         id: lyricsProc
         running: PhantomState.showDesktopLyrics
@@ -217,16 +216,71 @@ Scope {
             readonly property int activeWs: Hyprland.focusedWorkspace?.id ?? 1
             readonly property real zoomFactor: Math.max(1.0, PhantomState.wallpaperZoom / 100.0)
             readonly property real parallaxOffsetX: PhantomState.wallpaperParallax ? ((activeWs - 3.5) * -14) : 0
+            property real wpCrossfade: 1.0
+            property real wpPunchScale: 1.0
+            property real wpSlideX: 0.0
 
-            // layer gambar wallpaper + efek vignette tipis atas bawah
-            // ganti wallpaper lewat Velvet Room Settings > Wallpaper atau ubah defaultWallpaper di PhantomState.qml
+            ParallelAnimation {
+                id: wpSwitchAnim
+                NumberAnimation {
+                    target: bgWin
+                    property: "wpCrossfade"
+                    from: 0.0
+                    to: 1.0
+                    duration: 920
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    target: bgWin
+                    property: "wpPunchScale"
+                    from: 1.09
+                    to: 1.0
+                    duration: 1060
+                    easing.type: Easing.OutBack
+                    easing.overshoot: 1.15
+                }
+                NumberAnimation {
+                    target: bgWin
+                    property: "wpSlideX"
+                    from: 34.0
+                    to: 0.0
+                    duration: 920
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            Connections {
+                target: PhantomState
+                function onWallpaperPathChanged() {
+                    wpSwitchAnim.restart()
+                }
+            }
+
+            // lapisan gambar wallpaper sebelumnya untuk transisi crossfade
+            Image {
+                id: wpPrevImg
+                visible: PhantomState.showWallpaperLayer && PhantomState.previousWallpaperPath !== "" && bgWin.wpCrossfade < 0.99
+                width: parent.width * bgWin.zoomFactor
+                height: parent.height * bgWin.zoomFactor
+                x: (parent.width - width) / 2 + bgWin.parallaxOffsetX
+                y: (parent.height - height) / 2
+                source: PhantomState.previousWallpaperPath !== "" ? ("file://" + PhantomState.previousWallpaperPath) : ""
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                cache: true
+                smooth: true
+            }
+
+            // lapisan gambar wallpaper aktif dengan efek parallax dan transisi
             Image {
                 id: wpImg
                 visible: PhantomState.showWallpaperLayer && PhantomState.wallpaperPath !== ""
                 width: parent.width * bgWin.zoomFactor
                 height: parent.height * bgWin.zoomFactor
-                x: (parent.width - width) / 2 + bgWin.parallaxOffsetX
+                x: (parent.width - width) / 2 + bgWin.parallaxOffsetX + bgWin.wpSlideX
                 y: (parent.height - height) / 2
+                scale: bgWin.wpPunchScale
+                opacity: bgWin.wpCrossfade
                 source: PhantomState.wallpaperPath !== "" ? ("file://" + PhantomState.wallpaperPath) : ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
@@ -238,7 +292,7 @@ Scope {
                 }
             }
 
-            // vignette gelap halus di atas & bawah biar bar, cava, dan lirik lebih kebaca
+            // gradasi vignette gelap pada bagian atas dan bawah layar
             Rectangle {
                 anchors.fill: parent
                 gradient: Gradient {
@@ -249,8 +303,7 @@ Scope {
                 }
             }
 
-            // widget jam & cuaca desktop ala kalender/hud persona 5
-            // bisa diganti posisinya & skalanya lewat Velvet Room Settings > Desktop atau ubah x/y di bawah
+            // widget jam dan informasi cuaca desktop
             Item {
                 id: desktopClockWidget
                 visible: PhantomState.showDesktopClock
@@ -276,12 +329,12 @@ Scope {
                     return 48
                 }
 
-                // Style A: Authentic Persona 5 Jagged Cutout Clock + Weather HUD (Reference Image)
+                // gaya jam potongan poligon editorial dengan ikon cuaca
                 Item {
                     anchors.fill: parent
                     visible: PhantomState.desktopClockStyle === "p5-editorial"
 
-                    // 1. Connected Jagged White Outer Silhouette + Black Inner Cutout + 2 Bottom Icicle Spikes
+                    // siluet poligon luar putih dan potongan dalam hitam
                     Canvas {
                         id: p5ClockHull
                         anchors.fill: parent
@@ -300,7 +353,7 @@ Scope {
                                 c.lineTo(278, 118)
                                 c.lineTo(286, 118)
                                 c.lineTo(274, 188)
-                                // Two sharp downward P5 icicle spikes at bottom
+                                // dua sudut runcing bawah
                                 c.lineTo(222, 189)
                                 c.lineTo(221, 232)
                                 c.lineTo(209, 189)
@@ -365,7 +418,7 @@ Scope {
                             ctx.fillStyle = "#06090E"
                             ctx.fill()
 
-                            // Slanted white underline bar inside the left hour box
+                            // garis bawah miring di dalam kotak angka jam
                             ctx.fillStyle = "#F2F2EE"
                             ctx.beginPath()
                             ctx.moveTo(68, 121)
@@ -377,7 +430,7 @@ Scope {
                         }
                     }
 
-                    // 2. Left Tilted Hour Number (e.g. "8" or "23")
+                    // angka jam miring di sisi kiri
                     Item {
                         x: 52
                         y: 26
@@ -395,7 +448,7 @@ Scope {
                         }
                     }
 
-                    // 3. Center Tilted Minute Number (e.g. "30")
+                    // angka menit miring di bagian tengah
                     Item {
                         x: 172
                         y: 38
@@ -413,7 +466,7 @@ Scope {
                         }
                     }
 
-                    // 4. Lower Center Weekday ("SATURDAY" with P5 horizontal slice line)
+                    // label nama hari dengan aksen garis potong horizontal
                     Item {
                         x: 156
                         y: 128
@@ -437,7 +490,7 @@ Scope {
                             }
                         }
 
-                        // Characteristic Persona 5 horizontal dark razor-slice across the weekday letters
+                        // garis potong gelap melintasi teks nama hari
                         Rectangle {
                             anchors.centerIn: parent
                             anchors.verticalCenterOffset: 2
@@ -448,7 +501,7 @@ Scope {
                         }
                     }
 
-                    // 5. Right Tilted White Weather Square Stamp + Black Comic Cloud/Weather Silhouette
+                    // kotak stempel ikon cuaca di sisi kanan
                     Item {
                         x: 278
                         y: 38
@@ -480,21 +533,21 @@ Scope {
                                 ctx.lineWidth = 3.2
 
                                 function drawCloud(yOff) {
-                                    // Back secondary cloud puffs
+                                    // siluet awan latar belakang
                                     ctx.beginPath()
                                     ctx.arc(44, 34 + yOff, 11, 0, Math.PI * 2)
                                     ctx.arc(57, 36 + yOff, 12, 0, Math.PI * 2)
                                     ctx.arc(68, 43 + yOff, 9, 0, Math.PI * 2)
                                     ctx.fill()
 
-                                    // White separator arc between front and back cloud
+                                    // garis lengkung pemisah putih antar awan
                                     ctx.beginPath()
                                     ctx.arc(33, 41 + yOff, 16, -0.8, 0.5)
                                     ctx.arc(50, 40 + yOff, 15, -1.2, 0.4)
                                     ctx.arc(64, 47 + yOff, 11, -1.3, 0.3)
                                     ctx.stroke()
 
-                                    // Main foreground bold black cloud silhouette (flat bottom like reference)
+                                    // siluet awan utama bagian depan
                                     ctx.beginPath()
                                     ctx.moveTo(14, 56 + yOff)
                                     ctx.arc(22, 48 + yOff, 11, Math.PI * 0.85, Math.PI * 1.55)
@@ -507,7 +560,7 @@ Scope {
                                 }
 
                                 if (wIcon === "clear-day") {
-                                    // Bold P5 Spiky Sun
+                                    // ikon matahari
                                     ctx.beginPath()
                                     ctx.arc(44, 42, 16, 0, Math.PI * 2)
                                     ctx.fill()
@@ -521,30 +574,30 @@ Scope {
                                         ctx.fill()
                                     }
                                 } else if (wIcon === "clear-night") {
-                                    // P5 Crescent Moon + 4-Point Star
+                                    // ikon bulan sabit dan bintang
                                     ctx.beginPath()
                                     ctx.arc(44, 42, 22, 0.3, Math.PI * 1.85)
                                     ctx.arc(52, 35, 17, Math.PI * 1.75, 0.45, true)
                                     ctx.closePath()
                                     ctx.fill()
-                                    // Small 4-point star
+                                    // bintang empat sudut kecil
                                     ctx.beginPath()
                                     ctx.moveTo(64, 18); ctx.lineTo(66, 25); ctx.lineTo(73, 27)
                                     ctx.lineTo(66, 29); ctx.lineTo(64, 36); ctx.lineTo(62, 29)
                                     ctx.lineTo(55, 27); ctx.lineTo(62, 25); ctx.closePath()
                                     ctx.fill()
                                 } else if (wIcon === "partly-cloudy-day") {
-                                    // Sun peeking behind cloud
+                                    // ikon matahari di balik awan
                                     ctx.beginPath()
                                     ctx.arc(28, 30, 12, 0, Math.PI * 2)
                                     ctx.fill()
                                     ctx.stroke()
                                     drawCloud(2)
                                 } else if (wIcon === "partly-cloudy-night") {
-                                    // Classic P5 Double Cloud (matches reference screenshot!)
+                                    // ikon awan ganda malam
                                     drawCloud(0)
                                 } else if (wIcon === "rain") {
-                                    // Cloud + P5 Diagonal Rain Slashes
+                                    // ikon awan dan garis hujan diagonal
                                     drawCloud(-6)
                                     var rx = [22, 35, 48, 61]
                                     for (var r = 0; r < rx.length; r++) {
@@ -557,7 +610,7 @@ Scope {
                                         ctx.fill()
                                     }
                                 } else if (wIcon === "thunder") {
-                                    // Cloud + Jagged P5 Lightning Bolt + Rain Slashes
+                                    // ikon awan dengan kilat dan hujan
                                     drawCloud(-7)
                                     ctx.beginPath()
                                     ctx.moveTo(45, 50)
@@ -587,7 +640,7 @@ Scope {
                         }
                     }
 
-                    // 6. Weather Percentage & Temperature Readout Below White Weather Square ("55%" style)
+                    // indikator persentase kelembapan dan suhu di bawah ikon cuaca
                     Column {
                         x: 274
                         y: 132
@@ -616,7 +669,7 @@ Scope {
                     }
                 }
 
-                // Style B: Minimal Clean Giant Clock
+                // gaya jam teks minimalis
                 Column {
                     anchors.centerIn: parent
                     visible: PhantomState.desktopClockStyle === "minimal"
@@ -643,7 +696,7 @@ Scope {
                     }
                 }
 
-                // Style C: Cyber HUD Clock
+                // gaya jam kartu poligon siber
                 P5SkewedCard {
                     anchors.fill: parent
                     anchors.margins: 16
@@ -676,8 +729,7 @@ Scope {
                 }
             }
 
-            // visualizer audio cava kiri-kanan + lirik lagu melayang di tengah bawah
-            // otomatis ngumpet (0% cpu/gpu) kalau lagi ga ada suara atau ga nyetel spotify
+            // kontainer bawah untuk visualizer audio cava dan lirik lagu
             Item {
                 id: bottomAudioBar
                 z: 10
@@ -690,8 +742,7 @@ Scope {
                 height: Math.max(128, PhantomState.cavaMaxHeight)
                 visible: PhantomState.showDesktopCava || PhantomState.showDesktopLyrics
 
-                // slot tengah: lirik multi-baris (past2, past1, now, next1, next2) tanpa card
-                // ubah font.pixelSize di activeLyricText kalau mau gedein ukuran lirik utama
+                // slot tengah untuk tampilan lirik lima baris
                 Item {
                     id: centerLyricsSlot
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -707,7 +758,7 @@ Scope {
                         spacing: 2
                         visible: bgScope.musicPlaying && bgScope.currentLyric !== ""
 
-                        // Past 2 (2 lines ago — small & faint)
+                        // baris lirik dua langkah sebelumnya
                         Text {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
@@ -721,7 +772,7 @@ Scope {
                             elide: Text.ElideRight
                         }
 
-                        // Past 1 (1 line ago — medium-small & muted)
+                        // baris lirik satu langkah sebelumnya
                         Text {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
@@ -737,7 +788,7 @@ Scope {
                             elide: Text.ElideRight
                         }
 
-                        // NOW (Current Active Lyric — Larger, Highlighted & Crisp!)
+                        // baris lirik yang sedang dinyanyikan saat ini
                         Text {
                             id: activeLyricText
                             width: parent.width
@@ -753,7 +804,7 @@ Scope {
                             elide: Text.ElideRight
                         }
 
-                        // Next 1 (Next upcoming line — medium-small & muted)
+                        // baris lirik satu langkah berikutnya
                         Text {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
@@ -769,7 +820,7 @@ Scope {
                             elide: Text.ElideRight
                         }
 
-                        // Next 2 (2 lines ahead — small & faint)
+                        // baris lirik dua langkah berikutnya
                         Text {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
@@ -785,7 +836,7 @@ Scope {
                     }
                 }
 
-                // sayap kiri: spektrum cava (otomatis hilang pas hening)
+                // kanvas spektrum audio cava sisi kiri
                 Canvas {
                     id: leftCavaCanvas
                     visible: PhantomState.showDesktopCava && bgScope.hasLiveAudio
@@ -825,7 +876,7 @@ Scope {
                     }
                 }
 
-                // sayap kanan: spektrum cava (otomatis hilang pas hening)
+                // kanvas spektrum audio cava sisi kanan
                 Canvas {
                     id: rightCavaCanvas
                     visible: PhantomState.showDesktopCava && bgScope.hasLiveAudio

@@ -39,8 +39,7 @@ Item {
         function onSecondaryChanged() { radarCanvas.requestPaint() }
     }
 
-    // mode 1: grafik bintang 5 sudut ala social stats persona 5
-    // bisa diganti ke mode bar miring lewat Velvet Room Settings > Bar & Dock > Stats Style
+    // tampilan grafik radar bintang 5 sudut (social stats)
     Item {
         anchors.fill: parent
         visible: PhantomState.statsStyle === "pentagon"
@@ -70,7 +69,6 @@ Item {
 
                 var cx = width / 2
                 var cy = height / 2 + 6
-                // Much larger star radius (0.44 instead of 0.30)!
                 var maxR = Math.min(width, height) * 0.44
                 var vals = [
                     Math.max(0.32, Math.min(1.0, root.animCpu / 100.0)),
@@ -80,12 +78,12 @@ Item {
                     Math.max(0.32, Math.min(1.0, root.animTemp / 100.0))
                 ]
 
-                // 1. Outer Crimson Offset Star Cutout
+                // bayangan bintang aksen di belakang
                 traceStar(ctx, cx + 4, cy + 4, maxR * 1.04, 0.44, -0.04)
                 ctx.fillStyle = PhantomState.primary
                 ctx.fill()
 
-                // 2. Main Pitch-Black 5-Point Star Backdrop with Thick White Border
+                // bidang dasar bintang gelap dengan garis tepi terang
                 traceStar(ctx, cx, cy, maxR, 0.44, 0)
                 ctx.fillStyle = "#08090D"
                 ctx.fill()
@@ -93,7 +91,7 @@ Item {
                 ctx.lineWidth = 2.6
                 ctx.stroke()
 
-                // 3. Concentric Inner 5-Point Star Guides (72% and 44% scale)
+                // garis bantu skala bintang bagian dalam
                 var starRings = [0.72, 0.44]
                 for (var rIdx = 0; rIdx < starRings.length; rIdx++) {
                     traceStar(ctx, cx, cy, maxR * starRings[rIdx], 0.44, 0)
@@ -102,7 +100,7 @@ Item {
                     ctx.stroke()
                 }
 
-                // 4. 5 Radial Axis Lines from Center to Star Tips + 5 Inner Valley Lines
+                // garis sumbu radial dari titik pusat ke tiap sudut bintang
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.25)"
                 ctx.lineWidth = 1.1
                 for (var j = 0; j < 10; j++) {
@@ -114,7 +112,7 @@ Item {
                     ctx.stroke()
                 }
 
-                // 5. ACTIVE SYSTEM STATS 5-POINT STAR (Dynamic Golden/Yellow Star!)
+                // poligon nilai statistik aktif
                 ctx.beginPath()
                 for (var k = 0; k < 10; k++) {
                     var sa = -Math.PI / 2 + (k * Math.PI / 5)
@@ -142,7 +140,7 @@ Item {
                 ctx.lineWidth = 2.4
                 ctx.stroke()
 
-                // 6. Center Core Star Emblem
+                // bintang inti di titik pusat
                 traceStar(ctx, cx, cy, maxR * 0.18, 0.44, 0)
                 ctx.fillStyle = PhantomState.primary
                 ctx.fill()
@@ -150,7 +148,7 @@ Item {
                 ctx.lineWidth = 1.4
                 ctx.stroke()
 
-                // 7. Outer Tip Nodes
+                // titik indikator di ujung tiap nilai statistik
                 for (var n = 0; n < 5; n++) {
                     var na = -Math.PI / 2 + (n * 2 * Math.PI / 5)
                     var nx = cx + Math.cos(na) * (maxR * vals[n])
@@ -166,7 +164,7 @@ Item {
             }
         }
 
-        // Clamped 5 Vertex Labels around the Giant 5-Point Star
+        // label persentase & nama metrik di keliling sudut bintang
         Repeater {
             model: root.statsModel
             delegate: Item {
@@ -230,7 +228,7 @@ Item {
         }
     }
 
-    // mode 2: bar indikator miring ala hp/sp bar persona 5
+    // tampilan bar indikator horizontal miring
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 6

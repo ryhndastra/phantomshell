@@ -9,8 +9,7 @@ import Quickshell.Services.Notifications
 Singleton {
     id: root
 
-    // state buka/tutup panel ui
-    // set salah satu ke true kalau mau panel langsung kebuka pas shell baru start
+    // state visibilitas panel antarmuka
     property bool launcherOpen: false
     property bool dashboardOpen: false
     property bool settingsOpen: false
@@ -18,6 +17,72 @@ Singleton {
     property bool calendarOpen: false
     property bool sessionOpen: false
     property bool lockOpen: false
+    property bool wallpaperSelectorOpen: false
+    property bool mediaPopupOpen: false
+
+    // state animasi transisi tema dan wallpaper
+    property int transitionTick: 0
+    property string transitionTitle: "METAVERSE SHIFT"
+    property string transitionSub: "PALETTE SYNCHRONIZED"
+    property string previousWallpaperPath: ""
+
+    function toggleLauncher() {
+        const next = !launcherOpen
+        if (next) {
+            dashboardOpen = false
+            settingsOpen = false
+            notificationsOpen = false
+            calendarOpen = false
+            sessionOpen = false
+            wallpaperSelectorOpen = false
+            mediaPopupOpen = false
+        }
+        launcherOpen = next
+    }
+
+    function toggleSettings() {
+        const next = !settingsOpen
+        if (next) {
+            launcherOpen = false
+            dashboardOpen = false
+            notificationsOpen = false
+            calendarOpen = false
+            wallpaperSelectorOpen = false
+            mediaPopupOpen = false
+        }
+        settingsOpen = next
+    }
+
+    function toggleWallpaperSelector() {
+        const next = !wallpaperSelectorOpen
+        if (next) {
+            launcherOpen = false
+            dashboardOpen = false
+            settingsOpen = false
+            notificationsOpen = false
+            calendarOpen = false
+            sessionOpen = false
+            mediaPopupOpen = false
+        }
+        wallpaperSelectorOpen = next
+    }
+
+    function toggleMediaPopup() {
+        const next = !mediaPopupOpen
+        if (next) {
+            launcherOpen = false
+            dashboardOpen = false
+            settingsOpen = false
+            notificationsOpen = false
+            calendarOpen = false
+            sessionOpen = false
+            wallpaperSelectorOpen = false
+        }
+        mediaPopupOpen = next
+        if (next) refreshMedia()
+    }
+
+    property bool lockClosing: false
 
     function lockScreen() {
         launcherOpen = false
@@ -26,16 +91,27 @@ Singleton {
         notificationsOpen = false
         calendarOpen = false
         sessionOpen = false
+        wallpaperSelectorOpen = false
+        mediaPopupOpen = false
+        lockClosing = false
         lockOpen = true
     }
 
-    // state osd volume & brightness
+    function unlockScreen() {
+        if (lockOpen && !lockClosing) {
+            lockClosing = true
+        }
+    }
+
+    // state osd volume dan kecerahan layar
     property bool osdVisible: false
     property string osdLabel: "VOLUME"
     property int osdValue: 65
+    property bool osdMuted: false
+    property bool volumeMuted: false
+    property int brightnessPct: 50
 
-    // palet warna aktif & tema default
-    // ganti themeId & warna hex di bawah buat ubah tema default pas pertama jalan
+    // palet warna aktif dan tema default
     property string themeName: "P5 Phantom Crimson"
     property string themeId: "p5-crimson"
     property bool darkMode: true
@@ -55,10 +131,22 @@ Singleton {
     property color urgent: "#FF0033"
     property color success: "#00F59B"
 
+    Behavior on primary { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on secondary { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on accent { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on background { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on surface { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on surfaceAlt { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on foreground { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on muted { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on borderLight { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+    Behavior on borderDark { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
+
     readonly property var presets: ({
         "p5-crimson": {
             name: "P5 Phantom Crimson",
             id: "p5-crimson",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png",
             primary: "#E60012",
             secondary: "#FFD700",
             accent: "#FF1E2E",
@@ -75,6 +163,7 @@ Singleton {
         "p3-reload": {
             name: "P3 Reload S.E.E.S. Blue",
             id: "p3-reload",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p3-reload.png",
             primary: "#00B4D8",
             secondary: "#90E0EF",
             accent: "#00F0FF",
@@ -91,6 +180,7 @@ Singleton {
         "p4-golden": {
             name: "P4 Golden Midnight",
             id: "p4-golden",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p4-golden.png",
             primary: "#FFB703",
             secondary: "#FB8500",
             accent: "#FFE600",
@@ -107,6 +197,7 @@ Singleton {
         "kasumi-violet": {
             name: "Violet Kasumi",
             id: "kasumi-violet",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-kasumi-violet.png",
             primary: "#B829FF",
             secondary: "#FF70A6",
             accent: "#D96BFF",
@@ -123,6 +214,7 @@ Singleton {
         "akechi-crow": {
             name: "Crow Royal Gold",
             id: "akechi-crow",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-akechi-crow.png",
             primary: "#D4AF37",
             secondary: "#E60012",
             accent: "#FFF3B0",
@@ -139,6 +231,7 @@ Singleton {
         "futaba-matrix": {
             name: "Oracle Hacker Matrix",
             id: "futaba-matrix",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-futaba-matrix.png",
             primary: "#39FF14",
             secondary: "#FF9F1C",
             accent: "#72FF57",
@@ -155,6 +248,7 @@ Singleton {
         "monochrome": {
             name: "Phantom Monochrome",
             id: "monochrome",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-monochrome.png",
             primary: "#E2E2EC",
             secondary: "#A0A0B2",
             accent: "#FFFFFF",
@@ -171,6 +265,7 @@ Singleton {
         "expressive": {
             name: "Velvet Expressive",
             id: "expressive",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-expressive.png",
             primary: "#7B61FF",
             secondary: "#00F5D4",
             accent: "#9D85FF",
@@ -187,6 +282,7 @@ Singleton {
         "tonal-spot": {
             name: "Gore Magala Ice",
             id: "tonal-spot",
+            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-tonal-spot.png",
             primary: "#8AB4F8",
             secondary: "#C58AF9",
             accent: "#A8C7FA",
@@ -202,44 +298,46 @@ Singleton {
         }
     })
 
-    // pengaturan default komponen bar, desktop widget, dan hyprland
-    // ubah nilai default di bawah buat ngatur tampilan awal bar & widget desktop
+    // konfigurasi bentuk poligon dan kemiringan
     property bool polygonMode: true
     property real skewAngle: -10
     property int cornerRadius: 14
 
-    // Bar & Layout Options
-    property string barPosition: "top" // "top", "bottom"
-    property string barStyle: "p5-skew" // "p5-skew", "float", "hug", "islands"
-    property string groupStyle: "pills" // "no", "pills", "separated"
+    // opsi tata letak dan visibilitas komponen bar
+    property string barPosition: "top"
+    property string barStyle: "p5-skew"
+    property string groupStyle: "pills"
     property bool barShowBackground: false
     property bool barAutoHide: false
     property bool showWeatherHud: true
     property bool showWorkspaces: true
     property bool showDynamicIsland: true
+    property bool showMediaPill: true
     property bool showThemePill: true
     property bool showImPill: true
     property bool showStatsPill: true
     property bool showUnreadCount: true
 
-    // Workspaces Options (like ii BarConfig)
+    // opsi indikator workspace
     property int workspaceCount: 6
-    property string workspaceNumStyle: "arabic" // "arabic", "roman", "kanji"
+    property string workspaceNumStyle: "arabic"
 
-    // Bar Utility Buttons (like ii BarConfig)
+    // opsi tombol utilitas bar
     property bool showUtilButtons: true
     property bool showUtilSnip: true
     property bool showUtilPicker: true
     property bool showUtilMic: false
     property bool showUtilDark: false
 
-    // Screen Frame / Corners (Default OFF so it never clashes with open app windows!)
+    // opsi bingkai tepi layar
     property bool screenFrame: false
-    property string screenRoundCorner: "no" // "no", "yes", "not-fullscreen"
+    property string screenRoundCorner: "no"
     property int frameThickness: 2
 
-    // Shell Logo & Wallpaper Layer (Default TRUE with PhantomShell Logo Wallpaper!)
-    readonly property string logoPath: Qt.resolvedUrl("../assets/pshell.png")
+    // konfigurasi logo dan daftar wallpaper
+    readonly property string logoPath: themeId === "p5-crimson"
+        ? Qt.resolvedUrl("../assets/pshell.png")
+        : Qt.resolvedUrl("../assets/pshell-" + themeId + ".png")
     readonly property string defaultWallpaperPath: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png"
     property bool showWallpaperLayer: true
     property bool wallpaperParallax: true
@@ -247,6 +345,14 @@ Singleton {
     property string wallpaperPath: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png"
     readonly property var availableWallpapers: [
         "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p3-reload.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p4-golden.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-kasumi-violet.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-akechi-crow.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-futaba-matrix.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-monochrome.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-expressive.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-tonal-spot.png",
         "/home/sho/Pictures/Wallpapers/goremagala_iceshard.jpg",
         "/home/sho/Pictures/Wallpapers/1409986.png",
         "/home/sho/Pictures/Wallpapers/wallhaven-0q3yqq.jpg",
@@ -257,18 +363,31 @@ Singleton {
         "/home/sho/Pictures/Wallpapers/wallhaven-j3vvdw.png"
     ]
 
+    function setWallpaper(newPath) {
+        if (!newPath) return
+        wallpaperSelectorOpen = false
+        if (newPath !== wallpaperPath) {
+            previousWallpaperPath = wallpaperPath
+            wallpaperPath = newPath
+        }
+        transitionTitle = "WALLPAPER SHIFT"
+        transitionSub = newPath.split("/").pop().toUpperCase()
+        transitionTick++
+        Quickshell.execDetached(["sh", "-c", "swww img '" + newPath + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
+        saveState()
+        playSfx("select")
+    }
+
     function cycleWallpaper() {
         var idx = availableWallpapers.indexOf(wallpaperPath)
         var nextIdx = (idx + 1) % availableWallpapers.length
-        wallpaperPath = availableWallpapers[nextIdx]
-        Quickshell.execDetached(["sh", "-c", "swww img '" + wallpaperPath + "' --transition-type grow --transition-fps 60 2>/dev/null || true"])
-        saveState()
+        setWallpaper(availableWallpapers[nextIdx])
     }
 
-    // Desktop Widgets (Clock + Quote + Split Cava + Center Live Lyrics)
+    // konfigurasi widget jam desktop, visualizer cava, dan lirik
     property bool showDesktopClock: true
-    property string desktopClockStyle: "p5-editorial" // "p5-editorial", "minimal", "cyber"
-    property string desktopClockPosition: "top-left" // "top-left", "center", "top-right", "bottom-left"
+    property string desktopClockStyle: "p5-editorial"
+    property string desktopClockPosition: "top-left"
     property int desktopClockScale: 100
     property bool desktopClockShowSeconds: false
     property bool desktopClockShowQuote: true
@@ -282,13 +401,13 @@ Singleton {
     property bool showDesktopLyrics: true
     property bool lyricsShowCard: false
 
-    // Widgets & Notifications
-    property string statsStyle: "pentagon" // "pentagon" or "bars"
+    // opsi grafik statistik dan efek suara notifikasi
+    property string statsStyle: "pentagon"
     property bool dndEnabled: false
     property bool sfxEnabled: true
     property real sfxVolume: 0.7
 
-    // Hyprland Live Tuning
+    // parameter live tuning hyprland
     property int hyprGapsIn: 5
     property int hyprGapsOut: 10
     property int hyprBorderSize: 2
@@ -298,7 +417,7 @@ Singleton {
     property int hyprBlurPasses: 2
     property bool hyprAnimationsEnabled: true
 
-    // Display / Monitor Configuration & InFocus Projector Mirroring
+    // konfigurasi layar monitor dan mode proyektor
     property var monitorList: ([{
         name: "eDP-1",
         description: "Chimei Innolux Corporation 0x1521",
@@ -319,12 +438,12 @@ Singleton {
     property bool displayEnabled: true
     property string displayMode: "1920x1080@144.00Hz"
     property var displayAvailableModes: ["1920x1080@144.00Hz", "1920x1080@60.02Hz"]
-    property int displayTransform: 0 // 0=Normal, 1=90°, 2=180°, 3=270°
+    property int displayTransform: 0
     property int displayScalePct: 100
     property int displayPosX: 0
     property int displayPosY: 0
     property string displayMirrorOf: "none"
-    property string presentationMode: "extend" // "extend", "mirror-auto", "mirror-1080p", "mirror-720p"
+    property string presentationMode: "extend"
 
     Process {
         id: monitorsProc
@@ -392,7 +511,7 @@ Singleton {
             ? m.availableModes.slice()
             : [(m.width || 1920) + "x" + (m.height || 1080) + "@" + Number(m.refreshRate || 144).toFixed(2) + "Hz"]
 
-        // If running inside nested Hyprland (WAYLAND-1) with only 1 virtual mode, expose full hardware framerate options
+        // daftar mode fallback saat berjalan di sesi nested wayland
         if (String(root.displayName).indexOf("WAYLAND") === 0 || rawModes.length <= 1) {
             const fallbackModes = [
                 "1920x1080@144.00Hz",
@@ -410,7 +529,7 @@ Singleton {
         const modes = root.sortDisplayModes(rawModes)
         root.displayAvailableModes = modes
 
-        // Default to the BEST mode (highest resolution & highest refresh rate, e.g. 1920x1080@144.00Hz)
+        // pilih mode resolusi dan refresh rate tertinggi sebagai default
         const bestMode = modes[0] || "1920x1080@144.00Hz"
         const curRate = Number(m.refreshRate || 144).toFixed(2)
         const curModeGuess = (m.width || 1920) + "x" + (m.height || 1080) + "@" + curRate + "Hz"
@@ -520,7 +639,297 @@ Singleton {
     property bool wifiConnected: true
     property bool btConnected: true
 
-    // info spesifikasi os & hardware buat tab 6. about
+    // state panel wifi & bluetooth interaktif (nmcli & bluetoothctl)
+    property string wifiSsid: "Scanning..."
+    property string wifiIp: "127.0.0.1"
+    property string wifiSecurity: "WPA2"
+    property int wifiSignal: 100
+    property bool wifiScanning: false
+    property string wifiStatusMsg: ""
+    property var wifiNetworks: []
+
+    property string btDeviceName: "Ready"
+    property string btDeviceMac: ""
+    property bool btScanning: false
+    property string btStatusMsg: ""
+    property var btDevices: []
+
+    Process {
+        id: wifiListProc
+        command: ["bash", "-c",
+            "RADIO=$(nmcli radio wifi 2>/dev/null || echo enabled); " +
+            "IP=$(ip -4 -o addr show scope global 2>/dev/null | awk '{print $4}' | head -n1); " +
+            "echo \"META|${RADIO}|${IP:-0.0.0.0}\"; " +
+            "nmcli -t -f NAME,TYPE connection show 2>/dev/null | awk -F: '$2==\"802-11-wireless\"{print \"SAVED|\"$1}'; " +
+            "nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY device wifi list --rescan no 2>/dev/null | head -n 25"
+        ]
+        stdout: SplitParser {
+            splitMarker: ""
+            onRead: data => {
+                root.wifiScanning = false
+                const lines = String(data).trim().split("\n")
+                const list = []
+                const seen = {}
+                const savedMap = {}
+                let activeFound = false
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim()
+                    if (!line) continue
+                    if (line.indexOf("META|") === 0) {
+                        const mp = line.split("|")
+                        root.wifiConnected = (mp[1] !== "disabled")
+                        if (mp[2]) root.wifiIp = mp[2]
+                        continue
+                    }
+                    if (line.indexOf("SAVED|") === 0) {
+                        const savedName = line.slice(6).trim()
+                        if (savedName) savedMap[savedName] = true
+                        continue
+                    }
+                    const parts = line.split(":")
+                    if (parts.length < 4) continue
+                    const inUse = parts[0].trim() === "*"
+                    const sec = parts[parts.length - 1].trim() || "OPEN"
+                    const sig = parseInt(parts[parts.length - 2], 10) || 0
+                    const ssid = parts.slice(1, parts.length - 2).join(":").trim()
+                    if (!ssid) continue
+                    if (seen[ssid] && !inUse) continue
+                    seen[ssid] = true
+                    const item = {
+                        inUse: inUse,
+                        ssid: ssid,
+                        signal: sig,
+                        security: sec === "--" ? "OPEN" : sec,
+                        saved: Boolean(savedMap[ssid] || inUse)
+                    }
+                    if (inUse) {
+                        activeFound = true
+                        root.wifiSsid = ssid
+                        root.wifiSignal = sig
+                        root.wifiSecurity = item.security
+                        list.unshift(item)
+                    } else {
+                        list.push(item)
+                    }
+                }
+                if (!activeFound) {
+                    root.wifiSsid = root.wifiConnected ? (list.length > 0 ? "Disconnected" : "No Networks") : "Wi-Fi Off"
+                }
+                const oldKey = root.wifiNetworks.map(n => n.ssid + "|" + (n.inUse ? "1" : "0") + "|" + (n.saved ? "1" : "0") + "|" + n.security).join(";")
+                const newKey = list.map(n => n.ssid + "|" + (n.inUse ? "1" : "0") + "|" + (n.saved ? "1" : "0") + "|" + n.security).join(";")
+                if (oldKey !== newKey || root.wifiNetworks.length !== list.length) {
+                    root.wifiNetworks = list
+                }
+            }
+        }
+    }
+
+    Process {
+        id: wifiScanProc
+        command: ["bash", "-c", "nmcli device wifi rescan 2>/dev/null || true"]
+        onExited: wifiListProc.running = true
+    }
+
+    property string _wifiActionCmd: ""
+    Process {
+        id: wifiActionProc
+        command: ["bash", "-c", root._wifiActionCmd]
+        stdout: SplitParser {
+            splitMarker: ""
+            onRead: data => {
+                const out = String(data).trim()
+                if (out.indexOf("OK|") === 0) {
+                    root.wifiStatusMsg = out.slice(3)
+                } else if (out.indexOf("ERR|") === 0) {
+                    root.wifiStatusMsg = out.slice(4)
+                }
+            }
+        }
+        onExited: {
+            wifiListProc.running = true
+            wifiRefreshDelay.restart()
+        }
+    }
+
+    function refreshWifi() {
+        wifiListProc.running = true
+    }
+
+    function scanWifi() {
+        root.wifiScanning = true
+        root.wifiStatusMsg = "Scanning nearby frequencies..."
+        wifiScanProc.running = true
+    }
+
+    function setWifiPower(enable) {
+        root.wifiConnected = enable
+        root.wifiStatusMsg = enable ? "Enabling Wi-Fi radio..." : "Wi-Fi radio disabled"
+        Quickshell.execDetached(["bash", "-c", "nmcli radio wifi " + (enable ? "on" : "off")])
+        wifiRefreshDelay.restart()
+    }
+
+    function connectWifi(ssid, password) {
+        if (!ssid) return
+        root.wifiStatusMsg = "Linking to " + ssid + "..."
+        const safeSsid = String(ssid).replace(/'/g, "'\\''")
+        const safePass = String(password || "").replace(/'/g, "'\\''")
+        if (safePass !== "") {
+            root._wifiActionCmd =
+                "(nmcli connection delete '" + safeSsid + "' >/dev/null 2>&1 || true); " +
+                "if nmcli -w 12 device wifi connect '" + safeSsid + "' password '" + safePass + "' >/dev/null 2>&1; then " +
+                "  echo 'OK|★ LINKED TO " + safeSsid + "'; " +
+                "else " +
+                "  echo 'ERR|AUTH FAILED // Check Passkey'; " +
+                "fi"
+        } else {
+            root._wifiActionCmd =
+                "if nmcli -w 10 connection up '" + safeSsid + "' >/dev/null 2>&1 || nmcli -w 10 device wifi connect '" + safeSsid + "' >/dev/null 2>&1; then " +
+                "  echo 'OK|★ LINKED TO " + safeSsid + "'; " +
+                "else " +
+                "  echo 'ERR|PASSKEY REQUIRED // Click PASSKEY'; " +
+                "fi"
+        }
+        wifiActionProc.running = false
+        wifiActionProc.running = true
+    }
+
+    function disconnectWifi(ssid) {
+        if (!ssid) return
+        root.wifiStatusMsg = "Disconnecting " + ssid + "..."
+        const safeSsid = String(ssid).replace(/'/g, "'\\''")
+        root._wifiActionCmd =
+            "if nmcli connection down '" + safeSsid + "' >/dev/null 2>&1; then " +
+            "  echo 'OK|DISCONNECTED " + safeSsid + "'; " +
+            "else " +
+            "  echo 'ERR|Failed to disconnect'; " +
+            "fi"
+        wifiActionProc.running = false
+        wifiActionProc.running = true
+    }
+
+    Timer {
+        id: wifiRefreshDelay
+        interval: 3200
+        repeat: false
+        onTriggered: {
+            root.wifiStatusMsg = ""
+            wifiListProc.running = true
+        }
+    }
+
+    Process {
+        id: btListProc
+        command: ["bash", "-c",
+            "POW=$(bluetoothctl show 2>/dev/null | awk '/Powered:/ {print $2}'); " +
+            "CONN=$(bluetoothctl devices Connected 2>/dev/null | awk '{print $2}'); " +
+            "PAIR=$(bluetoothctl devices Paired 2>/dev/null | awk '{print $2}'); " +
+            "echo \"META|${POW:-yes}\"; " +
+            "bluetoothctl devices 2>/dev/null | while read -r _ mac name; do " +
+            "  [ -z \"$mac\" ] && continue; " +
+            "  c=0; p=0; " +
+            "  echo \"$CONN\" | grep -q \"$mac\" && c=1; " +
+            "  echo \"$PAIR\" | grep -q \"$mac\" && p=1; " +
+            "  echo \"DEV|${mac}|${c}|${p}|${name}\"; " +
+            "done"
+        ]
+        stdout: SplitParser {
+            splitMarker: ""
+            onRead: data => {
+                root.btScanning = false
+                const lines = String(data).trim().split("\n")
+                const list = []
+                let connectedName = ""
+                let connectedMac = ""
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim()
+                    if (!line) continue
+                    if (line.indexOf("META|") === 0) {
+                        const mp = line.split("|")
+                        root.btConnected = (mp[1] !== "no")
+                        continue
+                    }
+                    if (line.indexOf("DEV|") === 0) {
+                        const dp = line.split("|")
+                        if (dp.length >= 5) {
+                            const mac = dp[1]
+                            const isConn = dp[2] === "1"
+                            const isPair = dp[3] === "1"
+                            const name = dp.slice(4).join("|").trim() || mac
+                            const item = {
+                                mac: mac,
+                                name: name,
+                                connected: isConn,
+                                paired: isPair
+                            }
+                            if (isConn) {
+                                connectedName = name
+                                connectedMac = mac
+                                list.unshift(item)
+                            } else {
+                                list.push(item)
+                            }
+                        }
+                    }
+                }
+                const oldBtKey = root.btDevices.map(d => d.mac + "|" + (d.connected ? "1" : "0") + "|" + (d.paired ? "1" : "0") + "|" + d.name).join(";")
+                const newBtKey = list.map(d => d.mac + "|" + (d.connected ? "1" : "0") + "|" + (d.paired ? "1" : "0") + "|" + d.name).join(";")
+                if (oldBtKey !== newBtKey || root.btDevices.length !== list.length) {
+                    root.btDevices = list
+                }
+                root.btDeviceName = connectedName !== "" ? connectedName : (root.btConnected ? (list.length > 0 ? (list.length + " Devices") : "Ready") : "BT Off")
+                root.btDeviceMac = connectedMac
+            }
+        }
+    }
+
+    Process {
+        id: btScanProc
+        command: ["bash", "-c", "bluetoothctl --timeout 4 scan on >/dev/null 2>&1 || true"]
+        onExited: btListProc.running = true
+    }
+
+    function refreshBluetooth() {
+        btListProc.running = true
+    }
+
+    function scanBluetooth() {
+        root.btScanning = true
+        root.btStatusMsg = "Scanning Bluetooth devices..."
+        btScanProc.running = true
+    }
+
+    function setBluetoothPower(enable) {
+        root.btConnected = enable
+        root.btStatusMsg = enable ? "Powering Bluetooth ON..." : "Bluetooth powered OFF"
+        Quickshell.execDetached(["bash", "-c", "bluetoothctl power " + (enable ? "on" : "off")])
+        btRefreshDelay.restart()
+    }
+
+    function connectBluetooth(mac, name) {
+        if (!mac) return
+        root.btStatusMsg = "Linking " + (name || mac) + "..."
+        Quickshell.execDetached(["bash", "-c", "bluetoothctl trust '" + mac + "' >/dev/null 2>&1; bluetoothctl connect '" + mac + "' >/dev/null 2>&1 || true"])
+        btRefreshDelay.restart()
+    }
+
+    function disconnectBluetooth(mac, name) {
+        if (!mac) return
+        root.btStatusMsg = "Disconnecting " + (name || mac) + "..."
+        Quickshell.execDetached(["bash", "-c", "bluetoothctl disconnect '" + mac + "' >/dev/null 2>&1 || true"])
+        btRefreshDelay.restart()
+    }
+
+    Timer {
+        id: btRefreshDelay
+        interval: 2200
+        repeat: false
+        onTriggered: {
+            root.btStatusMsg = ""
+            btListProc.running = true
+        }
+    }
+
+    // informasi spesifikasi sistem dan perangkat keras
     property string sysHost: "sho@nixos"
     property string sysOs: "NixOS 26.11 (Zokor) x86_64"
     property string sysKernel: "Linux 7.1.8"
@@ -558,10 +967,11 @@ Singleton {
 
     function refreshSystemDossier() {
         sysInfoProc.running = true
+        wifiListProc.running = true
+        btListProc.running = true
     }
 
-    // server notifikasi & riwayat chat sns
-    // tambahin kalimat di renTestQuotes kalau mau nambah variasi pesan tombol test im
+    // server notifikasi dan antrean riwayat pesan
     property ListModel imNotifications: ListModel {}
     property ListModel imPopupStack: ListModel {}
     property int _testQuoteIdx: 0
@@ -644,11 +1054,23 @@ Singleton {
         }
     }
 
-    Component.onCompleted: {
-        refreshSystemDossier()
+    function applyDefaultCursor() {
+        Quickshell.execDetached([
+            "bash", "-c",
+            "hyprctl setcursor Persona5-Animated 24 2>/dev/null; " +
+            "gsettings set org.gnome.desktop.interface cursor-theme 'Persona5-Animated' 2>/dev/null; " +
+            "gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null || true"
+        ])
     }
 
-    // fungsi sinkronisasi tema & konfigurasi live ke hyprland
+    Component.onCompleted: {
+        applyDefaultCursor()
+        refreshSystemDossier()
+        refreshWorkspaces()
+        refreshMedia()
+    }
+
+    // sinkronisasi preset tema, wallpaper bawaan, dan warna border hyprland
     function applyPreset(presetId) {
         if (presets[presetId]) {
             const p = presets[presetId]
@@ -667,11 +1089,223 @@ Singleton {
             urgent = p.urgent
             success = p.success
 
+            if (p.wallpaper && p.wallpaper !== wallpaperPath) {
+                previousWallpaperPath = wallpaperPath
+                wallpaperPath = p.wallpaper
+                Quickshell.execDetached(["sh", "-c", "swww img '" + p.wallpaper + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
+            }
+
+            transitionTitle = p.name.toUpperCase()
+            transitionSub = "METAVERSE PALETTE & WALLPAPER SYNCHRONIZED"
+            transitionTick++
+
             const cleanHex = String(p.primary).replace("#", "")
             Quickshell.execDetached(["hyprctl", "keyword", "general:col.active_border", "rgba(" + cleanHex + "ff)"])
             saveState()
             playSfx("select")
         }
+    }
+
+    // pelacak daftar jendela aplikasi aktif pada tiap workspace
+    property var workspaceApps: ({})
+
+    function resolveAppIconUrl(cls) {
+        if (!cls) return ""
+        const c = String(cls).toLowerCase().trim()
+        const candidates = [c]
+        if (c.indexOf("zen") !== -1) candidates.push("zen-browser", "zen", "firefox")
+        else if (c.indexOf("vesktop") !== -1 || c.indexOf("discord") !== -1) candidates.push("vesktop", "discord", "com.discordapp.Discord")
+        else if (c === "code" || c.indexOf("vscode") !== -1 || c.indexOf("codium") !== -1) candidates.push("vscode", "code", "com.visualstudio.code", "vscodium")
+        else if (c.indexOf("spotify") !== -1) candidates.push("spotify", "spotify-client", "com.spotify.Client")
+        else if (c.indexOf("kitty") !== -1) candidates.push("kitty")
+        else if (c.indexOf("alacritty") !== -1) candidates.push("Alacritty", "utilities-terminal")
+        else if (c.indexOf("wezterm") !== -1 || c.indexOf("foot") !== -1 || c.indexOf("ghostty") !== -1) candidates.push("utilities-terminal")
+        else if (c.indexOf("thunar") !== -1 || c.indexOf("nautilus") !== -1 || c.indexOf("dolphin") !== -1 || c.indexOf("nemo") !== -1) candidates.push("system-file-manager", "folder")
+        else if (c.indexOf("chrome") !== -1 || c.indexOf("chromium") !== -1) candidates.push("google-chrome", "chromium")
+        else if (c.indexOf("brave") !== -1) candidates.push("brave-browser", "brave")
+        else if (c.indexOf("firefox") !== -1) candidates.push("firefox")
+        else if (c.indexOf("obs") !== -1) candidates.push("com.obsproject.Studio", "obs")
+        else if (c.indexOf("steam") !== -1) candidates.push("steam")
+        else if (c.indexOf("telegram") !== -1) candidates.push("telegram", "org.telegram.desktop")
+        else if (c.indexOf("mpv") !== -1) candidates.push("mpv")
+        else if (c.indexOf("vlc") !== -1) candidates.push("vlc")
+
+        for (let i = 0; i < candidates.length; i++) {
+            const p = Quickshell.iconPath(candidates[i], true)
+            if (p && String(p).length > 0) return p
+        }
+        return ""
+    }
+
+    function resolveAppGlyph(cls) {
+        if (!cls) return "\uf2d0"
+        const c = String(cls).toLowerCase()
+        if (c.indexOf("kitty") !== -1 || c.indexOf("alacritty") !== -1 || c.indexOf("foot") !== -1 || c.indexOf("wezterm") !== -1 || c.indexOf("ghostty") !== -1 || c.indexOf("term") !== -1) return "\uf489"
+        if (c.indexOf("zen") !== -1 || c.indexOf("firefox") !== -1 || c.indexOf("floorp") !== -1 || c.indexOf("librewolf") !== -1) return "\uf269"
+        if (c.indexOf("chrome") !== -1 || c.indexOf("chromium") !== -1 || c.indexOf("brave") !== -1 || c.indexOf("vivaldi") !== -1) return "\uf268"
+        if (c === "code" || c.indexOf("vscode") !== -1 || c.indexOf("codium") !== -1 || c.indexOf("nvim") !== -1 || c.indexOf("neovide") !== -1 || c.indexOf("zed") !== -1 || c.indexOf("cursor") !== -1 || c.indexOf("antigravity") !== -1) return "\uf121"
+        if (c.indexOf("vesktop") !== -1 || c.indexOf("discord") !== -1 || c.indexOf("webcord") !== -1) return "\uf392"
+        if (c.indexOf("telegram") !== -1) return "\uf2c6"
+        if (c.indexOf("spotify") !== -1 || c.indexOf("music") !== -1 || c.indexOf("amberol") !== -1 || c.indexOf("cider") !== -1) return "\uf1bc"
+        if (c.indexOf("mpv") !== -1 || c.indexOf("vlc") !== -1 || c.indexOf("celluloid") !== -1) return "\uf144"
+        if (c.indexOf("thunar") !== -1 || c.indexOf("nautilus") !== -1 || c.indexOf("dolphin") !== -1 || c.indexOf("nemo") !== -1 || c.indexOf("pcmanfm") !== -1) return "\uf07b"
+        if (c.indexOf("steam") !== -1 || c.indexOf("lutris") !== -1 || c.indexOf("heroic") !== -1) return "\uf1b6"
+        if (c.indexOf("obs") !== -1) return "\uf03d"
+        if (c.indexOf("gimp") !== -1 || c.indexOf("inkscape") !== -1 || c.indexOf("krita") !== -1 || c.indexOf("blender") !== -1) return "\uf1fc"
+        if (c.indexOf("zathura") !== -1 || c.indexOf("evince") !== -1 || c.indexOf("okular") !== -1 || c.indexOf("office") !== -1) return "\uf15c"
+        return "\uf2d0"
+    }
+
+    function refreshWorkspaces() {
+        wsClientsProc.running = false
+        wsClientsProc.running = true
+    }
+
+    Process {
+        id: wsClientsProc
+        command: ["hyprctl", "clients", "-j"]
+        stdout: SplitParser {
+            splitMarker: ""
+            onRead: data => {
+                try {
+                    const arr = JSON.parse(data)
+                    if (!Array.isArray(arr)) return
+                    const map = {}
+                    for (let i = 0; i < arr.length; i++) {
+                        const win = arr[i]
+                        if (!win || !win.mapped || win.hidden) continue
+                        const wsId = win.workspace ? win.workspace.id : 0
+                        if (!wsId || wsId <= 0) continue
+                        const cls = String(win.class || win.initialClass || "").trim()
+                        if (!cls) continue
+                        const key = String(wsId)
+                        if (!map[key]) map[key] = []
+                        if (map[key].length < 4) {
+                            map[key].push({
+                                cls: cls,
+                                title: String(win.title || cls),
+                                iconUrl: root.resolveAppIconUrl(cls),
+                                glyph: root.resolveAppGlyph(cls)
+                            })
+                        }
+                    }
+                    root.workspaceApps = map
+                } catch (e) {}
+            }
+        }
+    }
+
+    Timer {
+        interval: 1500
+        running: root.showWorkspaces
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: wsClientsProc.running = true
+    }
+
+    // pengendali media player mpris dengan prioritas spotify
+    property bool mediaAvailable: false
+    property bool mediaPlaying: false
+    property string mediaPlayerName: "SPOTIFY"
+    property string mediaTitle: "No Track Playing"
+    property string mediaArtist: "Open Spotify or play media"
+    property string mediaAlbum: ""
+    property string mediaArtUrl: ""
+    property real mediaPositionSec: 0
+    property real mediaLengthSec: 0
+    property string mediaShuffle: "Off"
+    property string mediaLoop: "None"
+
+    function formatMediaTime(sec) {
+        const s = Math.max(0, Math.floor(Number(sec) || 0))
+        const m = Math.floor(s / 60)
+        const r = s % 60
+        return (m < 10 ? "0" + m : String(m)) + ":" + (r < 10 ? "0" + r : String(r))
+    }
+
+    function refreshMedia() {
+        mediaProc.running = false
+        mediaProc.running = true
+    }
+
+    function mediaPlayPause() {
+        Quickshell.execDetached(["bash", "-c", "playerctl -p spotify,%any play-pause 2>/dev/null || true"])
+        mediaRefreshDelay.restart()
+    }
+
+    function mediaNext() {
+        Quickshell.execDetached(["bash", "-c", "playerctl -p spotify,%any next 2>/dev/null || true"])
+        mediaRefreshDelay.restart()
+    }
+
+    function mediaPrev() {
+        Quickshell.execDetached(["bash", "-c", "playerctl -p spotify,%any previous 2>/dev/null || true"])
+        mediaRefreshDelay.restart()
+    }
+
+    function mediaSeek(ratio) {
+        if (root.mediaLengthSec <= 0) return
+        const targetSec = Math.max(0, Math.min(root.mediaLengthSec, ratio * root.mediaLengthSec))
+        root.mediaPositionSec = targetSec
+        Quickshell.execDetached(["bash", "-c", "playerctl -p spotify,%any position " + targetSec.toFixed(1) + " 2>/dev/null || true"])
+        mediaRefreshDelay.restart()
+    }
+
+    function mediaToggleShuffle() {
+        Quickshell.execDetached(["bash", "-c", "playerctl -p spotify,%any shuffle Toggle 2>/dev/null || true"])
+        mediaRefreshDelay.restart()
+    }
+
+    function mediaToggleLoop() {
+        const nextLoop = root.mediaLoop === "None" ? "Playlist" : (root.mediaLoop === "Playlist" ? "Track" : "None")
+        Quickshell.execDetached(["bash", "-c", "playerctl -p spotify,%any loop " + nextLoop + " 2>/dev/null || true"])
+        mediaRefreshDelay.restart()
+    }
+
+    Timer {
+        id: mediaRefreshDelay
+        interval: 220
+        repeat: false
+        onTriggered: root.refreshMedia()
+    }
+
+    Process {
+        id: mediaProc
+        command: [
+            "bash", "-c",
+            "playerctl -p spotify,%any metadata --format '{{playerName}}|{{status}}|{{artist}}|{{title}}|{{album}}|{{mpris:artUrl}}|{{position}}|{{mpris:length}}|{{shuffle}}|{{loop}}' 2>/dev/null | head -n 1 || echo 'NONE'"
+        ]
+        stdout: SplitParser {
+            splitMarker: ""
+            onRead: data => {
+                const line = String(data).trim()
+                if (!line || line === "NONE" || line.indexOf("|") === -1) {
+                    root.mediaAvailable = false
+                    root.mediaPlaying = false
+                    return
+                }
+                const p = line.split("|")
+                root.mediaAvailable = true
+                root.mediaPlayerName = (p[0] || "MEDIA").toUpperCase()
+                root.mediaPlaying = (p[1] === "Playing")
+                root.mediaArtist = p[2] || "Unknown Artist"
+                root.mediaTitle = p[3] || "Unknown Track"
+                root.mediaAlbum = p[4] || ""
+                root.mediaArtUrl = p[5] || ""
+                root.mediaPositionSec = (Number(p[6]) || 0) / 1000000.0
+                root.mediaLengthSec = (Number(p[7]) || 0) / 1000000.0
+                root.mediaShuffle = p[8] || "Off"
+                root.mediaLoop = p[9] || "None"
+            }
+        }
+    }
+
+    Timer {
+        interval: 1500
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: mediaProc.running = true
     }
 
     function setDarkMode(isDark) {
@@ -784,9 +1418,94 @@ Singleton {
     function triggerOsd(label, val) {
         osdLabel = label
         osdValue = Math.max(0, Math.min(150, val))
-        if (label === "VOLUME") volumePct = osdValue
+        if (label === "VOLUME") {
+            volumePct = osdValue
+            osdMuted = volumeMuted || (osdValue === 0)
+        } else {
+            brightnessPct = osdValue
+            osdMuted = false
+        }
         osdVisible = true
         osdHideTimer.restart()
+    }
+
+    function setSystemVolume(pct) {
+        const clamped = Math.max(0, Math.min(150, Math.round(Number(pct) || 0)))
+        volumePct = clamped
+        volumeMuted = (clamped === 0)
+        Quickshell.execDetached(["bash", "-c", "wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 2>/dev/null; wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ " + clamped + "% 2>/dev/null || true"])
+        triggerOsd("VOLUME", clamped)
+    }
+
+    function toggleSystemMute() {
+        Quickshell.execDetached(["bash", "-c", "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle 2>/dev/null || true"])
+    }
+
+    function setSystemBrightness(pct) {
+        const clamped = Math.max(1, Math.min(100, Math.round(Number(pct) || 50)))
+        brightnessPct = clamped
+        Quickshell.execDetached(["bash", "-c", "brightnessctl set " + clamped + "% >/dev/null 2>&1 || true"])
+        triggerOsd("BRIGHTNESS", clamped)
+    }
+
+    // pemantau perubahan volume audio dan kecerahan layar secara otomatis
+    Process {
+        id: osdWatcherProc
+        running: true
+        command: [
+            "bash", "-c",
+            "prev_v=\"\"; prev_b=\"\"; " +
+            "while true; do " +
+            "  v=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null); " +
+            "  b=$(brightnessctl -m 2>/dev/null | cut -d',' -f4 | tr -dc '0-9'); " +
+            "  if [ -n \"$v\" ] && [ \"$v\" != \"$prev_v\" ]; then " +
+            "    if [ -n \"$prev_v\" ]; then echo \"VOL|$v\"; else echo \"INIT_VOL|$v\"; fi; " +
+            "    prev_v=\"$v\"; " +
+            "  fi; " +
+            "  if [ -n \"$b\" ] && [ \"$b\" != \"$prev_b\" ]; then " +
+            "    if [ -n \"$prev_b\" ]; then echo \"BRI|$b\"; else echo \"INIT_BRI|$b\"; fi; " +
+            "    prev_b=\"$b\"; " +
+            "  fi; " +
+            "  sleep 0.16; " +
+            "done"
+        ]
+        stdout: SplitParser {
+            onRead: data => {
+                const line = String(data).trim()
+                if (!line) return
+                if (line.indexOf("INIT_VOL|") === 0 || line.indexOf("VOL|") === 0) {
+                    const isInit = line.indexOf("INIT_") === 0
+                    const raw = line.slice(isInit ? 9 : 4)
+                    const muted = raw.indexOf("MUTED") !== -1
+                    const numMatch = raw.match(/([0-9]+(?:\.[0-9]+)?)/)
+                    const pct = numMatch ? Math.round( parseFloat(numMatch[1]) * 100 ) : root.volumePct
+                    root.volumeMuted = muted
+                    root.volumePct = pct
+                    root.osdMuted = muted || (pct === 0)
+                    if (!isInit) {
+                        root.triggerOsd("VOLUME", pct)
+                    }
+                } else if (line.indexOf("INIT_BRI|") === 0 || line.indexOf("BRI|") === 0) {
+                    const isInit = line.indexOf("INIT_") === 0
+                    const pct = parseInt(line.slice(isInit ? 9 : 4), 10)
+                    if (!isNaN(pct)) {
+                        root.brightnessPct = pct
+                        if (!isInit) {
+                            root.osdMuted = false
+                            root.triggerOsd("BRIGHTNESS", pct)
+                        }
+                    }
+                }
+            }
+        }
+        onExited: osdWatcherRestart.restart()
+    }
+
+    Timer {
+        id: osdWatcherRestart
+        interval: 1500
+        repeat: false
+        onTriggered: osdWatcherProc.running = true
     }
 
     Timer {

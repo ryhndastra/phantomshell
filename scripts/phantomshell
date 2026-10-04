@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Determine base config directory (supports XDG_CONFIG_HOME or direct repo execution)
+# penentuan direktori konfigurasi dasar
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DOTS="$(cd "$SCRIPT_DIR/../dots" 2>/dev/null && pwd || true)"
 

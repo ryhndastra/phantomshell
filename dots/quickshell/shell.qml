@@ -19,47 +19,49 @@ import qs.modules.settings
 import qs.modules.session
 import qs.modules.lock
 
-// daftar modul utama phantomshell
-// komen salah satu baris di bawah kalau ada modul yang ga pengen di-load sama sekali
+// titik masuk utama seluruh modul phantomshell
 ShellRoot {
     id: root
 
-    // layer wallpaper, jam desktop, cuaca, cava, dan lirik
+    // modul latar belakang wallpaper, jam desktop, cuaca, cava, dan lirik
     PhantomBackground {}
 
-    // bingkai layar opsional (bisa dinyalain lewat menu settings)
+    // modul bingkai tepi layar
     ScreenFrame {}
 
-    // bar utama atas/bawah + workspace + dynamic island
+    // modul bar status utama dan dynamic island
     PhantomBar {}
 
-    // app launcher & command menu (SUPER / ALT+D)
+    // modul pencari aplikasi dan perintah cepat
     PhantomLauncher {}
 
-    // popup chat bubble notifikasi & sns log (ALT+M)
+    // modul popup balon notifikasi dan riwayat pesan
     PhantomNotifications {}
 
-    // indikator osd volume & brightness
+    // modul indikator volume dan kecerahan layar
     PhantomOsd {}
 
-    // control center & radar statistik 5-point star (ALT+N)
+    // modul pusat kontrol dan grafik statistik sistem
     PhantomDashboard {}
 
-    // menu pengaturan velvet room (ALT+I)
+    // modul jendela pengaturan sistem
     PhantomSettings {}
 
-    // menu power & session calling card (ALT+Escape)
+    // modul menu daya dan sesi pengguna
     PhantomSession {}
 
-    // layar kunci wayland + pam auth (SUPER+L / ALT+L)
+    // modul pemilih wallpaper galeri
+    PhantomWallpaperSelector {}
+
+    // modul pengunci layar sesi wayland
     PhantomLock {}
 
-    // handler ipc buat dipanggil lewat script phantomshell atau keybind hyprland.lua
+    // antarmuka ipc untuk pemanggilan fungsi dari skrip atau keybind
     IpcHandler {
         target: "phantom"
 
         function toggleLauncher(): void {
-            PhantomState.launcherOpen = !PhantomState.launcherOpen
+            PhantomState.toggleLauncher()
         }
 
         function toggleDashboard(): void {
@@ -67,7 +69,11 @@ ShellRoot {
         }
 
         function toggleSettings(): void {
-            PhantomState.settingsOpen = !PhantomState.settingsOpen
+            PhantomState.toggleSettings()
+        }
+
+        function toggleWallpaperSelector(): void {
+            PhantomState.toggleWallpaperSelector()
         }
 
         function toggleNotifications(): void {
@@ -83,7 +89,11 @@ ShellRoot {
         }
 
         function toggleLock(): void {
-            PhantomState.lockScreen()
+            if (PhantomState.lockOpen) {
+                PhantomState.unlockScreen()
+            } else {
+                PhantomState.lockScreen()
+            }
         }
 
         function lock(): void {

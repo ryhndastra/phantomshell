@@ -6,12 +6,12 @@ Item {
     property color fillColor: PhantomState.surface
     property color borderColor: PhantomState.borderLight
     property color shadowColor: PhantomState.primary
-    property int borderWidth: 2
+    property real borderWidth: 2
     property real skewPx: PhantomState.polygonMode ? 6 : 0
     property bool showShadowOffset: true
-    property int shadowOffsetX: 3
-    property int shadowOffsetY: 3
-    property int radius: PhantomState.cornerRadius
+    property real shadowOffsetX: 3
+    property real shadowOffsetY: 3
+    property real radius: PhantomState.cornerRadius
 
     onFillColorChanged: canvas.requestPaint()
     onBorderColorChanged: canvas.requestPaint()
@@ -27,7 +27,7 @@ Item {
         function onSurfaceChanged() { canvas.requestPaint() }
     }
 
-    // Sleek Rounded mode (when polygonMode is off)
+    // mode sudut membulat saat mode poligon nonaktif
     Rectangle {
         anchors.fill: parent
         visible: !PhantomState.polygonMode
@@ -37,8 +37,7 @@ Item {
         border.width: root.borderWidth
     }
 
-    // Persona 5 Skewed / Jagged Comic Polygon mode
-    // Canvas extends by shadowOffsetX/Y on right/bottom so the main polygon is 100% centered on root!
+    // mode poligon miring dengan bayangan aksen
     Canvas {
         id: canvas
         anchors.fill: parent
@@ -57,7 +56,7 @@ Item {
             var h = root.height
             var s = Math.min(Math.abs(root.skewPx), w * 0.16)
 
-            // 1. Offset Crimson/Accent Shadow Polygon
+            // poligon bayangan aksen di belakang
             if (root.showShadowOffset) {
                 ctx.fillStyle = root.shadowColor
                 ctx.beginPath()
@@ -69,7 +68,7 @@ Item {
                 ctx.fill()
             }
 
-            // 2. Main Skewed Polygon Fill — Centered symmetrically on (0..w, 0..h)!
+            // bidang utama poligon miring
             ctx.fillStyle = root.fillColor
             ctx.strokeStyle = root.borderColor
             ctx.lineWidth = root.borderWidth

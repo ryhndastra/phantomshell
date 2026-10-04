@@ -6,8 +6,7 @@ import qs.config
 import qs.components
 
 Scope {
-    // popup balon chat im persona 5 di pojok kanan
-    // ubah margins atau implicitWidth di bawah kalau mau geser/ubah ukuran popup notifikasi
+    // jendela popup balon notifikasi pesan di pojok kanan layar
     PanelWindow {
         id: popupWin
         visible: PhantomState.imPopupStack.count > 0 && !PhantomState.notificationsOpen
@@ -60,8 +59,7 @@ Scope {
         }
     }
 
-    // panel sns phone notification center (muncul pas klik tombol sns di bar)
-    // ubah implicitWidth / implicitHeight di bawah kalau mau gedein panel inbox sns
+    // panel pusat riwayat notifikasi pesan
     Variants {
         model: Quickshell.screens
 
@@ -138,7 +136,7 @@ Scope {
                     anchors.margins: 16
                     spacing: 10
 
-                    // SNS Header Bar
+                    // baris header pusat notifikasi
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
@@ -169,7 +167,7 @@ Scope {
                             }
                         }
 
-                        // Send Test Bubble Button
+                        // tombol pengirim notifikasi uji coba
                         Item {
                             Layout.preferredWidth: testBtnRow.implicitWidth + 20
                             Layout.preferredHeight: 28
@@ -209,7 +207,7 @@ Scope {
                             }
                         }
 
-                        // Clear All Button
+                        // tombol penghapus seluruh riwayat notifikasi
                         Item {
                             Layout.preferredWidth: 56
                             Layout.preferredHeight: 28
@@ -245,7 +243,7 @@ Scope {
                         color: PhantomState.primary
                     }
 
-                    // SNS Chat Stream + Empty State
+                    // daftar riwayat pesan masuk dan tampilan kosong
                     Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
