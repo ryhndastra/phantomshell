@@ -121,6 +121,8 @@ Scope {
                 id: blade
                 Layout.fillWidth: true
                 Layout.preferredHeight: 54
+                Layout.minimumHeight: 46
+                implicitHeight: 54
 
                 property string title: "COMMAND"
                 property string subtitle: "Execute Action"
@@ -719,6 +721,8 @@ Scope {
                                 readonly property bool isCurrent: PhantomState.themeId === modelData.id
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 30
+                                Layout.minimumHeight: 28
+                                implicitHeight: 30
 
                                 P5SkewedCard {
                                     anchors.fill: parent
@@ -773,6 +777,7 @@ Scope {
                         Item {
                             Layout.preferredWidth: modeSwitchRow.implicitWidth + 20
                             Layout.preferredHeight: 22
+                            implicitHeight: 22
 
                             P5SkewedCard {
                                 anchors.fill: parent
@@ -817,48 +822,57 @@ Scope {
                     P5PentagonStats {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        Layout.minimumHeight: 125
+                        Layout.preferredHeight: 175
                     }
 
                     // tombol pembuka jendela pengaturan lengkap
                     Item {
+                        id: openSettingsBtn
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 32
+                        Layout.minimumHeight: 36
+                        Layout.preferredHeight: 36
+                        implicitHeight: 36
+                        z: 10
 
                         P5SkewedCard {
                             anchors.fill: parent
-                            fillColor: PhantomState.surface
-                            borderColor: PhantomState.primary
-                            shadowColor: PhantomState.primary
+                            fillColor: openSettingsMouse.containsMouse ? PhantomState.primary : PhantomState.surface
+                            borderColor: openSettingsMouse.containsMouse ? "#FFFFFF" : PhantomState.primary
+                            shadowColor: openSettingsMouse.containsMouse ? PhantomState.secondary : PhantomState.primary
                             borderWidth: 2
-                            skewPx: PhantomState.polygonMode ? 5 : 0
-                            shadowOffsetX: 2
-                            shadowOffsetY: 2
+                            skewPx: PhantomState.polygonMode ? 6 : 0
+                            shadowOffsetX: 3
+                            shadowOffsetY: 3
                         }
 
                         Row {
                             anchors.centerIn: parent
-                            spacing: 6
+                            spacing: 8
                             P5Icon {
                                 name: "settings"
-                                size: 13
-                                color: PhantomState.secondary
+                                size: 14
+                                color: openSettingsMouse.containsMouse ? "#FFFFFF" : PhantomState.secondary
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                             Text {
                                 text: "OPEN UNIFIED SETTINGS GUI"
-                                color: PhantomState.foreground
-                                font.pixelSize: 10
+                                color: "#FFFFFF"
+                                font.pixelSize: 11
                                 font.weight: Font.Black
+                                font.italic: true
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                         }
 
                         MouseArea {
+                            id: openSettingsMouse
                             anchors.fill: parent
+                            hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                PhantomState.dashboardOpen = false
-                                PhantomState.settingsOpen = true
+                                PhantomState.playSfx("select")
+                                PhantomState.toggleSettings()
                             }
                         }
                     }

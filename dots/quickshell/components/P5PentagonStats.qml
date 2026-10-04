@@ -5,7 +5,7 @@ import qs.config
 Item {
     id: root
     implicitWidth: 360
-    implicitHeight: 230
+    implicitHeight: 175
 
     property real animCpu: PhantomState.cpuPct
     property real animRam: PhantomState.ramPct
