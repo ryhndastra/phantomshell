@@ -416,12 +416,7 @@ Row {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: mouse => {
                             if (mouse.button === Qt.LeftButton) {
-                                if (trayItem.modelData.onlyMenu && trayItem.modelData.hasMenu && rightRow.barWin) {
-                                    const pos = trayItem.mapToItem(null, 0, trayItem.height + 4)
-                                    trayItem.modelData.display(rightRow.barWin, Math.max(8, pos.x - 120), pos.y)
-                                } else {
-                                    trayItem.modelData.activate()
-                                }
+                                PhantomState.activateTrayItem(trayItem.modelData)
                             } else if (mouse.button === Qt.RightButton) {
                                 if (trayItem.modelData.hasMenu && rightRow.barWin) {
                                     const pos = trayItem.mapToItem(null, 0, trayItem.height + 4)

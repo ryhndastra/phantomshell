@@ -273,6 +273,110 @@ Singleton {
         trayPopupOpen = next
     }
 
+    // aktifkan atau fokuskan aplikasi dari system tray termasuk yang berada di velvet room
+    function activateTrayItem(trayItem) {
+        if (!trayItem) return
+        root.trayPopupOpen = false
+
+        const rawTitle = String(trayItem.title || "").toLowerCase().replace(/^_/, "").trim()
+        const rawTooltip = String(trayItem.tooltipTitle || "").toLowerCase().replace(/^_/, "").trim()
+        const rawId = String(trayItem.id || "").toLowerCase().replace(/^_/, "").trim()
+        const combined = rawTitle + " " + rawTooltip + " " + rawId
+
+        const tokens = []
+        if (combined.indexOf("spotify") !== -1) tokens.push("spotify")
+        if (combined.indexOf("vesktop") !== -1 || combined.indexOf("discord") !== -1) {
+            tokens.push("vesktop", "discord")
+        }
+        if (combined.indexOf("steam") !== -1) tokens.push("steam")
+        if (combined.indexOf("telegram") !== -1) tokens.push("telegram")
+        if (combined.indexOf("obs") !== -1) tokens.push("obs")
+
+        const cleanTitle = rawTitle.replace(/-client$/, "").replace(/\.desktop$/, "").trim()
+        const cleanId = rawId.replace(/-client$/, "").replace(/\.desktop$/, "").trim()
+        if (cleanTitle.length >= 3 && cleanTitle.indexOf("chrome_status_icon") === -1 && cleanTitle !== "background app") {
+            if (tokens.indexOf(cleanTitle) === -1) tokens.push(cleanTitle)
+        }
+        if (cleanId.length >= 3 && cleanId.indexOf("chrome_status_icon") === -1) {
+            if (tokens.indexOf(cleanId) === -1) tokens.push(cleanId)
+        }
+
+        const matchesWin = (win) => {
+            if (!win) return false
+            const wCls = String(win.cls || "").toLowerCase()
+            const wTitle = String(win.title || "").toLowerCase()
+            for (let i = 0; i < tokens.length; i++) {
+                const tok = tokens[i]
+                if (!tok) continue
+                if (wCls.indexOf(tok) !== -1 || tok.indexOf(wCls) !== -1 || wTitle.indexOf(tok) !== -1) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        const wsMap = root.workspaceApps || {}
+
+        // cek apakah jendela aplikasi ada di velvet room (special workspace)
+        const specialList = wsMap["special"] || []
+        for (let i = 0; i < specialList.length; i++) {
+            const win = specialList[i]
+            if (matchesWin(win)) {
+                if (!root.specialWorkspaceActive) {
+                    root.toggleVelvetRoom()
+                }
+                if (win.addr) {
+                    Quickshell.execDetached([
+                        "hyprctl", "eval",
+                        "if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end; hl.dispatch(hl.dsp.focus({ window = 'address:" + win.addr + "' }))"
+                    ])
+                }
+                if (!trayItem.onlyMenu) trayItem.activate()
+                return
+            }
+        }
+
+        // cek apakah jendela aplikasi ada di workspace reguler 1..10
+        const wsKeys = Object.keys(wsMap)
+        for (let k = 0; k < wsKeys.length; k++) {
+            const wsKey = wsKeys[k]
+            if (wsKey === "special") continue
+            const list = wsMap[wsKey] || []
+            for (let i = 0; i < list.length; i++) {
+                const win = list[i]
+                if (matchesWin(win)) {
+                    if (root.specialWorkspaceActive) {
+                        root.toggleVelvetRoom()
+                    }
+                    const wsNum = parseInt(wsKey, 10)
+                    if (!isNaN(wsNum) && wsNum > 0 && win.addr) {
+                        Quickshell.execDetached([
+                            "hyprctl", "eval",
+                            "hl.dispatch(hl.dsp.focus({ workspace = " + wsNum + " })); hl.dispatch(hl.dsp.focus({ window = 'address:" + win.addr + "' }))"
+                        ])
+                    }
+                    if (!trayItem.onlyMenu) trayItem.activate()
+                    return
+                }
+            }
+        }
+
+        // jika belum ada jendela yang tampil (mis. ter-minimize ke tray)
+        if (!trayItem.onlyMenu) {
+            trayItem.activate()
+        } else if (tokens.indexOf("steam") !== -1) {
+            Quickshell.execDetached(["steam", "steam://open/main"])
+        } else if (tokens.indexOf("spotify") !== -1) {
+            Quickshell.execDetached([
+                "bash", "-c",
+                "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Raise >/dev/null 2>&1 || spotify >/dev/null 2>&1 &"
+            ])
+        } else {
+            trayItem.activate()
+        }
+        root.refreshWorkspaces()
+    }
+
     function toggleCheatsheet() {
         const next = !cheatsheetOpen
         if (next) closeAllModals()

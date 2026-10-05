@@ -17,7 +17,10 @@ sync_bundle() {
     local dest="$1"
     emit "SYNC_START|Syncing dots ke ${dest}..."
 
-    for sub in quickshell hypr kitty phantomshell matugen cava; do
+    for sub in quickshell hypr kitty phantomshell matugen cava wireplumber; do
+        if [ ! -d "$DOTS_SRC/$sub" ]; then
+            continue
+        fi
         if [ -L "$dest/$sub" ]; then
             emit "SYNC_SKIP|${dest}/${sub} adalah symlink nix-store (dilewati, disinkronkan via /etc/nixos/dotfiles)"
             continue
