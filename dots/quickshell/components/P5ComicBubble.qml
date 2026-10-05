@@ -16,20 +16,28 @@ Item {
 
     // resolusi path ikon aplikasi notifikasi, fallback ke avatar default ren.png
     readonly property string resolvedIconUrl: {
-        if (appIcon && appIcon.trim() !== "") {
-            var raw = appIcon.trim()
-            if (raw.startsWith("file://") || raw.startsWith("image://") || raw.startsWith("qrc:")) {
+        var raw = (appIcon || "").trim()
+        if (raw !== "" && !raw.startsWith("image://qsimage")) {
+            if (raw.startsWith("file://") || raw.startsWith("qrc:")) {
                 return raw
             }
             if (raw.startsWith("/")) {
                 return "file://" + raw
             }
-            var lookup = Quickshell.iconPath(raw, true)
-            if (lookup && lookup !== "") {
-                return lookup
+            var resolved = PhantomState.resolveAppIconUrl(raw)
+            if (resolved && resolved !== "") {
+                return resolved
             }
         }
-        return Qt.resolvedUrl("../assets/ren.png")
+        var senderClean = (sender || "").trim()
+        var senderLower = senderClean.toLowerCase()
+        if (senderClean !== "" && senderLower !== "ren" && senderLower.indexOf("morgana") === -1 && senderLower.indexOf("futaba") === -1 && senderLower.indexOf("joker") === -1) {
+            var bySender = PhantomState.resolveAppIconUrl(senderClean)
+            if (bySender && bySender !== "") {
+                return bySender
+            }
+        }
+        return ""
     }
 
     // pecah nama pengirim jadi array per karakter buat efek huruf kotak selang-seling
@@ -135,18 +143,18 @@ Item {
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true
-                visible: customAppIconImg.status !== Image.Ready || root.appIcon === ""
+                visible: customAppIconImg.status !== Image.Ready || root.resolvedIconUrl === ""
             }
 
             Image {
                 id: customAppIconImg
                 anchors.fill: parent
                 anchors.margins: 4
-                source: root.appIcon !== "" ? root.resolvedIconUrl : ""
+                source: root.resolvedIconUrl
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 mipmap: true
-                visible: root.appIcon !== "" && status === Image.Ready
+                visible: root.resolvedIconUrl !== "" && status === Image.Ready
             }
         }
     }

@@ -52,6 +52,10 @@ Scope {
             Behavior on scale { NumberAnimation { duration: 200; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
             Behavior on rotation { NumberAnimation { duration: 200; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
 
+            HoverHandler {
+                id: bodyHover
+            }
+
             // kartu poligon miring utama dengan bayangan berlapis
             P5SkewedCard {
                 anchors.fill: parent
@@ -201,7 +205,8 @@ Scope {
 
                     property real animRatio: osdBody.ratio
                     Behavior on animRatio {
-                        NumberAnimation { duration: 130; easing.type: Easing.OutCubic }
+                        enabled: !trackMouse.pressed
+                        NumberAnimation { duration: 110; easing.type: Easing.OutCubic }
                     }
 
                     onAnimRatioChanged: gaugeCanvas.requestPaint()
@@ -322,10 +327,17 @@ Scope {
                         }
                     }
 
-                    // interaksi klik dan geser langsung pada bilah osd
+                    // interaksi klik, geser, dan scroll langsung pada bilah osd
                     MouseArea {
+                        id: trackMouse
                         anchors.fill: parent
+                        anchors.topMargin: -12
+                        anchors.bottomMargin: -12
+                        hoverEnabled: true
+                        preventStealing: true
                         cursorShape: Qt.PointingHandCursor
+                        readonly property bool interacting: pressed || containsMouse || iconMouse.containsMouse || bodyHover.hovered
+                        onInteractingChanged: PhantomState.osdHovered = interacting
                         function applyAt(mx) {
                             const pct = Math.round(Math.max(0, Math.min(1, mx / Math.max(1, trackArea.width))) * 100)
                             if (osdBody.isVolume) {
@@ -337,6 +349,14 @@ Scope {
                         onPressed: mouse => applyAt(mouse.x)
                         onPositionChanged: mouse => {
                             if (pressed) applyAt(mouse.x)
+                        }
+                        onWheel: wheel => {
+                            const step = wheel.angleDelta.y > 0 ? 2 : -2
+                            if (osdBody.isVolume) {
+                                PhantomState.setSystemVolume(PhantomState.volumePct + step)
+                            } else {
+                                PhantomState.setSystemBrightness(PhantomState.brightnessPct + step)
+                            }
                         }
                     }
                 }

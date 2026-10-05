@@ -196,6 +196,7 @@ Scope {
                         if (!map[key]) map[key] = []
                         if (map[key].length < 4) {
                             map[key].push({
+                                addr: String(win.address || ""),
                                 cls: cls,
                                 title: rawTitle || cls,
                                 iconUrl: root.resolveAppIconUrl(cls),

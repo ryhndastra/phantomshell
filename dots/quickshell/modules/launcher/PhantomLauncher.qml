@@ -22,7 +22,9 @@ Variants {
 
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: PhantomState.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: PhantomState.launcherOpen
+            ? (PhantomState.modalForceExclusive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand)
+            : WlrKeyboardFocus.None
         color: "transparent"
         visible: PhantomState.launcherOpen || bgFade.opacity > 0.01
 
@@ -143,6 +145,23 @@ Variants {
                 PhantomState.launcherOpen = false
             }
             query = ""
+        }
+
+        Connections {
+            target: PhantomState
+            function onLauncherOpenChanged() {
+                if (PhantomState.launcherOpen) {
+                    launcherWin.query = ""
+                    launcherWin.selectedIndex = 0
+                    searchInput.text = ""
+                    searchInput.forceActiveFocus()
+                }
+            }
+            function onModalForceExclusiveChanged() {
+                if (PhantomState.launcherOpen && PhantomState.modalForceExclusive) {
+                    searchInput.forceActiveFocus()
+                }
+            }
         }
 
         onVisibleChanged: {

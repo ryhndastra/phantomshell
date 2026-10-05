@@ -90,7 +90,9 @@ Scope {
 
         WlrLayershell.namespace: "phantomshell-cheatsheet"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: PhantomState.cheatsheetOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: PhantomState.cheatsheetOpen
+            ? (PhantomState.modalForceExclusive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand)
+            : WlrKeyboardFocus.None
         exclusiveZone: 0
 
         anchors {

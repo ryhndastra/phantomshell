@@ -76,7 +76,9 @@ Scope {
 
         WlrLayershell.namespace: "phantomshell-emoji"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: PhantomState.emojiOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: PhantomState.emojiOpen
+            ? (PhantomState.modalForceExclusive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand)
+            : WlrKeyboardFocus.None
         exclusiveZone: 0
 
         anchors {

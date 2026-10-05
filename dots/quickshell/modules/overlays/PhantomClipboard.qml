@@ -75,7 +75,9 @@ Scope {
 
         WlrLayershell.namespace: "phantomshell-clipboard"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: PhantomState.clipboardOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: PhantomState.clipboardOpen
+            ? (PhantomState.modalForceExclusive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand)
+            : WlrKeyboardFocus.None
         exclusiveZone: 0
 
         anchors {

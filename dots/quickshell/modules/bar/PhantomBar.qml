@@ -229,6 +229,7 @@ Scope {
                                 if (PhantomState.specialWorkspaceActive) {
                                     PhantomState.ensureSpecialWorkspaceOpen()
                                 }
+                                PhantomState.scheduleModalFocusPulse()
                                 Hyprland.refreshWorkspaces()
                                 PhantomState.refreshWorkspaces()
                             } else if (evName === "openwindow") {
@@ -614,14 +615,20 @@ Scope {
                 id: dynamicIsland
                 visible: PhantomState.showDynamicIsland
                 anchors.centerIn: parent
-                width: Math.min(320, Math.max(200, barWin.width - leftRow.width - rightRow.width - 48))
+                width: Math.min(340, Math.max(200, barWin.width - leftRow.width - rightRow.width - 48))
                 height: 30
 
                 P5SkewedCard {
                     anchors.fill: parent
-                    fillColor: PhantomState.launcherOpen ? PhantomState.primary : (islandMouse.containsMouse ? PhantomState.surfaceAlt : PhantomState.surface)
-                    borderColor: PhantomState.borderLight
-                    shadowColor: PhantomState.launcherOpen ? PhantomState.secondary : PhantomState.primary
+                    fillColor: PhantomState.launcherOpen
+                        ? PhantomState.primary
+                        : (PhantomState.specialWorkspaceActive
+                            ? (islandMouse.containsMouse ? "#1E3A8A" : "#0A1024")
+                            : (islandMouse.containsMouse ? PhantomState.surfaceAlt : PhantomState.surface))
+                    borderColor: PhantomState.specialWorkspaceActive ? "#60A5FA" : PhantomState.borderLight
+                    shadowColor: PhantomState.launcherOpen
+                        ? PhantomState.secondary
+                        : (PhantomState.specialWorkspaceActive ? "#1D4ED8" : PhantomState.primary)
                     borderWidth: 2
                     skewPx: PhantomState.polygonMode ? 6 : 0
                     shadowOffsetX: 2
@@ -630,14 +637,25 @@ Scope {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 16
+                    anchors.leftMargin: 14
                     anchors.rightMargin: 14
                     spacing: 8
 
+                    P5Star {
+                        visible: PhantomState.specialWorkspaceActive
+                        Layout.preferredWidth: 14
+                        Layout.preferredHeight: 14
+                        spinning: PhantomState.specialWorkspaceActive
+                        starColor: "#FACC15"
+                        innerColor: "#3B82F6"
+                    }
+
                     Text {
                         Layout.fillWidth: true
-                        text: barWin.activeTitle
-                        color: PhantomState.foreground
+                        text: PhantomState.specialWorkspaceActive
+                            ? ("VELVET ROOM // " + barWin.activeTitle)
+                            : barWin.activeTitle
+                        color: PhantomState.specialWorkspaceActive ? "#E0F2FE" : PhantomState.foreground
                         font.pixelSize: 11
                         font.weight: Font.Black
                         font.italic: true
@@ -647,7 +665,9 @@ Scope {
                     P5Icon {
                         name: "search"
                         size: 12
-                        color: PhantomState.launcherOpen ? PhantomState.foreground : PhantomState.secondary
+                        color: PhantomState.launcherOpen
+                            ? PhantomState.foreground
+                            : (PhantomState.specialWorkspaceActive ? "#FACC15" : PhantomState.secondary)
                     }
                 }
 
@@ -655,8 +675,22 @@ Scope {
                     id: islandMouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: PhantomState.toggleLauncher()
+                    onClicked: mouse => {
+                        if (mouse.button === Qt.RightButton) {
+                            PhantomState.toggleOverview()
+                        } else {
+                            PhantomState.toggleLauncher()
+                        }
+                    }
+                    onWheel: wheel => {
+                        if (wheel.angleDelta.y > 0) {
+                            Hyprland.dispatch("hl.dsp.focus({ direction = 'l' })")
+                        } else if (wheel.angleDelta.y < 0) {
+                            Hyprland.dispatch("hl.dsp.focus({ direction = 'r' })")
+                        }
+                    }
                 }
             }
 

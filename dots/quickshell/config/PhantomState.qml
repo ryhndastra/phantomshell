@@ -77,6 +77,11 @@ Singleton {
         root.specialWorkspaceActive = active
         root.velvetTransitionTick++
         root.playSfx(active ? "open" : "close")
+        const borderHex = active ? "60a5fa" : String(root.primary).replace("#", "")
+        Quickshell.execDetached([
+            "hyprctl", "eval",
+            "hl.config({ general = { col = { active_border = 'rgba(" + borderHex + "ff)' } } })"
+        ])
     }
 
     function toggleVelvetRoom() {
@@ -84,16 +89,17 @@ Singleton {
         root.specialWorkspaceActive = next
         root.velvetTransitionTick++
         root.playSfx(next ? "open" : "close")
+        const borderHex = next ? "60a5fa" : String(root.primary).replace("#", "")
         if (next) {
             Quickshell.execDetached([
                 "hyprctl", "eval",
-                "if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
+                "hl.config({ general = { col = { active_border = 'rgba(" + borderHex + "ff)' } } }); if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
             ])
         } else {
             reassertSpecialTimer.stop()
             Quickshell.execDetached([
                 "hyprctl", "eval",
-                "if hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
+                "hl.config({ general = { col = { active_border = 'rgba(" + borderHex + "ff)' } } }); if hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
             ])
         }
         root.refreshWorkspaces()
@@ -121,8 +127,41 @@ Singleton {
         }
     }
 
+    property bool modalForceExclusive: false
+
+    function pulseModalFocus() {
+        root.modalForceExclusive = true
+        modalFocusPulseTimer.restart()
+    }
+
+    function scheduleModalFocusPulse() {
+        if (root.launcherOpen || root.overviewOpen || root.clipboardOpen || root.emojiOpen || root.cheatsheetOpen || root.sessionOpen) {
+            root.modalForceExclusive = false
+            modalWsRefocusTimer.restart()
+        }
+    }
+
+    Timer {
+        id: modalWsRefocusTimer
+        interval: 25
+        repeat: false
+        onTriggered: {
+            if (root.launcherOpen || root.overviewOpen || root.clipboardOpen || root.emojiOpen || root.cheatsheetOpen || root.sessionOpen) {
+                root.pulseModalFocus()
+            }
+        }
+    }
+
+    Timer {
+        id: modalFocusPulseTimer
+        interval: 35
+        repeat: false
+        onTriggered: root.modalForceExclusive = false
+    }
+
     onLauncherOpenChanged: {
-        if (!launcherOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+        if (launcherOpen) pulseModalFocus()
+        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onDashboardOpenChanged: {
         if (!dashboardOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
@@ -136,6 +175,10 @@ Singleton {
     onCalendarOpenChanged: {
         if (!calendarOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
+    onSessionOpenChanged: {
+        if (sessionOpen) pulseModalFocus()
+        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
     onMediaPopupOpenChanged: {
         if (!mediaPopupOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
@@ -143,16 +186,20 @@ Singleton {
         if (!trayPopupOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onCheatsheetOpenChanged: {
-        if (!cheatsheetOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+        if (cheatsheetOpen) pulseModalFocus()
+        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onClipboardOpenChanged: {
-        if (!clipboardOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+        if (clipboardOpen) pulseModalFocus()
+        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onEmojiOpenChanged: {
-        if (!emojiOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+        if (emojiOpen) pulseModalFocus()
+        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onOverviewOpenChanged: {
-        if (!overviewOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+        if (overviewOpen) pulseModalFocus()
+        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
 
     function closeAllModals() {
@@ -592,6 +639,7 @@ Singleton {
 
     // alias dan fungsi layanan audio & osd
     property alias osdVisible: audioOsdService.osdVisible
+    property alias osdHovered: audioOsdService.osdHovered
     property alias osdLabel: audioOsdService.osdLabel
     property alias osdValue: audioOsdService.osdValue
     property alias osdMuted: audioOsdService.osdMuted

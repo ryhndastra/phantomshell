@@ -16,7 +16,9 @@ Scope {
 
         WlrLayershell.namespace: "phantomshell-session"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: PhantomState.sessionOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: PhantomState.sessionOpen
+            ? (PhantomState.modalForceExclusive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand)
+            : WlrKeyboardFocus.None
         exclusiveZone: 0
 
         anchors {
