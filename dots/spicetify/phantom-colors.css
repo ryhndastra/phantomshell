@@ -49,19 +49,39 @@
 }
 
 /* ============================================================
-   konten utama — pola diagonal p5 yang nyata
+   background — pola diagonal metaverse p5, paksa ke semua container
    ============================================================ */
-.Root__main-view,
-.main-view-container,
-[class*="main-view"] {
+
+/* pattern di body sebagai base layer */
+body {
     background-color: #0A0A0D !important;
     background-image:
         repeating-linear-gradient(
             -45deg,
-            rgba(230,0,18,0.07) 0px,
-            rgba(230,0,18,0.07) 1px,
-            transparent 1px,
-            transparent 14px
+            rgba(230,0,18,0.09) 0px,
+            rgba(230,0,18,0.09) 1.5px,
+            transparent 1.5px,
+            transparent 13px
+        ) !important;
+}
+
+/* main view dan semua wrapper utamanya */
+.Root__main-view,
+.main-view-container,
+[class*="main-view"],
+#main,
+.os-content,
+.os-content > div,
+[class*="PageContainer"],
+[class*="contentSpacing"] {
+    background-color: #0A0A0D !important;
+    background-image:
+        repeating-linear-gradient(
+            -45deg,
+            rgba(230,0,18,0.09) 0px,
+            rgba(230,0,18,0.09) 1.5px,
+            transparent 1.5px,
+            transparent 13px
         ) !important;
     border: none !important;
     box-shadow: none !important;
@@ -171,28 +191,55 @@
     transform: translateY(-3px) !important;
 }
 
-/* tombol play di kartu — jangan terlalu gede */
+/* tombol play di album/playlist cards */
 .main-card-card [class*="PlayButton"],
-.main-card-card [data-testid="play-button"] {
+.main-card-card [data-testid="play-button"],
+.main-card-card button[class*="playButton"],
+.main-card-card button[class*="play"] {
     background-color: #E60012 !important;
     width: 40px !important;
     height: 40px !important;
     border-radius: 50% !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important;
+    /* outline putih supaya keliatan di atas gambar terang maupun gelap */
+    outline: 2px solid rgba(255,255,255,0.3) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.7) !important;
     transition: transform 0.12s ease !important;
 }
 
 .main-card-card [class*="PlayButton"]:hover,
-.main-card-card [data-testid="play-button"]:hover {
+.main-card-card [data-testid="play-button"]:hover,
+.main-card-card button[class*="playButton"]:hover {
     transform: scale(1.06) !important;
     background-color: #FF1E2E !important;
+    outline-color: rgba(255,255,255,0.6) !important;
 }
 
 .main-card-card [class*="PlayButton"] svg,
-.main-card-card [data-testid="play-button"] svg {
+.main-card-card [data-testid="play-button"] svg,
+.main-card-card button[class*="playButton"] svg,
+.main-card-card button[class*="play"] svg {
     fill: #FFFFFF !important;
     width: 18px !important;
     height: 18px !important;
+}
+
+/* tombol play di shortcut cards (8 kotak cepat di atas) */
+.view-homeShortcutsGrid-shortcut [class*="PlayButton"],
+.view-homeShortcutsGrid-shortcut [data-testid="play-button"],
+.view-homeShortcutsGrid-shortcut button[class*="playButton"],
+.view-homeShortcutsGrid-shortcut button[class*="play"] {
+    background-color: #E60012 !important;
+    border-radius: 50% !important;
+    outline: 2px solid rgba(255,255,255,0.4) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.8) !important;
+    transition: transform 0.12s ease !important;
+}
+
+.view-homeShortcutsGrid-shortcut [class*="PlayButton"] svg,
+.view-homeShortcutsGrid-shortcut [data-testid="play-button"] svg,
+.view-homeShortcutsGrid-shortcut button[class*="playButton"] svg,
+.view-homeShortcutsGrid-shortcut button[class*="play"] svg {
+    fill: #FFFFFF !important;
 }
 
 /* ============================================================
