@@ -565,6 +565,18 @@ Singleton {
     property int hyprBlurPasses: 2
     property bool hyprAnimationsEnabled: true
 
+    // sinkronisasi warna tema aktif ke vesktop, spotify (spicetify), dan kitty
+    function syncAppThemes(pal) {
+        const c = pal || root
+        Quickshell.execDetached([
+            "bash", "-c",
+            "(phantom-sync-apps '" + String(c.primary) + "' '" + String(c.secondary) + "' '" + String(c.accent) + "' '"
+            + String(c.background) + "' '" + String(c.surface) + "' '" + String(c.surfaceAlt) + "' '"
+            + String(c.foreground) + "' '" + String(c.muted) + "' '" + String(c.borderLight) + "' '"
+            + String(c.urgent) + "' '" + String(c.success) + "' >/dev/null 2>&1 || true) &"
+        ])
+    }
+
     // sinkronisasi preset tema, wallpaper bawaan, dan warna border hyprland
     function applyPreset(presetId) {
         if (presets[presetId]) {
@@ -600,6 +612,7 @@ Singleton {
                 "eval",
                 "hl.config({ general = { col = { active_border = 'rgba(" + cleanHex + "ff)' } } })"
             ])
+            syncAppThemes(p)
             saveState()
             playSfx("select")
         }
@@ -617,6 +630,7 @@ Singleton {
             muted = "#5A5A6E"
             borderLight = "#101016"
             borderDark = "#CCCCD8"
+            syncAppThemes(root)
             saveState()
         }
     }

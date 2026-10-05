@@ -1,0 +1,285 @@
+/**
+ * @name PhantomShell Persona
+ * @version 4.0.0
+ * @description tema discord/vesktop persona 5 — clean, intentional, dark
+ * @author PhantomShell
+ */
+
+/* ============================================================
+   variabel warna p5
+   ============================================================ */
+:root,
+.theme-dark,
+.theme-light,
+html.theme-dark,
+html.visual-refresh,
+body {
+    --p5-red:        #E60012;
+    --p5-gold:       #FFD700;
+    --p5-bg:         #0B0B0E;
+    --p5-surface:    #111116;
+    --p5-surface2:   #1A1A22;
+    --p5-fg:         #FFFFFF;
+    --p5-muted:      #7A7A8A;
+    --p5-red-rgb:    230, 0, 18;
+    --p5-gold-rgb:   255, 215, 0;
+
+    /* warna bawaan discord — background */
+    --background-primary:              var(--p5-bg)      !important;
+    --background-secondary:            var(--p5-surface) !important;
+    --background-secondary-alt:        #0D0D11           !important;
+    --background-tertiary:             #08080B           !important;
+    --background-accent:               var(--p5-red)     !important;
+    --background-floating:             var(--p5-surface) !important;
+    --background-nested-floating:      var(--p5-surface) !important;
+    --background-modifier-hover:       rgba(var(--p5-red-rgb), 0.15) !important;
+    --background-modifier-active:      rgba(var(--p5-red-rgb), 0.25) !important;
+    --background-modifier-selected:    rgba(var(--p5-red-rgb), 0.35) !important;
+    --background-modifier-accent:      rgba(var(--p5-red-rgb), 0.20) !important;
+
+    /* visual refresh bg tokens */
+    --bg-base-primary:      var(--p5-bg)       !important;
+    --bg-base-secondary:    var(--p5-surface)  !important;
+    --bg-base-tertiary:     #08080B            !important;
+    --bg-surface-overlay:   var(--p5-surface)  !important;
+    --bg-surface-raised:    var(--p5-surface2) !important;
+    --bg-overlay-chat:      var(--p5-bg)       !important;
+    --bg-overlay-1:         var(--p5-surface)  !important;
+    --bg-overlay-2:         var(--p5-surface)  !important;
+    --bg-overlay-3:         var(--p5-surface2) !important;
+    --chat-background-default: var(--p5-bg)    !important;
+    --home-background:         var(--p5-bg)    !important;
+    --channeltextarea-background: var(--p5-surface) !important;
+    --input-background:        var(--p5-surface) !important;
+    --custom-channel-members-bg: var(--p5-surface) !important;
+
+    /* brand */
+    --brand-experiment:     var(--p5-red)  !important;
+    --brand-experiment-560: #FF3A49        !important;
+    --brand-500:            var(--p5-red)  !important;
+    --brand-560:            #FF3A49        !important;
+
+    /* teks */
+    --header-primary:   var(--p5-fg)   !important;
+    --header-secondary: var(--p5-gold) !important;
+    --text-normal:      var(--p5-fg)   !important;
+    --text-muted:       var(--p5-muted) !important;
+    --text-link:        var(--p5-gold) !important;
+    --text-brand:       var(--p5-red)  !important;
+    --text-positive:    #00E57A        !important;
+    --text-danger:      #FF4455        !important;
+
+    /* interaktif */
+    --interactive-normal:   var(--p5-fg)   !important;
+    --interactive-hover:    var(--p5-gold) !important;
+    --interactive-active:   var(--p5-fg)   !important;
+    --channels-default:     var(--p5-muted) !important;
+    --channel-icon:         var(--p5-red)  !important;
+
+    /* mention, status */
+    --mention-background:   rgba(var(--p5-red-rgb), 0.20) !important;
+    --mention-foreground:   var(--p5-gold) !important;
+    --status-danger:        #FF4455        !important;
+    --status-positive:      #00E57A        !important;
+    --status-warning:       var(--p5-gold) !important;
+
+    /* scrollbar tipis */
+    --scrollbar-thin-thumb: rgba(var(--p5-red-rgb), 0.6) !important;
+    --scrollbar-thin-track: transparent !important;
+    --scrollbar-auto-thumb: rgba(var(--p5-red-rgb), 0.6) !important;
+    --scrollbar-auto-track: var(--p5-surface) !important;
+}
+
+/* ============================================================
+   layout utama — background bersih, garis diagonal SANGAT tipis
+   ============================================================ */
+[class*="appMount_"],
+[class*="app_"] {
+    background-color: var(--p5-bg) !important;
+}
+
+/* area chat & content — dark bersih, garis diagonal sangat subtle */
+[class*="chat_"],
+[class*="content_"][class*="chat_"],
+[class*="peopleColumn_"],
+[class*="nowPlayingColumn_"] > [class*="container_"] {
+    background-color: var(--p5-bg) !important;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(var(--p5-red-rgb), 0.018) 0px,
+        rgba(var(--p5-red-rgb), 0.018) 1px,
+        transparent 1px,
+        transparent 20px
+    ) !important;
+}
+
+/* ============================================================
+   sidebar kiri — daftar server & channel
+   ============================================================ */
+[class*="sidebar_"] {
+    background-color: var(--p5-surface) !important;
+    border-right: 1px solid rgba(var(--p5-red-rgb), 0.35) !important;
+}
+
+/* scroller di dalam sidebar — transparan */
+[class*="privateChannels_"],
+[class*="scroller_"] {
+    background: transparent !important;
+}
+
+/* ============================================================
+   header atas channel/dm
+   ============================================================ */
+[class*="title_"][class*="container_"],
+section[class*="container_"][class*="themed_"] {
+    background-color: var(--p5-surface) !important;
+    border-bottom: 1px solid rgba(var(--p5-red-rgb), 0.5) !important;
+    box-shadow: none !important;
+}
+
+/* ============================================================
+   tab navigasi (Online, All, Pending)
+   hanya aktif/selected yang miring — bukan semua tab
+   ============================================================ */
+[class*="topPill_"] [class*="item_"],
+[class*="tabBar_"] [class*="item_"] {
+    border-radius: 3px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+    transition: background 0.12s ease, color 0.12s ease !important;
+}
+
+[class*="topPill_"] [class*="item_"]:hover,
+[class*="tabBar_"] [class*="item_"]:hover {
+    background-color: rgba(var(--p5-red-rgb), 0.15) !important;
+    color: var(--p5-fg) !important;
+}
+
+/* tab yang sedang aktif — miring, merah */
+[class*="topPill_"] [class*="selected_"],
+[class*="tabBar_"] [class*="selected_"] {
+    background-color: var(--p5-red) !important;
+    color: var(--p5-fg) !important;
+    font-weight: 900 !important;
+    font-style: italic !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    transform: skewX(-8deg) !important;
+    border-radius: 2px !important;
+}
+
+/* tombol Add Friend */
+[class*="addFriend_"] {
+    background-color: var(--p5-red) !important;
+    color: var(--p5-fg) !important;
+    font-weight: 800 !important;
+    border-radius: 3px !important;
+}
+
+/* ============================================================
+   sidebar channel — item hover & selected
+   hanya selected yang punya aksen warna keras
+   ============================================================ */
+[class*="channel_"] [class*="interactive_"],
+[class*="channel_"] [class*="link_"] {
+    border-radius: 3px !important;
+    margin: 1px 6px !important;
+    border-left: 2px solid transparent !important;
+    transition: background 0.12s ease, border-color 0.12s ease !important;
+}
+
+[class*="channel_"]:hover [class*="interactive_"],
+[class*="channel_"]:hover [class*="link_"] {
+    background-color: rgba(var(--p5-red-rgb), 0.12) !important;
+    border-left-color: rgba(var(--p5-red-rgb), 0.6) !important;
+}
+
+/* channel aktif — garis merah kiri, background subtle */
+[class*="selected_"] [class*="interactive_"],
+[class*="modeSelected_"] [class*="link_"] {
+    background-color: rgba(var(--p5-red-rgb), 0.22) !important;
+    border-left: 3px solid var(--p5-red) !important;
+    color: var(--p5-fg) !important;
+    font-weight: 700 !important;
+}
+
+/* ============================================================
+   daftar teman — kartu confidant bersih
+   ============================================================ */
+[class*="peopleListItem_"] {
+    background-color: var(--p5-surface) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-left: 3px solid rgba(var(--p5-red-rgb), 0.5) !important;
+    border-radius: 4px !important;
+    margin: 4px 12px !important;
+    padding: 8px 12px !important;
+    transition: all 0.13s ease !important;
+}
+
+[class*="peopleListItem_"]:hover {
+    background-color: var(--p5-surface2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-left: 3px solid var(--p5-red) !important;
+    transform: translateX(3px) !important;
+}
+
+/* ============================================================
+   kolom Active Now kanan
+   ============================================================ */
+[class*="nowPlayingColumn_"] {
+    background-color: var(--p5-bg) !important;
+    border-left: 1px solid rgba(var(--p5-red-rgb), 0.25) !important;
+}
+
+[class*="itemCard_"] {
+    background-color: var(--p5-surface) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+    transition: transform 0.13s ease, box-shadow 0.13s ease !important;
+}
+
+[class*="itemCard_"]:hover {
+    border-color: rgba(var(--p5-red-rgb), 0.6) !important;
+    box-shadow: 0 4px 16px rgba(var(--p5-red-rgb), 0.25) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ============================================================
+   panel profil kiri bawah
+   ============================================================ */
+[class*="panels_"] {
+    background-color: var(--p5-surface) !important;
+    border-top: 1px solid rgba(var(--p5-red-rgb), 0.35) !important;
+}
+
+/* ============================================================
+   kotak ketik pesan & search
+   ============================================================ */
+[class*="searchBar_"],
+[class*="channelTextArea_"] [class*="scrollableContainer_"] {
+    background-color: var(--p5-surface) !important;
+    border: 1px solid rgba(var(--p5-red-rgb), 0.4) !important;
+    border-radius: 4px !important;
+    transition: border-color 0.12s ease !important;
+}
+
+[class*="searchBar_"]:focus-within,
+[class*="channelTextArea_"]:focus-within [class*="scrollableContainer_"] {
+    border-color: var(--p5-red) !important;
+    box-shadow: 0 0 0 2px rgba(var(--p5-red-rgb), 0.2) !important;
+}
+
+/* ============================================================
+   lencana notifikasi / badge — miring khas p5
+   ============================================================ */
+[class*="numberBadge_"],
+[class*="live_"] {
+    background-color: var(--p5-red) !important;
+    color: var(--p5-fg) !important;
+    border-radius: 2px !important;
+    transform: skewX(-8deg) !important;
+    font-weight: 900 !important;
+    font-size: 10px !important;
+    letter-spacing: 0.05em !important;
+}

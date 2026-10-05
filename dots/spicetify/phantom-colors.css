@@ -1,0 +1,339 @@
+/* phantomshell persona 5 — spicetify color override
+   diinjeksi via theme.js setelah catppuccin user.css dimuat
+   semua selector pakai !important karena bersaing dengan css-in-js spotify */
+
+/* ============================================================
+   variabel warna spicetify — override catppuccin
+   ============================================================ */
+:root {
+    --spice-main:           #0B0B0E !important;
+    --spice-sidebar:        #111116 !important;
+    --spice-player:         #0D0D11 !important;
+    --spice-card:           #111116 !important;
+    --spice-subtext:        #7A7A8A !important;
+    --spice-text:           #FFFFFF !important;
+    --spice-button:         #E60012 !important;
+    --spice-button-active:  #FFD700 !important;
+    --spice-button-disabled:#3A3A4A !important;
+    --spice-tab-active:     #E60012 !important;
+    --spice-highlight:      rgba(230, 0, 18, 0.18) !important;
+    --spice-notification:   #E60012 !important;
+    --spice-equalizer:      #FFD700 !important;
+    --spice-shadow:         rgba(0, 0, 0, 0.8) !important;
+    --spice-mantle:         #0D0D11 !important;
+    --spice-crust:          #080809 !important;
+    --spice-surface0:       #111116 !important;
+    --spice-surface1:       #1A1A22 !important;
+    --spice-surface2:       #22222C !important;
+    --spice-overlay0:       rgba(230, 0, 18, 0.12) !important;
+    --spice-overlay1:       rgba(230, 0, 18, 0.20) !important;
+    --spice-overlay2:       rgba(230, 0, 18, 0.30) !important;
+    --spice-red:            #E60012 !important;
+    --spice-yellow:         #FFD700 !important;
+    --spice-mauve:          #E60012 !important;
+    --spice-selected-row:   rgba(230, 0, 18, 0.22) !important;
+
+    /* rgb variants untuk transparansi */
+    --spice-rgb-main:           11, 11, 14 !important;
+    --spice-rgb-sidebar:        17, 17, 22 !important;
+    --spice-rgb-player:         13, 13, 17 !important;
+    --spice-rgb-card:           17, 17, 22 !important;
+    --spice-rgb-surface0:       17, 17, 22 !important;
+    --spice-rgb-surface1:       26, 26, 34 !important;
+    --spice-rgb-surface2:       34, 34, 44 !important;
+    --spice-rgb-highlight:      26, 26, 34 !important;
+    --spice-rgb-tab-active:     230, 0, 18 !important;
+    --spice-rgb-text:           255, 255, 255 !important;
+    --spice-rgb-subtext:        122, 122, 138 !important;
+    --spice-rgb-button:         230, 0, 18 !important;
+    --spice-rgb-button-active:  255, 215, 0 !important;
+    --spice-rgb-selected-row:   230, 0, 18 !important;
+    --spice-rgb-red:            230, 0, 18 !important;
+    --spice-rgb-yellow:         255, 215, 0 !important;
+    --spice-rgb-mauve:          230, 0, 18 !important;
+}
+
+/* ============================================================
+   area konten utama — dark bersih, diagonal sangat halus
+   ============================================================ */
+.Root__main-view,
+.main-view-container,
+[class*="main-view"] {
+    background-color: var(--spice-main) !important;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(230, 0, 18, 0.016) 0px,
+        rgba(230, 0, 18, 0.016) 1px,
+        transparent 1px,
+        transparent 22px
+    ) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* ============================================================
+   sidebar kiri — nav bar & library panel
+   ============================================================ */
+.Root__nav-bar,
+.nav-bar,
+[data-testid="LeftSidebar"] {
+    background-color: var(--spice-sidebar) !important;
+    border-right: 1px solid rgba(230, 0, 18, 0.3) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* item navigasi aktif */
+.main-navBar-navBarLinkActive,
+[class*="navBarLinkActive"] {
+    background-color: rgba(230, 0, 18, 0.18) !important;
+    border-left: 3px solid #E60012 !important;
+    border-radius: 0 4px 4px 0 !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+
+/* ============================================================
+   header konten (di atas playlist/album)
+   ============================================================ */
+.main-entityHeader-backgroundColor,
+.main-actionBarBackground-background,
+.main-home-homeHeader,
+[class*="under-main-view"] > div,
+[class*="entityHeader"] {
+    background: linear-gradient(180deg,
+        rgba(230, 0, 18, 0.22) 0%,
+        rgba(230, 0, 18, 0.05) 60%,
+        transparent 100%
+    ) !important;
+}
+
+/* ============================================================
+   label seksi — judul rak/shelf bergaya p5
+   hanya teks judul yang miring, bukan containernya
+   ============================================================ */
+.main-shelf-header h2,
+.main-shelf-title,
+[data-encore-id="type"].encore-text-title-small,
+[data-encore-id="type"].encore-text-title-medium {
+    display: inline-flex !important;
+    align-items: center !important;
+    background-color: #E60012 !important;
+    color: #FFFFFF !important;
+    padding: 2px 12px 2px 10px !important;
+    transform: skewX(-10deg) !important;
+    font-weight: 900 !important;
+    font-style: italic !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    border: none !important;
+    box-shadow: 4px 0 0 #FFD700 !important;
+    border-radius: 0 !important;
+}
+
+/* ============================================================
+   kartu pintas beranda (8 kotak atas)
+   ============================================================ */
+.view-homeShortcutsGrid-shortcut {
+    background-color: var(--spice-surface0) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: background-color 0.15s ease, transform 0.15s ease !important;
+    overflow: hidden !important;
+}
+
+.view-homeShortcutsGrid-shortcut:hover {
+    background-color: rgba(230, 0, 18, 0.25) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(230, 0, 18, 0.3) !important;
+}
+
+/* ============================================================
+   kartu album & playlist di rak beranda
+   ============================================================ */
+.main-card-card,
+[data-testid="card-image"],
+[class*="CardComponent"] {
+    background-color: var(--spice-surface0) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+.main-card-card:hover {
+    background-color: var(--spice-surface1) !important;
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ============================================================
+   pil filter atas (All, Music, Podcasts)
+   ============================================================ */
+[role="listitem"] button[data-encore-id="chip"],
+button[class*="ChipInner"],
+.x-filterChip-chip {
+    border-radius: 20px !important;
+    transform: none !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+    text-transform: none !important;
+    transition: background-color 0.12s ease !important;
+}
+
+[role="listitem"] button[data-encore-id="chip"][aria-checked="true"],
+.x-filterChip-chip[aria-checked="true"] {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+}
+
+/* ============================================================
+   baris lagu di playlist
+   ============================================================ */
+.main-trackList-trackListRow {
+    border-radius: 4px !important;
+    border-left: 2px solid transparent !important;
+    transition: background-color 0.1s ease, border-color 0.1s ease !important;
+}
+
+.main-trackList-trackListRow:hover {
+    background-color: rgba(230, 0, 18, 0.12) !important;
+    border-left: 2px solid rgba(230, 0, 18, 0.7) !important;
+    transform: none !important;
+}
+
+/* baris lagu yang sedang diputar */
+.main-trackList-trackListRow[aria-selected="true"],
+.main-trackList-playingIcon {
+    color: #E60012 !important;
+    border-left-color: #E60012 !important;
+}
+
+/* ============================================================
+   now playing bar bawah — minimalis, clean
+   ============================================================ */
+.Root__now-playing-bar,
+[data-testid="now-playing-bar"],
+.now-playing-bar {
+    background-color: var(--spice-player) !important;
+    border: none !important;
+    border-top: 1px solid rgba(230, 0, 18, 0.4) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 0 !important;
+}
+
+/* sampul album kiri bawah */
+.main-nowPlayingWidget-coverArt .cover-art,
+[data-testid="CoverSlotCollapsed"] {
+    border-radius: 4px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+    transform: none !important;
+    border: none !important;
+}
+
+/* ============================================================
+   tombol play/pause — merah bulat
+   ============================================================ */
+.main-playButton-PlayButton {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* hanya icon svg di dalam button yang dapat warna merah */
+button[data-testid="control-button-playpause"] svg,
+.main-playButton-PlayButton svg {
+    fill: #FFFFFF !important;
+}
+
+/* tombol play besar (di atas playlist) */
+button[data-testid="play-button"],
+.main-playButton-PlayButton.main-playButton-primary {
+    background-color: #E60012 !important;
+    border-radius: 50% !important;
+    transform: none !important;
+    transition: transform 0.15s ease, background-color 0.15s ease !important;
+}
+
+button[data-testid="play-button"]:hover,
+.main-playButton-PlayButton.main-playButton-primary:hover {
+    background-color: #FF1E2E !important;
+    transform: scale(1.06) !important;
+}
+
+/* ============================================================
+   progress bar — miring halus, merah
+   ============================================================ */
+.x-progressBar-progressBarBg {
+    background-color: var(--spice-surface1) !important;
+    border-radius: 2px !important;
+    height: 4px !important;
+    transform: skewX(-15deg) !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.x-progressBar-fillColor {
+    background-color: #E60012 !important;
+    border-radius: 2px !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.playback-bar:hover .x-progressBar-fillColor,
+.progress-bar:hover .x-progressBar-fillColor {
+    background-color: #FFD700 !important;
+}
+
+/* ============================================================
+   sidebar kanan (now playing / lyrics)
+   ============================================================ */
+.Root__right-sidebar,
+[data-testid="NowPlayingView"],
+.main-nowPlayingView-section {
+    background-color: var(--spice-sidebar) !important;
+    border-left: 1px solid rgba(230, 0, 18, 0.25) !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* kartu lirik */
+.main-nowPlayingView-lyricsContent,
+[data-testid="lyrics-npv-section"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* baris lirik aktif */
+[data-testid="lyrics-synchronized-line"][aria-current="true"],
+[class*="LyricsLine"][class*="current"] {
+    color: #E60012 !important;
+    font-weight: 800 !important;
+    font-size: 1.1em !important;
+}
+
+/* ============================================================
+   search bar atas
+   ============================================================ */
+.main-globalNav-searchInputContainer input,
+.x-searchInput-searchInputInput,
+[data-testid="search-input"] {
+    background-color: var(--spice-surface0) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(230, 0, 18, 0.35) !important;
+    border-radius: 20px !important;
+    transform: none !important;
+    box-shadow: none !important;
+    transition: border-color 0.12s ease !important;
+}
+
+.main-globalNav-searchInputContainer:focus-within input,
+[data-testid="search-input"]:focus {
+    border-color: #E60012 !important;
+    box-shadow: 0 0 0 2px rgba(230, 0, 18, 0.2) !important;
+}

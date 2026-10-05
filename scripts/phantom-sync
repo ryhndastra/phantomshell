@@ -17,7 +17,7 @@ sync_bundle() {
     local dest="$1"
     emit "SYNC_START|Syncing dots ke ${dest}..."
 
-    for sub in quickshell hypr kitty phantomshell matugen cava wireplumber; do
+    for sub in quickshell hypr kitty phantomshell matugen cava wireplumber vesktop spicetify; do
         if [ ! -d "$DOTS_SRC/$sub" ]; then
             continue
         fi
@@ -84,7 +84,8 @@ case "$cmd" in
                 mkdir -p "$NIXOS_DOTS/scripts"
                 cp -f "$REPO_ROOT/scripts/phantomshell" "$NIXOS_DOTS/scripts/phantomshell"
                 cp -f "$REPO_ROOT/scripts/phantom-sync" "$NIXOS_DOTS/scripts/phantom-sync"
-                chmod +x "$NIXOS_DOTS/scripts/phantomshell" "$NIXOS_DOTS/scripts/phantom-sync"
+                cp -f "$REPO_ROOT/scripts/sync-app-themes.sh" "$NIXOS_DOTS/scripts/sync-app-themes.sh"
+                chmod +x "$NIXOS_DOTS/scripts/phantomshell" "$NIXOS_DOTS/scripts/phantom-sync" "$NIXOS_DOTS/scripts/sync-app-themes.sh"
                 emit "SYNC_OK|scripts -> ${NIXOS_DOTS}/scripts"
             fi
 
@@ -97,9 +98,12 @@ case "$cmd" in
         # pasang kursor persona5-animated dan skrip cli ke direktori lokal pengguna
         mkdir -p "$HOME/.local/share/icons" "$HOME/.local/bin"
         rsync -a "$DOTS_SRC/icons/Persona5-Animated" "$HOME/.local/share/icons/" 2>/dev/null || true
+        chmod +x "$REPO_ROOT/scripts/sync-app-themes.sh" 2>/dev/null || true
         ln -sf "$REPO_ROOT/scripts/phantomshell" "$HOME/.local/bin/phantomshell"
         ln -sf "$REPO_ROOT/scripts/phantom-sync" "$HOME/.local/bin/phantom-sync"
-        emit "SYNC_OK|CLI & Persona5-Animated cursors installed to ~/.local"
+        ln -sf "$REPO_ROOT/scripts/sync-app-themes.sh" "$HOME/.local/bin/phantom-sync-apps"
+        "$REPO_ROOT/scripts/sync-app-themes.sh" 2>/dev/null || true
+        emit "SYNC_OK|CLI, Persona5 cursors, Vesktop & Spicetify themes installed"
         emit "SYNC_DONE|Sinkronisasi selesai"
         ;;
 
