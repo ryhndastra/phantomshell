@@ -98,7 +98,7 @@ body {
     background-color: var(--p5-bg) !important;
 }
 
-/* area chat & content — dark bersih, garis diagonal sangat subtle */
+/* area chat & content — pola diagonal khas metaverse p5 */
 [class*="chat_"],
 [class*="content_"][class*="chat_"],
 [class*="peopleColumn_"],
@@ -106,10 +106,24 @@ body {
     background-color: var(--p5-bg) !important;
     background-image: repeating-linear-gradient(
         -45deg,
-        rgba(var(--p5-red-rgb), 0.018) 0px,
-        rgba(var(--p5-red-rgb), 0.018) 1px,
+        rgba(var(--p5-red-rgb), 0.055) 0px,
+        rgba(var(--p5-red-rgb), 0.055) 1px,
         transparent 1px,
-        transparent 20px
+        transparent 16px
+    ) !important;
+}
+
+/* seluruh area konten utama — pola lebih kasar di layer bawah */
+[class*="appMount_"],
+[class*="app_"],
+[class*="layers_"] {
+    background-color: var(--p5-bg) !important;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(var(--p5-red-rgb), 0.04) 0px,
+        rgba(var(--p5-red-rgb), 0.04) 1px,
+        transparent 1px,
+        transparent 18px
     ) !important;
 }
 
