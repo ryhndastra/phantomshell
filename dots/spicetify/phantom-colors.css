@@ -1,365 +1,235 @@
-/* phantomshell persona 5 — spicetify color override
-   diinjeksi via theme.js setelah catppuccin user.css dimuat */
+/* phantomshell persona 5 — spicetify
+   diinjeksi via theme.js setelah user.css catppuccin */
 
 /* ============================================================
-   variabel warna
+   variabel warna p5
    ============================================================ */
 :root {
-    --spice-main:           #0B0B0E !important;
-    --spice-sidebar:        #111116 !important;
-    --spice-player:         #0D0D11 !important;
-    --spice-card:           #111116 !important;
-    --spice-subtext:        #7A7A8A !important;
+    --spice-main:           #0A0A0D !important;
+    --spice-sidebar:        #0F0F13 !important;
+    --spice-player:         #090909 !important;
+    --spice-card:           #131318 !important;
+    --spice-subtext:        #6B6B80 !important;
     --spice-text:           #FFFFFF !important;
     --spice-button:         #E60012 !important;
     --spice-button-active:  #FFD700 !important;
-    --spice-button-disabled:#3A3A4A !important;
+    --spice-button-disabled:#2A2A36 !important;
     --spice-tab-active:     #E60012 !important;
-    --spice-highlight:      rgba(230, 0, 18, 0.18) !important;
+    --spice-highlight:      rgba(230,0,18,0.18) !important;
     --spice-notification:   #E60012 !important;
     --spice-equalizer:      #FFD700 !important;
-    --spice-shadow:         rgba(0, 0, 0, 0.8) !important;
-    --spice-mantle:         #0D0D11 !important;
-    --spice-crust:          #080809 !important;
-    --spice-surface0:       #111116 !important;
-    --spice-surface1:       #1A1A22 !important;
-    --spice-surface2:       #22222C !important;
-    --spice-overlay0:       rgba(230, 0, 18, 0.12) !important;
-    --spice-overlay1:       rgba(230, 0, 18, 0.20) !important;
-    --spice-overlay2:       rgba(230, 0, 18, 0.30) !important;
+    --spice-shadow:         rgba(0,0,0,0.9) !important;
+    --spice-mantle:         #0A0A0D !important;
+    --spice-crust:          #060608 !important;
+    --spice-surface0:       #131318 !important;
+    --spice-surface1:       #1C1C24 !important;
+    --spice-surface2:       #23232E !important;
     --spice-red:            #E60012 !important;
     --spice-yellow:         #FFD700 !important;
     --spice-mauve:          #E60012 !important;
-    --spice-selected-row:   rgba(230, 0, 18, 0.22) !important;
+    --spice-selected-row:   rgba(230,0,18,0.2) !important;
 
-    --spice-rgb-main:           11, 11, 14 !important;
-    --spice-rgb-sidebar:        17, 17, 22 !important;
-    --spice-rgb-player:         13, 13, 17 !important;
-    --spice-rgb-card:           17, 17, 22 !important;
-    --spice-rgb-surface0:       17, 17, 22 !important;
-    --spice-rgb-surface1:       26, 26, 34 !important;
-    --spice-rgb-surface2:       34, 34, 44 !important;
-    --spice-rgb-highlight:      26, 26, 34 !important;
-    --spice-rgb-tab-active:     230, 0, 18 !important;
-    --spice-rgb-text:           255, 255, 255 !important;
-    --spice-rgb-subtext:        122, 122, 138 !important;
-    --spice-rgb-button:         230, 0, 18 !important;
-    --spice-rgb-button-active:  255, 215, 0 !important;
-    --spice-rgb-selected-row:   230, 0, 18 !important;
-    --spice-rgb-red:            230, 0, 18 !important;
-    --spice-rgb-yellow:         255, 215, 0 !important;
-    --spice-rgb-mauve:          230, 0, 18 !important;
+    --spice-rgb-main:           10,10,13 !important;
+    --spice-rgb-sidebar:        15,15,19 !important;
+    --spice-rgb-player:         9,9,9 !important;
+    --spice-rgb-card:           19,19,24 !important;
+    --spice-rgb-surface0:       19,19,24 !important;
+    --spice-rgb-surface1:       28,28,36 !important;
+    --spice-rgb-surface2:       35,35,46 !important;
+    --spice-rgb-highlight:      28,28,36 !important;
+    --spice-rgb-tab-active:     230,0,18 !important;
+    --spice-rgb-text:           255,255,255 !important;
+    --spice-rgb-subtext:        107,107,128 !important;
+    --spice-rgb-button:         230,0,18 !important;
+    --spice-rgb-button-active:  255,215,0 !important;
+    --spice-rgb-selected-row:   230,0,18 !important;
+    --spice-rgb-red:            230,0,18 !important;
+    --spice-rgb-yellow:         255,215,0 !important;
+    --spice-rgb-mauve:          230,0,18 !important;
 }
 
 /* ============================================================
-   area konten utama — pola diagonal metaverse p5 nyata
+   konten utama — pola diagonal p5 yang nyata
    ============================================================ */
 .Root__main-view,
 .main-view-container,
 [class*="main-view"] {
-    background-color: var(--spice-main) !important;
-    background-image: repeating-linear-gradient(
-        -45deg,
-        rgba(230, 0, 18, 0.05) 0px,
-        rgba(230, 0, 18, 0.05) 1px,
-        transparent 1px,
-        transparent 16px
-    ) !important;
+    background-color: #0A0A0D !important;
+    background-image:
+        repeating-linear-gradient(
+            -45deg,
+            rgba(230,0,18,0.07) 0px,
+            rgba(230,0,18,0.07) 1px,
+            transparent 1px,
+            transparent 14px
+        ) !important;
     border: none !important;
     box-shadow: none !important;
 }
 
-/* sidebar kiri — sedikit lebih gelap, juga ada diagonal */
+/* ============================================================
+   sidebar kiri
+   ============================================================ */
 .Root__nav-bar,
 .nav-bar,
-[data-testid="LeftSidebar"],
-.Root__nav-bar .main-yourLibraryX-libraryContainer {
-    background-color: var(--spice-sidebar) !important;
-    background-image: repeating-linear-gradient(
-        -45deg,
-        rgba(230, 0, 18, 0.03) 0px,
-        rgba(230, 0, 18, 0.03) 1px,
-        transparent 1px,
-        transparent 20px
-    ) !important;
-    border: none !important;
+[data-testid="LeftSidebar"] {
+    background-color: #0F0F13 !important;
+    border-right: 2px solid rgba(230,0,18,0.35) !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
     box-shadow: none !important;
 }
 
-/* ============================================================
-   ikon navigasi kiri atas (home, search, library)
-   ============================================================ */
-.main-navBar-navBarLink svg,
-[data-testid="nav-bar-link"] svg,
-.main-navBar-navBarIconContainer svg {
-    fill: var(--spice-subtext) !important;
-    transition: fill 0.15s ease !important;
+/* ikon nav — abu default, merah kalau aktif */
+.main-navBar-navBarLink svg {
+    fill: #4A4A5A !important;
+    transition: fill 0.12s ease !important;
 }
+.main-navBar-navBarLink:hover svg { fill: #FFFFFF !important; }
+.main-navBar-navBarLinkActive svg { fill: #E60012 !important; }
 
-.main-navBar-navBarLink:hover svg,
-[data-testid="nav-bar-link"]:hover svg {
-    fill: #FFFFFF !important;
-}
-
-/* nav link aktif — merah */
-.main-navBar-navBarLinkActive svg,
-.main-navBar-navBarLinkActive:hover svg,
-[data-testid="nav-bar-link"][aria-current="page"] svg {
-    fill: #E60012 !important;
-}
-
-.main-navBar-navBarLinkActive,
-[data-testid="nav-bar-link"][aria-current="page"] {
-    background-color: rgba(230, 0, 18, 0.15) !important;
+.main-navBar-navBarLinkActive {
+    background-color: rgba(230,0,18,0.12) !important;
     border-left: 3px solid #E60012 !important;
     border-radius: 0 4px 4px 0 !important;
-    color: #FFFFFF !important;
-    font-weight: 700 !important;
 }
 
 /* ============================================================
-   ikon player kontrol (prev, play, next, shuffle, repeat, dll.)
+   header konten — gradient merah gelap dari atas
    ============================================================ */
-
-/* ikon skip, prev, shuffle, repeat — abu muted */
-[data-testid="control-button-skip-back"] svg,
-[data-testid="control-button-skip-forward"] svg,
-[data-testid="control-button-shuffle"] svg,
-[data-testid="control-button-repeat"] svg,
-.player-controls button svg,
-[class*="playerControls"] button svg {
-    fill: var(--spice-subtext) !important;
-    transition: fill 0.15s ease !important;
+.main-entityHeader-backgroundColor,
+.main-actionBarBackground-background,
+.main-home-homeHeader,
+[class*="under-main-view"] > div {
+    background: linear-gradient(180deg,
+        rgba(180,0,10,0.45) 0%,
+        rgba(120,0,8,0.15) 50%,
+        transparent 100%
+    ) !important;
 }
 
-[data-testid="control-button-skip-back"]:hover svg,
-[data-testid="control-button-skip-forward"]:hover svg,
-[data-testid="control-button-shuffle"]:hover svg,
-[data-testid="control-button-repeat"]:hover svg {
-    fill: #FFFFFF !important;
-}
-
-/* shuffle & repeat kalau aktif — gold */
-[data-testid="control-button-shuffle"][aria-checked="true"] svg,
-[data-testid="control-button-repeat"][aria-checked="true"] svg {
-    fill: #FFD700 !important;
-}
-
-/* ikon play/pause di player bar — putih di dalam lingkaran merah */
-button[data-testid="control-button-playpause"] {
+/* ============================================================
+   label seksi — badge p5 solid dengan hard shadow
+   ============================================================ */
+.main-shelf-header h2,
+.main-shelf-title,
+[data-encore-id="type"].encore-text-title-small,
+[data-encore-id="type"].encore-text-title-medium {
+    display: inline-block !important;
     background-color: #E60012 !important;
+    color: #FFFFFF !important;
+    padding: 3px 16px 3px 10px !important;
+    transform: skewX(-12deg) !important;
+    font-weight: 900 !important;
+    font-style: italic !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    border: 2px solid #FFFFFF !important;
+    box-shadow: 4px 4px 0px #FFD700 !important;
+    border-radius: 0 !important;
+    margin-bottom: 12px !important;
+}
+
+/* ============================================================
+   kartu pintas beranda — p5 card style
+   ============================================================ */
+.view-homeShortcutsGrid-shortcut {
+    background-color: #131318 !important;
+    border: 1.5px solid rgba(255,255,255,0.08) !important;
+    border-left: 3px solid rgba(230,0,18,0.6) !important;
+    border-radius: 4px !important;
+    box-shadow: 3px 3px 0px rgba(0,0,0,0.8) !important;
+    transform: none !important;
+    transition: all 0.14s ease !important;
+    overflow: hidden !important;
+}
+
+.view-homeShortcutsGrid-shortcut:hover {
+    background-color: #1C1C24 !important;
+    border-color: rgba(255,255,255,0.15) !important;
+    border-left-color: #E60012 !important;
+    box-shadow: 4px 4px 0px rgba(230,0,18,0.5) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ============================================================
+   kartu album & playlist — hard border + flat shadow
+   ============================================================ */
+.main-card-card {
+    background-color: #131318 !important;
+    border: 1.5px solid rgba(255,255,255,0.06) !important;
+    border-radius: 4px !important;
+    box-shadow: 3px 3px 0px rgba(0,0,0,0.9) !important;
+    transition: all 0.16s ease !important;
+}
+
+.main-card-card:hover {
+    background-color: #1C1C24 !important;
+    border: 1.5px solid rgba(230,0,18,0.7) !important;
+    box-shadow: 5px 5px 0px #E60012 !important;
+    transform: translateY(-3px) !important;
+}
+
+/* tombol play di kartu — jangan terlalu gede */
+.main-card-card [class*="PlayButton"],
+.main-card-card [data-testid="play-button"] {
+    background-color: #E60012 !important;
+    width: 40px !important;
+    height: 40px !important;
     border-radius: 50% !important;
-    width: 36px !important;
-    height: 36px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: background-color 0.15s ease, transform 0.12s ease !important;
-    border: none !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important;
+    transition: transform 0.12s ease !important;
 }
 
-button[data-testid="control-button-playpause"]:hover {
-    background-color: #FF2233 !important;
-    transform: scale(1.08) !important;
+.main-card-card [class*="PlayButton"]:hover,
+.main-card-card [data-testid="play-button"]:hover {
+    transform: scale(1.06) !important;
+    background-color: #FF1E2E !important;
 }
 
-button[data-testid="control-button-playpause"] svg {
+.main-card-card [class*="PlayButton"] svg,
+.main-card-card [data-testid="play-button"] svg {
     fill: #FFFFFF !important;
     width: 18px !important;
     height: 18px !important;
 }
 
 /* ============================================================
-   ikon di kanan player (heart, queue, device, volume)
-   ============================================================ */
-.player-controls__right svg,
-[class*="ExtraControls"] svg,
-[data-testid="add-button"] svg,
-[data-testid="queue-button"] svg,
-[data-testid="device-button"] svg,
-[data-testid="volume-bar"] svg,
-[data-testid="lyrics-button"] svg {
-    fill: var(--spice-subtext) !important;
-    transition: fill 0.15s ease !important;
-}
-
-.player-controls__right button:hover svg,
-[class*="ExtraControls"] button:hover svg,
-[data-testid="add-button"]:hover svg,
-[data-testid="queue-button"]:hover svg,
-[data-testid="device-button"]:hover svg,
-[data-testid="lyrics-button"]:hover svg {
-    fill: #FFFFFF !important;
-}
-
-/* tombol yang sedang aktif (misal lyrics panel terbuka) */
-[data-testid="lyrics-button"][aria-checked="true"] svg,
-[data-testid="queue-button"][aria-checked="true"] svg {
-    fill: #E60012 !important;
-}
-
-/* ============================================================
-   ikon di library panel kiri
-   ============================================================ */
-.main-yourLibraryX-libraryContainer svg,
-[class*="listItemLink"] svg {
-    fill: var(--spice-subtext) !important;
-    transition: fill 0.15s ease !important;
-}
-
-.main-yourLibraryX-libraryContainer [class*="listItemLink"]:hover svg {
-    fill: #FFFFFF !important;
-}
-
-/* ============================================================
-   header konten
-   ============================================================ */
-.main-entityHeader-backgroundColor,
-.main-actionBarBackground-background,
-.main-home-homeHeader,
-[class*="under-main-view"] > div,
-[class*="entityHeader"] {
-    background: linear-gradient(180deg,
-        rgba(230, 0, 18, 0.25) 0%,
-        rgba(230, 0, 18, 0.08) 55%,
-        transparent 100%
-    ) !important;
-}
-
-/* ============================================================
-   label seksi — badge miring p5
-   ============================================================ */
-.main-shelf-header h2,
-.main-shelf-title,
-[data-encore-id="type"].encore-text-title-small,
-[data-encore-id="type"].encore-text-title-medium {
-    display: inline-flex !important;
-    align-items: center !important;
-    background-color: #E60012 !important;
-    color: #FFFFFF !important;
-    padding: 2px 14px 2px 10px !important;
-    transform: skewX(-10deg) !important;
-    font-weight: 900 !important;
-    font-style: italic !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.06em !important;
-    border: none !important;
-    box-shadow: 5px 0 0 #FFD700 !important;
-    border-radius: 0 !important;
-}
-
-/* ============================================================
-   kartu pintas beranda (8 kotak cepat)
-   ============================================================ */
-.view-homeShortcutsGrid-shortcut {
-    background-color: var(--p5-surface0, #111116) !important;
-    border: none !important;
-    border-radius: 6px !important;
-    border-left: 3px solid rgba(230, 0, 18, 0.4) !important;
-    box-shadow: none !important;
-    transform: none !important;
-    transition: background-color 0.15s ease, transform 0.15s ease, border-color 0.15s ease !important;
-    overflow: hidden !important;
-}
-
-.view-homeShortcutsGrid-shortcut:hover {
-    background-color: rgba(230, 0, 18, 0.2) !important;
-    border-left-color: #E60012 !important;
-    transform: translateX(3px) !important;
-}
-
-/* ikon play overlay di shortcut card */
-.view-homeShortcutsGrid-shortcut [class*="PlayButton"] svg,
-.view-homeShortcutsGrid-shortcut button svg {
-    fill: #FFFFFF !important;
-}
-
-/* ============================================================
-   kartu album & playlist
-   ============================================================ */
-.main-card-card {
-    background-color: #111116 !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease !important;
-}
-
-.main-card-card:hover {
-    background-color: #1A1A22 !important;
-    border-color: rgba(230, 0, 18, 0.5) !important;
-    transform: translateY(-4px) !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(230, 0, 18, 0.3) !important;
-}
-
-/* ikon play yang muncul pas hover kartu */
-.main-card-card [class*="PlayButton"] svg,
-.main-card-card [data-testid="play-button"] svg {
-    fill: #FFFFFF !important;
-}
-
-.main-card-card [class*="PlayButton"],
-.main-card-card [data-testid="play-button"] {
-    background-color: #E60012 !important;
-    box-shadow: 0 4px 12px rgba(230, 0, 18, 0.5) !important;
-    transition: transform 0.12s ease, background-color 0.12s ease !important;
-}
-
-.main-card-card:hover [class*="PlayButton"]:hover,
-.main-card-card:hover [data-testid="play-button"]:hover {
-    background-color: #FF2233 !important;
-    transform: scale(1.06) !important;
-}
-
-/* ============================================================
-   pil filter (All, Music, Podcasts)
+   filter chips (All, Music, Podcasts)
    ============================================================ */
 [role="listitem"] button[data-encore-id="chip"],
 button[class*="ChipInner"],
 .x-filterChip-chip {
-    border-radius: 20px !important;
+    background-color: #1C1C24 !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 3px !important;
     transform: none !important;
-    font-weight: 600 !important;
-    font-style: normal !important;
-    text-transform: none !important;
-    transition: background-color 0.12s ease !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    transition: all 0.12s ease !important;
 }
 
 [role="listitem"] button[data-encore-id="chip"][aria-checked="true"],
 .x-filterChip-chip[aria-checked="true"] {
     background-color: #E60012 !important;
-    color: #FFFFFF !important;
     border-color: #E60012 !important;
     font-weight: 800 !important;
+    color: #FFFFFF !important;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.7) !important;
 }
 
 /* ============================================================
-   baris lagu di playlist
+   baris tracklist
    ============================================================ */
 .main-trackList-trackListRow {
-    border-radius: 4px !important;
-    border-left: 2px solid transparent !important;
+    border-radius: 3px !important;
+    border-left: 2.5px solid transparent !important;
     transition: background-color 0.1s ease, border-color 0.1s ease !important;
 }
 
 .main-trackList-trackListRow:hover {
-    background-color: rgba(230, 0, 18, 0.1) !important;
-    border-left-color: rgba(230, 0, 18, 0.6) !important;
-}
-
-/* nomor baris & ikon play di tracklist */
-.main-trackList-trackListRow:hover [class*="trackListRowNumber"] {
-    color: #E60012 !important;
-}
-
-.main-trackList-trackListRow:hover [class*="playing-icon"] svg,
-.main-trackList-trackListRow:hover [class*="trackListRowButton"] svg {
-    fill: #E60012 !important;
-}
-
-/* lagu yang sedang diputar — highlight merah */
-.main-trackList-trackListRow[aria-selected="true"] {
+    background-color: rgba(230,0,18,0.1) !important;
     border-left-color: #E60012 !important;
 }
 
@@ -370,61 +240,54 @@ button[class*="ChipInner"],
 }
 
 /* ============================================================
-   now playing bar bawah
+   player bar bawah — lebih berkarakter
    ============================================================ */
 .Root__now-playing-bar,
-[data-testid="now-playing-bar"],
-.now-playing-bar {
-    background-color: var(--spice-player) !important;
-    border: none !important;
-    border-top: 1px solid rgba(230, 0, 18, 0.45) !important;
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.6) !important;
-    border-radius: 0 !important;
+[data-testid="now-playing-bar"] {
+    background-color: #090909 !important;
+    border-top: 2px solid #E60012 !important;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.8) !important;
 }
 
-/* sampul album kiri bawah */
+/* sampul album */
 .main-nowPlayingWidget-coverArt .cover-art,
 [data-testid="CoverSlotCollapsed"] {
-    border-radius: 4px !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7) !important;
-    transform: none !important;
-    border: none !important;
+    border-radius: 3px !important;
+    border: 1.5px solid rgba(230,0,18,0.4) !important;
+    box-shadow: 3px 3px 0px rgba(0,0,0,0.8) !important;
 }
 
-/* ikon heart & titik-titik di widget kiri bawah */
-[data-testid="add-button"] svg {
-    fill: var(--spice-subtext) !important;
-    transition: fill 0.12s ease !important;
+/* nama lagu yang sedang diputar */
+[data-testid="context-item-link"],
+[data-testid="track-info-name"] {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
 }
 
-[data-testid="add-button"]:hover svg,
-[data-testid="add-button"][aria-checked="true"] svg {
-    fill: #E60012 !important;
+/* artist link */
+[data-testid="context-item-info-artist"],
+[data-testid="track-info-artists"] a {
+    color: #6B6B80 !important;
 }
 
 /* ============================================================
    tombol play besar di atas playlist/album
    ============================================================ */
-.main-playButton-PlayButton {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
+.main-playButton-PlayButton { background: transparent !important; border: none !important; }
 
 button[data-testid="play-button"],
 .main-playButton-PlayButton.main-playButton-primary {
     background-color: #E60012 !important;
     border-radius: 50% !important;
-    transform: none !important;
-    box-shadow: 0 4px 16px rgba(230, 0, 18, 0.5) !important;
-    transition: transform 0.15s ease, background-color 0.15s ease !important;
+    box-shadow: 0 4px 14px rgba(230,0,18,0.45) !important;
+    transition: transform 0.14s ease, box-shadow 0.14s ease !important;
 }
 
 button[data-testid="play-button"]:hover,
 .main-playButton-PlayButton.main-playButton-primary:hover {
-    background-color: #FF2233 !important;
-    transform: scale(1.06) !important;
-    box-shadow: 0 6px 20px rgba(230, 0, 18, 0.6) !important;
+    background-color: #FF1E2E !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 6px 20px rgba(230,0,18,0.6) !important;
 }
 
 button[data-testid="play-button"] svg,
@@ -433,14 +296,81 @@ button[data-testid="play-button"] svg,
 }
 
 /* ============================================================
-   progress bar — miring halus khas p5
+   tombol play/pause di player bar — lingkaran merah
+   ============================================================ */
+button[data-testid="control-button-playpause"] {
+    background-color: #E60012 !important;
+    border-radius: 50% !important;
+    width: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background-color 0.12s ease, transform 0.12s ease !important;
+}
+
+button[data-testid="control-button-playpause"]:hover {
+    background-color: #FF1E2E !important;
+    transform: scale(1.07) !important;
+}
+
+button[data-testid="control-button-playpause"] svg {
+    fill: #FFFFFF !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* kontrol lainnya (skip, prev, shuffle, repeat) */
+[data-testid="control-button-skip-back"] svg,
+[data-testid="control-button-skip-forward"] svg,
+[data-testid="control-button-shuffle"] svg,
+[data-testid="control-button-repeat"] svg {
+    fill: #4A4A5A !important;
+    transition: fill 0.12s ease !important;
+}
+
+[data-testid="control-button-skip-back"]:hover svg,
+[data-testid="control-button-skip-forward"]:hover svg,
+[data-testid="control-button-shuffle"]:hover svg,
+[data-testid="control-button-repeat"]:hover svg {
+    fill: #FFFFFF !important;
+}
+
+[data-testid="control-button-shuffle"][aria-checked="true"] svg,
+[data-testid="control-button-repeat"][aria-checked="true"] svg {
+    fill: #FFD700 !important;
+}
+
+/* ikon kanan player (heart, queue, device, volume) */
+[data-testid="add-button"] svg,
+[data-testid="queue-button"] svg,
+[data-testid="device-button"] svg,
+[data-testid="lyrics-button"] svg,
+[class*="ExtraControls"] button svg {
+    fill: #4A4A5A !important;
+    transition: fill 0.12s ease !important;
+}
+
+[data-testid="add-button"]:hover svg,
+[data-testid="queue-button"]:hover svg,
+[data-testid="device-button"]:hover svg,
+[data-testid="lyrics-button"]:hover svg,
+[class*="ExtraControls"] button:hover svg {
+    fill: #FFFFFF !important;
+}
+
+[data-testid="add-button"][aria-checked="true"] svg { fill: #E60012 !important; }
+[data-testid="lyrics-button"][aria-checked="true"] svg,
+[data-testid="queue-button"][aria-checked="true"] svg { fill: #E60012 !important; }
+
+/* ============================================================
+   progress bar — flat dan miring halus
    ============================================================ */
 .x-progressBar-progressBarBg {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255,255,255,0.08) !important;
     border-radius: 2px !important;
     height: 4px !important;
-    transform: skewX(-15deg) !important;
-    overflow: visible !important;
+    transform: skewX(-14deg) !important;
     border: none !important;
     box-shadow: none !important;
 }
@@ -448,6 +378,7 @@ button[data-testid="play-button"] svg,
 .x-progressBar-fillColor {
     background-color: #E60012 !important;
     border-radius: 2px !important;
+    transition: background-color 0.2s ease !important;
 }
 
 .playback-bar:hover .x-progressBar-fillColor,
@@ -455,95 +386,51 @@ button[data-testid="play-button"] svg,
     background-color: #FFD700 !important;
 }
 
-/* lingkaran thumb di progress bar */
-.x-progressBar-progressBarBg:hover .x-progressBar-sliderHandle {
-    background-color: #FFD700 !important;
-    transform: scale(1.2) !important;
-}
-
 /* ============================================================
-   sidebar kanan (now playing / lyrics)
+   sidebar kanan (now playing)
    ============================================================ */
 .Root__right-sidebar,
-[data-testid="NowPlayingView"],
-.main-nowPlayingView-section {
-    background-color: var(--spice-sidebar) !important;
-    border-left: 1px solid rgba(230, 0, 18, 0.2) !important;
-    border-radius: 0 !important;
+[data-testid="NowPlayingView"] {
+    background-color: #0F0F13 !important;
+    border-left: 2px solid rgba(230,0,18,0.25) !important;
     border-top: none !important;
     border-right: none !important;
     border-bottom: none !important;
     box-shadow: none !important;
 }
 
-/* ikon tab di sidebar kanan (lyrics, queue, connect) */
-[class*="NowPlayingBar"] button svg,
-.main-nowPlayingView-sectionHeaderButton svg {
-    fill: var(--spice-subtext) !important;
-    transition: fill 0.12s ease !important;
-}
-
-[class*="NowPlayingBar"] button:hover svg,
-.main-nowPlayingView-sectionHeaderButton:hover svg {
-    fill: #FFFFFF !important;
-}
-
-[class*="NowPlayingBar"] button[class*="active"] svg,
-.main-nowPlayingView-sectionHeaderButton[class*="active"] svg {
-    fill: #E60012 !important;
-}
-
-/* baris lirik aktif */
-[data-testid="lyrics-synchronized-line"][aria-current="true"] span,
-[class*="LyricsLine"][class*="current"] {
+/* lirik aktif */
+[data-testid="lyrics-synchronized-line"][aria-current="true"] span {
     color: #E60012 !important;
     font-weight: 800 !important;
 }
 
 /* ============================================================
-   search bar atas
+   search bar
    ============================================================ */
 .main-globalNav-searchInputContainer input,
-.x-searchInput-searchInputInput,
-[data-testid="search-input"] {
-    background-color: var(--spice-surface0) !important;
+.x-searchInput-searchInputInput {
+    background-color: #1C1C24 !important;
     color: #FFFFFF !important;
-    border: 1px solid rgba(230, 0, 18, 0.3) !important;
-    border-radius: 20px !important;
+    border: 1.5px solid rgba(230,0,18,0.3) !important;
+    border-radius: 4px !important;
     transform: none !important;
     box-shadow: none !important;
-    transition: border-color 0.12s ease !important;
 }
 
 .main-globalNav-searchInputContainer:focus-within input,
-[data-testid="search-input"]:focus {
+.x-searchInput-searchInputInput:focus {
     border-color: #E60012 !important;
-    box-shadow: 0 0 0 2px rgba(230, 0, 18, 0.2) !important;
-}
-
-/* ikon search */
-.main-globalNav-searchInputContainer svg,
-[data-testid="search-icon"] {
-    fill: var(--spice-subtext) !important;
+    box-shadow: 0 0 0 2px rgba(230,0,18,0.18) !important;
 }
 
 /* ============================================================
-   scrollbar tipis bercorak merah
+   scrollbar
    ============================================================ */
-::-webkit-scrollbar {
-    width: 4px !important;
-    height: 4px !important;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent !important;
-}
-
+::-webkit-scrollbar { width: 4px !important; height: 4px !important; }
+::-webkit-scrollbar-track { background: transparent !important; }
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(230, 0, 18, 0.5) !important;
+    background-color: rgba(230,0,18,0.45) !important;
     border-radius: 2px !important;
 }
-
-::-webkit-scrollbar-thumb:hover {
-    background-color: #E60012 !important;
-}
+::-webkit-scrollbar-thumb:hover { background-color: #E60012 !important; }
