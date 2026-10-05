@@ -10,6 +10,18 @@ Item {
     property color coreColor: PhantomState.background
     property bool spinning: false
 
+    onStarColorChanged: starCanvas.requestPaint()
+    onInnerColorChanged: starCanvas.requestPaint()
+    onCoreColorChanged: starCanvas.requestPaint()
+
+    RotationAnimation on rotation {
+        running: root.spinning && root.visible
+        from: 0
+        to: 360
+        duration: 4200
+        loops: Animation.Infinite
+    }
+
     Connections {
         target: PhantomState
         function onPrimaryChanged() { starCanvas.requestPaint() }

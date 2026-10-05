@@ -63,12 +63,97 @@ Singleton {
     property bool emojiOpen: false
     property bool overviewOpen: false
     property bool lockClosing: false
+    property bool specialWorkspaceActive: false
+    property int velvetTransitionTick: 0
 
     // state animasi transisi tema dan wallpaper
     property int transitionTick: 0
     property string transitionTitle: "METAVERSE SHIFT"
     property string transitionSub: "PALETTE SYNCHRONIZED"
     property string previousWallpaperPath: ""
+
+    function setSpecialWorkspaceActive(active) {
+        if (root.specialWorkspaceActive === active) return
+        root.specialWorkspaceActive = active
+        root.velvetTransitionTick++
+        root.playSfx(active ? "open" : "close")
+    }
+
+    function toggleVelvetRoom() {
+        const next = !root.specialWorkspaceActive
+        root.specialWorkspaceActive = next
+        root.velvetTransitionTick++
+        root.playSfx(next ? "open" : "close")
+        if (next) {
+            Quickshell.execDetached([
+                "hyprctl", "eval",
+                "if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
+            ])
+        } else {
+            reassertSpecialTimer.stop()
+            Quickshell.execDetached([
+                "hyprctl", "eval",
+                "if hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
+            ])
+        }
+        root.refreshWorkspaces()
+    }
+
+    function ensureSpecialWorkspaceOpen() {
+        if (!root.specialWorkspaceActive) return
+        Quickshell.execDetached([
+            "hyprctl", "eval",
+            "if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
+        ])
+        reassertSpecialTimer.restart()
+    }
+
+    Timer {
+        id: reassertSpecialTimer
+        interval: 45
+        repeat: false
+        onTriggered: {
+            if (!root.specialWorkspaceActive) return
+            Quickshell.execDetached([
+                "hyprctl", "eval",
+                "if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
+            ])
+        }
+    }
+
+    onLauncherOpenChanged: {
+        if (!launcherOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onDashboardOpenChanged: {
+        if (!dashboardOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onSettingsOpenChanged: {
+        if (!settingsOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onNotificationsOpenChanged: {
+        if (!notificationsOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onCalendarOpenChanged: {
+        if (!calendarOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onMediaPopupOpenChanged: {
+        if (!mediaPopupOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onTrayPopupOpenChanged: {
+        if (!trayPopupOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onCheatsheetOpenChanged: {
+        if (!cheatsheetOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onClipboardOpenChanged: {
+        if (!clipboardOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onEmojiOpenChanged: {
+        if (!emojiOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
+    onOverviewOpenChanged: {
+        if (!overviewOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
+    }
 
     function closeAllModals() {
         launcherOpen = false

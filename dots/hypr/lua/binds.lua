@@ -303,10 +303,10 @@ hl.bind(mod .. " + SHIFT + mouse_up",   hl.dsp.window.move({ workspace = "r+1" }
 hl.bind(mod .. " + ALT + mouse_down",   hl.dsp.window.move({ workspace = "r-1" }))
 hl.bind(mod .. " + ALT + mouse_up",     hl.dsp.window.move({ workspace = "r+1" }))
 
--- pintasan scratchpad (special workspace)
-hl.bind(mod .. " + S",       hl.dsp.workspace.toggle_special("special"), { description = "Workspace: Toggle Scratchpad" })
-hl.bind("CTRL + " .. mod .. " + S", hl.dsp.workspace.toggle_special("special"))
-hl.bind(mod .. " + mouse:275", hl.dsp.workspace.toggle_special("special"))
+-- pintasan scratchpad (special workspace / velvet room)
+hl.bind(mod .. " + S",       hl.dsp.exec_cmd(qsCall .. "toggleVelvetRoom"), { description = "Workspace: Toggle Velvet Room (Scratchpad)" })
+hl.bind("CTRL + " .. mod .. " + S", hl.dsp.exec_cmd(qsCall .. "toggleVelvetRoom"))
+hl.bind(mod .. " + mouse:275", hl.dsp.exec_cmd(qsCall .. "toggleVelvetRoom"))
 hl.bind(mod .. " + ALT + S", hl.dsp.window.move({ workspace = "special:special", follow = false }), {
     description = "Window: Send to Scratchpad"
 })

@@ -74,3 +74,20 @@ hl.animation({
     bezier = "p5Slash",
     style = "slide"
 })
+
+hl.animation({
+    leaf = "specialWorkspaceIn",
+    enabled = true,
+    speed = 3.8,
+    bezier = "p5Spring",
+    style = "slidefadevert -35%"
+})
+
+hl.animation({
+    leaf = "specialWorkspaceOut",
+    enabled = true,
+    speed = 3.0,
+    bezier = "p5Exit",
+    style = "slidefadevert -35%"
+})
+

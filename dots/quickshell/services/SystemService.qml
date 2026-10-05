@@ -185,12 +185,14 @@ Scope {
                         if (!win || !win.mapped || win.hidden) continue
                         if (win.size && (win.size[0] <= 4 || win.size[1] <= 4)) continue
                         const wsId = win.workspace ? win.workspace.id : 0
-                        if (!wsId || wsId <= 0) continue
+                        const wsName = String(win.workspace ? (win.workspace.name || "") : "")
+                        const isSpecial = (wsId < 0) || (wsName.indexOf("special") === 0)
+                        if (!isSpecial && (!wsId || wsId <= 0)) continue
                         const rawTitle = String(win.title || win.initialTitle || "").trim()
                         if (rawTitle.toLowerCase() === "steamwebhelper") continue
                         const cls = String(win.class || win.initialClass || rawTitle || "").trim()
                         if (!cls) continue
-                        const key = String(wsId)
+                        const key = isSpecial ? "special" : String(wsId)
                         if (!map[key]) map[key] = []
                         if (map[key].length < 4) {
                             map[key].push({

@@ -216,10 +216,40 @@ Scope {
                         target: Hyprland
                         function onRawEvent(event) {
                             const evName = String(event.name || "")
-                            if (evName === "workspace" || evName === "workspacev2" || evName === "focusedmon" || evName === "focusedmonv2") {
+                            if (evName === "activespecial" || evName === "activespecialv2") {
+                                const dataStr = String(event.data || "")
+                                const isOpen = dataStr.indexOf("special") !== -1
+                                if (!isOpen && PhantomState.specialWorkspaceActive) {
+                                    PhantomState.ensureSpecialWorkspaceOpen()
+                                } else if (isOpen && !PhantomState.specialWorkspaceActive) {
+                                    PhantomState.setSpecialWorkspaceActive(true)
+                                }
+                                PhantomState.refreshWorkspaces()
+                            } else if (evName === "workspace" || evName === "workspacev2" || evName === "focusedmon" || evName === "focusedmonv2") {
+                                if (PhantomState.specialWorkspaceActive) {
+                                    PhantomState.ensureSpecialWorkspaceOpen()
+                                }
                                 Hyprland.refreshWorkspaces()
                                 PhantomState.refreshWorkspaces()
-                            } else if (evName === "openwindow" || evName === "closewindow" || evName === "movewindow" || evName === "movewindowv2") {
+                            } else if (evName === "openwindow") {
+                                if (PhantomState.specialWorkspaceActive) {
+                                    const parts = String(event.data || "").split(",")
+                                    const addr = (parts[0] || "").trim()
+                                    const wsName = (parts[1] || "").trim()
+                                    if (addr !== "" && wsName.indexOf("special") !== 0) {
+                                        Quickshell.execDetached([
+                                            "hyprctl", "eval",
+                                            "hl.dispatch(hl.dsp.window.move({ workspace = 'special:special', window = 'address:0x" + addr + "' })); if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
+                                        ])
+                                    } else {
+                                        PhantomState.ensureSpecialWorkspaceOpen()
+                                    }
+                                }
+                                PhantomState.refreshWorkspaces()
+                            } else if (evName === "closewindow" || evName === "movewindow" || evName === "movewindowv2") {
+                                if (PhantomState.specialWorkspaceActive) {
+                                    PhantomState.ensureSpecialWorkspaceOpen()
+                                }
                                 PhantomState.refreshWorkspaces()
                             }
                         }
@@ -227,9 +257,9 @@ Scope {
 
                     P5SkewedCard {
                         anchors.fill: parent
-                        fillColor: PhantomState.surface
-                        borderColor: PhantomState.borderLight
-                        shadowColor: PhantomState.borderDark
+                        fillColor: PhantomState.specialWorkspaceActive ? "#0A1024" : PhantomState.surface
+                        borderColor: PhantomState.specialWorkspaceActive ? "#60A5FA" : PhantomState.borderLight
+                        shadowColor: PhantomState.specialWorkspaceActive ? "#1D4ED8" : PhantomState.borderDark
                         borderWidth: 2
                         skewPx: PhantomState.polygonMode ? 6 : 0
                         shadowOffsetX: 2
@@ -247,7 +277,10 @@ Scope {
                                 id: wsDel
                                 required property int index
                                 readonly property int wsId: index + 1
-                                readonly property bool isActive: (Hyprland.focusedMonitor?.activeWorkspace?.id ?? Hyprland.focusedWorkspace?.id ?? 1) === wsId
+                                readonly property bool isActive: !PhantomState.specialWorkspaceActive
+                                    && ((Hyprland.focusedMonitor?.activeWorkspace?.id ?? Hyprland.focusedWorkspace?.id ?? 1) === wsId)
+                                readonly property bool isUnderlyingActive: PhantomState.specialWorkspaceActive
+                                    && ((Hyprland.focusedMonitor?.activeWorkspace?.id ?? Hyprland.focusedWorkspace?.id ?? 1) === wsId)
                                 readonly property var appList: (PhantomState.workspaceApps && PhantomState.workspaceApps[String(wsId)])
                                     ? PhantomState.workspaceApps[String(wsId)]
                                     : []
@@ -262,10 +295,14 @@ Scope {
 
                                 P5SkewedCard {
                                     anchors.fill: parent
-                                    fillColor: wsDel.isActive ? PhantomState.primary : (wsDel.hasApps ? PhantomState.surfaceAlt : "transparent")
-                                    borderColor: wsDel.isActive ? PhantomState.borderLight : (wsDel.hasApps ? "#383B52" : "transparent")
+                                    fillColor: wsDel.isActive
+                                        ? PhantomState.primary
+                                        : (wsDel.isUnderlyingActive ? "#172554" : (wsDel.hasApps ? PhantomState.surfaceAlt : "transparent"))
+                                    borderColor: wsDel.isActive
+                                        ? PhantomState.borderLight
+                                        : (wsDel.isUnderlyingActive ? "#3B82F6" : (wsDel.hasApps ? "#383B52" : "transparent"))
                                     showShadowOffset: false
-                                    borderWidth: (wsDel.isActive || wsDel.hasApps) ? 1 : 0
+                                    borderWidth: (wsDel.isActive || wsDel.isUnderlyingActive || wsDel.hasApps) ? 1 : 0
                                     skewPx: PhantomState.polygonMode ? 4 : 0
                                 }
 
@@ -277,7 +314,9 @@ Scope {
                                     Text {
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: barScope.formatWsLabel(wsDel.wsId)
-                                        color: wsDel.isActive ? PhantomState.foreground : (wsDel.hasApps ? PhantomState.secondary : PhantomState.muted)
+                                        color: wsDel.isActive
+                                            ? PhantomState.foreground
+                                            : (wsDel.isUnderlyingActive ? "#93C5FD" : (wsDel.hasApps ? PhantomState.secondary : PhantomState.muted))
                                         font.pixelSize: wsDel.isActive ? 11 : 10
                                         font.weight: Font.Black
                                     }
@@ -322,6 +361,9 @@ Scope {
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
                                         Hyprland.dispatch("hl.dsp.focus({ workspace = " + String(wsDel.wsId) + " })")
+                                        if (PhantomState.specialWorkspaceActive) {
+                                            PhantomState.ensureSpecialWorkspaceOpen()
+                                        }
                                         Hyprland.refreshWorkspaces()
                                         PhantomState.refreshWorkspaces()
                                     }
@@ -332,6 +374,108 @@ Scope {
                                             Hyprland.dispatch("hl.dsp.focus({ workspace = 'r+1' })")
                                         }
                                     }
+                                }
+                            }
+                        }
+
+                        // indikator ruang kerja khusus (special workspace) bertema velvet room
+                        Item {
+                            id: velvetWsPill
+                            readonly property bool isActive: PhantomState.specialWorkspaceActive
+                            readonly property var appList: (PhantomState.workspaceApps && PhantomState.workspaceApps["special"])
+                                ? PhantomState.workspaceApps["special"]
+                                : []
+                            readonly property bool hasApps: appList.length > 0
+
+                            width: Math.max(isActive ? 68 : 26, velvetInnerRow.implicitWidth + 14)
+                            height: 22
+
+                            Behavior on width {
+                                NumberAnimation { duration: 200; easing.type: Easing.OutBack }
+                            }
+
+                            P5SkewedCard {
+                                anchors.fill: parent
+                                fillColor: velvetWsPill.isActive
+                                    ? "#1D4ED8"
+                                    : (velvetMouse.containsMouse ? "#1E3A8A" : (velvetWsPill.hasApps ? "#111C38" : "transparent"))
+                                borderColor: velvetWsPill.isActive
+                                    ? "#93C5FD"
+                                    : (velvetMouse.containsMouse || velvetWsPill.hasApps ? "#3B82F6" : "#2A2F45")
+                                showShadowOffset: velvetWsPill.isActive
+                                shadowColor: "#FACC15"
+                                shadowOffsetX: 1.5
+                                shadowOffsetY: 1.5
+                                borderWidth: 1.5
+                                skewPx: PhantomState.polygonMode ? 4 : 0
+                            }
+
+                            Row {
+                                id: velvetInnerRow
+                                anchors.centerIn: parent
+                                spacing: 4
+
+                                P5Star {
+                                    visible: velvetWsPill.isActive || velvetWsPill.hasApps
+                                    width: 12
+                                    height: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spinning: velvetWsPill.isActive
+                                    starColor: "#FACC15"
+                                    innerColor: "#3B82F6"
+                                }
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: velvetWsPill.isActive ? "VELVET" : "V"
+                                    color: velvetWsPill.isActive
+                                        ? "#FFFFFF"
+                                        : (velvetWsPill.hasApps || velvetMouse.containsMouse ? "#60A5FA" : PhantomState.muted)
+                                    font.pixelSize: 10
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                }
+
+                                Repeater {
+                                    model: velvetWsPill.appList
+                                    delegate: Item {
+                                        required property var modelData
+                                        width: 14
+                                        height: 14
+                                        anchors.verticalCenter: parent.verticalCenter
+
+                                        Image {
+                                            id: velvetAppImg
+                                            anchors.fill: parent
+                                            source: modelData.iconUrl || ""
+                                            sourceSize.width: 28
+                                            sourceSize.height: 28
+                                            fillMode: Image.PreserveAspectFit
+                                            smooth: true
+                                            visible: status === Image.Ready
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            visible: velvetAppImg.status !== Image.Ready
+                                            text: modelData.glyph || "\uf2d0"
+                                            color: "#E0F2FE"
+                                            font.family: "JetBrainsMono NFM"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Black
+                                        }
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: velvetMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    PhantomState.toggleVelvetRoom()
                                 }
                             }
                         }

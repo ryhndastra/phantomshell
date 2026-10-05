@@ -132,6 +132,10 @@ ShellRoot {
             PhantomState.toggleOverview()
         }
 
+        function toggleVelvetRoom(): void {
+            PhantomState.toggleVelvetRoom()
+        }
+
         function toggleLock(): void {
             if (PhantomState.lockOpen) {
                 PhantomState.unlockScreen()
