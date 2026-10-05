@@ -553,7 +553,7 @@ Singleton {
     // opsi grafik statistik dan efek suara notifikasi
     property string statsStyle: "pentagon"
     property bool sfxEnabled: true
-    property real sfxVolume: 0.7
+    property real sfxVolume: 0.35
 
     // parameter live tuning hyprland
     property int hyprGapsIn: 5
@@ -743,14 +743,15 @@ Singleton {
     }
 
     function playSfx(kind) {
-        if (!root.sfxEnabled) return
+        if (!root.sfxEnabled || root.sfxVolume <= 0.01) return
         if (kind === "notif") {
             const wavPath = Quickshell.shellPath("assets/persona-5-notif-sound.wav")
             const mp3Path = Quickshell.shellPath("assets/persona-5-notif-sound.mp3")
-            const vol = Math.max(0.1, Math.min(1.0, root.sfxVolume)).toFixed(2)
+            const vol = Math.max(0.01, Math.min(1.0, root.sfxVolume)).toFixed(2)
+            const ffVol = Math.round(Math.max(1, Math.min(100, root.sfxVolume * 100)))
             Quickshell.execDetached([
                 "bash", "-c",
-                "pw-play --volume=" + vol + " '" + wavPath + "' 2>/dev/null || ffplay -nodisp -autoexit -loglevel quiet '" + mp3Path + "' 2>/dev/null || true"
+                "pw-play --volume=" + vol + " '" + wavPath + "' 2>/dev/null || ffplay -nodisp -autoexit -loglevel quiet -volume " + ffVol + " '" + mp3Path + "' 2>/dev/null || true"
             ])
         }
     }

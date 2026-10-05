@@ -250,6 +250,100 @@ ColumnLayout {
                 }
             }
         }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+
+            Row {
+                Layout.preferredWidth: 92
+                spacing: 6
+                P5Icon { name: PhantomState.sfxEnabled ? "bell" : "bell-off"; size: 13; color: PhantomState.primary; anchors.verticalCenter: parent.verticalCenter }
+                Text {
+                    text: "NOTIF " + (PhantomState.sfxEnabled ? Math.round(PhantomState.sfxVolume * 100) + "%" : "OFF")
+                    color: PhantomState.foreground
+                    font.pixelSize: 10
+                    font.weight: Font.Black
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+
+            Item {
+                id: sfxTrack
+                Layout.fillWidth: true
+                Layout.preferredHeight: 26
+
+                P5SkewedCard {
+                    anchors.fill: parent
+                    fillColor: "#080A0F"
+                    borderColor: "#FFFFFF"
+                    shadowColor: PhantomState.primary
+                    borderWidth: 2
+                    skewPx: 5
+                    shadowOffsetX: 2
+                    shadowOffsetY: 2
+                }
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 32
+                    anchors.rightMargin: 32
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: 3
+                    color: "#44FFFFFF"
+
+                    Rectangle {
+                        width: parent.width * (PhantomState.sfxEnabled ? Math.min(1.0, PhantomState.sfxVolume) : 0.0)
+                        height: parent.height
+                        color: PhantomState.accent
+                    }
+                }
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "MUTE"
+                    color: PhantomState.muted
+                    font.pixelSize: 8
+                    font.weight: Font.Black
+                    rotation: -12
+                }
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "MAX"
+                    color: PhantomState.secondary
+                    font.pixelSize: 8
+                    font.weight: Font.Black
+                    rotation: -12
+                }
+
+                P5Star {
+                    width: 20
+                    height: 20
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: 24 + (sfxTrack.width - 68) * (PhantomState.sfxEnabled ? Math.min(1.0, Math.max(0.0, PhantomState.sfxVolume)) : 0.0)
+                    Behavior on x { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    function setSfx(mx) {
+                        var pct = Math.round(Math.max(0, Math.min(100, ((mx - 24) / (sfxTrack.width - 48)) * 100)))
+                        PhantomState.sfxVolume = pct / 100.0
+                        PhantomState.sfxEnabled = pct > 0
+                    }
+                    onPressed: mouse => setSfx(mouse.x)
+                    onPositionChanged: mouse => { if (pressed) setSfx(mouse.x) }
+                    onReleased: PhantomState.saveState()
+                }
+            }
+        }
     }
 
     // grid tombol aksi cepat sistem
@@ -315,7 +409,7 @@ ColumnLayout {
 
         P5BattleBlade {
             title: "AUDIO SFX"
-            subtitle: PhantomState.sfxEnabled ? "Persona 5 Cues ON" : "UI Sounds Muted"
+            subtitle: PhantomState.sfxEnabled ? ("Persona 5 Cues • " + Math.round(PhantomState.sfxVolume * 100) + "%") : "UI Sounds Muted"
             iconName: PhantomState.sfxEnabled ? "volume" : "mute"
             badgeColor: "#FF4D88"
             active: PhantomState.sfxEnabled

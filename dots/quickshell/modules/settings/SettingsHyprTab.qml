@@ -357,10 +357,23 @@ ColumnLayout {
 
     P5ConfigToggleRow {
         label: "UI Sound Effects (SFX)"
-        desc: "Play audio cues when notifications and presets trigger"
+        desc: "Play Persona 5 IM audio cues when notifications arrive"
         valueText: PhantomState.sfxEnabled ? "ENABLED" : "MUTED"
         active: PhantomState.sfxEnabled
         onTriggered: { PhantomState.sfxEnabled = !PhantomState.sfxEnabled; PhantomState.saveState() }
+    }
+
+    P5ConfigSliderRow {
+        label: "Notification & SFX Volume"
+        desc: "Adjust volume level of Persona 5 notification alert sound"
+        minVal: 0; maxVal: 100
+        currentVal: Math.round(PhantomState.sfxVolume * 100)
+        unit: "%"
+        onValueModified: newValue => {
+            PhantomState.sfxVolume = newValue / 100.0
+            PhantomState.sfxEnabled = newValue > 0
+            PhantomState.saveState()
+        }
     }
 
     P5SectionHeader { text: "HYPRLAND LIVE IPC TUNING" }
