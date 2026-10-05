@@ -1,160 +1,277 @@
 /**
- * @name PhantomShell Persona
- * @version 4.0.0
- * @description tema discord/vesktop persona 5 — clean, intentional, dark
+ * @name PhantomShell Persona Metaverse
+ * @version 5.1.0
+ * @description tema discord/vesktop persona 5 phantomshell dengan background metaverse & ikon phantomshell
  * @author PhantomShell
  */
 
-/* ============================================================
-   variabel warna p5
-   ============================================================ */
 :root,
+html,
+body,
 .theme-dark,
+.theme-darker,
+.theme-midnight,
 .theme-light,
 html.theme-dark,
 html.visual-refresh,
-body {
-    --p5-red:        #E60012;
-    --p5-gold:       #FFD700;
-    --p5-bg:         #0B0B0E;
-    --p5-surface:    #111116;
-    --p5-surface2:   #1A1A22;
-    --p5-fg:         #FFFFFF;
-    --p5-muted:      #7A7A8A;
-    --p5-red-rgb:    230, 0, 18;
-    --p5-gold-rgb:   255, 215, 0;
+.default-colors,
+[data-popout-root] {
+    --p5-red: #E60012;
+    --p5-gold: #FFD700;
+    --p5-accent: #FF1E2E;
+    --p5-bg: #0B0B0E;
+    --p5-surface: #141419;
+    --p5-surface2: #1F1F27;
+    --p5-fg: #FFFFFF;
+    --p5-muted: #9E9EAE;
+    --p5-border: #FFFFFF;
+    --p5-urgent: #FF0033;
+    --p5-success: #00F59B;
+    --p5-red-rgb: 230, 0, 18;
+    --p5-gold-rgb: 255, 215, 0;
+    --p5-logo-url: url("data:image/png;base64,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");
 
-    /* warna bawaan discord — background */
-    --background-primary:              var(--p5-bg)      !important;
-    --background-secondary:            var(--p5-surface) !important;
-    --background-secondary-alt:        #0D0D11           !important;
-    --background-tertiary:             #08080B           !important;
-    --background-accent:               var(--p5-red)     !important;
-    --background-floating:             var(--p5-surface) !important;
-    --background-nested-floating:      var(--p5-surface) !important;
-    --background-modifier-hover:       rgba(var(--p5-red-rgb), 0.15) !important;
-    --background-modifier-active:      rgba(var(--p5-red-rgb), 0.25) !important;
-    --background-modifier-selected:    rgba(var(--p5-red-rgb), 0.35) !important;
-    --background-modifier-accent:      rgba(var(--p5-red-rgb), 0.20) !important;
+    /* token warna dasar discord klasik & visual refresh */
+    --background-primary: var(--p5-bg) !important;
+    --background-secondary: var(--p5-surface) !important;
+    --background-secondary-alt: #09090D !important;
+    --background-tertiary: #060609 !important;
+    --background-accent: var(--p5-red) !important;
+    --background-floating: var(--p5-surface) !important;
+    --background-nested-floating: var(--p5-surface) !important;
+    --background-modifier-hover: rgba(var(--p5-red-rgb), 0.16) !important;
+    --background-modifier-active: rgba(var(--p5-red-rgb), 0.26) !important;
+    --background-modifier-selected: rgba(var(--p5-red-rgb), 0.34) !important;
+    --background-modifier-accent: rgba(var(--p5-red-rgb), 0.22) !important;
 
-    /* visual refresh bg tokens */
-    --bg-base-primary:      var(--p5-bg)       !important;
-    --bg-base-secondary:    var(--p5-surface)  !important;
-    --bg-base-tertiary:     #08080B            !important;
-    --bg-surface-overlay:   var(--p5-surface)  !important;
-    --bg-surface-raised:    var(--p5-surface2) !important;
-    --bg-overlay-chat:      var(--p5-bg)       !important;
-    --bg-overlay-1:         var(--p5-surface)  !important;
-    --bg-overlay-2:         var(--p5-surface)  !important;
-    --bg-overlay-3:         var(--p5-surface2) !important;
-    --chat-background-default: var(--p5-bg)    !important;
-    --home-background:         var(--p5-bg)    !important;
-    --channeltextarea-background: var(--p5-surface) !important;
-    --input-background:        var(--p5-surface) !important;
+    --background-base-low: var(--p5-bg) !important;
+    --background-base-lower: var(--p5-surface) !important;
+    --background-base-lowest: #060609 !important;
+    --background-surface-high: var(--p5-surface) !important;
+    --background-surface-higher: var(--p5-surface2) !important;
+    --background-surface-highest: var(--p5-surface2) !important;
+
+    --bg-base-primary: var(--p5-bg) !important;
+    --bg-base-secondary: var(--p5-surface) !important;
+    --bg-base-tertiary: #060609 !important;
+    --bg-surface-overlay: var(--p5-surface) !important;
+    --bg-surface-raised: var(--p5-surface2) !important;
+    --bg-overlay-chat: var(--p5-bg) !important;
+    --bg-overlay-1: var(--p5-surface) !important;
+    --bg-overlay-2: var(--p5-surface) !important;
+    --bg-overlay-3: var(--p5-surface2) !important;
+    --chat-background: var(--p5-bg) !important;
+    --chat-background-default: var(--p5-bg) !important;
+    --home-background: var(--p5-bg) !important;
     --custom-channel-members-bg: var(--p5-surface) !important;
+    --channeltextarea-background: var(--p5-surface) !important;
+    --input-background: var(--p5-surface) !important;
 
-    /* brand */
-    --brand-experiment:     var(--p5-red)  !important;
-    --brand-experiment-560: #FF3A49        !important;
-    --brand-500:            var(--p5-red)  !important;
-    --brand-560:            #FF3A49        !important;
+    --brand-experiment: var(--p5-red) !important;
+    --brand-experiment-560: var(--p5-accent) !important;
+    --brand-500: var(--p5-red) !important;
+    --brand-560: var(--p5-accent) !important;
 
-    /* teks */
-    --header-primary:   var(--p5-fg)   !important;
+    --header-primary: var(--p5-fg) !important;
     --header-secondary: var(--p5-gold) !important;
-    --text-normal:      var(--p5-fg)   !important;
-    --text-muted:       var(--p5-muted) !important;
-    --text-link:        var(--p5-gold) !important;
-    --text-brand:       var(--p5-red)  !important;
-    --text-positive:    #00E57A        !important;
-    --text-danger:      #FF4455        !important;
+    --text-normal: var(--p5-fg) !important;
+    --text-muted: var(--p5-muted) !important;
+    --text-link: var(--p5-gold) !important;
+    --text-brand: var(--p5-red) !important;
+    --text-positive: var(--p5-success) !important;
+    --text-danger: var(--p5-urgent) !important;
 
-    /* interaktif */
-    --interactive-normal:   var(--p5-fg)   !important;
-    --interactive-hover:    var(--p5-gold) !important;
-    --interactive-active:   var(--p5-fg)   !important;
-    --channels-default:     var(--p5-muted) !important;
-    --channel-icon:         var(--p5-red)  !important;
+    --interactive-normal: var(--p5-fg) !important;
+    --interactive-hover: var(--p5-gold) !important;
+    --interactive-active: var(--p5-fg) !important;
+    --channels-default: var(--p5-muted) !important;
+    --channel-icon: var(--p5-red) !important;
 
-    /* mention, status */
-    --mention-background:   rgba(var(--p5-red-rgb), 0.20) !important;
-    --mention-foreground:   var(--p5-gold) !important;
-    --status-danger:        #FF4455        !important;
-    --status-positive:      #00E57A        !important;
-    --status-warning:       var(--p5-gold) !important;
+    --mention-background: rgba(var(--p5-red-rgb), 0.22) !important;
+    --mention-foreground: var(--p5-gold) !important;
+    --status-danger: var(--p5-urgent) !important;
+    --status-positive: var(--p5-success) !important;
+    --status-warning: var(--p5-gold) !important;
 
-    /* scrollbar tipis */
-    --scrollbar-thin-thumb: rgba(var(--p5-red-rgb), 0.6) !important;
+    --scrollbar-thin-thumb: rgba(var(--p5-red-rgb), 0.65) !important;
     --scrollbar-thin-track: transparent !important;
-    --scrollbar-auto-thumb: rgba(var(--p5-red-rgb), 0.6) !important;
+    --scrollbar-auto-thumb: rgba(var(--p5-red-rgb), 0.65) !important;
     --scrollbar-auto-track: var(--p5-surface) !important;
 }
 
-/* ============================================================
-   layout utama — background bersih, garis diagonal SANGAT tipis
-   ============================================================ */
-[class*="appMount_"],
-[class*="app_"] {
-    background-color: var(--p5-bg) !important;
+/* ganti ikon discord di pojok kiri atas (home / direct messages) dengan ikon phantomshell transparan tanpa kotak hitam */
+[data-list-item-id="guildsnav___home"],
+[data-list-item-id="guildsnav___home"] [class*="childWrapper_"],
+[class*="tutorialContainer_"] [class*="wrapper_"],
+[class*="tutorialContainer_"] [class*="childWrapper_"],
+[class*="tutorialContainer_"] [class*="childWrapperNoHoverBg_"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-/* area chat & content — pola diagonal khas metaverse p5 */
+[class*="tutorialContainer_"] foreignObject {
+    mask: none !important;
+    -webkit-mask: none !important;
+}
+
+[data-list-item-id="guildsnav___home"] svg,
+[class*="tutorialContainer_"] [class*="childWrapper_"] svg {
+    background-image: var(--p5-logo-url) !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    width: 44px !important;
+    height: 44px !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.85)) !important;
+    transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), filter 0.15s ease !important;
+}
+
+[data-list-item-id="guildsnav___home"]:hover svg,
+[data-list-item-id="guildsnav___home"][class*="selected_"] svg,
+[class*="tutorialContainer_"] [class*="selected_"] svg {
+    transform: scale(1.1) rotate(-4deg) !important;
+    filter: drop-shadow(0 0 6px rgba(var(--p5-red-rgb), 0.75)) !important;
+}
+
+[data-list-item-id="guildsnav___home"] svg > *,
+[class*="tutorialContainer_"] [class*="childWrapper_"] svg > * {
+    display: none !important;
+}
+
+/* latar belakang utama seluruh aplikasi & area chat bertema persona 5 / phantomshell */
+body,
+#app-mount,
+[class*="appMount_"],
+[class*="app_"],
+[class*="bg_"],
+[class*="layers_"],
 [class*="chat_"],
-[class*="content_"][class*="chat_"],
+main[class*="chatContent_"],
+[class*="chatContent_"],
+[class*="messagesWrapper_"],
+[class*="noChannel_"],
+[class*="pageWrapper_"],
+[class*="tabBody_"],
 [class*="peopleColumn_"],
-[class*="nowPlayingColumn_"] > [class*="container_"] {
+[class*="nowPlayingColumn_"],
+[class*="nowPlayingColumn_"] > [class*="container_"],
+[class*="homeWrapper_"] {
     background-color: var(--p5-bg) !important;
+    background-image:
+        radial-gradient(circle at 82% 14%, rgba(var(--p5-red-rgb), 0.12) 0%, transparent 48%),
+        radial-gradient(circle at 18% 88%, rgba(var(--p5-red-rgb), 0.08) 0%, transparent 45%),
+        repeating-linear-gradient(
+            -45deg,
+            rgba(var(--p5-red-rgb), 0.065) 0px,
+            rgba(var(--p5-red-rgb), 0.065) 2px,
+            transparent 2px,
+            transparent 16px
+        ) !important;
+}
+
+/* pastikan wrapper dalam chat & form input bawah transparan agar motif p5 di chatContent_ terlihat */
+[class*="content_"] > [class*="chatContent_"] [class*="scroller_"],
+[class*="messagesWrapper_"] [class*="scroller_"],
+ol[class*="scrollerInner_"],
+form[class*="form_"],
+form[class*="form_"]::before,
+form[class*="form_"]::after,
+[class*="channelTextArea_"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* bilah server paling kiri (guilds rail) */
+nav[class*="guilds_"],
+[class*="guilds_"] [class*="tree_"],
+[class*="guilds_"] [class*="scroller_"] {
+    background-color: #07070A !important;
     background-image: repeating-linear-gradient(
         -45deg,
-        rgba(var(--p5-red-rgb), 0.055) 0px,
-        rgba(var(--p5-red-rgb), 0.055) 1px,
-        transparent 1px,
+        rgba(var(--p5-red-rgb), 0.04) 0px,
+        rgba(var(--p5-red-rgb), 0.04) 1.5px,
+        transparent 1.5px,
+        transparent 14px
+    ) !important;
+}
+
+nav[class*="guilds_"] {
+    border-right: 1.5px solid rgba(var(--p5-red-rgb), 0.45) !important;
+}
+
+/* sidebar daftar channel & dm di sebelah kiri */
+[class*="sidebar_"],
+[class*="sidebar_"] > nav[class*="container_"],
+[class*="sidebar_"] > [class*="container_"],
+[class*="privateChannels_"] {
+    background-color: var(--p5-surface) !important;
+    background-image:
+        linear-gradient(180deg, rgba(var(--p5-red-rgb), 0.09) 0%, transparent 220px),
+        repeating-linear-gradient(
+            -45deg,
+            rgba(var(--p5-red-rgb), 0.035) 0px,
+            rgba(var(--p5-red-rgb), 0.035) 1.5px,
+            transparent 1.5px,
+            transparent 16px
+        ) !important;
+}
+
+[class*="sidebar_"] {
+    border-right: 2px solid var(--p5-red) !important;
+}
+
+[class*="privateChannels_"] [class*="scroller_"],
+[class*="sidebar_"] [class*="scroller_"] {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* header nama server & bar atas channel */
+header[class*="header_"],
+[class*="title_"][class*="container_"],
+section[class*="container_"][class*="themed_"] {
+    background-color: var(--p5-surface) !important;
+    background-image: linear-gradient(90deg, rgba(var(--p5-red-rgb), 0.16) 0%, transparent 65%) !important;
+    border-bottom: 2px solid var(--p5-red) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.65) !important;
+}
+
+/* daftar member di sebelah kanan */
+[class*="membersWrap_"],
+[class*="members_"],
+[class*="members_"] > div {
+    background-color: var(--p5-surface) !important;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(var(--p5-red-rgb), 0.035) 0px,
+        rgba(var(--p5-red-rgb), 0.035) 1.5px,
+        transparent 1.5px,
         transparent 16px
     ) !important;
 }
 
-/* seluruh area konten utama — pola lebih kasar di layer bawah */
-[class*="appMount_"],
-[class*="app_"],
-[class*="layers_"] {
-    background-color: var(--p5-bg) !important;
-    background-image: repeating-linear-gradient(
-        -45deg,
-        rgba(var(--p5-red-rgb), 0.04) 0px,
-        rgba(var(--p5-red-rgb), 0.04) 1px,
-        transparent 1px,
-        transparent 18px
-    ) !important;
+[class*="membersWrap_"] {
+    border-left: 2px solid rgba(var(--p5-red-rgb), 0.55) !important;
 }
 
-/* ============================================================
-   sidebar kiri — daftar server & channel
-   ============================================================ */
-[class*="sidebar_"] {
-    background-color: var(--p5-surface) !important;
-    border-right: 1px solid rgba(var(--p5-red-rgb), 0.35) !important;
-}
-
-/* scroller di dalam sidebar — transparan */
-[class*="privateChannels_"],
-[class*="scroller_"] {
+[class*="member_"],
+[class*="memberInner_"] {
     background: transparent !important;
+    background-color: transparent !important;
+    border-radius: 3px !important;
+    transition: background-color 0.12s ease, transform 0.12s ease !important;
 }
 
-/* ============================================================
-   header atas channel/dm
-   ============================================================ */
-[class*="title_"][class*="container_"],
-section[class*="container_"][class*="themed_"] {
-    background-color: var(--p5-surface) !important;
-    border-bottom: 1px solid rgba(var(--p5-red-rgb), 0.5) !important;
-    box-shadow: none !important;
+[class*="member_"]:hover {
+    background-color: rgba(var(--p5-red-rgb), 0.18) !important;
+    border-left: 3px solid var(--p5-red) !important;
+    transform: translateX(3px) !important;
 }
 
-/* ============================================================
-   tab navigasi (Online, All, Pending)
-   hanya aktif/selected yang miring — bukan semua tab
-   ============================================================ */
+/* tab navigasi (Online, All, Pending) */
 [class*="topPill_"] [class*="item_"],
 [class*="tabBar_"] [class*="item_"] {
     border-radius: 3px !important;
@@ -165,11 +282,10 @@ section[class*="container_"][class*="themed_"] {
 
 [class*="topPill_"] [class*="item_"]:hover,
 [class*="tabBar_"] [class*="item_"]:hover {
-    background-color: rgba(var(--p5-red-rgb), 0.15) !important;
+    background-color: rgba(var(--p5-red-rgb), 0.18) !important;
     color: var(--p5-fg) !important;
 }
 
-/* tab yang sedang aktif — miring, merah */
 [class*="topPill_"] [class*="selected_"],
 [class*="tabBar_"] [class*="selected_"] {
     background-color: var(--p5-red) !important;
@@ -180,9 +296,9 @@ section[class*="container_"][class*="themed_"] {
     letter-spacing: 0.05em !important;
     transform: skewX(-8deg) !important;
     border-radius: 2px !important;
+    box-shadow: 3px 3px 0px var(--p5-gold) !important;
 }
 
-/* tombol Add Friend */
 [class*="addFriend_"] {
     background-color: var(--p5-red) !important;
     color: var(--p5-fg) !important;
@@ -190,103 +306,104 @@ section[class*="container_"][class*="themed_"] {
     border-radius: 3px !important;
 }
 
-/* ============================================================
-   sidebar channel — item hover & selected
-   hanya selected yang punya aksen warna keras
-   ============================================================ */
+/* item channel & dm di sidebar kiri */
 [class*="channel_"] [class*="interactive_"],
 [class*="channel_"] [class*="link_"] {
     border-radius: 3px !important;
     margin: 1px 6px !important;
     border-left: 2px solid transparent !important;
-    transition: background 0.12s ease, border-color 0.12s ease !important;
+    transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease !important;
 }
 
 [class*="channel_"]:hover [class*="interactive_"],
 [class*="channel_"]:hover [class*="link_"] {
-    background-color: rgba(var(--p5-red-rgb), 0.12) !important;
-    border-left-color: rgba(var(--p5-red-rgb), 0.6) !important;
+    background-color: rgba(var(--p5-red-rgb), 0.16) !important;
+    border-left-color: var(--p5-red) !important;
+    transform: translateX(2px) !important;
 }
 
-/* channel aktif — garis merah kiri, background subtle */
 [class*="selected_"] [class*="interactive_"],
 [class*="modeSelected_"] [class*="link_"] {
-    background-color: rgba(var(--p5-red-rgb), 0.22) !important;
+    background-color: rgba(var(--p5-red-rgb), 0.28) !important;
     border-left: 3px solid var(--p5-red) !important;
+    box-shadow: inset 0 -1px 0 var(--p5-gold) !important;
     color: var(--p5-fg) !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
 }
 
-/* ============================================================
-   daftar teman — kartu confidant bersih
-   ============================================================ */
+/* hover pesan di ruang chat */
+[class*="message_"]:hover {
+    background-color: rgba(var(--p5-red-rgb), 0.08) !important;
+}
+
+/* daftar teman (friends list) */
 [class*="peopleListItem_"] {
     background-color: var(--p5-surface) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    border-left: 3px solid rgba(var(--p5-red-rgb), 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-left: 3px solid var(--p5-red) !important;
     border-radius: 4px !important;
     margin: 4px 12px !important;
     padding: 8px 12px !important;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.7) !important;
     transition: all 0.13s ease !important;
 }
 
 [class*="peopleListItem_"]:hover {
     background-color: var(--p5-surface2) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-left: 3px solid var(--p5-red) !important;
+    border-color: var(--p5-red) !important;
+    border-left: 4px solid var(--p5-gold) !important;
+    box-shadow: 4px 4px 0px var(--p5-red) !important;
     transform: translateX(3px) !important;
 }
 
-/* ============================================================
-   kolom Active Now kanan
-   ============================================================ */
+/* kartu active now di kolom kanan */
 [class*="nowPlayingColumn_"] {
-    background-color: var(--p5-bg) !important;
-    border-left: 1px solid rgba(var(--p5-red-rgb), 0.25) !important;
+    border-left: 2px solid rgba(var(--p5-red-rgb), 0.45) !important;
 }
 
 [class*="itemCard_"] {
     background-color: var(--p5-surface) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border: 1.5px solid rgba(var(--p5-red-rgb), 0.45) !important;
     border-radius: 4px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.85) !important;
     transition: transform 0.13s ease, box-shadow 0.13s ease !important;
 }
 
 [class*="itemCard_"]:hover {
-    border-color: rgba(var(--p5-red-rgb), 0.6) !important;
-    box-shadow: 0 4px 16px rgba(var(--p5-red-rgb), 0.25) !important;
+    border-color: var(--p5-gold) !important;
+    box-shadow: 4px 4px 0px var(--p5-red) !important;
     transform: translateY(-2px) !important;
 }
 
-/* ============================================================
-   panel profil kiri bawah
-   ============================================================ */
-[class*="panels_"] {
+/* panel profil & voice di kiri bawah */
+[class*="panels_"],
+[class*="panels_"] > div {
     background-color: var(--p5-surface) !important;
-    border-top: 1px solid rgba(var(--p5-red-rgb), 0.35) !important;
 }
 
-/* ============================================================
-   kotak ketik pesan & search
-   ============================================================ */
+[class*="panels_"] {
+    border: 1.5px solid var(--p5-red) !important;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.85) !important;
+    border-radius: 4px !important;
+}
+
+/* kotak ketik pesan & search bar */
 [class*="searchBar_"],
 [class*="channelTextArea_"] [class*="scrollableContainer_"] {
     background-color: var(--p5-surface) !important;
-    border: 1px solid rgba(var(--p5-red-rgb), 0.4) !important;
+    border: 1.5px solid var(--p5-red) !important;
     border-radius: 4px !important;
-    transition: border-color 0.12s ease !important;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8) !important;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease !important;
 }
 
 [class*="searchBar_"]:focus-within,
 [class*="channelTextArea_"]:focus-within [class*="scrollableContainer_"] {
-    border-color: var(--p5-red) !important;
-    box-shadow: 0 0 0 2px rgba(var(--p5-red-rgb), 0.2) !important;
+    border-color: var(--p5-gold) !important;
+    box-shadow: 3px 3px 0px var(--p5-red) !important;
 }
 
-/* ============================================================
-   lencana notifikasi / badge — miring khas p5
-   ============================================================ */
+/* lencana angka notifikasi & indikator live */
 [class*="numberBadge_"],
 [class*="live_"] {
     background-color: var(--p5-red) !important;
