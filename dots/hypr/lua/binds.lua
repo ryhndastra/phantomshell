@@ -262,10 +262,18 @@ for i = 1, 10 do
     end)
 
     hl.bind(mod .. " + SHIFT + " .. key, function()
-        hl.dispatch(hl.dsp.window.move({ workspace = i, follow = false }))
-    end, { description = "Window: Send to Workspace " .. i })
+        hl.dispatch(hl.dsp.window.move({ workspace = i, follow = true }))
+    end, { description = "Window: Move to Workspace " .. i })
 
     hl.bind(mod .. " + SHIFT + code:" .. numpadcodes[i], function()
+        hl.dispatch(hl.dsp.window.move({ workspace = i, follow = true }))
+    end)
+
+    hl.bind(mod .. " + ALT + " .. key, function()
+        hl.dispatch(hl.dsp.window.move({ workspace = i, follow = false }))
+    end, { description = "Window: Send Silently to Workspace " .. i })
+
+    hl.bind(mod .. " + ALT + code:" .. numpadcodes[i], function()
         hl.dispatch(hl.dsp.window.move({ workspace = i, follow = false }))
     end)
 end
