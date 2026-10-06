@@ -45,6 +45,8 @@ Item {
         anchors.bottomMargin: -(root.showShadowOffset ? Math.abs(root.shadowOffsetY) : 0)
         visible: PhantomState.polygonMode
         antialiasing: true
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
 
         onPaint: {
             var ctx = getContext("2d")

@@ -135,7 +135,8 @@ Scope {
                 // pill tanggal & waktu ala persona 5 (klik buat buka popup kalender)
                 Item {
                     visible: PhantomState.showWeatherHud
-                    width: hudRow.implicitWidth + 24
+                    implicitWidth: hudRow.implicitWidth + 24
+                    width: implicitWidth
                     height: 30
 
                     P5SkewedCard {
@@ -208,8 +209,10 @@ Scope {
 
                 // indikator nomor workspace dan ikon aplikasi aktif
                 Item {
+                    id: wsContainer
                     visible: PhantomState.showWorkspaces
-                    width: wsRow.implicitWidth + 18
+                    implicitWidth: Math.max(wsRow.implicitWidth, wsRow.childrenRect.width) + 24
+                    width: implicitWidth
                     height: 30
 
                     Connections {
@@ -285,14 +288,13 @@ Scope {
                                 readonly property var appList: (PhantomState.workspaceApps && PhantomState.workspaceApps[String(wsId)])
                                     ? PhantomState.workspaceApps[String(wsId)]
                                     : []
+                                readonly property int maxIcons: 3
+                                readonly property var visibleApps: appList.slice(0, maxIcons)
                                 readonly property bool hasApps: appList.length > 0
 
-                                width: Math.max(isActive ? 28 : 22, wsInnerRow.implicitWidth + (hasApps ? 14 : 10))
+                                implicitWidth: Math.max(isActive ? 28 : 22, wsInnerRow.implicitWidth + (hasApps ? 14 : 10))
+                                width: implicitWidth
                                 height: 22
-
-                                Behavior on width {
-                                    NumberAnimation { duration: 180; easing.type: Easing.OutBack }
-                                }
 
                                 P5SkewedCard {
                                     anchors.fill: parent
@@ -322,9 +324,9 @@ Scope {
                                         font.weight: Font.Black
                                     }
 
-                                    // deretan ikon aplikasi yang terbuka di workspace ini
+                                    // deretan ikon aplikasi yang terbuka di workspace ini (maksimal tiga ikon)
                                     Repeater {
-                                        model: wsDel.appList
+                                        model: wsDel.visibleApps
                                         delegate: Item {
                                             required property var modelData
                                             width: 14
@@ -386,14 +388,13 @@ Scope {
                             readonly property var appList: (PhantomState.workspaceApps && PhantomState.workspaceApps["special"])
                                 ? PhantomState.workspaceApps["special"]
                                 : []
+                            readonly property int maxIcons: 3
+                            readonly property var visibleApps: appList.slice(0, maxIcons)
                             readonly property bool hasApps: appList.length > 0
 
-                            width: Math.max(isActive ? 68 : 26, velvetInnerRow.implicitWidth + 14)
+                            implicitWidth: Math.max(isActive ? 68 : 26, velvetInnerRow.implicitWidth + 14)
+                            width: implicitWidth
                             height: 22
-
-                            Behavior on width {
-                                NumberAnimation { duration: 200; easing.type: Easing.OutBack }
-                            }
 
                             P5SkewedCard {
                                 anchors.fill: parent
@@ -438,7 +439,7 @@ Scope {
                                 }
 
                                 Repeater {
-                                    model: velvetWsPill.appList
+                                    model: velvetWsPill.visibleApps
                                     delegate: Item {
                                         required property var modelData
                                         width: 14
@@ -485,8 +486,10 @@ Scope {
 
                 // deretan tombol utilitas tangkapan layar dan pemilih warna
                 Item {
+                    id: utilContainer
                     visible: PhantomState.showUtilButtons && (PhantomState.showUtilSnip || PhantomState.showUtilPicker || PhantomState.showUtilMic || PhantomState.showUtilDark)
-                    width: utilRow.implicitWidth + 20
+                    implicitWidth: utilRow.implicitWidth + 20
+                    width: implicitWidth
                     height: 30
 
                     P5SkewedCard {
@@ -508,7 +511,8 @@ Scope {
                         // tombol tangkapan layar area
                         Item {
                             visible: PhantomState.showUtilSnip
-                            width: snipBtnRow.implicitWidth + 14
+                            implicitWidth: 26
+                            width: 26
                             height: 22
 
                             P5SkewedCard {
@@ -520,20 +524,7 @@ Scope {
                                 skewPx: 4
                             }
 
-                            Row {
-                                id: snipBtnRow
-                                anchors.centerIn: parent
-                                spacing: 4
-                                P5Icon { anchors.verticalCenter: parent.verticalCenter; name: "snip"; size: 12; color: PhantomState.foreground }
-                                Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "SNIP"
-                                    color: PhantomState.foreground
-                                    font.pixelSize: 9
-                                    font.weight: Font.Black
-                                    font.italic: true
-                                }
-                            }
+                            P5Icon { anchors.centerIn: parent; name: "snip"; size: 12; color: PhantomState.foreground }
 
                             MouseArea {
                                 id: snipMouse
@@ -547,7 +538,8 @@ Scope {
                         // tombol pemilih warna layar
                         Item {
                             visible: PhantomState.showUtilPicker
-                            width: pickBtnRow.implicitWidth + 14
+                            implicitWidth: 26
+                            width: 26
                             height: 22
 
                             P5SkewedCard {
@@ -559,20 +551,7 @@ Scope {
                                 skewPx: 4
                             }
 
-                            Row {
-                                id: pickBtnRow
-                                anchors.centerIn: parent
-                                spacing: 4
-                                P5Icon { anchors.verticalCenter: parent.verticalCenter; name: "picker"; size: 12; color: PhantomState.secondary }
-                                Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "PICK"
-                                    color: PhantomState.foreground
-                                    font.pixelSize: 9
-                                    font.weight: Font.Black
-                                    font.italic: true
-                                }
-                            }
+                            P5Icon { anchors.centerIn: parent; name: "picker"; size: 12; color: PhantomState.secondary }
 
                             MouseArea {
                                 id: pickMouse
@@ -586,7 +565,7 @@ Scope {
                         // tombol toggle mute mic
                         Item {
                             visible: PhantomState.showUtilMic
-                            width: 24; height: 22
+                            implicitWidth: 24; width: 24; height: 22
                             P5Icon { anchors.centerIn: parent; name: "volume"; size: 12; color: PhantomState.foreground }
                             MouseArea {
                                 anchors.fill: parent
@@ -598,7 +577,7 @@ Scope {
                         // tombol ganti dark/light mode
                         Item {
                             visible: PhantomState.showUtilDark
-                            width: 24; height: 22
+                            implicitWidth: 24; width: 24; height: 22
                             P5Icon { anchors.centerIn: parent; name: PhantomState.darkMode ? "moon" : "sun"; size: 12; color: PhantomState.secondary }
                             MouseArea {
                                 anchors.fill: parent
@@ -610,12 +589,15 @@ Scope {
                 }
             }
 
-            // bagian tengah bar: dynamic island judul aplikasi aktif & tombol buka launcher
+            // bagian tengah bar: dynamic island dikunci di titik tengah layar dengan penyusutan lebar simetris
             Item {
                 id: dynamicIsland
-                visible: PhantomState.showDynamicIsland
+                readonly property real halfAvailLeft: (barWin.width / 2) - (leftRow.x + leftRow.width + 10)
+                readonly property real halfAvailRight: (rightRow.x - 10) - (barWin.width / 2)
+                readonly property real maxCenteredWidth: Math.max(0, 2 * Math.min(halfAvailLeft, halfAvailRight))
+                visible: PhantomState.showDynamicIsland && maxCenteredWidth >= 96
                 anchors.centerIn: parent
-                width: Math.min(340, Math.max(200, barWin.width - leftRow.width - rightRow.width - 48))
+                width: Math.min(340, maxCenteredWidth)
                 height: 30
 
                 P5SkewedCard {
