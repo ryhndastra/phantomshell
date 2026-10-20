@@ -103,7 +103,12 @@ Scope {
                 root.syncBusy = false
             }
         }
-        onExited: root.syncBusy = false
+        onExited: {
+            root.syncBusy = false
+            if (root.syncStatus === "CHECKING") {
+                root.syncStatus = "IDLE"
+            }
+        }
     }
 
     // proses pull + sync + reload lengkap
