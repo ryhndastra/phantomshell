@@ -12,6 +12,10 @@ hl.env("XCURSOR_THEME", "Persona5-Animated")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_THEME", "Persona5-Animated")
 hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("LIBVA_DRIVER_NAME", "iHD")
+hl.env("VDPAU_DRIVER", "va_gl")
+hl.env("MESA_VK_DEVICE_SELECT", "8086:46a3")
+hl.env("__GLX_VENDOR_LIBRARY_NAME", "mesa")
 
 hl.on("hyprland.start", function()
     -- penerapan tema dan ukuran kursor bawaan

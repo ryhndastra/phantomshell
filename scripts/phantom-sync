@@ -1,144 +1,379 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env python3
+# utilitas global sinkronisasi session.md dan memory.md lintas seluruh project ke mirror global dan obsidian vault
+import difflib
+import json
+import os
+import re
+import subprocess
+import sys
+import time
 
-# penentuan direktori repositori sumber phantomshell
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-DOTS_SRC="$REPO_ROOT/dots"
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
-NIXOS_DOTS="/etc/nixos/dotfiles"
+PROJECTS_ROOT = "/mnt/data/Projects"
+DEFAULT_PROJECT = "/mnt/data/Projects/Web/React/e-commerce_platform_pangandaran"
+ACTIVE_PROJECT_FILE = "/home/sho/.config/opencode/active_project.txt"
+GLOBAL_MEMORY_FILE = "/home/sho/.config/opencode/MEMORY.md"
+GLOBAL_SESSION_MIRROR = "/home/sho/.config/opencode/SESSION.md"
+OBSIDIAN_VAULT_ROOT = "/mnt/data/Obsidian/Obsidian Vaults/Phantom Syndicate"
+DISCORD_BIN = "/home/sho/.local/bin/phantom-discord"
 
-cmd="${1:-help}"
+PROJECT_MARKERS = (
+    "package.json",
+    "Cargo.toml",
+    "pubspec.yaml",
+    "go.mod",
+    "pyproject.toml",
+    "requirements.txt",
+    "composer.json",
+    "build.gradle",
+    "pom.xml",
+    "flake.nix",
+    "shell.nix",
+)
 
-emit() { printf '%s\n' "$1"; }
+SESSION_SCAFFOLD = """# Session Checkpoint
 
-# fungsi bantu sinkronisasi satu bundel direktori konfigurasi
-sync_bundle() {
-    local dest="$1"
-    emit "SYNC_START|Syncing dots ke ${dest}..."
+## Next Exact Step
+Belum ada tugas berjalan. tunggu perintah Sho dari Discord atau terminal.
 
-    for sub in quickshell hypr kitty phantomshell matugen cava wireplumber vesktop spicetify; do
-        if [ ! -d "$DOTS_SRC/$sub" ]; then
+## Done
+- [ ] belum ada checkpoint tercatat
+
+## Pending
+- [ ] isi checkpoint tiap selesai satu langkah penting
+"""
+
+MEMORY_SCAFFOLD = """# Project Memory
+
+Memori lokal proyek ini. ringkasan keputusan penting yang gak boleh hilang saat context window diringkas.
+
+## Konteks
+- file ini dibuat otomatis oleh phantom-sync / phantom-nixos-bridge saat proyek pertama kali terdeteksi
+- sinkron ke Obsidian Vault lewat duet Hermes(mem) & Haru(docs)
+
+## Catatan
+- tambahkan keputusan arsitektur, temuan bug, atau konvensi yang perlu diingat
+"""
+
+
+def looks_like_project(project_dir: str) -> bool:
+    if not os.path.isdir(project_dir):
+        return False
+    if os.path.isdir(os.path.join(project_dir, ".git")):
+        return True
+    if os.path.isdir(os.path.join(project_dir, ".opencode")):
+        return True
+    for marker in PROJECT_MARKERS:
+        if os.path.exists(os.path.join(project_dir, marker)):
+            return True
+    return False
+
+
+def ensure_session_scaffold(project_dir: str) -> bool:
+    if not looks_like_project(project_dir):
+        return False
+    created = False
+    oc_dir = os.path.join(project_dir, ".opencode")
+    s_file = os.path.join(oc_dir, "SESSION.md")
+    m_file = os.path.join(oc_dir, "MEMORY.md")
+    try:
+        if not os.path.exists(s_file):
+            os.makedirs(oc_dir, exist_ok=True)
+            with open(s_file, "w", encoding="utf-8") as f:
+                f.write(SESSION_SCAFFOLD)
+            created = True
+        if not os.path.exists(m_file):
+            os.makedirs(oc_dir, exist_ok=True)
+            with open(m_file, "w", encoding="utf-8") as f:
+                f.write(MEMORY_SCAFFOLD)
+            created = True
+    except Exception:
+        pass
+    return created
+
+
+def list_all_project_dirs(scaffold: bool = True) -> list[str]:
+    result = []
+    if not os.path.isdir(PROJECTS_ROOT):
+        return result
+    for root, dirs, _ in os.walk(PROJECTS_ROOT):
+        depth = root[len(PROJECTS_ROOT):].count(os.sep)
+        if depth >= 3:
+            dirs[:] = []
             continue
-        fi
-        if [ -L "$dest/$sub" ]; then
-            emit "SYNC_SKIP|${dest}/${sub} adalah symlink nix-store (dilewati, disinkronkan via /etc/nixos/dotfiles)"
-            continue
-        fi
-        mkdir -p "$dest/$sub"
-        local flags="-a"
-        if [ "$sub" = "quickshell" ] || [ "$sub" = "matugen" ]; then
-            flags="-a --delete"
-        elif [ "$sub" = "hypr" ]; then
-            flags="-a --delete --exclude=monitors.lua"
-        fi
-        if rsync $flags "$DOTS_SRC/$sub/" "$dest/$sub/" 2>&1 | head -n 20 | while IFS= read -r l; do emit "SYNC_LOG|$l"; done; then
-            emit "SYNC_OK|${sub} -> ${dest}/${sub}"
-        else
-            emit "SYNC_WARN|${sub} rsync warning pada ${dest}"
-        fi
-    done
-}
+        dirs[:] = [
+            d for d in dirs
+            if not d.startswith(".") and d not in ("node_modules", "target", "vendor", "dist", "build", "__pycache__")
+        ]
+        for d in dirs:
+            full = os.path.join(root, d)
+            if looks_like_project(full):
+                result.append(full)
+                if scaffold:
+                    ensure_session_scaffold(full)
+    return sorted(set(result))
 
-case "$cmd" in
-    check-remote)
-        cd "$REPO_ROOT"
-        git fetch origin main --quiet 2>/dev/null || { emit "ERR|Gagal fetch remote"; exit 0; }
-        LOCAL=$(git rev-parse HEAD 2>/dev/null)
-        REMOTE=$(git rev-parse origin/main 2>/dev/null)
-        BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-        AHEAD=$(git rev-list origin/main..HEAD --count 2>/dev/null || echo 0)
-        BEHIND=$(git rev-list HEAD..origin/main --count 2>/dev/null || echo 0)
-        COMMIT_MSG=$(git log -1 --format='%s' origin/main 2>/dev/null | head -c 80)
-        DATE=$(git log -1 --format='%ar' origin/main 2>/dev/null)
-        emit "REMOTE_CHECK|${BRANCH}|${LOCAL:0:7}|${REMOTE:0:7}|${AHEAD}|${BEHIND}|${COMMIT_MSG}|${DATE}"
-        ;;
 
-    pull)
-        cd "$REPO_ROOT"
-        BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-        BEFORE=$(git rev-parse HEAD 2>/dev/null)
-        emit "PULL_START|Fetching latest commits from origin/${BRANCH}..."
-        if ! git pull --rebase origin "$BRANCH" 2>&1 | while IFS= read -r line; do emit "PULL_LOG|${line}"; done; then
-            emit "ERR|git pull gagal, cek koneksi atau ada conflict"
-            exit 0
-        fi
-        AFTER=$(git rev-parse HEAD 2>/dev/null)
-        if [ "$BEFORE" = "$AFTER" ]; then
-            emit "PULL_DONE|ALREADY_LATEST|Udah di commit terbaru: ${AFTER:0:7}"
-        else
-            COUNT=$(git rev-list "${BEFORE}..${AFTER}" --count 2>/dev/null || echo 1)
-            NEWMSG=$(git log -1 --format='%s' 2>/dev/null | head -c 80)
-            emit "PULL_DONE|UPDATED|${COUNT} commit baru • ${AFTER:0:7} • ${NEWMSG}"
-        fi
-        ;;
+def resolve_project_dir(hint: str = "") -> str:
+    all_dirs = list_all_project_dirs(scaffold=True)
+    if hint:
+        clean = hint.strip().rstrip("/")
+        if os.path.isdir(clean) and looks_like_project(clean):
+            return os.path.abspath(clean)
+        lower_clean = clean.lower()
+        name_map = {os.path.basename(p).lower(): p for p in all_dirs}
+        rel_map = {os.path.relpath(p, PROJECTS_ROOT).lower(): p for p in all_dirs}
+        if lower_clean in name_map:
+            return name_map[lower_clean]
+        if lower_clean in rel_map:
+            return rel_map[lower_clean]
+        matches = difflib.get_close_matches(lower_clean, list(name_map.keys()), n=1, cutoff=0.55)
+        if matches:
+            return name_map[matches[0]]
+        for k, p in name_map.items():
+            if lower_clean in k or k in lower_clean:
+                return p
 
-    sync)
-        CUSTOM_TARGET="${2:-}"
-        if [ -n "$CUSTOM_TARGET" ]; then
-            sync_bundle "$CUSTOM_TARGET"
-        else
-            # sinkronisasi ke /etc/nixos/dotfiles jika tersedia dan dapat ditulis
-            if [ -d "$NIXOS_DOTS" ] && [ -w "$NIXOS_DOTS" ]; then
-                sync_bundle "$NIXOS_DOTS"
-                mkdir -p "$NIXOS_DOTS/scripts"
-                cp -f "$REPO_ROOT/scripts/phantomshell" "$NIXOS_DOTS/scripts/phantomshell"
-                cp -f "$REPO_ROOT/scripts/phantom-sync" "$NIXOS_DOTS/scripts/phantom-sync"
-                cp -f "$REPO_ROOT/scripts/sync-app-themes.sh" "$NIXOS_DOTS/scripts/sync-app-themes.sh"
-                chmod +x "$NIXOS_DOTS/scripts/phantomshell" "$NIXOS_DOTS/scripts/phantom-sync" "$NIXOS_DOTS/scripts/sync-app-themes.sh"
-                emit "SYNC_OK|scripts -> ${NIXOS_DOTS}/scripts"
-            fi
+    cwd = os.path.abspath(os.getcwd())
+    if cwd.startswith(PROJECTS_ROOT) and looks_like_project(cwd):
+        return cwd
 
-            # sinkronisasi ke ~/.config untuk setiap folder yang bukan symlink nix-store
-            if [ -w "$CONFIG_DIR" ]; then
-                sync_bundle "$CONFIG_DIR"
-            fi
-        fi
+    if os.path.exists(ACTIVE_PROJECT_FILE):
+        try:
+            with open(ACTIVE_PROJECT_FILE, "r", encoding="utf-8") as f:
+                saved = f.read().strip()
+                if saved and os.path.isdir(saved):
+                    return os.path.abspath(saved)
+        except Exception:
+            pass
 
-        # pasang kursor persona5-animated dan skrip cli ke direktori lokal pengguna
-        mkdir -p "$HOME/.local/share/icons" "$HOME/.local/bin"
-        rsync -a "$DOTS_SRC/icons/Persona5-Animated" "$HOME/.local/share/icons/" 2>/dev/null || true
-        chmod +x "$REPO_ROOT/scripts/sync-app-themes.sh" 2>/dev/null || true
-        ln -sf "$REPO_ROOT/scripts/phantomshell" "$HOME/.local/bin/phantomshell"
-        ln -sf "$REPO_ROOT/scripts/phantom-sync" "$HOME/.local/bin/phantom-sync"
-        ln -sf "$REPO_ROOT/scripts/sync-app-themes.sh" "$HOME/.local/bin/phantom-sync-apps"
-        "$REPO_ROOT/scripts/sync-app-themes.sh" 2>/dev/null || true
-        emit "SYNC_OK|CLI, Persona5 cursors, Vesktop & Spicetify themes installed"
-        emit "SYNC_DONE|Sinkronisasi selesai"
-        ;;
+    return DEFAULT_PROJECT
 
-    pull-sync)
-        TARGET="${2:-}"
-        "$0" pull
-        if [ -n "$TARGET" ]; then
-            "$0" sync "$TARGET"
-        else
-            "$0" sync
-        fi
-        emit "RELOAD_START|Reloading Hyprland config..."
-        hyprctl reload >/dev/null 2>&1 || true
-        emit "RELOAD_DONE|Phantomshell berhasil disinkronkan"
-        ;;
 
-    status)
-        cd "$REPO_ROOT"
-        BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-        COMMIT=$(git rev-parse HEAD 2>/dev/null)
-        DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-        MSG=$(git log -1 --format='%s' 2>/dev/null | head -c 80)
-        DATE=$(git log -1 --format='%ar' origin/main 2>/dev/null || git log -1 --format='%ar' 2>/dev/null)
-        emit "STATUS|${BRANCH}|${COMMIT:0:7}|${DIRTY}|${MSG}|${DATE}"
-        ;;
+def enrich_wikilinks(text: str) -> str:
+    replacements = [
+        (r"\bAGY\(lead\)", "[[AGY (Lead)|AGY(lead)]]"),
+        (r"\bMakoto\(pm\)", "[[Makoto (PM)|Makoto(pm)]]"),
+        (r"\bRen\(fs\)", "[[Ren (FS)|Ren(fs)]]"),
+        (r"\bFutaba\(be\)", "[[Futaba (BE)|Futaba(be)]]"),
+        (r"\bAnn\(fe\)", "[[Ann (FE)|Ann(fe)]]"),
+        (r"\bYusuke\(uiux\)", "[[Yusuke (UIUX)|Yusuke(uiux)]]"),
+        (r"\bKasumi\(anim\)", "[[Kasumi (Anim)|Kasumi(anim)]]"),
+        (r"\bAkechi\(red\)", "[[Akechi (Red)|Akechi(red)]]"),
+        (r"\bMorgana\(ps\)", "[[Morgana (PS)|Morgana(ps)]]"),
+        (r"\bRyuji\(qa\)", "[[Ryuji (QA)|Ryuji(qa)]]"),
+        (r"\bHaru\(docs\)", "[[Haru (Docs)|Haru(docs)]]"),
+        (r"\bHermes\(mem\)", "[[Hermes (Mem)|Hermes(mem)]]"),
+    ]
+    out = text
+    for pat, rep in replacements:
+        out = re.sub(pat, rep, out)
+    out = re.sub(r"\n{3,}", "\n\n", out)
+    return out
 
-    *)
-        cat <<EOF
-phantom-sync — phantomshell updater & sync tool
-usage:
-  phantom-sync status           tampilkan git status repo
-  phantom-sync check-remote     cek update di github tanpa pull
-  phantom-sync pull             tarik commit terbaru (git pull --rebase)
-  phantom-sync sync [target]    rsync dots/ ke /etc/nixos/dotfiles & ~/.config
-  phantom-sync pull-sync        pull + sync sekaligus
-EOF
-        ;;
-esac
+
+def atomic_write(path: str, content: str) -> None:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = f"{path}.tmp.{os.getpid()}"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(content)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+
+def run_global_sync(target_hint: str = "") -> dict:
+    active_proj = resolve_project_dir(target_hint)
+    ensure_session_scaffold(active_proj)
+    try:
+        atomic_write(ACTIVE_PROJECT_FILE, active_proj + "\n")
+    except Exception:
+        pass
+
+    ts_now = time.strftime("%Y-%m-%d %H:%M:%S")
+    all_projects = list_all_project_dirs(scaffold=True)
+    if active_proj not in all_projects and os.path.isdir(active_proj):
+        all_projects.append(active_proj)
+        all_projects.sort()
+
+    session_entries = []
+    for p in all_projects:
+        sf = os.path.join(p, ".opencode", "SESSION.md")
+        mf = os.path.join(p, ".opencode", "MEMORY.md")
+        sc = ""
+        mc = ""
+        if os.path.exists(sf):
+            try:
+                with open(sf, "r", encoding="utf-8", errors="replace") as f:
+                    sc = f.read().strip()
+            except Exception:
+                pass
+        if os.path.exists(mf):
+            try:
+                with open(mf, "r", encoding="utf-8", errors="replace") as f:
+                    mc = f.read().strip()
+            except Exception:
+                pass
+        if sc or mc:
+            session_entries.append((p, sc, mc))
+
+    # 1. sinkronkan <active_project>/.opencode/SESSION.md ke mirror global ~/.config/opencode/SESSION.md
+    active_sf = os.path.join(active_proj, ".opencode", "SESSION.md")
+    active_session_raw = ""
+    if os.path.exists(active_sf):
+        with open(active_sf, "r", encoding="utf-8", errors="replace") as f:
+            active_session_raw = f.read().strip()
+
+    mirror_saved_bytes = 0
+    mirror_saved_lines = 0
+    if active_session_raw:
+        mirror_header = (
+            f"<!-- MIRROR GLOBAL OTOMATIS — JANGAN EDIT LANGSUNG -->\n"
+            f"<!-- Source of Truth: {active_sf} | Disinkronkan: {ts_now} -->\n\n"
+        )
+        mirror_body = mirror_header + active_session_raw + "\n"
+        atomic_write(GLOBAL_SESSION_MIRROR, mirror_body)
+        mirror_saved_bytes = len(mirror_body.encode("utf-8"))
+        mirror_saved_lines = mirror_body.count("\n")
+
+    # 2. sinkronkan global MEMORY.md secara utuh (zero truncation) ke Obsidian Vault
+    global_mem_raw = ""
+    if os.path.exists(GLOBAL_MEMORY_FILE):
+        with open(GLOBAL_MEMORY_FILE, "r", encoding="utf-8", errors="replace") as f:
+            global_mem_raw = f.read().strip()
+
+    os.makedirs(OBSIDIAN_VAULT_ROOT, exist_ok=True)
+    projects_vault_dir = os.path.join(OBSIDIAN_VAULT_ROOT, "Projects")
+    os.makedirs(projects_vault_dir, exist_ok=True)
+
+    mem_vault_file = os.path.join(OBSIDIAN_VAULT_ROOT, "04 - Global Memory (Hermes Mirror).md")
+    mem_vault_bytes = 0
+    if global_mem_raw:
+        proj_links_str = " • ".join(f"[[Project - {os.path.basename(p)}]]" for p, _, _ in session_entries)
+        mem_doc = (
+            "---\ntags:\n  - phantom-syndicate\n  - memory\n  - hermes\n  - haru\n"
+            f"last_synced: \"{ts_now}\"\nactive_project: \"{active_proj}\"\n---\n"
+            "# 04 - Global Memory (Hermes & Haru Mirror)\n\n"
+            "Terhubung ke: [[00 - Phantom Syndicate Hub (MOC)]] | [[01 - Roster & Role Tags]] | [[03 - Arsitektur & Cara Sinkronisasi Session]] | [[Hermes (Mem)]] | [[Haru (Docs)]] | [[AGY (Lead)]]\n\n"
+            f"**Proyek Terkait**: {proj_links_str}\n"
+            f"**Proyek Aktif Saat Ini**: `[[Project - {os.path.basename(active_proj)}]]` (`{active_proj}`)\n"
+            f"**File Asli**: `{GLOBAL_MEMORY_FILE}` *(disalin utuh 100% zero-truncation pada `{ts_now}`)*\n\n---\n\n"
+            + enrich_wikilinks(global_mem_raw)
+            + "\n"
+        )
+        atomic_write(mem_vault_file, mem_doc)
+        mem_vault_bytes = len(mem_doc.encode("utf-8"))
+
+    # 3. sinkronkan setiap project di /mnt/data/Projects ke Obsidian Vault Projects/Project - <nama>.md
+    synced_projects = []
+    active_vault_note = ""
+    active_vault_bytes = 0
+    active_vault_lines = 0
+
+    for p_path, s_content, m_content in session_entries:
+        p_name = os.path.basename(p_path.rstrip("/"))
+        p_note_path = os.path.join(projects_vault_dir, f"Project - {p_name}.md")
+        is_active = os.path.abspath(p_path) == os.path.abspath(active_proj)
+        status_badge = "AKTIF SAAT INI" if is_active else "TERSIMPAN"
+        agent_links = (
+            "[[AGY (Lead)]] • [[Makoto (PM)]] • [[Ren (FS)]] • [[Futaba (BE)]] • "
+            "[[Ann (FE)]] • [[Yusuke (UIUX)]] • [[Kasumi (Anim)]] • [[Akechi (Red)]] • "
+            "[[Morgana (PS)]] • [[Ryuji (QA)]] • [[Haru (Docs)]] • [[Hermes (Mem)]]"
+        )
+        mem_section = ""
+        if m_content.strip():
+            mem_section = (
+                "\n\n---\n\n"
+                "## Local Project Memory (`.opencode/MEMORY.md`)\n\n"
+                f"{enrich_wikilinks(m_content.strip())}\n"
+            )
+        p_doc = (
+            f"---\ntags:\n  - phantom-syndicate\n  - project-session\n  - {p_name.lower()}\n"
+            f"project_path: \"{p_path}\"\nstatus: \"{status_badge}\"\nlast_synced: \"{ts_now}\"\n---\n"
+            f"# Project - {p_name} (`{status_badge}`)\n\n"
+            "Terhubung ke: [[00 - Phantom Syndicate Hub (MOC)]] | [[04 - Global Memory (Hermes Mirror)]] | [[02 - Panduan Discord War Room & Perintah]] | [[Hermes (Mem)]] | [[Haru (Docs)]]\n\n"
+            f"- **Lokasi Project di NixOS**: `{p_path}`\n"
+            f"- **File Session Asli**: `{p_path}/.opencode/SESSION.md`\n"
+            f"- **File Memory Lokal**: `{p_path}/.opencode/MEMORY.md`\n"
+            f"- **Terakhir Disinkronkan**: `{ts_now}`\n"
+            f"- **Cara Buka di Terminal**: `cd {p_path} && oc`\n"
+            f"- **Cara Pindah dari Discord**: `!dev {p_name}`\n"
+            f"- **Cara Sync Kapan Saja**: `/sync` (TUI) atau `!sync` (Discord)\n"
+            f"- **Squad Terlibat**: {agent_links}\n\n---\n\n"
+            + enrich_wikilinks(s_content.strip() or "(belum ada session)")
+            + mem_section
+            + "\n"
+        )
+        atomic_write(p_note_path, p_doc)
+        b_len = len(p_doc.encode("utf-8"))
+        l_cnt = p_doc.count("\n")
+        synced_projects.append({
+            "name": p_name,
+            "path": p_path,
+            "vault_note": p_note_path,
+            "active": is_active,
+            "bytes": b_len,
+            "lines": l_cnt,
+        })
+        if is_active:
+            active_vault_note = p_note_path
+            active_vault_bytes = b_len
+            active_vault_lines = l_cnt
+
+    return {
+        "ok": True,
+        "timestamp": ts_now,
+        "active_project": active_proj,
+        "active_project_name": os.path.basename(active_proj.rstrip("/")),
+        "active_session_source": active_sf,
+        "global_session_mirror": GLOBAL_SESSION_MIRROR,
+        "global_session_mirror_bytes": mirror_saved_bytes,
+        "global_session_mirror_lines": mirror_saved_lines,
+        "global_memory_vault": mem_vault_file,
+        "global_memory_vault_bytes": mem_vault_bytes,
+        "active_vault_note": active_vault_note,
+        "active_vault_bytes": active_vault_bytes,
+        "active_vault_lines": active_vault_lines,
+        "total_projects_synced": len(synced_projects),
+        "projects": synced_projects,
+    }
+
+
+def main():
+    args = [a for a in sys.argv[1:] if a not in ("--broadcast", "--json")]
+    broadcast = "--broadcast" in sys.argv
+    as_json = "--json" in sys.argv
+    hint = args[0] if args else ""
+
+    res = run_global_sync(hint)
+    if as_json:
+        print(json.dumps(res, indent=2, ensure_ascii=False))
+    else:
+        print(f"=== PHANTOM GLOBAL SYNC COMPLETE ({res['timestamp']}) ===")
+        print(f"Active Project       : {res['active_project']} ({res['active_project_name']})")
+        print(f"Source SESSION.md    : {res['active_session_source']}")
+        print(f"Global Mirror        : {res['global_session_mirror']} ({res['global_session_mirror_bytes']} bytes, {res['global_session_mirror_lines']} lines)")
+        print(f"Active Vault Note    : {res['active_vault_note']} ({res['active_vault_bytes']} bytes, {res['active_vault_lines']} lines)")
+        print(f"Global Memory Vault  : {res['global_memory_vault']} ({res['global_memory_vault_bytes']} bytes)")
+        print(f"Total Projects Synced: {res['total_projects_synced']} project(s) across {PROJECTS_ROOT}")
+
+    if broadcast and os.path.isfile(DISCORD_BIN):
+        hermes_msg = (
+            f"📚 **`[GLOBAL SYNC — HERMES MEMORY KEEPER]`**\n"
+            f"Tenang saja, **Sho**. Seluruh catatan sesi dan memori lintas project sudah kusinkronkan dengan presisi pada `{res['timestamp']}` tanpa perlu berpindah workspace:\n"
+            f"- **Project Aktif**: `{res['active_project']}`\n"
+            f"- **Source `SESSION.md`**: `{res['active_session_source']}`\n"
+            f"- **Mirror `~/.config/opencode/SESSION.md`**: `{res['global_session_mirror_bytes']} bytes` (`{res['global_session_mirror_lines']} baris`, tersinkronisasi 100%)\n"
+            f"- **Total Project Tersinkronisasi**: `{res['total_projects_synced']} project` di `{PROJECTS_ROOT}`"
+        )
+        haru_msg = (
+            f"🪓 **`[OBSIDIAN VAULT CURATION — HARU DOCS]`**\n"
+            f"Seluruh dokumentasi dan jejaring `[[WikiLinks]]` Graph View di Obsidian Vault juga sudah kurapikan dengan tenang untukmu, **Sho**~ 🌸\n"
+            f"- **Catatan Project Aktif**: `{res['active_vault_note']}` (`{res['active_vault_bytes']} bytes`, `{res['active_vault_lines']} baris`, lengkap dengan blok `Local Project Memory`)\n"
+            f"- **Global Memory Mirror**: `{res['global_memory_vault']}` (`{res['global_memory_vault_bytes']} bytes`, utuh 100% tanpa terpotong)"
+        )
+        subprocess.run([DISCORD_BIN, "--say", "hermes", hermes_msg], check=False, timeout=15)
+        subprocess.run([DISCORD_BIN, "--say", "haru", haru_msg], check=False, timeout=15)
+
+
+if __name__ == "__main__":
+    main()

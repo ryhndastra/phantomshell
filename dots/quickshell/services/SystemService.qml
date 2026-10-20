@@ -227,7 +227,14 @@ Scope {
             "DISK=$(df / --output=pcent 2>/dev/null | tail -1 | tr -dc '0-9'); " +
             "TEMP=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null | awk '{printf \"%.0f\", $1/1000}' || echo 45); " +
             "BAT=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n1 || echo 100); " +
-            "GPU=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -n1 | tr -dc '0-9'); " +
+            "GPU=0; " +
+            "if [ -f /sys/devices/pci0000:00/0000:00:02.0/drm/card1/gt_act_freq_mhz ]; then " +
+            "  ACT=$(cat /sys/devices/pci0000:00/0000:00:02.0/drm/card1/gt_act_freq_mhz 2>/dev/null || echo 0); " +
+            "  MAX=$(cat /sys/devices/pci0000:00/0000:00:02.0/drm/card1/gt_max_freq_mhz 2>/dev/null || echo 1200); " +
+            "  [ \"$MAX\" -gt 0 ] && GPU=$(( ACT * 100 / MAX )); " +
+            "elif [ -f /sys/bus/pci/devices/0000:01:00.0/power/runtime_status ] && [ \"$(cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status 2>/dev/null)\" = \"active\" ]; then " +
+            "  GPU=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -n1 | tr -dc '0-9'); " +
+            "fi; " +
             "[ -z \"$GPU\" ] && GPU=0; " +
             "echo \"${CPU_LINE} ${RAM} ${DISK} ${TEMP} ${BAT} ${GPU}\""
         ]

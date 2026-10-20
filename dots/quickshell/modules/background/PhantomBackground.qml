@@ -154,12 +154,10 @@ Scope {
                     bgScope.leftBars = l
                     bgScope.rightBars = r
                     cavaSilenceTimer.restart()
-                } else {
-                    bgScope.hasLiveAudio = false
-                    bgScope.leftBars = []
-                    bgScope.rightBars = []
+                    bgScope.cavaTick++
+                } else if (bgScope.hasLiveAudio) {
+                    // Biarkan cavaSilenceTimer membersihkan bars dan memicu satu kali repaint penutup
                 }
-                bgScope.cavaTick++
             }
         }
     }

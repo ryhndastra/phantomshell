@@ -4,3 +4,12 @@ result-*
 *.swp
 *~
 .DS_Store
+
+# User private docs & tools
+DESIGN.md
+**/DESIGN.md
+.opencode/
+dots/opencode/
+scripts/phantom-discord
+scripts/phantom-nixos-bridge
+

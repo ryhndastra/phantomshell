@@ -33,6 +33,16 @@ Item {
         { label: "CHARM",     sys: "TEMP", pct: PhantomState.tempPct }
     ]
 
+    // hentikan repaint saat panel tidak terlihat
+    property bool animActive: visible
+
+    Timer {
+        interval: 500
+        running: root.animActive
+        repeat: true
+        onTriggered: radarCanvas.requestPaint()
+    }
+
     Connections {
         target: PhantomState
         function onPrimaryChanged() { radarCanvas.requestPaint() }
@@ -78,31 +88,26 @@ Item {
                     Math.max(0.32, Math.min(1.0, root.animTemp / 100.0))
                 ]
 
-                // bayangan bintang aksen di belakang
-                traceStar(ctx, cx + 4, cy + 4, maxR * 1.04, 0.44, -0.04)
-                ctx.fillStyle = PhantomState.primary
-                ctx.fill()
-
-                // bidang dasar bintang gelap dengan garis tepi terang
+                // bidang dasar bintang gelap, border luar tipis
                 traceStar(ctx, cx, cy, maxR, 0.44, 0)
                 ctx.fillStyle = "#08090D"
                 ctx.fill()
-                ctx.strokeStyle = PhantomState.borderLight
-                ctx.lineWidth = 2.6
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.35)"
+                ctx.lineWidth = 1
                 ctx.stroke()
 
-                // garis bantu skala bintang bagian dalam
+                // grid bintang bagian dalam
                 var starRings = [0.72, 0.44]
                 for (var rIdx = 0; rIdx < starRings.length; rIdx++) {
                     traceStar(ctx, cx, cy, maxR * starRings[rIdx], 0.44, 0)
-                    ctx.strokeStyle = (rIdx === 0) ? "rgba(255, 255, 255, 0.35)" : "rgba(255, 255, 255, 0.22)"
-                    ctx.lineWidth = 1.4
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)"
+                    ctx.lineWidth = 1
                     ctx.stroke()
                 }
 
                 // garis sumbu radial dari titik pusat ke tiap sudut bintang
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.25)"
-                ctx.lineWidth = 1.1
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"
+                ctx.lineWidth = 1
                 for (var j = 0; j < 10; j++) {
                     var a = -Math.PI / 2 + (j * Math.PI / 5)
                     var len = (j % 2 === 0) ? maxR : (maxR * 0.44)
@@ -133,19 +138,11 @@ Item {
                 }
                 ctx.closePath()
                 ctx.fillStyle = PhantomState.secondary
-                ctx.globalAlpha = 0.85
+                ctx.globalAlpha = 0.8
                 ctx.fill()
                 ctx.globalAlpha = 1.0
-                ctx.strokeStyle = "#FFFFFF"
-                ctx.lineWidth = 2.4
-                ctx.stroke()
-
-                // bintang inti di titik pusat
-                traceStar(ctx, cx, cy, maxR * 0.18, 0.44, 0)
-                ctx.fillStyle = PhantomState.primary
-                ctx.fill()
-                ctx.strokeStyle = "#FFFFFF"
-                ctx.lineWidth = 1.4
+                ctx.strokeStyle = PhantomState.foreground
+                ctx.lineWidth = 1
                 ctx.stroke()
 
                 // titik indikator di ujung tiap nilai statistik
@@ -154,11 +151,11 @@ Item {
                     var nx = cx + Math.cos(na) * (maxR * vals[n])
                     var ny = cy + Math.sin(na) * (maxR * vals[n])
                     ctx.beginPath()
-                    ctx.arc(nx, ny, 4.2, 0, Math.PI * 2)
+                    ctx.arc(nx, ny, 3, 0, Math.PI * 2)
                     ctx.fillStyle = PhantomState.primary
                     ctx.fill()
-                    ctx.strokeStyle = "#FFFFFF"
-                    ctx.lineWidth = 1.6
+                    ctx.strokeStyle = PhantomState.foreground
+                    ctx.lineWidth = 1
                     ctx.stroke()
                 }
             }
@@ -191,9 +188,6 @@ Item {
                         width: statBadgeText.implicitWidth + 12
                         height: 16
                         color: PhantomState.primary
-                        border.color: "#FFFFFF"
-                        border.width: 1.5
-                        rotation: -4
 
                         Text {
                             id: statBadgeText
@@ -210,9 +204,6 @@ Item {
                         width: subLabel.implicitWidth + 8
                         height: 13
                         color: "#08090D"
-                        border.color: PhantomState.secondary
-                        border.width: 1
-                        rotation: 2
 
                         Text {
                             id: subLabel
@@ -220,7 +211,8 @@ Item {
                             text: modelData.label
                             color: PhantomState.secondary
                             font.pixelSize: 8
-                            font.weight: Font.Black
+                            font.weight: Font.Bold
+                            font.letterSpacing: 0.5
                         }
                     }
                 }
@@ -247,18 +239,16 @@ Item {
                     spacing: 8
 
                     Item {
-                        Layout.preferredWidth: 108
+                        Layout.preferredWidth: 100
                         Layout.fillHeight: true
 
                         P5SkewedCard {
                             anchors.fill: parent
                             fillColor: PhantomState.primary
-                            borderColor: PhantomState.borderLight
-                            shadowColor: PhantomState.borderDark
-                            borderWidth: 1
+                            borderColor: "transparent"
+                            showShadowOffset: false
+                            borderWidth: 0
                             skewPx: 4
-                            shadowOffsetX: 2
-                            shadowOffsetY: 2
                         }
 
                         Text {
@@ -272,12 +262,12 @@ Item {
 
                     Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 16
+                        Layout.preferredHeight: 14
 
                         P5SkewedCard {
                             anchors.fill: parent
                             fillColor: PhantomState.surfaceAlt
-                            borderColor: PhantomState.borderLight
+                            borderColor: Qt.rgba(1, 1, 1, 0.12)
                             showShadowOffset: false
                             borderWidth: 1
                             skewPx: 4

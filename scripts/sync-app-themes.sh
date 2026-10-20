@@ -1026,3 +1026,90 @@ if [[ -f "$KITTY_CONF" ]]; then
 
     pkill -USR1 -f "kitty" 2>/dev/null || true
 fi
+
+# sinkronisasi tema opencode cli
+OPENCODE_THEME_DIR="$HOME/.config/opencode/themes"
+DOTS_OPENCODE_THEME_DIR="$DOTS_DIR/opencode/themes"
+mkdir -p "$OPENCODE_THEME_DIR" "$DOTS_OPENCODE_THEME_DIR"
+
+write_opencode_theme() {
+    local target="$1"
+    cat > "$target" <<EOF
+{
+  "\$schema": "https://opencode.ai/theme.json",
+  "defs": {
+    "p5_primary": "${PRIMARY}",
+    "p5_secondary": "${SECONDARY}",
+    "p5_accent": "${ACCENT}",
+    "p5_bg": "${BG}",
+    "p5_surface": "${SURFACE}",
+    "p5_surface_alt": "${SURFACE_ALT}",
+    "p5_fg": "${FG}",
+    "p5_muted": "${MUTED}",
+    "p5_border": "${BORDER}",
+    "p5_urgent": "${URGENT}",
+    "p5_success": "${SUCCESS}",
+    "p5_cyan": "#38BDF8",
+    "p5_purple": "#C084FC",
+    "p5_diff_add_bg": "#0D281E",
+    "p5_diff_del_bg": "#2D0C14"
+  },
+  "theme": {
+    "primary": { "dark": "p5_primary", "light": "p5_primary" },
+    "secondary": { "dark": "p5_secondary", "light": "p5_primary" },
+    "accent": { "dark": "p5_accent", "light": "p5_accent" },
+    "error": { "dark": "p5_urgent", "light": "p5_urgent" },
+    "warning": { "dark": "p5_secondary", "light": "p5_secondary" },
+    "success": { "dark": "p5_success", "light": "p5_success" },
+    "info": { "dark": "p5_cyan", "light": "p5_cyan" },
+    "text": { "dark": "p5_fg", "light": "#0B0B0F" },
+    "textMuted": { "dark": "p5_muted", "light": "#52525B" },
+    "background": { "dark": "p5_bg", "light": "#F8FAFC" },
+    "backgroundPanel": { "dark": "p5_surface", "light": "#F1F5F9" },
+    "backgroundElement": { "dark": "p5_surface_alt", "light": "#E2E8F0" },
+    "border": { "dark": "p5_primary", "light": "#CBD5E1" },
+    "borderActive": { "dark": "p5_secondary", "light": "p5_primary" },
+    "borderSubtle": { "dark": "p5_primary", "light": "#E2E8F0" },
+    "diffAdded": { "dark": "p5_success", "light": "#16A34A" },
+    "diffRemoved": { "dark": "p5_urgent", "light": "#DC2626" },
+    "diffContext": { "dark": "p5_muted", "light": "#64748B" },
+    "diffHunkHeader": { "dark": "p5_secondary", "light": "p5_primary" },
+    "diffHighlightAdded": { "dark": "p5_success", "light": "#16A34A" },
+    "diffHighlightRemoved": { "dark": "p5_urgent", "light": "#DC2626" },
+    "diffAddedBg": { "dark": "p5_diff_add_bg", "light": "#DCFCE7" },
+    "diffRemovedBg": { "dark": "p5_diff_del_bg", "light": "#FEE2E2" },
+    "diffContextBg": { "dark": "p5_surface", "light": "#F8FAFC" },
+    "diffLineNumber": { "dark": "p5_muted", "light": "#94A3B8" },
+    "diffAddedLineNumberBg": { "dark": "p5_diff_add_bg", "light": "#DCFCE7" },
+    "diffRemovedLineNumberBg": { "dark": "p5_diff_del_bg", "light": "#FEE2E2" },
+    "markdownText": { "dark": "p5_fg", "light": "#0B0B0F" },
+    "markdownHeading": { "dark": "p5_primary", "light": "p5_primary" },
+    "markdownLink": { "dark": "p5_secondary", "light": "p5_primary" },
+    "markdownLinkText": { "dark": "p5_cyan", "light": "#0284C7" },
+    "markdownCode": { "dark": "p5_secondary", "light": "p5_primary" },
+    "markdownBlockQuote": { "dark": "p5_muted", "light": "#64748B" },
+    "markdownEmph": { "dark": "p5_accent", "light": "p5_accent" },
+    "markdownStrong": { "dark": "p5_secondary", "light": "p5_primary" },
+    "markdownHorizontalRule": { "dark": "p5_primary", "light": "p5_primary" },
+    "markdownListItem": { "dark": "p5_primary", "light": "p5_primary" },
+    "markdownListEnumeration": { "dark": "p5_secondary", "light": "p5_primary" },
+    "markdownImage": { "dark": "p5_cyan", "light": "#0284C7" },
+    "markdownImageText": { "dark": "p5_secondary", "light": "p5_primary" },
+    "markdownCodeBlock": { "dark": "p5_fg", "light": "#0B0B0F" },
+    "syntaxComment": { "dark": "p5_muted", "light": "#64748B" },
+    "syntaxKeyword": { "dark": "p5_primary", "light": "p5_primary" },
+    "syntaxFunction": { "dark": "p5_secondary", "light": "#D97706" },
+    "syntaxVariable": { "dark": "p5_fg", "light": "#0B0B0F" },
+    "syntaxString": { "dark": "p5_success", "light": "#16A34A" },
+    "syntaxNumber": { "dark": "p5_purple", "light": "#9333EA" },
+    "syntaxType": { "dark": "p5_cyan", "light": "#0284C7" },
+    "syntaxOperator": { "dark": "p5_accent", "light": "p5_accent" },
+    "syntaxPunctuation": { "dark": "p5_fg", "light": "#334155" }
+  }
+}
+EOF
+}
+
+write_opencode_theme "$OPENCODE_THEME_DIR/phantomshell.json"
+write_opencode_theme "$DOTS_OPENCODE_THEME_DIR/phantomshell.json"
+
