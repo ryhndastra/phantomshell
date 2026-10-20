@@ -12,4 +12,5 @@ DESIGN.md
 dots/opencode/
 scripts/phantom-discord
 scripts/phantom-nixos-bridge
+scripts/phantom-memory-sync
 
