@@ -14,7 +14,7 @@ Row {
 
     // pill pengendali media player dan pembuka popup jukebox
     Item {
-        visible: PhantomState.showMediaPill
+        visible: PhantomState.showMediaPill && !PhantomState.isP3
         width: mediaPillRow.implicitWidth + 20
         height: 30
 
@@ -23,10 +23,10 @@ Row {
             fillColor: PhantomState.mediaPopupOpen ? PhantomState.primary : PhantomState.surface
             borderColor: PhantomState.borderLight
             shadowColor: PhantomState.mediaPlaying ? PhantomState.secondary : PhantomState.primary
-            borderWidth: 2
-            skewPx: PhantomState.polygonMode ? 5 : 0
-            shadowOffsetX: 2
-            shadowOffsetY: 2
+            borderWidth: PhantomState.isP3 ? 1 : 2
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+            shadowOffsetY: PhantomState.isP3 ? 0 : 2
         }
 
         Row {
@@ -155,7 +155,7 @@ Row {
 
     // tombol ganti cepat preset warna
     Item {
-        visible: PhantomState.showThemePill
+        visible: PhantomState.showThemePill && !PhantomState.isP3
         width: themePillRow.implicitWidth + 24
         height: 30
 
@@ -164,10 +164,10 @@ Row {
             fillColor: PhantomState.primary
             borderColor: PhantomState.borderLight
             shadowColor: PhantomState.borderDark
-            borderWidth: 2
-            skewPx: PhantomState.polygonMode ? 5 : 0
-            shadowOffsetX: 2
-            shadowOffsetY: 2
+            borderWidth: PhantomState.isP3 ? 1 : 2
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+            shadowOffsetY: PhantomState.isP3 ? 0 : 2
         }
 
         Row {
@@ -204,6 +204,7 @@ Row {
 
     // tombol pembuka panel pemilih wallpaper
     Item {
+        visible: !PhantomState.isP3
         width: 34
         height: 30
 
@@ -212,10 +213,10 @@ Row {
             fillColor: PhantomState.wallpaperSelectorOpen ? PhantomState.primary : (wpBtnMouse.containsMouse ? PhantomState.surfaceAlt : PhantomState.surface)
             borderColor: PhantomState.borderLight
             shadowColor: PhantomState.wallpaperSelectorOpen ? PhantomState.secondary : PhantomState.primary
-            borderWidth: 2
-            skewPx: PhantomState.polygonMode ? 5 : 0
-            shadowOffsetX: 2
-            shadowOffsetY: 2
+            borderWidth: PhantomState.isP3 ? 1 : 2
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+            shadowOffsetY: PhantomState.isP3 ? 0 : 2
         }
 
         P5Icon {
@@ -243,7 +244,7 @@ Row {
 
     // tombol buka riwayat chat notifikasi sns
     Item {
-        visible: PhantomState.showImPill
+        visible: PhantomState.showImPill && !PhantomState.isP3
         width: imPillRow.implicitWidth + 22
         height: 30
 
@@ -252,10 +253,10 @@ Row {
             fillColor: PhantomState.notificationsOpen ? PhantomState.primary : PhantomState.surface
             borderColor: PhantomState.borderLight
             shadowColor: PhantomState.secondary
-            borderWidth: 2
-            skewPx: PhantomState.polygonMode ? 5 : 0
-            shadowOffsetX: 2
-            shadowOffsetY: 2
+            borderWidth: PhantomState.isP3 ? 1 : 2
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+            shadowOffsetY: PhantomState.isP3 ? 0 : 2
         }
 
         Row {
@@ -307,7 +308,7 @@ Row {
 
     // tombol buka control center & pentagon star radar
     Item {
-        visible: PhantomState.showStatsPill
+        visible: PhantomState.showStatsPill && !PhantomState.isP3
         width: statsPillRow.implicitWidth + 24
         height: 30
 
@@ -316,10 +317,10 @@ Row {
             fillColor: PhantomState.dashboardOpen ? PhantomState.primary : PhantomState.surface
             borderColor: PhantomState.borderLight
             shadowColor: PhantomState.primary
-            borderWidth: 2
-            skewPx: PhantomState.polygonMode ? 5 : 0
-            shadowOffsetX: 2
-            shadowOffsetY: 2
+            borderWidth: PhantomState.isP3 ? 1 : 2
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+            shadowOffsetY: PhantomState.isP3 ? 0 : 2
         }
 
         Row {
@@ -366,10 +367,10 @@ Row {
                 : (trayDropdownMouse.containsMouse && sysTrayPill.isDropdownMode ? PhantomState.surfaceAlt : PhantomState.surface)
             borderColor: PhantomState.borderLight
             shadowColor: (sysTrayPill.isDropdownMode && PhantomState.trayPopupOpen) ? PhantomState.secondary : PhantomState.primary
-            borderWidth: 2
-            skewPx: PhantomState.polygonMode ? 5 : 0
-            shadowOffsetX: 2
-            shadowOffsetY: 2
+            borderWidth: PhantomState.isP3 ? 1 : 2
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+            shadowOffsetY: PhantomState.isP3 ? 0 : 2
         }
 
         // mode 1-2 aplikasi: tampilkan ikon aplikasi secara langsung
@@ -496,8 +497,58 @@ Row {
         }
     }
 
+    // tombol taktis pembuka tactical game menu persona 3 reload
+    Item {
+        visible: PhantomState.isP3
+        width: seesTacticalRow.implicitWidth + 24
+        height: 30
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 4
+            color: PhantomState.dashboardOpen ? "#00dbff" : "#020718"
+            border.color: "#00dbff"
+            border.width: 1
+        }
+
+        Row {
+            id: seesTacticalRow
+            anchors.centerIn: parent
+            spacing: 6
+
+            Rectangle {
+                width: 6; height: 6
+                radius: 3
+                color: PhantomState.dashboardOpen ? "#020718" : "#00dbff"
+                anchors.verticalCenter: parent.verticalCenter
+                SequentialAnimation on opacity {
+                    loops: Animation.Infinite
+                    NumberAnimation { from: 0.3; to: 1.0; duration: 800; easing.type: Easing.InOutQuad }
+                    NumberAnimation { from: 1.0; to: 0.3; duration: 800; easing.type: Easing.InOutQuad }
+                }
+            }
+
+            Text {
+                text: "S.E.E.S. // TACTICAL"
+                color: PhantomState.dashboardOpen ? "#020718" : "#ffffff"
+                font.family: "JetBrainsMono NFM"
+                font.pixelSize: 10
+                font.weight: Font.Black
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: PhantomState.toggleDashboard()
+        }
+    }
+
     // tombol buka menu pengaturan (settings)
     Item {
+        visible: !PhantomState.isP3
         width: 36
         height: 30
 
@@ -506,10 +557,10 @@ Row {
             fillColor: PhantomState.settingsOpen ? PhantomState.secondary : PhantomState.surface
             borderColor: PhantomState.borderLight
             shadowColor: PhantomState.primary
-            borderWidth: 2
-            skewPx: PhantomState.polygonMode ? 4 : 0
-            shadowOffsetX: 2
-            shadowOffsetY: 2
+            borderWidth: PhantomState.isP3 ? 1 : 2
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 4 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+            shadowOffsetY: PhantomState.isP3 ? 0 : 2
         }
 
         P5Icon {
@@ -536,10 +587,10 @@ Row {
             fillColor: PhantomState.sessionOpen ? PhantomState.urgent : PhantomState.surfaceAlt
             borderColor: PhantomState.borderLight
             shadowColor: PhantomState.primary
-            borderWidth: 2
-            skewPx: PhantomState.polygonMode ? 4 : 0
-            shadowOffsetX: 2
-            shadowOffsetY: 2
+            borderWidth: PhantomState.isP3 ? 1 : 2
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 4 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+            shadowOffsetY: PhantomState.isP3 ? 0 : 2
         }
 
         P5Icon {

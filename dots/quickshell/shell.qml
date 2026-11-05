@@ -83,6 +83,10 @@ ShellRoot {
             PhantomState.toggleDashboard()
         }
 
+        function setP3Card(idx: int): void {
+            PhantomState.p3MenuCard = idx
+        }
+
         function toggleSettings(): void {
             PhantomState.toggleSettings()
         }

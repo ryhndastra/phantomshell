@@ -334,6 +334,11 @@ Scope {
                 rightBars: bgScope.rightBars
                 cavaTick: bgScope.cavaTick
             }
+
+            // widget pemutar musik kapsul makoto yuki khusus mode persona 3 reload
+            P3MusicCapsule {
+                visible: PhantomState.isP3
+            }
         }
     }
 }

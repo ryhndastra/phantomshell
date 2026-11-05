@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Effects
 
-// Widget Jam & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
+// Widget Tanggal & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
 Item {
     id: p3ClockRoot
-    implicitWidth: 640
+    implicitWidth: 660
     implicitHeight: 140
 
     property var currentTime: new Date()
@@ -22,27 +22,78 @@ Item {
         return h + ":" + m
     }
 
-    readonly property string dateStr: {
-        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
-        const m = months[p3ClockRoot.currentTime.getMonth()]
-        const d = p3ClockRoot.currentTime.getDate().toString().padStart(2, "0")
-        return m + "·" + d
+    // Format Tanggal Asli Persona 3 Reload: M/D (contoh 11/5 atau 4/20)
+    readonly property string p3DateStr: {
+        const m = (p3ClockRoot.currentTime.getMonth() + 1).toString()
+        const d = p3ClockRoot.currentTime.getDate().toString()
+        return m + "/" + d
     }
 
-    readonly property string weekdayStr: {
-        const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+    // Nama Hari Asli Persona 3 Reload (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
+    readonly property string p3WeekdayStr: {
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         return days[p3ClockRoot.currentTime.getDay()]
     }
 
-    readonly property string daytimeStr: {
-        const h = p3ClockRoot.currentTime.getHours()
-        if (h >= 0 && h < 1) return "DARK HOUR"
-        if (h >= 1 && h < 6) return "LATE NIGHT"
-        if (h >= 6 && h < 9) return "EARLY MORNING"
-        if (h >= 9 && h < 12) return "MORNING"
-        if (h >= 12 && h < 14) return "LUNCHTIME"
-        if (h >= 14 && h < 18) return "AFTER SCHOOL"
-        return "EVENING"
+    readonly property int currentHour: p3ClockRoot.currentTime.getHours()
+
+    // Penentuan Periode Waktu Persona 3 Reload
+    readonly property string periodId: {
+        const h = currentHour
+        if (h >= 0 && h < 1) return "darkhour"     // 00:00 - 01:00 Dark Hour
+        if (h >= 1 && h < 6) return "latenight"    // 01:00 - 06:00 Late Night
+        if (h >= 6 && h < 12) return "morning"     // 06:00 - 12:00 Morning
+        if (h >= 12 && h < 17) return "afterschool"// 12:00 - 17:00 After School
+        if (h >= 17 && h < 20) return "evening"    // 17:00 - 20:00 Evening
+        return "night"                              // 20:00 - 24:00 Night
+    }
+
+    readonly property string watermarkText: {
+        switch (periodId) {
+            case "darkhour": return "DARK HOUR"
+            case "morning": return "MORNING"
+            case "afterschool": return "AFTER SCHOOL"
+            case "evening": return "EVENING"
+            case "latenight": return "LATE NIGHT"
+            default: return "NIGHT"
+        }
+    }
+
+    readonly property string periodLabel: {
+        switch (periodId) {
+            case "darkhour": return "Dark Hour"
+            case "morning": return "Morning"
+            case "afterschool": return "After School"
+            case "evening": return "Evening"
+            case "latenight": return "Late Night"
+            default: return "Night"
+        }
+    }
+
+    // Warna Aksen Dinamis Berdasarkan Waktu
+    readonly property color periodColor: {
+        switch (periodId) {
+            case "darkhour": return "#72ff95"  // Hijau Neon Ikonik Dark Hour
+            case "morning": return "#00dbff"   // Biru Cyan Listrik P3 Atlus
+            case "afterschool": return "#29b6f6" // Biru Cerah Sore
+            case "evening": return "#ff9f43"   // Kuning-Oranye Sunset Dusk
+            case "latenight": return "#82b1ff" // Biru Indigo Larut Malam
+            default: return "#54a0ff"
+        }
+    }
+
+    // Warna Tinting Gelombang Air
+    readonly property color waveColorTint: {
+        switch (periodId) {
+            case "darkhour": return "#2ed573"
+            case "evening": return "#ee5253"
+            case "latenight": return "#341f97"
+            default: return "#0099ff"
+        }
+    }
+
+    readonly property real waveColorization: {
+        return periodId === "darkhour" ? 0.92 : (periodId === "evening" ? 0.85 : (periodId === "latenight" ? 0.60 : 0.0))
     }
 
     readonly property real moonPhaseDegree: {
@@ -72,7 +123,7 @@ Item {
         id: clockContent
         anchors.fill: parent
 
-        // ── Gelombang Air Laut Latar Belakang (Membentang Penuh dengan Fade Kiri Halus) ──
+        // ── Gelombang Air Laut Latar Belakang (Dinamis Berubah Warna Mengikuti Waktu) ──
         Item {
             id: waveContainerOuter
             z: 1
@@ -123,6 +174,8 @@ Item {
 
             layer.enabled: true
             layer.effect: MultiEffect {
+                colorization: p3ClockRoot.waveColorization
+                colorizationColor: p3ClockRoot.waveColorTint
                 maskEnabled: true
                 maskSource: ShaderEffectSource {
                     sourceItem: Rectangle {
@@ -131,7 +184,7 @@ Item {
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
                             GradientStop { position: 0.0; color: "transparent" }
-                            GradientStop { position: 0.14; color: "white" }
+                            GradientStop { position: 0.12; color: "white" }
                             GradientStop { position: 1.0; color: "white" }
                         }
                     }
@@ -139,71 +192,67 @@ Item {
             }
         }
 
-        // ── Huruf Tanggal Bermasker Air Biru Mengalir (NOV·05 Watermark) ──
+        // ── Teks Watermark Raksasa Latar Belakang (DARK HOUR / MORNING / EVENING) ──
+        Text {
+            id: bgWatermark
+            z: 2
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: 6
+            anchors.left: parent.left
+            anchors.leftMargin: 30
+            text: p3ClockRoot.watermarkText
+            font.family: "Inter Display"
+            font.pixelSize: 88
+            font.weight: Font.Black
+            font.letterSpacing: -2
+            color: p3ClockRoot.periodColor
+            opacity: 0.22
+            rotation: -5
+        }
+
+        // ── Badge Jam Digital Sistem (Menyatu Rapi di Sebelah Kiri Banner) ──
         Item {
-            id: waveTextLayer
-            z: 5
-            anchors.fill: parent
-            clip: true
-            opacity: 0.55
+            id: sysTimeBadge
+            z: 50
+            anchors.left: parent.left
+            anchors.leftMargin: 24
+            anchors.verticalCenter: parent.verticalCenter
 
-            Item {
-                id: scrollingBg
-                width: waveTextLayer.width * 2
-                height: waveTextLayer.height
+            Rectangle {
+                anchors.centerIn: parent
+                width: sysTimeRow.implicitWidth + 20
+                height: 32
+                radius: 4
+                color: Qt.rgba(2/255, 7/255, 24/255, 0.75)
+                border.color: Qt.rgba(p3ClockRoot.periodColor.r, p3ClockRoot.periodColor.g, p3ClockRoot.periodColor.b, 0.5)
+                border.width: 1
 
-                Image {
-                    source: Qt.resolvedUrl("../../assets/themes/p3/img/wave8.png")
-                    width: waveTextLayer.width
-                    height: waveTextLayer.height
-                    fillMode: Image.Stretch
-                    x: 0
+                Row {
+                    id: sysTimeRow
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    Rectangle {
+                        width: 6; height: 6
+                        radius: 3
+                        color: p3ClockRoot.periodColor
+                        anchors.verticalCenter: parent.verticalCenter
+                        SequentialAnimation on opacity {
+                            loops: Animation.Infinite
+                            NumberAnimation { from: 0.3; to: 1.0; duration: 1000; easing.type: Easing.InOutQuad }
+                            NumberAnimation { from: 1.0; to: 0.3; duration: 1000; easing.type: Easing.InOutQuad }
+                        }
+                    }
+
+                    Text {
+                        text: p3ClockRoot.timeStr
+                        font.family: "JetBrainsMono NFM"
+                        font.pixelSize: 18
+                        font.weight: Font.Black
+                        color: "#ffffff"
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                 }
-                Image {
-                    source: Qt.resolvedUrl("../../assets/themes/p3/img/wave8.png")
-                    width: waveTextLayer.width
-                    height: waveTextLayer.height
-                    fillMode: Image.Stretch
-                    x: waveTextLayer.width
-                }
-
-                NumberAnimation on x {
-                    from: 0
-                    to: -waveTextLayer.width
-                    duration: 10000
-                    loops: Animation.Infinite
-                    running: true
-                }
-            }
-
-            Text {
-                id: textMask
-                anchors.right: parent.right
-                anchors.rightMargin: 110
-                anchors.verticalCenter: parent.verticalCenter
-                text: p3ClockRoot.dateStr
-                font.family: "Inter Display"
-                font.pixelSize: 110
-                font.weight: Font.Black
-                font.letterSpacing: -6
-                color: "white"
-                visible: true
-            }
-
-            ShaderEffectSource {
-                id: textMaskSource
-                sourceItem: textMask
-                hideSource: true
-                live: true
-            }
-
-            MultiEffect {
-                source: scrollingBg
-                anchors.fill: scrollingBg
-                maskEnabled: true
-                maskSource: textMaskSource
-                maskThresholdMin: 0.4
-                maskSpreadAtMin: 1.0
             }
         }
 
@@ -295,69 +344,108 @@ Item {
             }
         }
 
-        // ── Kolom Informasi Fase, Hari, dan Periode di Sebelah Kiri Bulan ──
-        Column {
-            id: dateMetaCol
+        // ── Nama Fase Bulan Di Atas Lingkaran Bulan ──
+        Text {
+            id: moonPhaseTxt
+            z: 50
+            anchors.bottom: circle1.top
+            anchors.bottomMargin: 4
+            anchors.right: circle1.right
+            text: p3ClockRoot.moonPhaseName
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: 11
+            font.weight: Font.Bold
+            color: "#fffb9f"
+            style: Text.Raised
+            styleColor: "#635400d9"
+        }
+
+        // ── Kluster HUD Tanggal & Periode Otentik Persona 3 Reload (Foto 1 & 6) ──
+        Item {
+            id: p3DateCluster
             z: 50
             anchors.verticalCenter: circle1.verticalCenter
             anchors.right: circle1.left
-            anchors.rightMargin: 16
-            spacing: 2
-
-            // Nama Fase Bulan (WAXING CRESCENT / FULL MOON)
-            Text {
-                anchors.right: parent.right
-                text: p3ClockRoot.moonPhaseName
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 13
-                font.weight: Font.Bold
-                color: "#fffb9f"
-                style: Text.Raised
-                styleColor: "#635400d9"
-            }
-
-            // Teks Hari dalam Pekan (THU) dengan Garis Biru
-            Text {
-                anchors.right: parent.right
-                text: p3ClockRoot.weekdayStr
-                font.family: "Inter Display"
-                font.pixelSize: 22
-                font.weight: Font.Black
-                font.letterSpacing: 0.5
-                color: "#ffffff"
-                style: Text.Outline
-                styleColor: "#0000ff"
-            }
-
-            // Teks Periode Hari (MORNING / AFTER SCHOOL / DARK HOUR)
-            Text {
-                anchors.right: parent.right
-                text: p3ClockRoot.daytimeStr
-                font.family: "Inter Display"
-                font.pixelSize: 16
-                font.weight: Font.Black
-                font.letterSpacing: -0.3
-                color: p3ClockRoot.daytimeStr === "DARK HOUR" ? "#72ff95" : "#00dbff"
-                style: Text.Outline
-                styleColor: "#002c90"
-            }
-        }
-
-        // ── Angka Jam Utama Putih Tebal dengan Drop-Shadow Atlus ──
-        Text {
-            id: timeText
-            z: 50
-            anchors.verticalCenter: circle1.verticalCenter
-            anchors.right: dateMetaCol.left
             anchors.rightMargin: 20
-            text: p3ClockRoot.timeStr
-            font.family: "Inter Display"
-            font.pixelSize: 84
-            font.weight: Font.Black
-            font.letterSpacing: -3
-            color: "#ffffff"
-            style: Text.Raised
-            styleColor: "#d11300b8"
+            width: dateClusterCol.implicitWidth
+            height: dateClusterCol.implicitHeight
+            rotation: -5
+
+            Column {
+                id: dateClusterCol
+                spacing: -4
+
+                // Baris Tanggal M/D dan Hari dengan Penanda Segitiga Terbalik ▼
+                Row {
+                    spacing: 8
+                    anchors.right: parent.right
+
+                    // Angka Tanggal M/D Putih Tebal Miring (Contoh 4/20 atau 11/5)
+                    Text {
+                        text: p3ClockRoot.p3DateStr
+                        font.family: "Inter Display"
+                        font.pixelSize: 66
+                        font.weight: Font.Black
+                        font.letterSpacing: -3
+                        color: "#ffffff"
+                        style: Text.Raised
+                        styleColor: Qt.rgba(0, 0, 0, 0.65)
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    // Kolom Hari dalam Pekan dan Segitiga Terbalik
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 1
+
+                        // Segitiga Terbalik Ikonik S.E.E.S. ▼
+                        Canvas {
+                            width: 18
+                            height: 12
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            onPaint: {
+                                var ctx = getContext("2d")
+                                ctx.reset()
+                                ctx.beginPath()
+                                ctx.moveTo(0, 0)
+                                ctx.lineTo(18, 0)
+                                ctx.lineTo(9, 12)
+                                ctx.closePath()
+                                ctx.fillStyle = "#000b21"
+                                ctx.fill()
+                                ctx.strokeStyle = p3ClockRoot.periodColor
+                                ctx.lineWidth = 1.5
+                                ctx.stroke()
+                            }
+                        }
+
+                        // Teks Hari (Mon / Thu)
+                        Text {
+                            text: p3ClockRoot.p3WeekdayStr
+                            font.family: "Inter Display"
+                            font.pixelSize: 22
+                            font.weight: Font.Black
+                            color: "#ffffff"
+                            style: Text.Outline
+                            styleColor: "#000b21"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+                    }
+                }
+
+                // Teks Periode Waktu Bersinar di Bawah Tanggal (Dark Hour / Morning / Evening)
+                Text {
+                    anchors.right: parent.right
+                    text: p3ClockRoot.periodLabel
+                    font.family: "Inter Display"
+                    font.pixelSize: 24
+                    font.weight: Font.Black
+                    font.letterSpacing: -0.5
+                    color: p3ClockRoot.periodColor
+                    style: Text.Outline
+                    styleColor: "#000b21"
+                }
+            }
         }
     }
 }

@@ -65,6 +65,7 @@ Singleton {
     property bool lockClosing: false
     property bool specialWorkspaceActive: false
     property int velvetTransitionTick: 0
+    property int p3MenuCard: 0
 
     // state animasi transisi tema dan wallpaper
     property int transitionTick: 0

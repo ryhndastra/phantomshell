@@ -36,7 +36,10 @@ Scope {
 
             color: "transparent"
 
-            property int activeCard: 0
+            property int activeCard: PhantomState.p3MenuCard
+            onActiveCardChanged: {
+                if (PhantomState.p3MenuCard !== activeCard) PhantomState.p3MenuCard = activeCard
+            }
             property bool contentVisible: false
             property bool canDismiss: false
 
@@ -582,12 +585,46 @@ Scope {
 
                 // ── Konten Kontrol Dinamis Berdasarkan Tab Terpilih ──
                 Item {
+                    id: detailPanelContent
                     anchors {
                         left: parent.left
                         right: parent.right
                         top: detailHeader.bottom
                         bottom: parent.bottom
                         margins: 18
+                    }
+
+                    transform: Translate {
+                        id: tabTranslate
+                        x: 0
+                    }
+                    opacity: 1.0
+
+                    Connections {
+                        target: p3MenuWin
+                        function onActiveCardChanged() {
+                            tabSlideAnim.restart()
+                        }
+                    }
+
+                    ParallelAnimation {
+                        id: tabSlideAnim
+                        NumberAnimation {
+                            target: tabTranslate
+                            property: "x"
+                            from: 35
+                            to: 0
+                            duration: 260
+                            easing.type: Easing.OutCubic
+                        }
+                        NumberAnimation {
+                            target: detailPanelContent
+                            property: "opacity"
+                            from: 0.3
+                            to: 1.0
+                            duration: 220
+                            easing.type: Easing.OutQuad
+                        }
                     }
 
                     // ── TAB 0: SYSTEM STATS ──
@@ -699,6 +736,75 @@ Scope {
                                 }
                             }
                         }
+
+                        // Baris Sakelar Taktis Protokol S.E.E.S.
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            // Toggle Cava Visualizer
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 38
+                                radius: 4
+                                color: PhantomState.showDesktopCava ? Qt.rgba(0/255, 219/255, 255/255, 0.2) : "#081330"
+                                border.color: PhantomState.showDesktopCava ? "#00dbff" : "#1a3d80"
+                                border.width: 1
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 6
+                                    Text {
+                                        text: "CAVA // " + (PhantomState.showDesktopCava ? "ON" : "OFF")
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Black
+                                        color: PhantomState.showDesktopCava ? "#00dbff" : "#7aa2d6"
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        PhantomState.playSfx("select")
+                                        PhantomState.showDesktopCava = !PhantomState.showDesktopCava
+                                        PhantomState.saveState()
+                                    }
+                                }
+                            }
+
+                            // Toggle Parallax
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 38
+                                radius: 4
+                                color: PhantomState.showWallpaperLayer ? Qt.rgba(0/255, 219/255, 255/255, 0.2) : "#081330"
+                                border.color: PhantomState.showWallpaperLayer ? "#00dbff" : "#1a3d80"
+                                border.width: 1
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 6
+                                    Text {
+                                        text: "PARALLAX // " + (PhantomState.showWallpaperLayer ? "ON" : "OFF")
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Black
+                                        color: PhantomState.showWallpaperLayer ? "#00dbff" : "#7aa2d6"
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        PhantomState.playSfx("select")
+                                        PhantomState.showWallpaperLayer = !PhantomState.showWallpaperLayer
+                                        PhantomState.saveState()
+                                    }
+                                }
+                            }
+                        }
+
                         Item { Layout.fillHeight: true }
                     }
 
@@ -907,93 +1013,246 @@ Scope {
                         }
                     }
 
-                    // ── TAB 3: PALETTE & ERAS ──
+                    // ── TAB 3: PALETTE & ERAS (ERA SWITCHER WITH HERO CHARACTER CARDS) ──
                     ColumnLayout {
                         anchors.fill: parent
                         visible: p3MenuWin.activeCard === 3
                         spacing: 10
 
+                        Text {
+                            text: "METAVERSE CHRONICLE // SELECT ACTIVE TIMELINE"
+                            font.family: "JetBrainsMono NFM"
+                            font.pixelSize: 10
+                            font.weight: Font.Black
+                            color: "#00dbff"
+                        }
+
+                        // 3 Kartu Pahlawan Persona dengan Gambar Karakter Otentik (char1, char2, char3)
                         Repeater {
                             model: [
-                                { id: "p3-reload", name: "Persona 3 Reload", desc: "S.E.E.S. Oceanic Modernist", color: "#00B4D8" },
-                                { id: "p5-crimson", name: "Persona 5 Royal", desc: "Thieves Den Punk Crimson", color: "#E60012" },
-                                { id: "p4-golden", name: "Persona 4 Golden", desc: "Inaba Retro Amber Yellow", color: "#F5B800" },
-                                { id: "kasumi-violet", name: "Kasumi Violet", desc: "Faith Arcana Glass Violet", color: "#9B5DE5" },
-                                { id: "akechi-crow", name: "Akechi Crow", desc: "Justice Arcana Charcoal Gold", color: "#C2A649" },
-                                { id: "futaba-matrix", name: "Futaba Matrix", desc: "Hermit Terminal Cyber Emerald", color: "#00F59B" }
+                                {
+                                    id: "p3-reload",
+                                    name: "PERSONA 3 RELOAD",
+                                    role: "LEADER",
+                                    desc: "Makoto Yuki // Tartarus Oceanic Modernism",
+                                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char1.png"),
+                                    accent: "#00dbff",
+                                    bgGrad: "#0048cc"
+                                },
+                                {
+                                    id: "p5-crimson",
+                                    name: "PERSONA 5 CRIMSON",
+                                    role: "TRICKSTER",
+                                    desc: "Ren Amamiya // Metaverse Punk Rebellion",
+                                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char2.png"),
+                                    accent: "#ff2a4b",
+                                    bgGrad: "#990014"
+                                },
+                                {
+                                    id: "p4-golden",
+                                    name: "PERSONA 4 GOLDEN",
+                                    role: "SEEKER",
+                                    desc: "Yu Narukami // Yasogami Retro Amber Investigation",
+                                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char3.png"),
+                                    accent: "#f5b800",
+                                    bgGrad: "#997300"
+                                }
                             ]
 
                             delegate: Item {
+                                id: charCard
                                 required property var modelData
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 52
+                                Layout.preferredHeight: isSelected ? 86 : 74
+                                Behavior on Layout.preferredHeight { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
                                 readonly property bool isSelected: PhantomState.themeId === modelData.id
-                                readonly property bool isHovered: pMouse.containsMouse
+                                readonly property bool isHovered: charMouse.containsMouse
 
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: 6
-                                    color: isSelected 
-                                        ? Qt.rgba(0/255, 219/255, 255/255, 0.22)
-                                        : (isHovered ? Qt.rgba(255, 255, 255, 0.08) : Qt.rgba(8/255, 18/255, 64/255, 0.75))
-                                    border.color: isSelected ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.3)
-                                    border.width: isSelected ? 2 : 1
-                                }
+                                    clip: true
+                                    color: charCard.isSelected
+                                        ? Qt.rgba(0/255, 20/255, 60/255, 0.90)
+                                        : (charCard.isHovered ? Qt.rgba(12/255, 26/255, 78/255, 0.85) : Qt.rgba(6/255, 14/255, 46/255, 0.80))
+                                    border.color: charCard.isSelected ? modelData.accent : (charCard.isHovered ? "#ffffff" : Qt.rgba(0/255, 219/255, 255/255, 0.3))
+                                    border.width: charCard.isSelected ? 2 : 1
 
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.margins: 12
-                                    spacing: 12
-
+                                    // Latar belakang gradasi miring aksen karakter
                                     Rectangle {
-                                        width: 18
-                                        height: 18
-                                        radius: 9
-                                        color: modelData.color
-                                        border.color: "#ffffff"
-                                        border.width: 1
-                                    }
-
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 2
-                                        Text {
-                                            text: modelData.name
-                                            font.family: "Inter Display"
-                                            font.pixelSize: 13
-                                            font.weight: Font.Black
-                                            color: "#ffffff"
-                                        }
-                                        Text {
-                                            text: modelData.desc
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 9
-                                            color: PhantomState.muted
+                                        anchors.right: parent.right
+                                        anchors.top: parent.top
+                                        anchors.bottom: parent.bottom
+                                        width: parent.width * 0.45
+                                        gradient: Gradient {
+                                            orientation: Gradient.Horizontal
+                                            GradientStop { position: 0.0; color: "transparent" }
+                                            GradientStop { position: 1.0; color: Qt.rgba(charCard.isSelected ? 0.25 : 0.12, 0.4, 0.8, 0.3) }
                                         }
                                     }
 
-                                    Text {
-                                        text: isSelected ? "ACTIVE ✓" : "SELECT"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 10
-                                        font.weight: Font.Black
-                                        color: isSelected ? "#00dbff" : PhantomState.muted
+                                    // Gambar Karakter Pahlawan (char1, char2, char3) Terpotong Rapi
+                                    Image {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: -20
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 190
+                                        height: parent.height + 20
+                                        source: modelData.charImg
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                        opacity: charCard.isSelected ? 1.0 : (charCard.isHovered ? 0.9 : 0.6)
+                                        scale: charCard.isHovered ? 1.05 : 1.0
+                                        Behavior on opacity { NumberAnimation { duration: 180 } }
+                                        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
                                     }
-                                }
 
-                                MouseArea {
-                                    id: pMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        PhantomState.playSfx("select")
-                                        PhantomState.applyPreset(modelData.id)
+                                    // Konten Teks & Label Karakter
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 14
+                                        spacing: 14
+
+                                        // Badge Role Angled
+                                        Rectangle {
+                                            Layout.preferredWidth: 42
+                                            Layout.preferredHeight: 42
+                                            radius: 4
+                                            color: charCard.isSelected ? modelData.accent : "#030a20"
+                                            border.color: modelData.accent
+                                            border.width: 1
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: modelData.role.substring(0, 3)
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Black
+                                                color: charCard.isSelected ? "#020718" : modelData.accent
+                                            }
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 2
+
+                                            Text {
+                                                text: modelData.name
+                                                font.family: "Inter Display"
+                                                font.pixelSize: 14
+                                                font.weight: Font.Black
+                                                color: charCard.isSelected ? modelData.accent : "#ffffff"
+                                            }
+                                            Text {
+                                                text: modelData.desc
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.weight: Font.Bold
+                                                color: "#8df6ff"
+                                                opacity: 0.85
+                                            }
+                                        }
+
+                                        // Tombol Status Seleksi
+                                        Rectangle {
+                                            Layout.preferredWidth: 84
+                                            Layout.preferredHeight: 28
+                                            radius: 3
+                                            color: charCard.isSelected ? modelData.accent : "transparent"
+                                            border.color: modelData.accent
+                                            border.width: 1
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: charCard.isSelected ? "ACTIVE ✓" : "ACTIVATE"
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 10
+                                                font.weight: Font.Black
+                                                color: charCard.isSelected ? "#020718" : modelData.accent
+                                            }
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: charMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            PhantomState.playSfx("select")
+                                            PhantomState.applyPreset(modelData.id)
+                                        }
                                     }
                                 }
                             }
                         }
+
+                        // Garis Pemisah untuk Preset Tambahan
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(0/255, 219/255, 255/255, 0.25)
+                        }
+
+                        // Preset Tambahan (Kasumi, Akechi, Futaba)
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Repeater {
+                                model: [
+                                    { id: "kasumi-violet", name: "Kasumi Violet", color: "#9B5DE5" },
+                                    { id: "akechi-crow", name: "Akechi Crow", color: "#C2A649" },
+                                    { id: "futaba-matrix", name: "Futaba Matrix", color: "#00F59B" }
+                                ]
+                                delegate: Item {
+                                    required property var modelData
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 38
+
+                                    readonly property bool isSelected: PhantomState.themeId === modelData.id
+                                    readonly property bool isHovered: subMouse.containsMouse
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: 4
+                                        color: isSelected ? Qt.rgba(1,1,1,0.15) : (isHovered ? Qt.rgba(1,1,1,0.08) : "#081330")
+                                        border.color: isSelected ? modelData.color : Qt.rgba(255,255,255,0.2)
+                                        border.width: isSelected ? 2 : 1
+
+                                        RowLayout {
+                                            anchors.centerIn: parent
+                                            spacing: 6
+                                            Rectangle {
+                                                width: 10; height: 10
+                                                radius: 5
+                                                color: modelData.color
+                                            }
+                                            Text {
+                                                text: modelData.name
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 10
+                                                font.weight: Font.Bold
+                                                color: isSelected ? "#ffffff" : "#c0d0e8"
+                                            }
+                                        }
+
+                                        MouseArea {
+                                            id: subMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                PhantomState.playSfx("select")
+                                                PhantomState.applyPreset(modelData.id)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         Item { Layout.fillHeight: true }
                     }
 
