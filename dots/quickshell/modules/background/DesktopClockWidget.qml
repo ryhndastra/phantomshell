@@ -7,8 +7,8 @@ import qs.components
 Item {
     id: desktopClockWidget
     visible: PhantomState.showDesktopClock
-    width: 430
-    height: 250
+    width: PhantomState.isP3 ? 560 : 430
+    height: PhantomState.isP3 ? 180 : 250
     z: 10
     scale: PhantomState.desktopClockScale / 100.0
 
@@ -25,17 +25,27 @@ Item {
 
     transformOrigin: {
         if (PhantomState.desktopClockPosition === "center") return Item.Center
-        if (PhantomState.desktopClockPosition === "top-right") return Item.TopRight
+        if (PhantomState.desktopClockPosition === "top-right" || PhantomState.isP3) return Item.TopRight
         if (PhantomState.desktopClockPosition === "bottom-left") return Item.BottomLeft
         return Item.TopLeft
     }
 
     x: {
+        if (PhantomState.isP3) {
+            if (PhantomState.desktopClockPosition === "center") return (parent.width - width) / 2
+            if (PhantomState.desktopClockPosition === "bottom-left") return 28
+            return parent.width - width - 12
+        }
         if (PhantomState.desktopClockPosition === "center") return (parent.width - width) / 2
         if (PhantomState.desktopClockPosition === "top-right") return parent.width - width - 38
         return 28
     }
     y: {
+        if (PhantomState.isP3) {
+            if (PhantomState.desktopClockPosition === "center") return (parent.height - height) / 2 - 40
+            if (PhantomState.desktopClockPosition === "bottom-left") return parent.height - height - 155
+            return PhantomState.barPosition === "top" ? 38 : 12
+        }
         if (PhantomState.desktopClockPosition === "center") return (parent.height - height) / 2 - 40
         if (PhantomState.desktopClockPosition === "bottom-left") return parent.height - height - 155
         return 48
@@ -44,7 +54,7 @@ Item {
     // gaya jam potongan poligon editorial dengan ikon cuaca
     Item {
         anchors.fill: parent
-        visible: PhantomState.desktopClockStyle === "p5-editorial"
+        visible: PhantomState.desktopClockStyle === "p5-editorial" && !PhantomState.isP3
 
         // siluet poligon luar putih dan potongan dalam hitam
         Canvas {
@@ -384,7 +394,7 @@ Item {
     // gaya jam teks minimalis
     Column {
         anchors.centerIn: parent
-        visible: PhantomState.desktopClockStyle === "minimal"
+        visible: PhantomState.desktopClockStyle === "minimal" && !PhantomState.isP3
         spacing: 2
 
         Text {
@@ -406,6 +416,13 @@ Item {
             font.weight: Font.Black
             anchors.horizontalCenter: parent.horizontalCenter
         }
+    }
+
+    // gaya jam otentik Persona 3 Reload: HUD air berputar, kalender masking air, bola bulan kosinus
+    P3ClockWidget {
+        id: p3SeesClock
+        anchors.fill: parent
+        visible: PhantomState.isP3 || PhantomState.desktopClockStyle === "p3-sees"
     }
 
     // gaya jam kartu poligon siber

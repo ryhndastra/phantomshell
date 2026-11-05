@@ -126,7 +126,11 @@ Scope {
                             if (mouse.button === Qt.RightButton) {
                                 PhantomState.toggleSettings()
                             } else {
-                                PhantomState.toggleLauncher()
+                                if (PhantomState.isP3) {
+                                    PhantomState.toggleDashboard()
+                                } else {
+                                    PhantomState.toggleLauncher()
+                                }
                             }
                         }
                     }
@@ -134,7 +138,7 @@ Scope {
 
                 // pill tanggal & waktu ala persona 5 (klik buat buka popup kalender)
                 Item {
-                    visible: PhantomState.showWeatherHud
+                    visible: PhantomState.showWeatherHud && !PhantomState.isP3
                     implicitWidth: hudRow.implicitWidth + 24
                     width: implicitWidth
                     height: 30
@@ -144,10 +148,10 @@ Scope {
                         fillColor: PhantomState.calendarOpen ? PhantomState.primary : (hudMouse.containsMouse ? PhantomState.surfaceAlt : PhantomState.surface)
                         borderColor: PhantomState.borderLight
                         shadowColor: PhantomState.calendarOpen ? PhantomState.secondary : PhantomState.primary
-                        borderWidth: 2
-                        skewPx: PhantomState.polygonMode ? 6 : 0
-                        shadowOffsetX: 2
-                        shadowOffsetY: 2
+                        borderWidth: PhantomState.isP3 ? 1 : 2
+                        skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 6 : 0)
+                        shadowOffsetX: PhantomState.isP3 ? 0 : 2
+                        shadowOffsetY: PhantomState.isP3 ? 0 : 2
                     }
 
                     Row {
@@ -264,10 +268,10 @@ Scope {
                         fillColor: PhantomState.specialWorkspaceActive ? "#0A1024" : PhantomState.surface
                         borderColor: PhantomState.specialWorkspaceActive ? "#60A5FA" : PhantomState.borderLight
                         shadowColor: PhantomState.specialWorkspaceActive ? "#1D4ED8" : PhantomState.borderDark
-                        borderWidth: 2
-                        skewPx: PhantomState.polygonMode ? 6 : 0
-                        shadowOffsetX: 2
-                        shadowOffsetY: 2
+                        borderWidth: PhantomState.isP3 ? 1 : 2
+                        skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 6 : 0)
+                        shadowOffsetX: PhantomState.isP3 ? 0 : 2
+                        shadowOffsetY: PhantomState.isP3 ? 0 : 2
                     }
 
                     Row {
@@ -306,7 +310,7 @@ Scope {
                                         : (wsDel.isUnderlyingActive ? "#3B82F6" : (wsDel.hasApps ? "#383B52" : "transparent"))
                                     showShadowOffset: false
                                     borderWidth: (wsDel.isActive || wsDel.isUnderlyingActive || wsDel.hasApps) ? 1 : 0
-                                    skewPx: PhantomState.polygonMode ? 4 : 0
+                                    skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 4 : 0)
                                 }
 
                                 Row {
@@ -409,7 +413,7 @@ Scope {
                                 shadowOffsetX: 1.5
                                 shadowOffsetY: 1.5
                                 borderWidth: 1.5
-                                skewPx: PhantomState.polygonMode ? 4 : 0
+                                skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 4 : 0)
                             }
 
                             Row {
@@ -497,10 +501,10 @@ Scope {
                         fillColor: PhantomState.surface
                         borderColor: PhantomState.borderLight
                         shadowColor: PhantomState.primary
-                        borderWidth: 2
-                        skewPx: PhantomState.polygonMode ? 5 : 0
-                        shadowOffsetX: 2
-                        shadowOffsetY: 2
+                        borderWidth: PhantomState.isP3 ? 1 : 2
+                        skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
+                        shadowOffsetX: PhantomState.isP3 ? 0 : 2
+                        shadowOffsetY: PhantomState.isP3 ? 0 : 2
                     }
 
                     Row {
@@ -521,7 +525,7 @@ Scope {
                                 borderColor: snipMouse.containsMouse ? PhantomState.borderLight : "transparent"
                                 showShadowOffset: false
                                 borderWidth: 1
-                                skewPx: 4
+                                skewPx: PhantomState.isP3 ? 0 : 4
                             }
 
                             P5Icon { anchors.centerIn: parent; name: "snip"; size: 12; color: PhantomState.foreground }
@@ -548,7 +552,7 @@ Scope {
                                 borderColor: pickMouse.containsMouse ? PhantomState.borderLight : "transparent"
                                 showShadowOffset: false
                                 borderWidth: 1
-                                skewPx: 4
+                                skewPx: PhantomState.isP3 ? 0 : 4
                             }
 
                             P5Icon { anchors.centerIn: parent; name: "picker"; size: 12; color: PhantomState.secondary }
@@ -611,10 +615,10 @@ Scope {
                     shadowColor: PhantomState.launcherOpen
                         ? PhantomState.secondary
                         : (PhantomState.specialWorkspaceActive ? "#1D4ED8" : PhantomState.primary)
-                    borderWidth: 2
-                    skewPx: PhantomState.polygonMode ? 6 : 0
-                    shadowOffsetX: 2
-                    shadowOffsetY: 2
+                    borderWidth: PhantomState.isP3 ? 1 : 2
+                    skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 6 : 0)
+                    shadowOffsetX: PhantomState.isP3 ? 0 : 2
+                    shadowOffsetY: PhantomState.isP3 ? 0 : 2
                 }
 
                 RowLayout {

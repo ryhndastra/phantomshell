@@ -268,10 +268,17 @@ Scope {
                 smooth: true
             }
 
+            // lapisan wallpaper dinamis persona 3 reload (riak air, makoto yuki, parallax 3d)
+            P3WallpaperEngine {
+                anchors.fill: parent
+                visible: PhantomState.showWallpaperLayer && PhantomState.isP3
+                animActive: bgWin.visible
+            }
+
             // lapisan gambar wallpaper aktif dengan efek parallax dan transisi
             Image {
                 id: wpImg
-                visible: PhantomState.showWallpaperLayer && PhantomState.wallpaperPath !== ""
+                visible: PhantomState.showWallpaperLayer && PhantomState.wallpaperPath !== "" && !PhantomState.isP3
                 width: parent.width * bgWin.zoomFactor
                 height: parent.height * bgWin.zoomFactor
                 x: (parent.width - width) / 2 + bgWin.parallaxOffsetX + bgWin.wpSlideX

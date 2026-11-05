@@ -43,7 +43,7 @@ sync_bundle() {
 case "$cmd" in
     check-remote)
         cd "$REPO_ROOT"
-        git fetch origin main --quiet 2>/dev/null || { emit "ERR|Gagal fetch remote"; exit 0; }
+        timeout 8 git fetch origin main --quiet 2>/dev/null || { emit "ERR|Gagal fetch remote"; exit 0; }
         LOCAL=$(git rev-parse HEAD 2>/dev/null)
         REMOTE=$(git rev-parse origin/main 2>/dev/null)
         BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)

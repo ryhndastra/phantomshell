@@ -164,6 +164,10 @@ Singleton {
         else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onDashboardOpenChanged: {
+        console.log("[STATE DEBUG] dashboardOpen changed to: " + dashboardOpen)
+        if (!dashboardOpen) {
+            console.trace()
+        }
         if (!dashboardOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onSettingsOpenChanged: {
@@ -222,30 +226,36 @@ Singleton {
         const next = !launcherOpen
         if (next) closeAllModals()
         launcherOpen = next
+        playSfx(next ? "open" : "close")
     }
 
     function toggleDashboard() {
+        console.log("[TOGGLE DASHBOARD] isP3=" + isP3 + " themeId=" + themeId + " current dashOpen=" + dashboardOpen)
         const next = !dashboardOpen
         if (next) closeAllModals()
         dashboardOpen = next
+        playSfx(next ? "open" : "close")
     }
 
     function toggleSettings() {
         const next = !settingsOpen
         if (next) closeAllModals()
         settingsOpen = next
+        playSfx(next ? "open" : "close")
     }
 
     function toggleNotifications() {
         const next = !notificationsOpen
         if (next) closeAllModals()
         notificationsOpen = next
+        playSfx(next ? "open" : "close")
     }
 
     function toggleCalendar() {
         const next = !calendarOpen
         if (next) closeAllModals()
         calendarOpen = next
+        playSfx(next ? "open" : "close")
     }
 
     function toggleSession() {
@@ -432,8 +442,8 @@ Singleton {
     }
 
     // palet warna aktif dan tema default
-    property string themeName: "P5 Phantom Crimson"
-    property string themeId: "p5-crimson"
+    property string themeName: "P3 Reload S.E.E.S. Blue"
+    property string themeId: "p3-reload"
     property bool darkMode: true
     property bool transparencyEnabled: true
     property bool autoScheme: false
@@ -504,6 +514,7 @@ Singleton {
     property int frameThickness: 2
 
     // konfigurasi logo dan wallpaper aktif
+    readonly property bool isP3: themeId === "p3-reload"
     readonly property string logoPath: themeId === "p5-crimson"
         ? Qt.resolvedUrl("../assets/pshell.png")
         : Qt.resolvedUrl("../assets/pshell-" + themeId + ".png")
@@ -744,14 +755,28 @@ Singleton {
 
     function playSfx(kind) {
         if (!root.sfxEnabled || root.sfxVolume <= 0.01) return
-        if (kind === "notif") {
-            const wavPath = Quickshell.shellPath("assets/persona-5-notif-sound.wav")
-            const mp3Path = Quickshell.shellPath("assets/persona-5-notif-sound.mp3")
-            const vol = Math.max(0.01, Math.min(1.0, root.sfxVolume)).toFixed(2)
-            const ffVol = Math.round(Math.max(1, Math.min(100, root.sfxVolume * 100)))
+        const vol = Math.max(0.01, Math.min(1.0, root.sfxVolume)).toFixed(2)
+        const ffVol = Math.round(Math.max(1, Math.min(100, root.sfxVolume * 100)))
+
+        var soundPath = ""
+        if (root.isP3) {
+            if (kind === "notif") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_toast.wav")
+            else if (kind === "achievement") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_achievement_toast.wav")
+            else if (kind === "select") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_default_activation.wav")
+            else if (kind === "open") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_side_menu_fly_in.wav")
+            else if (kind === "close") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_side_menu_fly_out.wav")
+            else if (kind === "modal") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_show_modal.wav")
+            else if (kind === "slider_up") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_slider_up.wav")
+            else if (kind === "slider_down") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_slider_down.wav")
+            else soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_navigation.wav")
+        } else {
+            soundPath = Quickshell.shellPath("assets/persona-5-notif-sound.wav")
+        }
+
+        if (soundPath !== "") {
             Quickshell.execDetached([
                 "bash", "-c",
-                "pw-play --volume=" + vol + " '" + wavPath + "' 2>/dev/null || ffplay -nodisp -autoexit -loglevel quiet -volume " + ffVol + " '" + mp3Path + "' 2>/dev/null || true"
+                "pw-play --volume=" + vol + " '" + soundPath + "' 2>/dev/null || ffplay -nodisp -autoexit -loglevel quiet -volume " + ffVol + " '" + soundPath + "' 2>/dev/null || true"
             ])
         }
     }
@@ -905,7 +930,40 @@ Singleton {
     function syncToSystem() { updaterService.syncToSystem() }
     function pullAndSync() { updaterService.pullAndSync() }
 
+    // proses pembacaan konfigurasi awal dari settings.json saat shell dimulai
+    Process {
+        id: loadSettingsProc
+        running: false
+        command: ["python3", "-c", "import json, os; p = os.path.expanduser('~/.config/phantomshell/settings.json'); print(json.dumps(json.load(open(p)))) if os.path.exists(p) else None"]
+        stdout: SplitParser {
+            onRead: data => {
+                console.log("[SETTINGS LOAD] read: " + data)
+                const line = String(data).trim()
+                if (!line) return
+                try {
+                    const cfg = JSON.parse(line)
+                    if (cfg && cfg.theme && cfg.theme.preset) {
+                        root.applyPreset(cfg.theme.preset)
+                    }
+                    if (cfg && cfg.desktop) {
+                        if (cfg.desktop.desktopClockPosition !== undefined) root.desktopClockPosition = cfg.desktop.desktopClockPosition
+                        if (cfg.desktop.showDesktopClock !== undefined) root.showDesktopClock = cfg.desktop.showDesktopClock
+                    }
+                    if (cfg && cfg.bar) {
+                        if (cfg.bar.position !== undefined) root.barPosition = cfg.bar.position
+                        if (cfg.bar.showWeatherHud !== undefined) root.showWeatherHud = cfg.bar.showWeatherHud
+                    }
+                    if (cfg && cfg.sfx) {
+                        if (cfg.sfx.enabled !== undefined) root.sfxEnabled = cfg.sfx.enabled
+                        if (cfg.sfx.volume !== undefined) root.sfxVolume = cfg.sfx.volume
+                    }
+                } catch(e) {}
+            }
+        }
+    }
+
     Component.onCompleted: {
+        loadSettingsProc.running = true
         applyDefaultCursor()
         refreshSystemDossier()
         refreshWorkspaces()

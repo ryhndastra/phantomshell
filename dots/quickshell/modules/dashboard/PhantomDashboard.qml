@@ -15,10 +15,10 @@ Scope {
             id: dashWin
             required property ShellScreen modelData
             screen: modelData
-            visible: PhantomState.dashboardOpen
+            visible: PhantomState.dashboardOpen && !PhantomState.isP3
 
             HyprlandFocusGrab {
-                active: PhantomState.dashboardOpen
+                active: PhantomState.dashboardOpen && !PhantomState.isP3
                 windows: [dashWin]
                 onCleared: PhantomState.dashboardOpen = false
             }

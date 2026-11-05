@@ -151,10 +151,13 @@ Variants {
             target: PhantomState
             function onLauncherOpenChanged() {
                 if (PhantomState.launcherOpen) {
+                    PhantomState.playSfx("open")
                     launcherWin.query = ""
                     launcherWin.selectedIndex = 0
                     searchInput.text = ""
                     searchInput.forceActiveFocus()
+                } else {
+                    PhantomState.playSfx("close")
                 }
             }
             function onModalForceExclusiveChanged() {
@@ -196,9 +199,32 @@ Variants {
                 // penahan klik di dalam area launcher
                 MouseArea { anchors.fill: parent }
 
-                // latar kartu miring launcher beserta aksen sudut
+                // latar kartu bersih minimalis khas Persona 3 Reload
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.rightMargin: 16
+                    anchors.bottomMargin: 48
+                    visible: PhantomState.isP3
+                    radius: 10
+                    color: Qt.rgba(7/255, 14/255, 32/255, 0.94)
+                    border.color: Qt.rgba(0/255, 219/255, 255/255, 0.5)
+                    border.width: 1
+
+                    // garis aksen biru cyan di atas
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 3
+                        radius: 1
+                        color: PhantomState.primary
+                    }
+                }
+
+                // latar kartu miring launcher beserta aksen sudut (P5)
                 Canvas {
                     anchors.fill: parent
+                    visible: !PhantomState.isP3
                     property color accent: PhantomState.primary
                     onAccentChanged: requestPaint()
                     onWidthChanged: requestPaint()
@@ -256,14 +282,15 @@ Variants {
                     anchors.rightMargin: 42
                     spacing: 18
 
-                    // lencana judul miring launcher
+                    // lencana judul launcher
                     Item {
-                        Layout.preferredWidth: 270
+                        Layout.preferredWidth: PhantomState.isP3 ? 320 : 270
                         Layout.preferredHeight: 62
-                        rotation: -2.5
+                        rotation: PhantomState.isP3 ? 0 : -2.5
 
                         Canvas {
                             anchors.fill: parent
+                            visible: !PhantomState.isP3
                             onPaint: {
                                 var ctx = getContext("2d")
                                 ctx.reset()
@@ -287,6 +314,23 @@ Variants {
                             }
                         }
 
+                        Rectangle {
+                            anchors.fill: parent
+                            visible: PhantomState.isP3
+                            radius: 4
+                            color: Qt.rgba(4/255, 13/255, 36/255, 0.85)
+                            border.color: "#00dbff"
+                            border.width: 1
+
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.bottom: parent.bottom
+                                width: 3
+                                color: "#00dbff"
+                            }
+                        }
+
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 18
@@ -305,16 +349,16 @@ Variants {
                             ColumnLayout {
                                 spacing: 0
                                 Text {
-                                    text: "PHANTOM LAUNCH"
+                                    text: PhantomState.isP3 ? "S.E.E.S. // TACTICAL SEARCH" : "PHANTOM LAUNCH"
                                     color: "#FFFFFF"
                                     font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 18
+                                    font.pixelSize: PhantomState.isP3 ? 15 : 18
                                     font.weight: Font.Black
-                                    font.italic: true
+                                    font.italic: !PhantomState.isP3
                                 }
                                 Text {
-                                    text: launcherWin.filteredItems.length + " APPS & COMMANDS"
-                                    color: PhantomState.secondary
+                                    text: PhantomState.isP3 ? "MEMENTO MORI • PROTOCOL DISPATCH" : (launcherWin.filteredItems.length + " APPS & COMMANDS")
+                                    color: PhantomState.isP3 ? "#00dbff" : PhantomState.secondary
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 9
                                     font.weight: Font.Black
@@ -330,6 +374,7 @@ Variants {
 
                         Canvas {
                             anchors.fill: parent
+                            visible: !PhantomState.isP3
                             property color accent: PhantomState.primary
                             onAccentChanged: requestPaint()
                             onPaint: {
@@ -367,11 +412,20 @@ Variants {
                             }
                         }
 
+                        Rectangle {
+                            anchors.fill: parent
+                            visible: PhantomState.isP3
+                            radius: 4
+                            color: Qt.rgba(4/255, 13/255, 36/255, 0.85)
+                            border.color: searchInput.activeFocus ? "#8df6ff" : Qt.rgba(0/255, 219/255, 255/255, 0.5)
+                            border.width: 1
+                        }
+
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 22
                             anchors.rightMargin: 24
-                            anchors.bottomMargin: 6
+                            anchors.bottomMargin: PhantomState.isP3 ? 0 : 6
                             spacing: 10
 
                             P5Icon {
@@ -387,7 +441,7 @@ Variants {
                                 font.family: "JetBrainsMono NFM"
                                 font.pixelSize: 17
                                 font.weight: Font.Black
-                                font.italic: true
+                                font.italic: !PhantomState.isP3
                                 selectionColor: PhantomState.primary
                                 selectedTextColor: "#FFFFFF"
                                 clip: true
@@ -419,12 +473,12 @@ Variants {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "Search installed apps or type >theme, >settings..."
+                                    text: PhantomState.isP3 ? "Search apps or system commands (>theme, >settings)..." : "Search installed apps or type >theme, >settings..."
                                     color: "#777777"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 13
                                     font.weight: Font.Bold
-                                    font.italic: true
+                                    font.italic: !PhantomState.isP3
                                     visible: searchInput.text.length === 0
                                 }
                             }
@@ -459,9 +513,32 @@ Variants {
                         readonly property bool isSelected: index === launcherWin.selectedIndex
                         readonly property bool isHovered: rowMouse.containsMouse
 
+                        // baris minimalis bersih untuk Persona 3 Reload
+                        Rectangle {
+                            anchors.fill: parent
+                            visible: PhantomState.isP3
+                            radius: 6
+                            color: rowDelegate.isSelected 
+                                ? Qt.rgba(0/255, 219/255, 255/255, 0.18) 
+                                : (rowDelegate.isHovered ? Qt.rgba(255, 255, 255, 0.05) : "transparent")
+                            border.color: rowDelegate.isSelected ? PhantomState.primary : "transparent"
+                            border.width: 1
+
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.bottom: parent.bottom
+                                width: 3
+                                radius: 1
+                                visible: rowDelegate.isSelected
+                                color: PhantomState.primary
+                            }
+                        }
+
                         Canvas {
                             id: rowCanvas
                             anchors.fill: parent
+                            visible: !PhantomState.isP3
                             property bool active: rowDelegate.isSelected || rowDelegate.isHovered
                             property color accent: PhantomState.primary
                             onActiveChanged: requestPaint()
@@ -676,15 +753,17 @@ Variants {
                             Rectangle {
                                 width: keyText.implicitWidth + 12
                                 height: 22
-                                color: "#FFFFFF"
-                                border.color: "#08080A"
-                                border.width: 2
-                                rotation: index % 2 === 0 ? -2 : 2
+                                radius: PhantomState.isP3 ? 3 : 0
+                                color: PhantomState.isP3 ? Qt.rgba(0/255, 219/255, 255/255, 0.2) : "#FFFFFF"
+                                border.color: PhantomState.isP3 ? "#00dbff" : "#08080A"
+                                border.width: PhantomState.isP3 ? 1 : 2
+                                rotation: PhantomState.isP3 ? 0 : (index % 2 === 0 ? -2 : 2)
+
                                 Text {
                                     id: keyText
                                     anchors.centerIn: parent
                                     text: modelData.key
-                                    color: "#08080A"
+                                    color: PhantomState.isP3 ? "#00dbff" : "#08080A"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 10
                                     font.weight: Font.Black
@@ -692,11 +771,11 @@ Variants {
                             }
                             Text {
                                 text: modelData.label
-                                color: "#FFFFFF"
+                                color: PhantomState.isP3 ? "#8df6ff" : "#FFFFFF"
                                 font.family: "JetBrainsMono NFM"
                                 font.pixelSize: 12
                                 font.weight: Font.Black
-                                font.italic: true
+                                font.italic: !PhantomState.isP3
                             }
                         }
                     }
@@ -708,16 +787,17 @@ Variants {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 4
                     anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.horizontalCenterOffset: 80
+                    anchors.horizontalCenterOffset: PhantomState.isP3 ? 0 : 80
                     width: 190
                     height: 66
-                    rotation: -6
+                    rotation: PhantomState.isP3 ? 0 : -6
                     z: 30
                     scale: okMouse.containsMouse ? 1.06 : 1.0
                     Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
 
                     Canvas {
                         anchors.fill: parent
+                        visible: !PhantomState.isP3
                         property bool hovered: okMouse.containsMouse
                         property color accent: PhantomState.primary
                         onHoveredChanged: requestPaint()
@@ -748,23 +828,36 @@ Variants {
                         }
                     }
 
+                    Rectangle {
+                        anchors.fill: parent
+                        visible: PhantomState.isP3
+                        radius: 4
+                        color: okMouse.containsMouse ? "#00dbff" : Qt.rgba(4/255, 13/255, 36/255, 0.95)
+                        border.color: "#00dbff"
+                        border.width: 1
+                    }
+
                     RowLayout {
                         anchors.centerIn: parent
                         spacing: 10
 
                         P5Icon {
                             name: "star"
-                            color: okMouse.containsMouse ? "#FFFFFF" : PhantomState.primary
+                            color: PhantomState.isP3
+                                ? (okMouse.containsMouse ? "#040d24" : "#00dbff")
+                                : (okMouse.containsMouse ? "#FFFFFF" : PhantomState.primary)
                             size: 24
                         }
 
                         Text {
                             text: "OK"
-                            color: "#FFFFFF"
+                            color: PhantomState.isP3
+                                ? (okMouse.containsMouse ? "#040d24" : "#FFFFFF")
+                                : "#FFFFFF"
                             font.family: "JetBrainsMono NFM"
                             font.pixelSize: 32
                             font.weight: Font.Black
-                            font.italic: true
+                            font.italic: !PhantomState.isP3
                         }
                     }
 
