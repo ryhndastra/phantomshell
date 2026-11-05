@@ -867,12 +867,19 @@ Scope {
 
                 p3Part2Video.stop()
                 p3Part2Video.visible = false
+                p3Part2Video.opacity = 1.0
                 p3Part2Video.seek(0)
                 p3Part3Video.stop()
-                p3Part3Video.visible = false
                 p3Part3Video.seek(0)
 
                 p3FrameAnim.restart()
+            }
+
+            // Latar Biru Samudra Pekat (Mencegah Layar Ngeblink / Tembus Desktop)
+            Rectangle {
+                anchors.fill: parent
+                color: "#00081d"
+                z: 0
             }
 
             // Stage 0: Animasi Shatter Kaca Intro (12 Frame)
@@ -885,7 +892,7 @@ Scope {
                 property int currentFrame: 0
                 property int totalFrames: 12
                 source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/png/pngseq" + String(currentFrame).padStart(2, '0') + ".png")
-                z: 1
+                z: 4
             }
 
             Timer {
@@ -901,6 +908,7 @@ Scope {
                         p3PngSequence.visible = false
                         p3Overlay.stage = 1
                         p3Part2Video.visible = true
+                        p3Part2Video.opacity = 1.0
                         p3Part2Video.play()
                     }
                 }
@@ -914,22 +922,36 @@ Scope {
                 fillMode: VideoOutput.PreserveAspectCrop
                 volume: 0
                 visible: false
-                z: 2
+                opacity: 1.0
+                z: 3
+
                 onPositionChanged: {
-                    if (duration > 0 && position >= duration - 80 && p3Overlay.stage === 1) {
-                        p3Part2Video.visible = false
+                    if (duration > 0 && position >= duration - 120 && p3Overlay.stage === 1) {
                         p3Overlay.stage = 2
-                        p3Part3Video.visible = true
                         p3Part3Video.play()
+                        part2FadeOut.restart()
                     }
                 }
                 onPlaybackStateChanged: {
                     if (playbackState === MediaPlayer.StoppedState && p3Overlay.stage === 1) {
-                        p3Part2Video.visible = false
                         p3Overlay.stage = 2
-                        p3Part3Video.visible = true
                         p3Part3Video.play()
+                        part2FadeOut.restart()
                     }
+                }
+            }
+
+            NumberAnimation {
+                id: part2FadeOut
+                target: p3Part2Video
+                property: "opacity"
+                from: 1.0
+                to: 0.0
+                duration: 250
+                easing.type: Easing.OutQuad
+                onFinished: {
+                    p3Part2Video.stop()
+                    p3Part2Video.visible = false
                 }
             }
 
@@ -941,7 +963,7 @@ Scope {
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
-                visible: false
+                visible: true
                 z: 2
             }
 
@@ -1014,17 +1036,37 @@ Scope {
         height: 350
         rotation: itemRotation
         property bool hovered: false
-        scale: hovered ? 1.08 : 1.0
-        transformOrigin: Item.Center
-        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
-        Image {
+        Item {
+            id: visualItem
             anchors.fill: parent
-            fillMode: Image.PreserveAspectFit
-            source: powerItemRoot.hovered ? powerItemRoot.hoverIcon : powerItemRoot.normalIcon
-            mipmap: true
-            smooth: true
+            scale: powerItemRoot.hovered ? 1.08 : 1.0
+            transformOrigin: Item.Center
+            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+
+            Image {
+                id: normalImg
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectFit
+                source: powerItemRoot.normalIcon
+                mipmap: true
+                smooth: true
+                opacity: powerItemRoot.hovered ? 0.0 : 1.0
+                Behavior on opacity { NumberAnimation { duration: 120 } }
+            }
+
+            Image {
+                id: hoverImg
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectFit
+                source: powerItemRoot.hoverIcon
+                mipmap: true
+                smooth: true
+                opacity: powerItemRoot.hovered ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: 120 } }
+            }
         }
+
         MouseArea {
             anchors.centerIn: parent
             width: parent.width * 0.4

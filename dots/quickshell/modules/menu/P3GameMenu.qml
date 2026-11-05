@@ -49,7 +49,10 @@ Scope {
                     p3MenuWin.canDismiss = false
                     p3MenuWin.contentVisible = false
                     p3MenuWin.activeCard = 0
-                    menuVideo.play()
+
+                    resumeVideo.seek(0)
+                    resumeVideo.play()
+
                     wipeAnim.restart()
                     delayTimer.restart()
                     dismissArmTimer.restart()
@@ -57,7 +60,8 @@ Scope {
                     PhantomState.refreshBluetooth()
                     keyCatcher.forceActiveFocus()
                 } else {
-                    menuVideo.stop()
+                    wipeAnim.stop()
+                    resumeVideo.stop()
                     p3MenuWin.contentVisible = false
                     p3MenuWin.canDismiss = false
                 }
@@ -70,42 +74,36 @@ Scope {
                 onTriggered: p3MenuWin.canDismiss = true
             }
 
-        Timer {
-            id: delayTimer
-            interval: 220
-            repeat: false
-            onTriggered: {
-                p3MenuWin.contentVisible = true
+            Timer {
+                id: delayTimer
+                interval: 650
+                repeat: false
+                onTriggered: {
+                    p3MenuWin.contentVisible = true
+                }
             }
+
+        // ── Dasar Samudra Pekat (Mencegah Layar Ngeblink / Tembus Desktop) ──
+        Rectangle {
+            anchors.fill: parent
+            color: "#02071a"
+            z: 0
         }
 
-        // ── Lapisan Video Utama: Persona 3 Reload Resume.mp4 ──
+        // ── Video Latar Menu Taktis Asli Persona 3 Reload (Resume.mp4 Engine) ──
         Video {
-            id: menuVideo
+            id: resumeVideo
             anchors.fill: parent
             source: Qt.resolvedUrl("../../assets/themes/p3/videos/Resume.mp4")
             fillMode: VideoOutput.PreserveAspectCrop
             loops: MediaPlayer.Infinite
             volume: 0
-            z: 0
+            z: 1
 
             // Overlay gradasi biru samudra tipis agar teks selalu terbaca kontras
             Rectangle {
                 anchors.fill: parent
-                color: Qt.rgba(4/255, 10/255, 30/255, 0.28)
-            }
-
-            // Overlay penutup pita bawah video agar menyatu dengan kedalaman air laut Atlus P3R
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: parent.height * 0.28
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "transparent" }
-                    GradientStop { position: 0.25; color: Qt.rgba(4/255, 12/255, 36/255, 0.78) }
-                    GradientStop { position: 1.0; color: Qt.rgba(3/255, 8/255, 24/255, 0.98) }
-                }
+                color: Qt.rgba(4/255, 10/255, 30/255, 0.15)
             }
         }
 

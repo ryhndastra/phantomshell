@@ -4,10 +4,8 @@ import QtQuick.Effects
 // Widget Jam & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
 Item {
     id: p3ClockRoot
-    implicitWidth: 560
-    implicitHeight: 180
-
-    readonly property real vw: width / 28.0
+    implicitWidth: 640
+    implicitHeight: 140
 
     property var currentTime: new Date()
 
@@ -74,15 +72,14 @@ Item {
         id: clockContent
         anchors.fill: parent
 
-        // ── Gelombang Air Laut Latar Belakang ──
+        // ── Gelombang Air Laut Latar Belakang (Membentang Penuh dengan Fade Kiri Halus) ──
         Item {
             id: waveContainerOuter
             z: 1
-            anchors.top: parent.top
+            anchors.left: parent.left
             anchors.right: parent.right
-            anchors.rightMargin: -p3ClockRoot.vw * 1.5625
-            width: p3ClockRoot.vw * 26.0417
-            height: p3ClockRoot.vw * 7.2917
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
             clip: true
 
             Repeater {
@@ -117,25 +114,38 @@ Item {
                     NumberAnimation on x {
                         from: 0
                         to: -waveContainerOuter.width
-                        duration: 10000 + wavePairDelegate.index * 1500
+                        duration: 12000 + wavePairDelegate.index * 1800
                         loops: Animation.Infinite
                         running: true
                     }
                 }
             }
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: ShaderEffectSource {
+                    sourceItem: Rectangle {
+                        width: waveContainerOuter.width
+                        height: waveContainerOuter.height
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0.0; color: "transparent" }
+                            GradientStop { position: 0.14; color: "white" }
+                            GradientStop { position: 1.0; color: "white" }
+                        }
+                    }
+                }
+            }
         }
 
-        // ── Huruf Tanggal Bermasker Air Biru Mengalir (NOV·05) ──
+        // ── Huruf Tanggal Bermasker Air Biru Mengalir (NOV·05 Watermark) ──
         Item {
             id: waveTextLayer
             z: 5
-            anchors.top: parent.top
-            anchors.topMargin: -p3ClockRoot.vw * 0.5
-            anchors.right: parent.right
-            anchors.rightMargin: -p3ClockRoot.vw * 1.5625
-            width: p3ClockRoot.vw * 26.0417
-            height: p3ClockRoot.vw * 6.25
+            anchors.fill: parent
             clip: true
+            opacity: 0.55
 
             Item {
                 id: scrollingBg
@@ -168,23 +178,23 @@ Item {
 
             Text {
                 id: textMask
-                anchors.top: parent.top
                 anchors.right: parent.right
-                anchors.rightMargin: p3ClockRoot.vw * 2
+                anchors.rightMargin: 110
+                anchors.verticalCenter: parent.verticalCenter
                 text: p3ClockRoot.dateStr
                 font.family: "Inter Display"
-                font.pixelSize: p3ClockRoot.vw * 6.75
+                font.pixelSize: 110
                 font.weight: Font.Black
-                font.letterSpacing: -p3ClockRoot.vw * 0.65
+                font.letterSpacing: -6
                 color: "white"
-                visible: false
+                visible: true
             }
 
             ShaderEffectSource {
                 id: textMaskSource
                 sourceItem: textMask
                 hideSource: true
-                visible: false
+                live: true
             }
 
             MultiEffect {
@@ -192,7 +202,7 @@ Item {
                 anchors.fill: scrollingBg
                 maskEnabled: true
                 maskSource: textMaskSource
-                maskThresholdMin: 0.5
+                maskThresholdMin: 0.4
                 maskSpreadAtMin: 1.0
             }
         }
@@ -201,11 +211,10 @@ Item {
         Rectangle {
             id: circle1
             z: 60
-            anchors.top: parent.top
-            anchors.topMargin: p3ClockRoot.vw * 2.3
+            anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            anchors.rightMargin: p3ClockRoot.vw * 1.5
-            width: p3ClockRoot.vw * 4.2
+            anchors.rightMargin: 18
+            width: 76
             height: width
             radius: width / 2
             color: "#ffd200"
@@ -223,7 +232,7 @@ Item {
             id: circle2
             z: 61
             anchors.centerIn: circle1
-            width: p3ClockRoot.vw * 4.0
+            width: 72
             height: width
             radius: width / 2
             color: "#ffe500"
@@ -231,7 +240,7 @@ Item {
             layer.effect: MultiEffect {
                 shadowEnabled: true
                 shadowColor: "#fff72a"
-                shadowBlur: p3ClockRoot.vw * 0.3
+                shadowBlur: 0.3
             }
         }
 
@@ -240,7 +249,7 @@ Item {
             id: moonSphere
             z: 62
             anchors.centerIn: circle1
-            width: p3ClockRoot.vw * 4.0
+            width: 72
             height: width
             clip: true
 
@@ -300,7 +309,7 @@ Item {
                 anchors.right: parent.right
                 text: p3ClockRoot.moonPhaseName
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: p3ClockRoot.vw * 1.15
+                font.pixelSize: 13
                 font.weight: Font.Bold
                 color: "#fffb9f"
                 style: Text.Raised
@@ -312,7 +321,7 @@ Item {
                 anchors.right: parent.right
                 text: p3ClockRoot.weekdayStr
                 font.family: "Inter Display"
-                font.pixelSize: p3ClockRoot.vw * 1.5
+                font.pixelSize: 22
                 font.weight: Font.Black
                 font.letterSpacing: 0.5
                 color: "#ffffff"
@@ -325,7 +334,7 @@ Item {
                 anchors.right: parent.right
                 text: p3ClockRoot.daytimeStr
                 font.family: "Inter Display"
-                font.pixelSize: p3ClockRoot.vw * 1.3
+                font.pixelSize: 16
                 font.weight: Font.Black
                 font.letterSpacing: -0.3
                 color: p3ClockRoot.daytimeStr === "DARK HOUR" ? "#72ff95" : "#00dbff"
@@ -340,12 +349,12 @@ Item {
             z: 50
             anchors.verticalCenter: circle1.verticalCenter
             anchors.right: dateMetaCol.left
-            anchors.rightMargin: 16
+            anchors.rightMargin: 20
             text: p3ClockRoot.timeStr
             font.family: "Inter Display"
-            font.pixelSize: p3ClockRoot.vw * 5.8
+            font.pixelSize: 84
             font.weight: Font.Black
-            font.letterSpacing: -p3ClockRoot.vw * 0.25
+            font.letterSpacing: -3
             color: "#ffffff"
             style: Text.Raised
             styleColor: "#d11300b8"
