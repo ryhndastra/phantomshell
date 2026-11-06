@@ -61,8 +61,9 @@ Scope {
 
             WlrLayershell.namespace: "phantomshell-bar"
             WlrLayershell.layer: WlrLayer.Top
-            exclusiveZone: 38
-            implicitHeight: 38
+            exclusiveZone: PhantomState.isP3 ? 0 : 38
+            implicitHeight: PhantomState.isP3 ? 0 : 38
+            visible: !PhantomState.isP3
             color: "transparent"
 
             anchors {

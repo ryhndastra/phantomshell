@@ -198,11 +198,11 @@ Item {
             z: 2
             anchors.verticalCenter: parent.verticalCenter
             anchors.verticalCenterOffset: 6
-            anchors.left: parent.left
-            anchors.leftMargin: 30
+            anchors.right: circle1.left
+            anchors.rightMargin: 15
             text: p3ClockRoot.watermarkText
             font.family: "Inter Display"
-            font.pixelSize: 88
+            font.pixelSize: 84
             font.weight: Font.Black
             font.letterSpacing: -2
             color: p3ClockRoot.periodColor
@@ -210,21 +210,23 @@ Item {
             rotation: -5
         }
 
-        // ── Badge Jam Digital Sistem (Menyatu Rapi di Sebelah Kiri Banner) ──
+        // ── Badge Jam Digital Sistem (Menyatu Anggun Saat Di-hover) ──
         Item {
             id: sysTimeBadge
             z: 50
             anchors.left: parent.left
             anchors.leftMargin: 24
             anchors.verticalCenter: parent.verticalCenter
+            opacity: clockMouse.containsMouse ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
             Rectangle {
                 anchors.centerIn: parent
                 width: sysTimeRow.implicitWidth + 20
                 height: 32
                 radius: 4
-                color: Qt.rgba(2/255, 7/255, 24/255, 0.75)
-                border.color: Qt.rgba(p3ClockRoot.periodColor.r, p3ClockRoot.periodColor.g, p3ClockRoot.periodColor.b, 0.5)
+                color: Qt.rgba(2/255, 7/255, 24/255, 0.85)
+                border.color: Qt.rgba(p3ClockRoot.periodColor.r, p3ClockRoot.periodColor.g, p3ClockRoot.periodColor.b, 0.6)
                 border.width: 1
 
                 Row {
@@ -254,6 +256,13 @@ Item {
                     }
                 }
             }
+        }
+
+        MouseArea {
+            id: clockMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.NoButton
         }
 
         // ── Lingkaran Cahaya Halo Bulan Kuning Keemasan ──

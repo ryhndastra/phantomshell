@@ -44,7 +44,7 @@ Item {
         if (PhantomState.isP3) {
             if (PhantomState.desktopClockPosition === "center") return (parent.height - height) / 2 - 40
             if (PhantomState.desktopClockPosition === "bottom-left") return parent.height - height - 155
-            return PhantomState.barPosition === "top" ? 38 : 12
+            return 16
         }
         if (PhantomState.desktopClockPosition === "center") return (parent.height - height) / 2 - 40
         if (PhantomState.desktopClockPosition === "bottom-left") return parent.height - height - 155

@@ -54,6 +54,7 @@ Singleton {
     property bool notificationsOpen: false
     property bool calendarOpen: false
     property bool sessionOpen: false
+    property string p3SessionSection: "main"
     property bool lockOpen: false
     property bool wallpaperSelectorOpen: false
     property bool mediaPopupOpen: false
@@ -261,7 +262,10 @@ Singleton {
 
     function toggleSession() {
         const next = !sessionOpen
-        if (next) closeAllModals()
+        if (next) {
+            closeAllModals()
+            p3SessionSection = "main"
+        }
         sessionOpen = next
     }
 

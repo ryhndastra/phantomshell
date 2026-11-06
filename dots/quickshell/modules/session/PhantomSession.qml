@@ -122,6 +122,44 @@ Scope {
             focus: PhantomState.sessionOpen
 
             Keys.onPressed: event => {
+                if (PhantomState.isP3) {
+                    if (event.key === Qt.Key_Escape) {
+                        if (p3Overlay.currentSection !== "main") {
+                            PhantomState.playSfx("select")
+                            p3Overlay.currentSection = "main"
+                        } else {
+                            PhantomState.sessionOpen = false
+                        }
+                        event.accepted = true
+                        return
+                    }
+                    if (p3Overlay.currentSection === "main") {
+                        if (event.key >= Qt.Key_1 && event.key <= Qt.Key_5) {
+                            const secs = ["stats", "network", "bluetooth", "palette", "dispatch"]
+                            p3Overlay.currentSection = secs[event.key - Qt.Key_1]
+                            PhantomState.playSfx("confirm")
+                            event.accepted = true
+                            return
+                        }
+                    } else if (p3Overlay.currentSection === "dispatch") {
+                        if (event.key === Qt.Key_1) {
+                            PhantomState.sessionOpen = false
+                            Quickshell.execDetached(["systemctl", "poweroff"])
+                            event.accepted = true
+                            return
+                        } else if (event.key === Qt.Key_2) {
+                            PhantomState.sessionOpen = false
+                            Quickshell.execDetached(["systemctl", "reboot"])
+                            event.accepted = true
+                            return
+                        } else if (event.key === Qt.Key_3) {
+                            PhantomState.sessionOpen = false
+                            Quickshell.execDetached(["hyprctl", "dispatch", "exit"])
+                            event.accepted = true
+                            return
+                        }
+                    }
+                }
                 if (event.key === Qt.Key_Escape) {
                     PhantomState.sessionOpen = false
                     event.accepted = true
@@ -846,6 +884,12 @@ Scope {
             Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
 
             property int stage: 0
+            property string currentSection: PhantomState.p3SessionSection
+            onCurrentSectionChanged: {
+                if (PhantomState.p3SessionSection !== currentSection) {
+                    PhantomState.p3SessionSection = currentSection
+                }
+            }
 
             Connections {
                 target: PhantomState
@@ -858,10 +902,16 @@ Scope {
                         p3FrameAnim.stop()
                     }
                 }
+                function onP3SessionSectionChanged() {
+                    if (p3Overlay.currentSection !== PhantomState.p3SessionSection) {
+                        p3Overlay.currentSection = PhantomState.p3SessionSection
+                    }
+                }
             }
 
             function resetMenu() {
                 stage = 0
+                currentSection = "main"
                 p3PngSequence.currentFrame = 0
                 p3PngSequence.visible = true
 
@@ -873,6 +923,8 @@ Scope {
                 p3Part3Video.seek(0)
 
                 p3FrameAnim.restart()
+                PhantomState.refreshWifi()
+                PhantomState.refreshBluetooth()
             }
 
             // Latar Biru Samudra Pekat (Mencegah Layar Ngeblink / Tembus Desktop)
@@ -939,6 +991,11 @@ Scope {
                         part2FadeOut.restart()
                     }
                 }
+                onErrorOccurred: (error, errorString) => {
+                    console.warn("[P3 VIDEO ERROR]", error, errorString)
+                    p3Overlay.stage = 2
+                    p3Part3Video.play()
+                }
             }
 
             NumberAnimation {
@@ -967,48 +1024,684 @@ Scope {
                 z: 2
             }
 
-            // 3 Tombol Aksi Daya Raksasa Asli Persona 3 Reload
+            // ── Pusat Menu Game Taktis Lengkap Beranak (S.E.E.S. Tactical Hub) ──
             Item {
-                id: p3PowerOptionsContainer
-                anchors.centerIn: parent
-                anchors.horizontalCenterOffset: 50
-                anchors.verticalCenterOffset: 10
-                width: 800
-                height: 500
+                id: p3TacticalHub
+                anchors.fill: parent
                 visible: p3Overlay.stage >= 1
                 z: 10
 
-                P3PowerItem {
-                    offsetY: -75
-                    itemRotation: 3
-                    normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/shutdown.png")
-                    hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/shutdown1.png")
-                    action: () => {
-                        PhantomState.playSfx("select")
-                        PhantomState.sessionOpen = false
-                        Quickshell.execDetached(["systemctl", "poweroff"])
+                // ── LEVEL 0: MENU UTAMA TINGKAT PERTAMA (Banyak Menu Dulu) ──
+                Item {
+                    id: p3MainMenuContainer
+                    visible: p3Overlay.currentSection === "main"
+                    anchors.right: parent.right
+                    anchors.rightMargin: 120
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 640
+                    height: 520
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 16
+
+                        // Header Menu Taktis
+                        RowLayout {
+                            spacing: 8
+                            Rectangle {
+                                width: 8; height: 8
+                                radius: 4
+                                color: "#00dbff"
+                                SequentialAnimation on opacity {
+                                    loops: Animation.Infinite
+                                    NumberAnimation { from: 0.3; to: 1.0; duration: 800; easing.type: Easing.InOutQuad }
+                                    NumberAnimation { from: 1.0; to: 0.3; duration: 800; easing.type: Easing.InOutQuad }
+                                }
+                            }
+                            Text {
+                                text: "S.E.E.S. // TACTICAL COMMAND INTERFACE"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 12
+                                font.weight: Font.Black
+                                color: "#00dbff"
+                            }
+                        }
+
+                        // 5 Menu Utama Bergaya Atlus Miring
+                        Repeater {
+                            model: [
+                                { id: "stats", arcana: "I", title: "SYSTEM STATS", sub: "Hardware Telemetry & Protocol Toggles" },
+                                { id: "network", arcana: "II", title: "TATSUMI LINK", sub: "Wi-Fi Radar & Grid Connectivity" },
+                                { id: "bluetooth", arcana: "III", title: "EVOKER LINK", sub: "Wireless Audio & Tactical Devices" },
+                                { id: "palette", arcana: "IV", title: "METAVERSE ERAS", sub: "Timeline Palette & Character Select" },
+                                { id: "dispatch", arcana: "V", title: "DISPATCH // POWER", sub: "Shutdown, Restart, Logout Session" }
+                            ]
+
+                            delegate: Item {
+                                id: mainMenuItem
+                                required property var modelData
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 74
+                                rotation: -4
+
+                                readonly property bool isHovered: itemMouse.containsMouse
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 6
+                                    color: mainMenuItem.isHovered ? Qt.rgba(0/255, 219/255, 255/255, 0.28) : Qt.rgba(3/255, 10/255, 36/255, 0.85)
+                                    border.color: mainMenuItem.isHovered ? "#ffffff" : Qt.rgba(0/255, 219/255, 255/255, 0.45)
+                                    border.width: mainMenuItem.isHovered ? 2 : 1
+                                    scale: mainMenuItem.isHovered ? 1.04 : 1.0
+                                    Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutBack } }
+                                    Behavior on color { ColorAnimation { duration: 140 } }
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 14
+                                        spacing: 16
+
+                                        // Badge Angka Romawi Arcana
+                                        Rectangle {
+                                            Layout.preferredWidth: 38
+                                            Layout.preferredHeight: 38
+                                            radius: 4
+                                            color: mainMenuItem.isHovered ? "#00dbff" : "#02081d"
+                                            border.color: "#00dbff"
+                                            border.width: 1
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: modelData.arcana
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 13
+                                                font.weight: Font.Black
+                                                color: mainMenuItem.isHovered ? "#02081d" : "#00dbff"
+                                            }
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 2
+
+                                            Text {
+                                                text: modelData.title
+                                                font.family: "Inter Display"
+                                                font.pixelSize: 20
+                                                font.weight: Font.Black
+                                                color: mainMenuItem.isHovered ? "#ffffff" : "#cbf8ff"
+                                            }
+                                            Text {
+                                                text: modelData.sub
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 10
+                                                color: mainMenuItem.isHovered ? "#8df6ff" : PhantomState.muted
+                                            }
+                                        }
+
+                                        Text {
+                                            text: "ENTER ►"
+                                            font.family: "JetBrainsMono NFM"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Black
+                                            color: mainMenuItem.isHovered ? "#ffffff" : "#00dbff"
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: itemMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onEntered: PhantomState.playSfx("select")
+                                        onClicked: {
+                                            PhantomState.playSfx("confirm")
+                                            p3Overlay.currentSection = modelData.id
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                P3PowerItem {
-                    offsetY: 100
-                    itemRotation: -5
-                    normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/restart.png")
-                    hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/restart1.png")
-                    action: () => {
-                        PhantomState.playSfx("select")
-                        PhantomState.sessionOpen = false
-                        Quickshell.execDetached(["systemctl", "reboot"])
+
+                // ── LEVEL 1: SUB-MENU POWER / DISPATCH (3 Tombol Ikonik Asli P3) ──
+                Item {
+                    id: p3DispatchSubMenu
+                    visible: p3Overlay.currentSection === "dispatch"
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: 50
+                    anchors.verticalCenterOffset: 10
+                    width: 800
+                    height: 520
+
+                    P3PowerItem {
+                        offsetY: -75
+                        itemRotation: 3
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/shutdown.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/shutdown1.png")
+                        action: () => {
+                            PhantomState.playSfx("select")
+                            PhantomState.sessionOpen = false
+                            Quickshell.execDetached(["systemctl", "poweroff"])
+                        }
+                    }
+                    P3PowerItem {
+                        offsetY: 100
+                        itemRotation: -5
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/restart.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/restart1.png")
+                        action: () => {
+                            PhantomState.playSfx("select")
+                            PhantomState.sessionOpen = false
+                            Quickshell.execDetached(["systemctl", "reboot"])
+                        }
+                    }
+                    P3PowerItem {
+                        offsetY: 280
+                        itemRotation: -12
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/logout.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/logout1.png")
+                        action: () => {
+                            PhantomState.playSfx("select")
+                            PhantomState.sessionOpen = false
+                            Quickshell.execDetached(["hyprctl", "dispatch", "exit"])
+                        }
+                    }
+
+                    // Tombol Kembali ke Menu Utama
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: -30
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.horizontalCenterOffset: 100
+                        width: 240
+                        height: 40
+                        radius: 4
+                        color: dispatchBackMouse.containsMouse ? "#00dbff" : Qt.rgba(2/255, 8/255, 29/255, 0.9)
+                        border.color: "#00dbff"
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "◄ RETURN TO MENU"
+                            font.family: "JetBrainsMono NFM"
+                            font.pixelSize: 11
+                            font.weight: Font.Black
+                            color: dispatchBackMouse.containsMouse ? "#02081d" : "#ffffff"
+                        }
+
+                        MouseArea {
+                            id: dispatchBackMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                PhantomState.playSfx("select")
+                                p3Overlay.currentSection = "main"
+                            }
+                        }
                     }
                 }
-                P3PowerItem {
-                    offsetY: 300
-                    itemRotation: -12
-                    normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/logout.png")
-                    hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/logout1.png")
-                    action: () => {
-                        PhantomState.playSfx("select")
-                        PhantomState.sessionOpen = false
-                        Quickshell.execDetached(["hyprctl", "dispatch", "exit"])
+
+                // ── LEVEL 1: SUB-MENU METAVERSE ERAS (KARTU KARAKTER HERO) ──
+                Item {
+                    id: p3PaletteSubMenu
+                    visible: p3Overlay.currentSection === "palette"
+                    anchors.right: parent.right
+                    anchors.rightMargin: 100
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 660
+                    height: 520
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 12
+
+                        Text {
+                            text: "METAVERSE ERAS // HERO TIMELINE SELECTOR"
+                            font.family: "JetBrainsMono NFM"
+                            font.pixelSize: 12
+                            font.weight: Font.Black
+                            color: "#00dbff"
+                        }
+
+                        Repeater {
+                            model: [
+                                { id: "p3-reload", name: "PERSONA 3 RELOAD", role: "LEADER", desc: "Makoto Yuki // Tartarus Oceanic Modernism", charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char1.png"), accent: "#00dbff" },
+                                { id: "p5-crimson", name: "PERSONA 5 CRIMSON", role: "TRICKSTER", desc: "Ren Amamiya // Metaverse Punk Rebellion", charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char2.png"), accent: "#ff2a4b" },
+                                { id: "p4-golden", name: "PERSONA 4 GOLDEN", role: "SEEKER", desc: "Yu Narukami // Yasogami Retro Amber Investigation", charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char3.png"), accent: "#f5b800" }
+                            ]
+
+                            delegate: Item {
+                                id: cCard
+                                required property var modelData
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 88
+
+                                readonly property bool isSelected: PhantomState.themeId === modelData.id
+                                readonly property bool isHovered: cMouse.containsMouse
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 6
+                                    clip: true
+                                    color: cCard.isSelected ? Qt.rgba(0/255, 20/255, 60/255, 0.90) : (cCard.isHovered ? Qt.rgba(12/255, 26/255, 78/255, 0.85) : Qt.rgba(6/255, 14/255, 46/255, 0.80))
+                                    border.color: cCard.isSelected ? modelData.accent : (cCard.isHovered ? "#ffffff" : Qt.rgba(0/255, 219/255, 255/255, 0.3))
+                                    border.width: cCard.isSelected ? 2 : 1
+
+                                    Image {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: -20
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 190
+                                        height: parent.height + 20
+                                        source: modelData.charImg
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                        opacity: cCard.isSelected ? 1.0 : (cCard.isHovered ? 0.9 : 0.6)
+                                        scale: cCard.isHovered ? 1.05 : 1.0
+                                        Behavior on opacity { NumberAnimation { duration: 180 } }
+                                        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+                                    }
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 14
+                                        spacing: 14
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 42
+                                            Layout.preferredHeight: 42
+                                            radius: 4
+                                            color: cCard.isSelected ? modelData.accent : "#030a20"
+                                            border.color: modelData.accent
+                                            border.width: 1
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: modelData.role.substring(0, 3)
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Black
+                                                color: cCard.isSelected ? "#020718" : modelData.accent
+                                            }
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 2
+                                            Text {
+                                                text: modelData.name
+                                                font.family: "Inter Display"
+                                                font.pixelSize: 14
+                                                font.weight: Font.Black
+                                                color: cCard.isSelected ? modelData.accent : "#ffffff"
+                                            }
+                                            Text {
+                                                text: modelData.desc
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.weight: Font.Bold
+                                                color: "#8df6ff"
+                                                opacity: 0.85
+                                            }
+                                        }
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 84
+                                            Layout.preferredHeight: 28
+                                            radius: 3
+                                            color: cCard.isSelected ? modelData.accent : "transparent"
+                                            border.color: modelData.accent
+                                            border.width: 1
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: cCard.isSelected ? "ACTIVE ✓" : "ACTIVATE"
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 10
+                                                font.weight: Font.Black
+                                                color: cCard.isSelected ? "#020718" : modelData.accent
+                                            }
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: cMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            PhantomState.playSfx("select")
+                                            PhantomState.applyPreset(modelData.id)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Tombol Kembali
+                        Rectangle {
+                            Layout.preferredWidth: 240
+                            Layout.preferredHeight: 38
+                            Layout.alignment: Qt.AlignRight
+                            radius: 4
+                            color: palBackMouse.containsMouse ? "#00dbff" : Qt.rgba(2/255, 8/255, 29/255, 0.9)
+                            border.color: "#00dbff"
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "◄ RETURN TO MENU"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 11
+                                font.weight: Font.Black
+                                color: palBackMouse.containsMouse ? "#02081d" : "#ffffff"
+                            }
+                            MouseArea {
+                                id: palBackMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    PhantomState.playSfx("select")
+                                    p3Overlay.currentSection = "main"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ── LEVEL 1: SUB-MENU SYSTEM STATS (TELEMETRY & TOGGLES) ──
+                Item {
+                    id: p3StatsSubMenu
+                    visible: p3Overlay.currentSection === "stats"
+                    anchors.right: parent.right
+                    anchors.rightMargin: 100
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 640
+                    height: 520
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 12
+
+                        Text {
+                            text: "SYSTEM STATS // HARDWARE TELEMETRY & PROTOCOLS"
+                            font.family: "JetBrainsMono NFM"
+                            font.pixelSize: 12
+                            font.weight: Font.Black
+                            color: "#00dbff"
+                        }
+
+                        // Telemetri Hardware
+                        Repeater {
+                            model: [
+                                { label: "CPU", sub: PhantomState.sysCpuModel || "Intel Core i5-12450H", text: Math.round(PhantomState.cpuPct) + "%", val: PhantomState.cpuPct },
+                                { label: "RAM", sub: PhantomState.sysRamText || "Memory Matrix", text: Math.round(PhantomState.ramPct) + "%", val: PhantomState.ramPct },
+                                { label: "GPU", sub: PhantomState.sysGpuModel || "NVIDIA RTX 3050 Mobile", text: Math.round(PhantomState.gpuPct) + "%", val: PhantomState.gpuPct },
+                                { label: "BATTERY", sub: "Power Cell", text: Math.round(PhantomState.batteryPct) + "%", val: PhantomState.batteryPct }
+                            ]
+                            delegate: Item {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 52
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 6
+                                    color: Qt.rgba(3/255, 10/255, 36/255, 0.85)
+                                    border.color: Qt.rgba(0/255, 219/255, 255/255, 0.4)
+                                    border.width: 1
+
+                                    ColumnLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 10
+                                        spacing: 4
+
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            Text {
+                                                text: modelData.label
+                                                font.family: "Inter Display"
+                                                font.pixelSize: 12
+                                                font.weight: Font.Black
+                                                color: "#ffffff"
+                                            }
+                                            Text {
+                                                text: modelData.sub
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                color: PhantomState.muted
+                                                elide: Text.ElideRight
+                                                Layout.fillWidth: true
+                                                Layout.leftMargin: 8
+                                            }
+                                            Text {
+                                                text: modelData.text
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Black
+                                                color: "#00dbff"
+                                            }
+                                        }
+
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 4
+                                            radius: 2
+                                            color: Qt.rgba(0, 0, 0, 0.5)
+
+                                            Rectangle {
+                                                width: parent.width * Math.max(0.02, Math.min(1.0, modelData.val / 100.0))
+                                                height: parent.height
+                                                radius: 2
+                                                color: modelData.val > 88 ? "#ff3355" : "#00dbff"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Sakelar Protokol CAVA & Parallax
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 42
+                                radius: 4
+                                color: PhantomState.showDesktopCava ? Qt.rgba(0/255, 219/255, 255/255, 0.25) : "#02081d"
+                                border.color: PhantomState.showDesktopCava ? "#00dbff" : "#1a3d80"
+                                border.width: 1
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "CAVA VISUALIZER: " + (PhantomState.showDesktopCava ? "ENABLED" : "DISABLED")
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 10
+                                    font.weight: Font.Black
+                                    color: PhantomState.showDesktopCava ? "#00dbff" : "#7aa2d6"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        PhantomState.playSfx("select")
+                                        PhantomState.showDesktopCava = !PhantomState.showDesktopCava
+                                        PhantomState.saveState()
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 42
+                                radius: 4
+                                color: PhantomState.showWallpaperLayer ? Qt.rgba(0/255, 219/255, 255/255, 0.25) : "#02081d"
+                                border.color: PhantomState.showWallpaperLayer ? "#00dbff" : "#1a3d80"
+                                border.width: 1
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "PARALLAX DEPTH: " + (PhantomState.showWallpaperLayer ? "ENABLED" : "DISABLED")
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 10
+                                    font.weight: Font.Black
+                                    color: PhantomState.showWallpaperLayer ? "#00dbff" : "#7aa2d6"
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        PhantomState.playSfx("select")
+                                        PhantomState.showWallpaperLayer = !PhantomState.showWallpaperLayer
+                                        PhantomState.saveState()
+                                    }
+                                }
+                            }
+                        }
+
+                        // Tombol Kembali
+                        Rectangle {
+                            Layout.preferredWidth: 240
+                            Layout.preferredHeight: 38
+                            Layout.alignment: Qt.AlignRight
+                            radius: 4
+                            color: statsBackMouse.containsMouse ? "#00dbff" : Qt.rgba(2/255, 8/255, 29/255, 0.9)
+                            border.color: "#00dbff"
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "◄ RETURN TO MENU"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 11
+                                font.weight: Font.Black
+                                color: statsBackMouse.containsMouse ? "#02081d" : "#ffffff"
+                            }
+                            MouseArea {
+                                id: statsBackMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    PhantomState.playSfx("select")
+                                    p3Overlay.currentSection = "main"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ── LEVEL 1: SUB-MENU TATSUMI LINK & EVOKER LINK ──
+                Item {
+                    id: p3NetworkSubMenu
+                    visible: p3Overlay.currentSection === "network" || p3Overlay.currentSection === "bluetooth"
+                    anchors.right: parent.right
+                    anchors.rightMargin: 100
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 640
+                    height: 520
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 14
+
+                        Text {
+                            text: p3Overlay.currentSection === "network" ? "TATSUMI LINK // WI-FI RADAR" : "EVOKER LINK // BLUETOOTH DEVICES"
+                            font.family: "JetBrainsMono NFM"
+                            font.pixelSize: 12
+                            font.weight: Font.Black
+                            color: "#00dbff"
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 64
+                            radius: 6
+                            color: Qt.rgba(3/255, 10/255, 36/255, 0.85)
+                            border.color: "#00dbff"
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 14
+                                spacing: 12
+
+                                P5Icon {
+                                    name: p3Overlay.currentSection === "network" ? "wifi" : "bluetooth"
+                                    size: 18
+                                    color: "#00dbff"
+                                }
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+                                    Text {
+                                        text: p3Overlay.currentSection === "network" ? (PhantomState.wifiSsid || "Connected") : "Bluetooth Adapter Active"
+                                        font.family: "Inter Display"
+                                        font.pixelSize: 14
+                                        font.weight: Font.Bold
+                                        color: "#ffffff"
+                                    }
+                                    Text {
+                                        text: p3Overlay.currentSection === "network" ? ("IP: " + (PhantomState.wifiIp || "192.168.1.1")) : "Audio Sinks & Evoker Links Ready"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 9
+                                        color: "#8df6ff"
+                                    }
+                                }
+                                Rectangle {
+                                    Layout.preferredWidth: 90
+                                    Layout.preferredHeight: 28
+                                    radius: 3
+                                    color: "#00dbff"
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "ONLINE ✓"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Black
+                                        color: "#02081d"
+                                    }
+                                }
+                            }
+                        }
+
+                        Item { Layout.fillHeight: true }
+
+                        // Tombol Kembali
+                        Rectangle {
+                            Layout.preferredWidth: 240
+                            Layout.preferredHeight: 38
+                            Layout.alignment: Qt.AlignRight
+                            radius: 4
+                            color: netBackMouse.containsMouse ? "#00dbff" : Qt.rgba(2/255, 8/255, 29/255, 0.9)
+                            border.color: "#00dbff"
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "◄ RETURN TO MENU"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 11
+                                font.weight: Font.Black
+                                color: netBackMouse.containsMouse ? "#02081d" : "#ffffff"
+                            }
+                            MouseArea {
+                                id: netBackMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    PhantomState.playSfx("select")
+                                    p3Overlay.currentSection = "main"
+                                }
+                            }
+                        }
                     }
                 }
             }

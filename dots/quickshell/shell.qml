@@ -107,6 +107,10 @@ ShellRoot {
             PhantomState.toggleSession()
         }
 
+        function setSessionSection(sec: string): void {
+            PhantomState.p3SessionSection = sec
+        }
+
         function toggleMedia(): void {
             PhantomState.toggleMediaPopup()
         }
