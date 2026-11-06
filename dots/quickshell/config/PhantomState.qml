@@ -55,6 +55,7 @@ Singleton {
     property bool calendarOpen: false
     property bool sessionOpen: false
     property string p3SessionSection: "main"
+    property bool p3CapsuleForceOpen: false
     property bool lockOpen: false
     property bool wallpaperSelectorOpen: false
     property bool mediaPopupOpen: false
@@ -92,41 +93,26 @@ Singleton {
         root.velvetTransitionTick++
         root.playSfx(next ? "open" : "close")
         const borderHex = next ? "60a5fa" : String(root.primary).replace("#", "")
-        if (next) {
-            Quickshell.execDetached([
-                "hyprctl", "eval",
-                "hl.config({ general = { col = { active_border = 'rgba(" + borderHex + "ff)' } } }); if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
-            ])
-        } else {
-            reassertSpecialTimer.stop()
-            Quickshell.execDetached([
-                "hyprctl", "eval",
-                "hl.config({ general = { col = { active_border = 'rgba(" + borderHex + "ff)' } } }); if hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
-            ])
-        }
+        Quickshell.execDetached([
+            "hyprctl", "dispatch",
+            "hl.dsp.workspace.toggle_special('special')"
+        ])
+        Quickshell.execDetached([
+            "hyprctl", "eval",
+            "hl.config({ general = { col = { active_border = 'rgba(" + borderHex + "ff)' } } })"
+        ])
         root.refreshWorkspaces()
     }
 
     function ensureSpecialWorkspaceOpen() {
-        if (!root.specialWorkspaceActive) return
-        Quickshell.execDetached([
-            "hyprctl", "eval",
-            "if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
-        ])
-        reassertSpecialTimer.restart()
+        // pasif: hindari mengunci pengguna di dalam special workspace
     }
 
     Timer {
         id: reassertSpecialTimer
-        interval: 45
+        interval: 1000
         repeat: false
-        onTriggered: {
-            if (!root.specialWorkspaceActive) return
-            Quickshell.execDetached([
-                "hyprctl", "eval",
-                "if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
-            ])
-        }
+        running: false
     }
 
     property bool modalForceExclusive: false
@@ -163,49 +149,27 @@ Singleton {
 
     onLauncherOpenChanged: {
         if (launcherOpen) pulseModalFocus()
-        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
-    onDashboardOpenChanged: {
-        console.log("[STATE DEBUG] dashboardOpen changed to: " + dashboardOpen)
-        if (!dashboardOpen) {
-            console.trace()
-        }
-        if (!dashboardOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
-    }
-    onSettingsOpenChanged: {
-        if (!settingsOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
-    }
-    onNotificationsOpenChanged: {
-        if (!notificationsOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
-    }
-    onCalendarOpenChanged: {
-        if (!calendarOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
-    }
+    onDashboardOpenChanged: {}
+    onSettingsOpenChanged: {}
+    onNotificationsOpenChanged: {}
+    onCalendarOpenChanged: {}
     onSessionOpenChanged: {
         if (sessionOpen) pulseModalFocus()
-        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
-    onMediaPopupOpenChanged: {
-        if (!mediaPopupOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
-    }
-    onTrayPopupOpenChanged: {
-        if (!trayPopupOpen && specialWorkspaceActive) ensureSpecialWorkspaceOpen()
-    }
+    onMediaPopupOpenChanged: {}
+    onTrayPopupOpenChanged: {}
     onCheatsheetOpenChanged: {
         if (cheatsheetOpen) pulseModalFocus()
-        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onClipboardOpenChanged: {
         if (clipboardOpen) pulseModalFocus()
-        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onEmojiOpenChanged: {
         if (emojiOpen) pulseModalFocus()
-        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
     onOverviewOpenChanged: {
         if (overviewOpen) pulseModalFocus()
-        else if (specialWorkspaceActive) ensureSpecialWorkspaceOpen()
     }
 
     function closeAllModals() {
