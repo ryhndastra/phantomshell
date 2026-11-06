@@ -931,21 +931,21 @@ Scope {
                     lore: "Awaken persona under the Dark Hour. Tactical modernism with deep ocean blue and neon cyan accents.",
                     accent: "#00dbff",
                     heroBgColor: "#0055ff",
-                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p3.png"),
-                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p3.png")
+                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/modal_hero_p3.png"),
+                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/card_face_p3.png")
                 },
                 {
                     id: "p5-crimson",
-                    tabLabel: "P5 CRIMSON",
-                    name: "PERSONA 5 CRIMSON",
+                    tabLabel: "P5 ROYAL",
+                    name: "PERSONA 5 ROYAL",
                     role: "TRICKSTER // REN AMAMIYA",
                     heroName: "Ren Amamiya",
-                    desc: "Metaverse Punk Rebellion • Neo-Tokyo Shujin Aesthetic",
+                    desc: "Metaverse Royal Rebellion • Neo-Tokyo Shujin Aesthetic",
                     lore: "Steal the distorted desires of corrupt adults. Bold neo-punk aesthetics with stark monochrome and razor crimson accents.",
                     accent: "#ff2a4b",
-                    heroBgColor: "#d91438",
-                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p5.png"),
-                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p5.png")
+                    heroBgColor: "#c4001a",
+                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/modal_hero_p5.png"),
+                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/card_face_p5.png")
                 },
                 {
                     id: "p4-golden",
@@ -957,8 +957,8 @@ Scope {
                     lore: "Reach out to the truth through the Midnight Channel. Retro television vibes with radiant amber gold accents.",
                     accent: "#f5b800",
                     heroBgColor: "#d99b00",
-                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p4.png"),
-                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p4.png")
+                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/modal_hero_p4.png"),
+                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/card_face_p4.png")
                 }
             ]
 
@@ -972,6 +972,18 @@ Scope {
                 if (PhantomState.p3SessionSection !== currentSection) {
                     PhantomState.p3SessionSection = currentSection
                 }
+                if (currentSection === "main") {
+                    p3SectionVideo.stop()
+                    p3Part3Video.stop()
+                    p3Overlay.stage = 1
+                    p3Part2Video.seek(0)
+                    p3Part2Video.play()
+                } else {
+                    p3Part2Video.stop()
+                    p3Part3Video.pause()
+                    p3SectionVideo.seek(0)
+                    p3SectionVideo.play()
+                }
             }
 
             Connections {
@@ -982,6 +994,7 @@ Scope {
                     } else if (!PhantomState.sessionOpen && PhantomState.isP3) {
                         p3Part2Video.stop()
                         p3Part3Video.stop()
+                        p3SectionVideo.stop()
                         p3FrameAnim.stop()
                     }
                 }
@@ -1004,6 +1017,7 @@ Scope {
             Component.onCompleted: {
                 p3Part2Video.seek(0)
                 p3Part3Video.seek(0)
+                p3SectionVideo.seek(0)
             }
 
             function resetMenu() {
@@ -1024,6 +1038,9 @@ Scope {
                 p3Part3Video.stop()
                 p3Part3Video.visible = false
                 p3Part3Video.seek(0)
+                p3SectionVideo.stop()
+                p3SectionVideo.visible = false
+                p3SectionVideo.seek(0)
 
                 p3FrameAnim.restart()
                 PhantomState.refreshWifi()
@@ -1102,30 +1119,24 @@ Scope {
                 source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2_60fps.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 volume: 0
-                visible: false
+                visible: p3Overlay.stage === 1 && p3Overlay.currentSection === "main"
                 z: 4
 
                 onPositionChanged: {
-                    if (duration > 0 && position >= duration - 50 && p3Overlay.stage === 1) {
-                        visible = false
+                    if (duration > 0 && position >= duration - 50 && p3Overlay.stage === 1 && p3Overlay.currentSection === "main") {
                         p3Overlay.stage = 2
-                        p3Part3Video.visible = true
                         p3Part3Video.play()
                     }
                 }
                 onPlaybackStateChanged: {
-                    if (playbackState === MediaPlayer.StoppedState && p3Overlay.stage === 1) {
-                        visible = false
+                    if (playbackState === MediaPlayer.StoppedState && p3Overlay.stage === 1 && p3Overlay.currentSection === "main") {
                         p3Overlay.stage = 2
-                        p3Part3Video.visible = true
                         p3Part3Video.play()
                     }
                 }
                 onErrorOccurred: (error, errorString) => {
                     console.warn("[P3 VIDEO ERROR]", error, errorString)
-                    visible = false
                     p3Overlay.stage = 2
-                    p3Part3Video.visible = true
                     p3Part3Video.play()
                 }
             }
@@ -1138,8 +1149,32 @@ Scope {
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
-                visible: p3Overlay.stage >= 2
-                z: 3
+                visible: p3Overlay.stage >= 2 && p3Overlay.currentSection === "main"
+                z: 4
+            }
+
+            // Lapisan Poster Section Sub-Menu (Options S.E.E.S. Emblem)
+            Image {
+                id: p3PosterSection
+                anchors.fill: parent
+                source: Qt.resolvedUrl("../../assets/themes/p3/videos/options_poster.png")
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
+                mipmap: true
+                visible: p3Overlay.currentSection !== "main"
+                z: 2
+            }
+
+            // Video Animasi Section Sub-Menu (Options_60fps.mp4: S.E.E.S. Emblem Spinning 1080p 60fps)
+            Video {
+                id: p3SectionVideo
+                anchors.fill: parent
+                source: Qt.resolvedUrl("../../assets/themes/p3/videos/Options_60fps.mp4")
+                fillMode: VideoOutput.PreserveAspectCrop
+                loops: MediaPlayer.Infinite
+                volume: 0
+                visible: p3Overlay.currentSection !== "main"
+                z: 4
             }
 
             // ── Pusat Menu Game Taktis Lengkap Beranak (S.E.E.S. Tactical Hub - Aktif langsung saat stage >= 1) ──
@@ -1351,17 +1386,30 @@ Scope {
 
                                     Image {
                                         anchors.right: parent.right
-                                        anchors.rightMargin: -20
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: 190
-                                        height: parent.height + 20
+                                        anchors.rightMargin: 0
+                                        anchors.top: parent.top
+                                        anchors.bottom: parent.bottom
+                                        width: 170
                                         source: modelData.charImg
-                                        fillMode: Image.PreserveAspectFit
+                                        fillMode: Image.PreserveAspectCrop
                                         smooth: true
-                                        opacity: cCard.isSelected ? 1.0 : (cCard.isHovered ? 0.9 : 0.6)
-                                        scale: cCard.isHovered ? 1.05 : 1.0
+                                        opacity: cCard.isSelected ? 1.0 : (cCard.isHovered ? 0.95 : 0.70)
+                                        scale: cCard.isHovered ? 1.04 : 1.0
                                         Behavior on opacity { NumberAnimation { duration: 180 } }
                                         Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+                                    }
+
+                                    Rectangle {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 120
+                                        anchors.top: parent.top
+                                        anchors.bottom: parent.bottom
+                                        width: 60
+                                        gradient: Gradient {
+                                            orientation: Gradient.Horizontal
+                                            GradientStop { position: 0.0; color: cCard.isSelected ? Qt.rgba(0/255, 20/255, 60/255, 0.90) : (cCard.isHovered ? Qt.rgba(12/255, 26/255, 78/255, 0.85) : Qt.rgba(6/255, 14/255, 46/255, 0.80)) }
+                                            GradientStop { position: 1.0; color: "transparent" }
+                                        }
                                     }
 
                                     RowLayout {
@@ -1411,13 +1459,13 @@ Scope {
                                             Layout.preferredWidth: 84
                                             Layout.preferredHeight: 28
                                             radius: 3
-                                            color: cCard.isSelected ? modelData.accent : "transparent"
+                                            color: cCard.isSelected ? modelData.accent : Qt.rgba(2/255, 7/255, 24/255, 0.7)
                                             border.color: modelData.accent
                                             border.width: 1
 
                                             Text {
                                                 anchors.centerIn: parent
-                                                text: cCard.isSelected ? "ACTIVE ✓" : "CONFIRM"
+                                                text: cCard.isSelected ? "ACTIVE ✓" : "ACTIVATE"
                                                 font.family: "JetBrainsMono NFM"
                                                 font.pixelSize: 10
                                                 font.weight: Font.Black
@@ -1821,7 +1869,7 @@ Scope {
                     // Latar Redup / Dimming
                     Rectangle {
                         anchors.fill: parent
-                        color: "#cc020716"
+                        color: "#a0020716"
 
                         MouseArea {
                             anchors.fill: parent
@@ -1837,14 +1885,14 @@ Scope {
                         id: confirmPortraitShell
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
-                        x: parent.width * 0.52
-                        width: parent.width * 0.48
+                        x: parent.width * 0.72
+                        width: parent.width * 0.28
                         clip: true
-                        z: 30
+                        z: 50
 
                         transform: [
                             Translate {
-                                x: p3Overlay.showThemeConfirm ? 0 : 90
+                                x: p3Overlay.showThemeConfirm ? 0 : 78
                                 Behavior on x {
                                     NumberAnimation {
                                         duration: 480
@@ -1854,10 +1902,10 @@ Scope {
                                 }
                             },
                             Scale {
-                                xScale: p3Overlay.showThemeConfirm ? 1.0 : 0.92
-                                yScale: p3Overlay.showThemeConfirm ? 1.0 : 0.92
-                                origin.x: confirmPortraitShell.width * 0.5
-                                origin.y: confirmPortraitShell.height * 0.5
+                                xScale: p3Overlay.showThemeConfirm ? 1.0 : 0.94
+                                yScale: p3Overlay.showThemeConfirm ? 1.0 : 0.94
+                                origin.x: confirmPortraitShell.width / 2
+                                origin.y: confirmPortraitShell.height / 2
                                 Behavior on xScale {
                                     NumberAnimation {
                                         duration: 480
@@ -1875,58 +1923,41 @@ Scope {
                             }
                         ]
 
-                        // Balok Warna Latar Belakang Hero (Cyan P3 / Crimson P5 / Amber P4)
-                        Rectangle {
-                            anchors.fill: parent
-                            color: confirmPortraitShell.parent.currentThemeData.heroBgColor
-                            Behavior on color { ColorAnimation { duration: 250 } }
-                        }
-
-                        // Efek Aksen Garis Gradasi Vertikal
-                        Rectangle {
-                            anchors.left: parent.left
-                            anchors.top: parent.top
-                            anchors.bottom: parent.bottom
-                            width: 12
-                            color: Qt.rgba(255/255, 255/255, 255/255, 0.4)
-                        }
-
-                        // Gambar Karakter Transparan HD (Makoto Evoker, Ren Shujin, Yu Katana)
+                        // Gambar Karakter Asli Atlus (Makoto All-Out Attack, Ren ArtStation, Yu Yasogami)
                         Image {
                             anchors.fill: parent
                             source: confirmPortraitShell.parent.currentThemeData.heroPortrait
-                            fillMode: Image.PreserveAspectFit
-                            horizontalAlignment: Image.AlignRight
-                            verticalAlignment: Image.AlignBottom
+                            fillMode: Image.PreserveAspectCrop
+                            horizontalAlignment: Image.AlignHCenter
+                            verticalAlignment: Image.AlignTop
                             smooth: true
-                            scale: 1.04
                         }
                     }
 
-                    // SISI KIRI: Panel Kartu Skewed Atlus (-18 Derajat)
+                    // SISI KIRI: Panel Kartu Skewed Atlus (-20 Derajat, Full Width Melintasi Bawah Karakter Sesuai Foto 2/5)
                     Item {
                         id: confirmRevealPanel
-                        x: parent.width * 0.03
-                        y: parent.height * 0.44
-                        width: parent.width * 0.54
-                        height: parent.height * 0.52
-                        z: 40
+                        x: -parent.width * 0.08
+                        y: parent.height * 0.52
+                        width: parent.width * 1.35
+                        height: parent.height * 0.60
+                        z: 20
 
                         transform: [
                             Rotation {
-                                angle: -18
+                                angle: -20
                                 origin.x: 0
                                 origin.y: confirmRevealPanel.height
                             },
                             Scale {
-                                xScale: p3Overlay.showThemeConfirm ? 1.0 : 0.75
+                                xScale: p3Overlay.showThemeConfirm ? 1.0 : 0.72
                                 origin.x: 0
                                 origin.y: confirmRevealPanel.height
                                 Behavior on xScale {
                                     NumberAnimation {
-                                        duration: 420
+                                        duration: 460
                                         easing.type: Easing.OutBack
-                                        easing.overshoot: 2.2
+                                        easing.overshoot: 2.5
                                     }
                                 }
                             },
@@ -1934,7 +1965,7 @@ Scope {
                                 x: p3Overlay.showThemeConfirm ? 0 : -140
                                 Behavior on x {
                                     NumberAnimation {
-                                        duration: 420
+                                        duration: 460
                                         easing.type: Easing.OutBack
                                         easing.overshoot: 1.5
                                     }
@@ -1942,11 +1973,14 @@ Scope {
                             }
                         ]
 
-                        // Latar Belakang Kartu Gelap Persona
+                        // Latar Belakang Kartu Gradasi Persona (Sesuai Persona 3 Reload Asli)
                         Rectangle {
                             anchors.fill: parent
-                            color: "#f2040916"
-                            border.color: Qt.rgba(255/255, 255/255, 255/255, 0.18)
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: "#f50f1c69" }
+                                GradientStop { position: 1.0; color: "#f7081044" }
+                            }
+                            border.color: Qt.rgba(255/255, 255/255, 255/255, 0.20)
                             border.width: 1
                         }
 
@@ -1965,19 +1999,18 @@ Scope {
                             id: confirmTabRow
                             anchors.top: parent.top
                             anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.topMargin: 16
-                            anchors.leftMargin: 20
-                            anchors.rightMargin: 40
+                            anchors.topMargin: parent.height * 0.02
+                            anchors.leftMargin: 480
+                            width: 600
                             height: 42
-                            spacing: 10
+                            spacing: 12
 
                             Repeater {
                                 model: p3Overlay.p3ThemesData
                                 delegate: Item {
                                     required property var modelData
                                     required property int index
-                                    width: (confirmTabRow.width - 20) / 3
+                                    width: (confirmTabRow.width - 24) / 3
                                     height: confirmTabRow.height
 
                                     Rectangle {
@@ -2014,23 +2047,24 @@ Scope {
                             }
                         }
 
-                        // Area Tengah: Judul & Deskripsi Cerita Persona
+                        // Area Tengah: Judul & Deskripsi Cerita Persona (FULL WIDTH ke kanan)
                         Rectangle {
                             id: confirmUpperBar
                             anchors.top: confirmTabRow.bottom
-                            anchors.topMargin: 8
+                            anchors.topMargin: parent.height * 0.015
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            height: parent.height * 0.44
+                            height: parent.height * 0.42
                             color: "#eb000000"
 
                             Column {
-                                anchors.centerIn: parent
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.leftMargin: 480
                                 spacing: 8
-                                width: parent.width - 40
+                                width: 680
 
                                 Text {
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                     text: confirmRevealPanel.parent.currentThemeData.name
                                     font.family: "Rubik"
                                     font.pixelSize: 26
@@ -2041,7 +2075,6 @@ Scope {
                                 }
 
                                 Text {
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                     text: confirmRevealPanel.parent.currentThemeData.role
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 13
@@ -2050,18 +2083,15 @@ Scope {
                                 }
 
                                 Text {
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                     text: confirmRevealPanel.parent.currentThemeData.lore
                                     font.family: "Montserrat"
                                     font.pixelSize: 12
                                     color: "#8df6ff"
                                     wrapMode: Text.Wrap
-                                    width: parent.width * 0.90
-                                    horizontalAlignment: Text.AlignHCenter
+                                    width: parent.width * 0.95
                                 }
 
                                 Text {
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                     text: "APPLY PROTOCOL TIMELINE THEME?"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 11
@@ -2074,8 +2104,9 @@ Scope {
                         // Tombol Aksi Konfirmasi (Apply / Return)
                         Row {
                             anchors.top: confirmUpperBar.bottom
-                            anchors.topMargin: 16
-                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.topMargin: parent.height * 0.03
+                            anchors.left: parent.left
+                            anchors.leftMargin: 480
                             spacing: 16
 
                             // Tombol Eksekusi / Apply
