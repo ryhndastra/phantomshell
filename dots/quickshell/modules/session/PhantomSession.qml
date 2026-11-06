@@ -945,6 +945,18 @@ Scope {
                 z: 0
             }
 
+            // Poster Frame 0 Part 2 (Grounded underwater frame to eliminate decode flash)
+            Image {
+                id: p3PosterPart2
+                anchors.fill: parent
+                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2_poster.png")
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
+                mipmap: true
+                visible: p3Overlay.stage === 1
+                z: 1
+            }
+
             // Lapisan Poster Bawah Air Statis (Menghilangkan kedipan hitam saat video loop/decode - hanya aktif di stage 2)
             Image {
                 id: p3PosterBase
@@ -1050,27 +1062,27 @@ Scope {
                     visible: p3Overlay.currentSection === "main"
                     anchors.centerIn: parent
                     anchors.horizontalCenterOffset: 240
-                    anchors.verticalCenterOffset: 25
+                    anchors.verticalCenterOffset: 0
                     width: 920
-                    height: 800
+                    height: 700
 
                     P3PowerItem {
-                        offsetY: -250
+                        offsetY: -220
                         itemRotation: 3
                         itemWidth: 880
                         itemHeight: 280
-                        offsetX: 40
+                        offsetX: 20
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_stats.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_stats1.png")
                         action: () => { p3Overlay.currentSection = "stats" }
                     }
 
                     P3PowerItem {
-                        offsetY: -125
+                        offsetY: -110
                         itemRotation: -4
                         itemWidth: 880
                         itemHeight: 280
-                        offsetX: 65
+                        offsetX: 40
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_network.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_network1.png")
                         action: () => { p3Overlay.currentSection = "network" }
@@ -1081,29 +1093,29 @@ Scope {
                         itemRotation: 2
                         itemWidth: 880
                         itemHeight: 280
-                        offsetX: 30
+                        offsetX: 10
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_bluetooth.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_bluetooth1.png")
                         action: () => { p3Overlay.currentSection = "bluetooth" }
                     }
 
                     P3PowerItem {
-                        offsetY: 125
+                        offsetY: 110
                         itemRotation: -3
                         itemWidth: 880
                         itemHeight: 280
-                        offsetX: 75
+                        offsetX: 50
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_palette.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_palette1.png")
                         action: () => { p3Overlay.currentSection = "palette" }
                     }
 
                     P3PowerItem {
-                        offsetY: 250
+                        offsetY: 220
                         itemRotation: -7
                         itemWidth: 880
                         itemHeight: 280
-                        offsetX: 40
+                        offsetX: 20
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_dispatch.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_dispatch1.png")
                         action: () => { p3Overlay.currentSection = "dispatch" }
@@ -1121,7 +1133,7 @@ Scope {
                     height: 520
 
                     P3PowerItem {
-                        offsetY: -75
+                        offsetY: -140
                         itemRotation: 3
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/shutdown.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/shutdown1.png")
@@ -1132,7 +1144,7 @@ Scope {
                         }
                     }
                     P3PowerItem {
-                        offsetY: 100
+                        offsetY: 0
                         itemRotation: -5
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/restart.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/restart1.png")
@@ -1143,7 +1155,7 @@ Scope {
                         }
                     }
                     P3PowerItem {
-                        offsetY: 280
+                        offsetY: 140
                         itemRotation: -12
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/logout.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/logout1.png")
@@ -1726,8 +1738,10 @@ Scope {
         property int itemHeight: 350
         property int offsetX: 30
 
-        x: offsetX
-        y: offsetY
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: offsetX
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: offsetY
         width: itemWidth
         height: itemHeight
         rotation: itemRotation
