@@ -8,15 +8,9 @@ Item {
     id: p3WallpaperRoot
     anchors.fill: parent
 
-    property real mouseOffsetX: 0.0
-    property real mouseOffsetY: 0.0
     property bool animActive: true
 
     readonly property bool effectiveAnimRunning: animActive && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)
-
-    onEffectiveAnimRunningChanged: {
-        console.log("[P3WP DEBUG] currentWsId=" + currentWsId + " hasActiveWindows=" + hasActiveWindows + " effectiveAnimRunning=" + effectiveAnimRunning)
-    }
 
     // Gambar latar dasar samudra / langit malam p3 reload
     Image {
@@ -62,16 +56,6 @@ Item {
         visible: false
     }
 
-    // Masker kedalaman siluet makoto yuki untuk parallax 3d
-    Image {
-        id: depthMapRaw
-        source: Qt.resolvedUrl("../../assets/themes/p3/bg/makoto_depth.png")
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
-        smooth: true
-        mipmap: true
-        visible: false
-    }
 
     // ── Tahap 0a: Shader efek riak gelombang air pada background ──
     ShaderEffect {
