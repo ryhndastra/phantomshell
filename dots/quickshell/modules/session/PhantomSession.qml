@@ -930,8 +930,19 @@ Scope {
             // Latar Biru Samudra Pekat (Mencegah Layar Ngeblink / Tembus Desktop)
             Rectangle {
                 anchors.fill: parent
-                color: "#00081d"
+                color: "#0048aa"
                 z: 0
+            }
+
+            // Lapisan Poster Bawah Air Statis (Menghilangkan kedipan hitam saat video loop/decode)
+            Image {
+                id: p3PosterBase
+                anchors.fill: parent
+                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3_poster.png")
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
+                mipmap: true
+                z: 1
             }
 
             // Stage 0: Animasi Shatter Kaca Intro (12 Frame)
@@ -957,20 +968,20 @@ Scope {
                         p3PngSequence.currentFrame++
                     } else {
                         stop()
-                        p3PngSequence.visible = false
                         p3Overlay.stage = 1
                         p3Part2Video.visible = true
                         p3Part2Video.opacity = 1.0
                         p3Part2Video.play()
+                        p3PngSequence.visible = false
                     }
                 }
             }
 
-            // Stage 1: Video Animasi Makoto Yuki Tenggelam ke Bawah Air (part2.mp4)
+            // Stage 1: Video Animasi Makoto Yuki Tenggelam ke Bawah Air (part2_fast.mp4)
             Video {
                 id: p3Part2Video
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2_fast.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 volume: 0
                 visible: false
@@ -1012,11 +1023,11 @@ Scope {
                 }
             }
 
-            // Stage 2: Video Animasi Mengambang Terus Menerus di Bawah Air (part3.mp4 Infinite Loop)
+            // Stage 2: Video Animasi Mengambang Terus Menerus di Bawah Air (part3_fast.mp4 Infinite Loop)
             Video {
                 id: p3Part3Video
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3_fast.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
@@ -1031,27 +1042,27 @@ Scope {
                 visible: p3Overlay.stage >= 1
                 z: 10
 
-                // ── LEVEL 0: MENU UTAMA TINGKAT PERTAMA (Banyak Menu Dulu) ──
+                // ── LEVEL 0: MENU UTAMA TINGKAT PERTAMA (Tipografi Atlus Persona 3 Reload Otentik) ──
                 Item {
                     id: p3MainMenuContainer
                     visible: p3Overlay.currentSection === "main"
                     anchors.right: parent.right
-                    anchors.rightMargin: 120
+                    anchors.rightMargin: 90
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 640
+                    width: 700
                     height: 520
 
                     ColumnLayout {
                         anchors.fill: parent
-                        spacing: 16
+                        spacing: 14
 
-                        // Header Menu Taktis
+                        // Header Menu Taktis SEES
                         RowLayout {
                             spacing: 8
                             Rectangle {
                                 width: 8; height: 8
                                 radius: 4
-                                color: "#00dbff"
+                                color: "#65e7ff"
                                 SequentialAnimation on opacity {
                                     loops: Animation.Infinite
                                     NumberAnimation { from: 0.3; to: 1.0; duration: 800; easing.type: Easing.InOutQuad }
@@ -1059,92 +1070,106 @@ Scope {
                                 }
                             }
                             Text {
-                                text: "S.E.E.S. // TACTICAL COMMAND INTERFACE"
+                                text: "S.E.E.S. // TACTICAL COMMAND PROTOCOL"
                                 font.family: "JetBrainsMono NFM"
                                 font.pixelSize: 12
                                 font.weight: Font.Black
-                                color: "#00dbff"
+                                color: "#65e7ff"
                             }
                         }
 
-                        // 5 Menu Utama Bergaya Atlus Miring
+                        // 5 Menu Utama Bergaya Tipografi Mengambang Persona 3 Reload (Sama dengan Shutdown / Restart / Logout)
                         Repeater {
                             model: [
                                 { id: "stats", arcana: "I", title: "SYSTEM STATS", sub: "Hardware Telemetry & Protocol Toggles" },
                                 { id: "network", arcana: "II", title: "TATSUMI LINK", sub: "Wi-Fi Radar & Grid Connectivity" },
                                 { id: "bluetooth", arcana: "III", title: "EVOKER LINK", sub: "Wireless Audio & Tactical Devices" },
                                 { id: "palette", arcana: "IV", title: "METAVERSE ERAS", sub: "Timeline Palette & Character Select" },
-                                { id: "dispatch", arcana: "V", title: "DISPATCH // POWER", sub: "Shutdown, Restart, Logout Session" }
+                                { id: "dispatch", arcana: "V", title: "DISPATCH", sub: "Shutdown, Restart, Logout Session" }
                             ]
 
                             delegate: Item {
                                 id: mainMenuItem
                                 required property var modelData
+                                required property int index
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 74
-                                rotation: -4
+                                Layout.preferredHeight: 78
+                                rotation: [2, -4, 3, -2, -5][index % 5]
 
                                 readonly property bool isHovered: itemMouse.containsMouse
 
-                                Rectangle {
+                                Item {
                                     anchors.fill: parent
-                                    radius: 6
-                                    color: mainMenuItem.isHovered ? Qt.rgba(0/255, 219/255, 255/255, 0.28) : Qt.rgba(3/255, 10/255, 36/255, 0.85)
-                                    border.color: mainMenuItem.isHovered ? "#ffffff" : Qt.rgba(0/255, 219/255, 255/255, 0.45)
-                                    border.width: mainMenuItem.isHovered ? 2 : 1
-                                    scale: mainMenuItem.isHovered ? 1.04 : 1.0
+                                    scale: mainMenuItem.isHovered ? 1.06 : 1.0
+                                    transformOrigin: Item.Left
                                     Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutBack } }
-                                    Behavior on color { ColorAnimation { duration: 140 } }
 
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 14
-                                        spacing: 16
+                                    // Pita Aksen Merah Atlus (Sama persis dengan style ribbon shutdown1.png)
+                                    Rectangle {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: -16
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: mainMenuItem.isHovered ? Math.min(parent.width, 580) : 0
+                                        height: 52
+                                        color: "#ff1f29"
+                                        radius: 3
+                                        rotation: -1.5
+                                        visible: width > 0
+                                        Behavior on width { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
-                                        // Badge Angka Romawi Arcana
+                                        // Garis aksen cyan di tepi bawah
                                         Rectangle {
-                                            Layout.preferredWidth: 38
-                                            Layout.preferredHeight: 38
-                                            radius: 4
-                                            color: mainMenuItem.isHovered ? "#00dbff" : "#02081d"
-                                            border.color: "#00dbff"
-                                            border.width: 1
-
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: modelData.arcana
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 13
-                                                font.weight: Font.Black
-                                                color: mainMenuItem.isHovered ? "#02081d" : "#00dbff"
-                                            }
+                                            anchors.bottom: parent.bottom
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            height: 3
+                                            color: "#65e7ff"
                                         }
+                                    }
 
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 2
+                                    ColumnLayout {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: mainMenuItem.isHovered ? 26 : 8
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        spacing: 1
+                                        Behavior on anchors.leftMargin { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
+                                        RowLayout {
+                                            spacing: 12
+
+                                            // Angka Romawi Arcana
+                                            Text {
+                                                text: modelData.arcana + "."
+                                                font.family: "Rubik"
+                                                font.pixelSize: 26
+                                                font.weight: Font.Black
+                                                font.italic: true
+                                                color: mainMenuItem.isHovered ? "#ffffff" : Qt.rgba(101/255, 231/255, 255/255, 0.6)
+                                                Behavior on color { ColorAnimation { duration: 120 } }
+                                            }
+
+                                            // Judul Menu Utama Tipografi Atlus P3
                                             Text {
                                                 text: modelData.title
-                                                font.family: "Inter Display"
-                                                font.pixelSize: 20
+                                                font.family: "Rubik"
+                                                font.pixelSize: 42
                                                 font.weight: Font.Black
-                                                color: mainMenuItem.isHovered ? "#ffffff" : "#cbf8ff"
-                                            }
-                                            Text {
-                                                text: modelData.sub
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                color: mainMenuItem.isHovered ? "#8df6ff" : PhantomState.muted
+                                                font.italic: true
+                                                font.capitalization: Font.AllUppercase
+                                                color: mainMenuItem.isHovered ? "#ffffff" : "#65e7ff"
+                                                Behavior on color { ColorAnimation { duration: 120 } }
                                             }
                                         }
 
+                                        // Subtitle Tracker Taktis
                                         Text {
-                                            text: "ENTER ►"
+                                            Layout.leftMargin: 38
+                                            text: "// " + modelData.sub.toUpperCase()
                                             font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 11
-                                            font.weight: Font.Black
-                                            color: mainMenuItem.isHovered ? "#ffffff" : "#00dbff"
+                                            font.pixelSize: 10
+                                            font.weight: Font.Bold
+                                            color: mainMenuItem.isHovered ? "#ffffff" : Qt.rgba(101/255, 231/255, 255/255, 0.55)
+                                            opacity: mainMenuItem.isHovered ? 1.0 : 0.75
                                         }
                                     }
 
@@ -1209,26 +1234,37 @@ Scope {
                         }
                     }
 
-                    // Tombol Kembali ke Menu Utama
-                    Rectangle {
+                    // Tombol Kembali ke Menu Utama Bergaya Atlus
+                    Item {
                         anchors.bottom: parent.bottom
-                        anchors.bottomMargin: -30
+                        anchors.bottomMargin: -35
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.horizontalCenterOffset: 100
-                        width: 240
-                        height: 40
-                        radius: 4
-                        color: dispatchBackMouse.containsMouse ? "#00dbff" : Qt.rgba(2/255, 8/255, 29/255, 0.9)
-                        border.color: "#00dbff"
-                        border.width: 1
+                        width: 260
+                        height: 48
 
-                        Text {
+                        RowLayout {
                             anchors.centerIn: parent
-                            text: "◄ RETURN TO MENU"
-                            font.family: "JetBrainsMono NFM"
-                            font.pixelSize: 11
-                            font.weight: Font.Black
-                            color: dispatchBackMouse.containsMouse ? "#02081d" : "#ffffff"
+                            spacing: 8
+                            scale: dispatchBackMouse.containsMouse ? 1.08 : 1.0
+                            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+
+                            Text {
+                                text: "◄"
+                                font.family: "Rubik"
+                                font.pixelSize: 20
+                                font.weight: Font.Black
+                                font.italic: true
+                                color: dispatchBackMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                            }
+                            Text {
+                                text: "RETURN TO MENU"
+                                font.family: "Rubik"
+                                font.pixelSize: 22
+                                font.weight: Font.Black
+                                font.italic: true
+                                color: dispatchBackMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                            }
                         }
 
                         MouseArea {
@@ -1236,6 +1272,7 @@ Scope {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
+                            onEntered: PhantomState.playSfx("select")
                             onClicked: {
                                 PhantomState.playSfx("select")
                                 p3Overlay.currentSection = "main"
@@ -1381,29 +1418,43 @@ Scope {
                             }
                         }
 
-                        // Tombol Kembali
-                        Rectangle {
-                            Layout.preferredWidth: 240
-                            Layout.preferredHeight: 38
+                        // Tombol Kembali Bergaya Atlus
+                        Item {
+                            Layout.preferredWidth: 260
+                            Layout.preferredHeight: 46
                             Layout.alignment: Qt.AlignRight
-                            radius: 4
-                            color: palBackMouse.containsMouse ? "#00dbff" : Qt.rgba(2/255, 8/255, 29/255, 0.9)
-                            border.color: "#00dbff"
-                            border.width: 1
 
-                            Text {
-                                anchors.centerIn: parent
-                                text: "◄ RETURN TO MENU"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 11
-                                font.weight: Font.Black
-                                color: palBackMouse.containsMouse ? "#02081d" : "#ffffff"
+                            RowLayout {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 8
+                                scale: palBackMouse.containsMouse ? 1.08 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+
+                                Text {
+                                    text: "◄"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 20
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                    color: palBackMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                                }
+                                Text {
+                                    text: "RETURN TO MENU"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 22
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                    color: palBackMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                                }
                             }
+
                             MouseArea {
                                 id: palBackMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
+                                onEntered: PhantomState.playSfx("select")
                                 onClicked: {
                                     PhantomState.playSfx("select")
                                     p3Overlay.currentSection = "main"
@@ -1565,29 +1616,43 @@ Scope {
                             }
                         }
 
-                        // Tombol Kembali
-                        Rectangle {
-                            Layout.preferredWidth: 240
-                            Layout.preferredHeight: 38
+                        // Tombol Kembali Bergaya Atlus
+                        Item {
+                            Layout.preferredWidth: 260
+                            Layout.preferredHeight: 46
                             Layout.alignment: Qt.AlignRight
-                            radius: 4
-                            color: statsBackMouse.containsMouse ? "#00dbff" : Qt.rgba(2/255, 8/255, 29/255, 0.9)
-                            border.color: "#00dbff"
-                            border.width: 1
 
-                            Text {
-                                anchors.centerIn: parent
-                                text: "◄ RETURN TO MENU"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 11
-                                font.weight: Font.Black
-                                color: statsBackMouse.containsMouse ? "#02081d" : "#ffffff"
+                            RowLayout {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 8
+                                scale: statsBackMouse.containsMouse ? 1.08 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+
+                                Text {
+                                    text: "◄"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 20
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                    color: statsBackMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                                }
+                                Text {
+                                    text: "RETURN TO MENU"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 22
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                    color: statsBackMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                                }
                             }
+
                             MouseArea {
                                 id: statsBackMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
+                                onEntered: PhantomState.playSfx("select")
                                 onClicked: {
                                     PhantomState.playSfx("select")
                                     p3Overlay.currentSection = "main"
@@ -1673,29 +1738,43 @@ Scope {
 
                         Item { Layout.fillHeight: true }
 
-                        // Tombol Kembali
-                        Rectangle {
-                            Layout.preferredWidth: 240
-                            Layout.preferredHeight: 38
+                        // Tombol Kembali Bergaya Atlus
+                        Item {
+                            Layout.preferredWidth: 260
+                            Layout.preferredHeight: 46
                             Layout.alignment: Qt.AlignRight
-                            radius: 4
-                            color: netBackMouse.containsMouse ? "#00dbff" : Qt.rgba(2/255, 8/255, 29/255, 0.9)
-                            border.color: "#00dbff"
-                            border.width: 1
 
-                            Text {
-                                anchors.centerIn: parent
-                                text: "◄ RETURN TO MENU"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 11
-                                font.weight: Font.Black
-                                color: netBackMouse.containsMouse ? "#02081d" : "#ffffff"
+                            RowLayout {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 8
+                                scale: netBackMouse.containsMouse ? 1.08 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+
+                                Text {
+                                    text: "◄"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 20
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                    color: netBackMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                                }
+                                Text {
+                                    text: "RETURN TO MENU"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 22
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                    color: netBackMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                                }
                             }
+
                             MouseArea {
                                 id: netBackMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
+                                onEntered: PhantomState.playSfx("select")
                                 onClicked: {
                                     PhantomState.playSfx("select")
                                     p3Overlay.currentSection = "main"

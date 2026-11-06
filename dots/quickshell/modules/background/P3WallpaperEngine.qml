@@ -10,7 +10,7 @@ Item {
 
     property bool animActive: true
 
-    readonly property bool effectiveAnimRunning: animActive && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)
+    readonly property bool effectiveAnimRunning: animActive && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows) && !PhantomState.sessionOpen
 
     // Gambar latar dasar samudra / langit malam p3 reload
     Image {
