@@ -4,7 +4,7 @@ import QtQuick.Effects
 // Widget Tanggal & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
 Item {
     id: p3ClockRoot
-    implicitWidth: 390
+    implicitWidth: 345
     implicitHeight: 140
 
     property var currentTime: new Date()
@@ -146,12 +146,12 @@ Item {
             id: bgPeriodText
             z: 2
             anchors.top: parent.top
-            anchors.topMargin: -2
+            anchors.topMargin: 2
             anchors.right: circle1.left
-            anchors.rightMargin: 10
+            anchors.rightMargin: 8
             text: p3ClockRoot.watermarkText
             font.family: "Anton"
-            font.pixelSize: 88
+            font.pixelSize: 82
             font.weight: Font.Black
             font.letterSpacing: -1
             color: p3ClockRoot.periodBgTextColor
@@ -222,7 +222,7 @@ Item {
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
                             GradientStop { position: 0.0; color: "transparent" }
-                            GradientStop { position: 0.12; color: "white" }
+                            GradientStop { position: 0.08; color: "white" }
                             GradientStop { position: 1.0; color: "white" }
                         }
                     }
@@ -236,8 +236,8 @@ Item {
             z: 60
             anchors.verticalCenter: waveContainerOuter.verticalCenter
             anchors.right: parent.right
-            anchors.rightMargin: 18
-            width: 72
+            anchors.rightMargin: 8
+            width: 70
             height: width
             radius: width / 2
             color: "#ffd200"
@@ -318,22 +318,6 @@ Item {
             }
         }
 
-        // ── Nama Fase Bulan Di Atas Lingkaran Bulan ──
-        Text {
-            id: moonPhaseTxt
-            z: 50
-            anchors.bottom: circle1.top
-            anchors.bottomMargin: 4
-            anchors.right: circle1.right
-            text: p3ClockRoot.moonPhaseName
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: 11
-            font.weight: Font.Bold
-            color: "#fffb9f"
-            style: Text.Raised
-            styleColor: "#635400d9"
-        }
-
         // ── Kluster HUD Tanggal & Periode Otentik Persona 3 Reload ──
         Item {
             id: p3DateCluster
@@ -341,7 +325,7 @@ Item {
             anchors.verticalCenter: waveContainerOuter.verticalCenter
             anchors.verticalCenterOffset: -2
             anchors.right: circle1.left
-            anchors.rightMargin: 16
+            anchors.rightMargin: 10
             width: dateClusterCol.implicitWidth
             height: dateClusterCol.implicitHeight
             rotation: -4

@@ -7,7 +7,7 @@ import qs.components
 Item {
     id: desktopClockWidget
     visible: PhantomState.showDesktopClock
-    width: PhantomState.isP3 ? 390 : 430
+    width: PhantomState.isP3 ? 345 : 430
     height: PhantomState.isP3 ? 140 : 250
     z: 10
     scale: PhantomState.desktopClockScale / 100.0
@@ -34,7 +34,7 @@ Item {
         if (PhantomState.isP3) {
             if (PhantomState.desktopClockPosition === "center") return (parent.width - width) / 2
             if (PhantomState.desktopClockPosition === "bottom-left") return 28
-            return parent.width - width - 12
+            return parent.width - width
         }
         if (PhantomState.desktopClockPosition === "center") return (parent.width - width) / 2
         if (PhantomState.desktopClockPosition === "top-right") return parent.width - width - 38
@@ -44,7 +44,7 @@ Item {
         if (PhantomState.isP3) {
             if (PhantomState.desktopClockPosition === "center") return (parent.height - height) / 2 - 40
             if (PhantomState.desktopClockPosition === "bottom-left") return parent.height - height - 155
-            return 16
+            return 0
         }
         if (PhantomState.desktopClockPosition === "center") return (parent.height - height) / 2 - 40
         if (PhantomState.desktopClockPosition === "bottom-left") return parent.height - height - 155
