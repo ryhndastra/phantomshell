@@ -145,11 +145,11 @@ Item {
         ShaderEffect {
             id: s1_bars_motion
             anchors.fill: parent
-            opacity: 0.55
+            opacity: 0.45
 
             property var source: barsRaw
             property real time: 0
-            property real speed: 0.25
+            property real speed: 0.006
 
             NumberAnimation on time {
                 from: 0
@@ -170,50 +170,6 @@ Item {
             fillMode: Image.PreserveAspectCrop
             smooth: true
             mipmap: true
-        }
-    }
-
-    // Sumber tekstur komposit untuk diproses oleh shader raymarching parallax
-    ShaderEffectSource {
-        id: s1_out
-        anchors.fill: parent
-        sourceItem: s1_composite
-        live: p3WallpaperRoot.effectiveAnimRunning
-        hideSource: true
-    }
-
-    // ── Tahap 2: Shader 3D depth raymarching parallax berdasarkan pergerakan kursor mouse ──
-    ShaderEffect {
-        id: s2_parallax
-        anchors.fill: parent
-
-        property var source: s1_out
-        property var depthMap: depthMapRaw
-        property real offsetX: p3WallpaperRoot.mouseOffsetX
-        property real offsetY: p3WallpaperRoot.mouseOffsetY
-        property real parallaxStrength: 0.012
-        property real aspectRatio: width / Math.max(1, height)
-
-        vertexShader: Qt.resolvedUrl("../../assets/themes/p3/shaders/parallax.vert.qsb")
-        fragmentShader: Qt.resolvedUrl("../../assets/themes/p3/shaders/parallax.frag.qsb")
-
-        Behavior on offsetX {
-            NumberAnimation { duration: 900; easing.type: Easing.OutCubic }
-        }
-        Behavior on offsetY {
-            NumberAnimation { duration: 900; easing.type: Easing.OutCubic }
-        }
-    }
-
-    // Pelacak kursor mouse di seluruh layar untuk memicu efek 3D parallax
-    MouseArea {
-        anchors.fill: parent
-        enabled: p3WallpaperRoot.effectiveAnimRunning
-        hoverEnabled: true
-        acceptedButtons: Qt.NoButton
-        onPositionChanged: mouse => {
-            p3WallpaperRoot.mouseOffsetX = (mouse.x / width - 0.5) * 2.0
-            p3WallpaperRoot.mouseOffsetY = (mouse.y / height - 0.5) * 2.0
         }
     }
 }
