@@ -226,6 +226,7 @@ Scope {
 
             MouseArea {
                 anchors.fill: parent
+                enabled: !PhantomState.isP3
                 onClicked: PhantomState.sessionOpen = false
             }
         }
@@ -881,7 +882,10 @@ Scope {
             anchors.fill: parent
             visible: PhantomState.isP3 && (PhantomState.sessionOpen || opacity > 0.01)
             opacity: PhantomState.sessionOpen ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+            Behavior on opacity {
+                enabled: !PhantomState.sessionOpen
+                NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+            }
 
             property int stage: 0
             property string currentSection: PhantomState.p3SessionSection
@@ -927,10 +931,11 @@ Scope {
                 PhantomState.refreshBluetooth()
             }
 
-            // Latar Biru Samudra Pekat (Mencegah Layar Ngeblink / Tembus Desktop)
+            // Latar Biru Samudra Pekat (Hanya aktif saat stage >= 1, sehingga stage 0 transparan memperlihatkan desktop)
             Rectangle {
                 anchors.fill: parent
                 color: "#0048aa"
+                visible: p3Overlay.stage >= 1
                 z: 0
             }
 
@@ -961,7 +966,7 @@ Scope {
 
             Timer {
                 id: p3FrameAnim
-                interval: 1000 / 60
+                interval: 1000 / 30
                 repeat: true
                 running: false
                 onTriggered: {
@@ -1039,11 +1044,11 @@ Scope {
                 z: 2
             }
 
-            // ── Pusat Menu Game Taktis Lengkap Beranak (S.E.E.S. Tactical Hub) ──
+            // ── Pusat Menu Game Taktis Lengkap Beranak (S.E.E.S. Tactical Hub - Aktif langsung saat stage >= 1) ──
             Item {
                 id: p3TacticalHub
                 anchors.fill: parent
-                visible: p3Overlay.stage >= 2
+                visible: p3Overlay.stage >= 1
                 z: 10
 
                 // ── LEVEL 0: MENU UTAMA TINGKAT PERTAMA (Pola Polished Atlus Persona 3 Reload) ──
@@ -1051,16 +1056,16 @@ Scope {
                     id: p3MainMenuContainer
                     visible: p3Overlay.currentSection === "main"
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: 130
-                    anchors.verticalCenterOffset: -20
-                    width: 800
-                    height: 520
+                    anchors.horizontalCenterOffset: 140
+                    anchors.verticalCenterOffset: -10
+                    width: 900
+                    height: 600
 
                     P3PowerItem {
-                        offsetY: -70
+                        offsetY: -110
                         itemRotation: 3
-                        itemWidth: 620
-                        itemHeight: 200
+                        itemWidth: 800
+                        itemHeight: 220
                         offsetX: 60
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/stats.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/stats1.png")
@@ -1068,10 +1073,10 @@ Scope {
                     }
 
                     P3PowerItem {
-                        offsetY: 20
+                        offsetY: -10
                         itemRotation: -4
-                        itemWidth: 620
-                        itemHeight: 200
+                        itemWidth: 800
+                        itemHeight: 220
                         offsetX: 70
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/network.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/network1.png")
@@ -1079,10 +1084,10 @@ Scope {
                     }
 
                     P3PowerItem {
-                        offsetY: 110
+                        offsetY: 90
                         itemRotation: 2
-                        itemWidth: 620
-                        itemHeight: 200
+                        itemWidth: 800
+                        itemHeight: 220
                         offsetX: 50
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/bluetooth.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/bluetooth1.png")
@@ -1090,10 +1095,10 @@ Scope {
                     }
 
                     P3PowerItem {
-                        offsetY: 200
+                        offsetY: 190
                         itemRotation: -3
-                        itemWidth: 640
-                        itemHeight: 200
+                        itemWidth: 820
+                        itemHeight: 220
                         offsetX: 80
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/palette.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/palette1.png")
@@ -1103,8 +1108,8 @@ Scope {
                     P3PowerItem {
                         offsetY: 290
                         itemRotation: -8
-                        itemWidth: 560
-                        itemHeight: 200
+                        itemWidth: 750
+                        itemHeight: 220
                         offsetX: 60
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/dispatch.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/dispatch1.png")
@@ -1707,9 +1712,10 @@ Scope {
                 }
             }
 
-            // Klik latar kosong untuk menutup menu jeda
+            // Klik latar kosong untuk menutup menu jeda (dinonaktifkan di mode P3 agar tidak keluar saat missclick)
             MouseArea {
                 anchors.fill: parent
+                enabled: !PhantomState.isP3
                 z: -1
                 onClicked: PhantomState.sessionOpen = false
             }
