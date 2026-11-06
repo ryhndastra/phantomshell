@@ -111,6 +111,11 @@ ShellRoot {
             PhantomState.p3SessionSection = sec
         }
 
+        function showThemeConfirm(idx: int): void {
+            PhantomState.p3ThemeConfirmIdx = idx
+            PhantomState.p3ThemeConfirm = true
+        }
+
         function toggleMedia(): void {
             PhantomState.toggleMediaPopup()
         }

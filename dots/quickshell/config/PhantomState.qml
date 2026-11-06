@@ -55,6 +55,8 @@ Singleton {
     property bool calendarOpen: false
     property bool sessionOpen: false
     property string p3SessionSection: "main"
+    property bool p3ThemeConfirm: false
+    property int p3ThemeConfirmIdx: 0
     property bool p3CapsuleForceOpen: false
     property bool p3WallpaperAutoPause: true
     readonly property bool hasActiveWindows: {

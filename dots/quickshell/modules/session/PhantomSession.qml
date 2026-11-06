@@ -123,10 +123,37 @@ Scope {
 
             Keys.onPressed: event => {
                 if (PhantomState.isP3) {
+                    if (p3Overlay.showThemeConfirm) {
+                        if (event.key === Qt.Key_Escape) {
+                            PhantomState.playSfx("select")
+                            p3Overlay.showThemeConfirm = false
+                            event.accepted = true
+                            return
+                        }
+                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                            PhantomState.playSfx("confirm")
+                            PhantomState.applyPreset(p3Overlay.p3ThemesData[p3Overlay.selectedThemeIndex].id)
+                            p3Overlay.showThemeConfirm = false
+                            event.accepted = true
+                            return
+                        }
+                        if (event.key === Qt.Key_Left || event.key === Qt.Key_Up) {
+                            p3Overlay.selectedThemeIndex = (p3Overlay.selectedThemeIndex + 2) % 3
+                            PhantomState.playSfx("select")
+                            event.accepted = true
+                            return
+                        }
+                        if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
+                            p3Overlay.selectedThemeIndex = (p3Overlay.selectedThemeIndex + 1) % 3
+                            PhantomState.playSfx("select")
+                            event.accepted = true
+                            return
+                        }
+                    }
                     if (event.key === Qt.Key_Escape) {
                         if (p3Overlay.currentSection !== "main") {
                             PhantomState.playSfx("select")
-                            p3Overlay.currentSection = "main"
+                            p3Overlay.navigateTo("main")
                         } else {
                             PhantomState.sessionOpen = false
                         }
@@ -136,7 +163,7 @@ Scope {
                     if (p3Overlay.currentSection === "main") {
                         if (event.key >= Qt.Key_1 && event.key <= Qt.Key_5) {
                             const secs = ["stats", "network", "bluetooth", "palette", "dispatch"]
-                            p3Overlay.currentSection = secs[event.key - Qt.Key_1]
+                            p3Overlay.navigateTo(secs[event.key - Qt.Key_1])
                             PhantomState.playSfx("confirm")
                             event.accepted = true
                             return
@@ -889,6 +916,58 @@ Scope {
 
             property int stage: 0
             property string currentSection: PhantomState.p3SessionSection
+            property string targetSection: "main"
+            property bool showThemeConfirm: false
+            property int selectedThemeIndex: 0
+
+            readonly property var p3ThemesData: [
+                {
+                    id: "p3-reload",
+                    tabLabel: "P3 RELOAD",
+                    name: "PERSONA 3 RELOAD",
+                    role: "LEADER // MAKOTO YUKI",
+                    heroName: "Makoto Yuki",
+                    desc: "Tartarus Oceanic Modernism • S.E.E.S. Evoker Protocol",
+                    lore: "Awaken persona under the Dark Hour. Tactical modernism with deep ocean blue and neon cyan accents.",
+                    accent: "#00dbff",
+                    heroBgColor: "#0055ff",
+                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p3.png"),
+                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p3.png")
+                },
+                {
+                    id: "p5-crimson",
+                    tabLabel: "P5 CRIMSON",
+                    name: "PERSONA 5 CRIMSON",
+                    role: "TRICKSTER // REN AMAMIYA",
+                    heroName: "Ren Amamiya",
+                    desc: "Metaverse Punk Rebellion • Neo-Tokyo Shujin Aesthetic",
+                    lore: "Steal the distorted desires of corrupt adults. Bold neo-punk aesthetics with stark monochrome and razor crimson accents.",
+                    accent: "#ff2a4b",
+                    heroBgColor: "#d91438",
+                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p5.png"),
+                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p5.png")
+                },
+                {
+                    id: "p4-golden",
+                    tabLabel: "P4 GOLDEN",
+                    name: "PERSONA 4 GOLDEN",
+                    role: "SEEKER // YU NARUKAMI",
+                    heroName: "Yu Narukami",
+                    desc: "Yasogami Retro Amber • Midnight Channel Investigation",
+                    lore: "Reach out to the truth through the Midnight Channel. Retro television vibes with radiant amber gold accents.",
+                    accent: "#f5b800",
+                    heroBgColor: "#d99b00",
+                    heroPortrait: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p4.png"),
+                    charImg: Qt.resolvedUrl("../../assets/themes/p3/components/hero_p4.png")
+                }
+            ]
+
+            function navigateTo(sec) {
+                if (sec === currentSection) return
+                targetSection = sec
+                showThemeConfirm = false
+                p3WipeTransition.trigger()
+            }
             onCurrentSectionChanged: {
                 if (PhantomState.p3SessionSection !== currentSection) {
                     PhantomState.p3SessionSection = currentSection
@@ -908,7 +987,16 @@ Scope {
                 }
                 function onP3SessionSectionChanged() {
                     if (p3Overlay.currentSection !== PhantomState.p3SessionSection) {
-                        p3Overlay.currentSection = PhantomState.p3SessionSection
+                        p3Overlay.navigateTo(PhantomState.p3SessionSection)
+                    }
+                }
+                function onP3ThemeConfirmChanged() {
+                    if (PhantomState.p3ThemeConfirm) {
+                        if (!PhantomState.sessionOpen) PhantomState.sessionOpen = true
+                        p3Overlay.currentSection = "palette"
+                        p3Overlay.selectedThemeIndex = PhantomState.p3ThemeConfirmIdx
+                        p3Overlay.showThemeConfirm = true
+                        PhantomState.p3ThemeConfirm = false
                     }
                 }
             }
@@ -921,6 +1009,11 @@ Scope {
             function resetMenu() {
                 stage = 0
                 currentSection = "main"
+                targetSection = "main"
+                showThemeConfirm = false
+                selectedThemeIndex = 0
+                p3WipeTransition.running = false
+                p3WipeTransition.opacity = 0
 
                 p3PngSequence.currentFrame = 0
                 p3PngSequence.visible = true
@@ -1074,7 +1167,7 @@ Scope {
                         offsetX: 20
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_stats.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_stats1.png")
-                        action: () => { p3Overlay.currentSection = "stats" }
+                        action: () => { p3Overlay.navigateTo("stats") }
                     }
 
                     P3PowerItem {
@@ -1085,7 +1178,7 @@ Scope {
                         offsetX: 40
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_network.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_network1.png")
-                        action: () => { p3Overlay.currentSection = "network" }
+                        action: () => { p3Overlay.navigateTo("network") }
                     }
 
                     P3PowerItem {
@@ -1096,7 +1189,7 @@ Scope {
                         offsetX: 10
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_bluetooth.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_bluetooth1.png")
-                        action: () => { p3Overlay.currentSection = "bluetooth" }
+                        action: () => { p3Overlay.navigateTo("bluetooth") }
                     }
 
                     P3PowerItem {
@@ -1107,7 +1200,7 @@ Scope {
                         offsetX: 50
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_palette.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_palette1.png")
-                        action: () => { p3Overlay.currentSection = "palette" }
+                        action: () => { p3Overlay.navigateTo("palette") }
                     }
 
                     P3PowerItem {
@@ -1118,7 +1211,7 @@ Scope {
                         offsetX: 20
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_dispatch.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_dispatch1.png")
-                        action: () => { p3Overlay.currentSection = "dispatch" }
+                        action: () => { p3Overlay.navigateTo("dispatch") }
                     }
                 }
 
@@ -1207,7 +1300,7 @@ Scope {
                             onEntered: PhantomState.playSfx("select")
                             onClicked: {
                                 PhantomState.playSfx("select")
-                                p3Overlay.currentSection = "main"
+                                p3Overlay.navigateTo("main")
                             }
                         }
                     }
@@ -1236,15 +1329,12 @@ Scope {
                         }
 
                         Repeater {
-                            model: [
-                                { id: "p3-reload", name: "PERSONA 3 RELOAD", role: "LEADER", desc: "Makoto Yuki // Tartarus Oceanic Modernism", charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char1.png"), accent: "#00dbff" },
-                                { id: "p5-crimson", name: "PERSONA 5 CRIMSON", role: "TRICKSTER", desc: "Ren Amamiya // Metaverse Punk Rebellion", charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char2.png"), accent: "#ff2a4b" },
-                                { id: "p4-golden", name: "PERSONA 4 GOLDEN", role: "SEEKER", desc: "Yu Narukami // Yasogami Retro Amber Investigation", charImg: Qt.resolvedUrl("../../assets/themes/p3/components/char3.png"), accent: "#f5b800" }
-                            ]
+                            model: p3Overlay.p3ThemesData
 
                             delegate: Item {
                                 id: cCard
                                 required property var modelData
+                                required property int index
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 88
 
@@ -1327,7 +1417,7 @@ Scope {
 
                                             Text {
                                                 anchors.centerIn: parent
-                                                text: cCard.isSelected ? "ACTIVE ✓" : "ACTIVATE"
+                                                text: cCard.isSelected ? "ACTIVE ✓" : "CONFIRM"
                                                 font.family: "JetBrainsMono NFM"
                                                 font.pixelSize: 10
                                                 font.weight: Font.Black
@@ -1343,7 +1433,8 @@ Scope {
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: {
                                             PhantomState.playSfx("select")
-                                            PhantomState.applyPreset(modelData.id)
+                                            p3Overlay.selectedThemeIndex = index
+                                            p3Overlay.showThemeConfirm = true
                                         }
                                     }
                                 }
@@ -1389,7 +1480,7 @@ Scope {
                                 onEntered: PhantomState.playSfx("select")
                                 onClicked: {
                                     PhantomState.playSfx("select")
-                                    p3Overlay.currentSection = "main"
+                                    p3Overlay.navigateTo("main")
                                 }
                             }
                         }
@@ -1587,7 +1678,7 @@ Scope {
                                 onEntered: PhantomState.playSfx("select")
                                 onClicked: {
                                     PhantomState.playSfx("select")
-                                    p3Overlay.currentSection = "main"
+                                    p3Overlay.navigateTo("main")
                                 }
                             }
                         }
@@ -1709,9 +1800,503 @@ Scope {
                                 onEntered: PhantomState.playSfx("select")
                                 onClicked: {
                                     PhantomState.playSfx("select")
-                                    p3Overlay.currentSection = "main"
+                                    p3Overlay.navigateTo("main")
                                 }
                             }
+                        }
+                    }
+                }
+
+                // ── MODAL KONFIRMASI PEMILIHAN TEMA BERGAYA ASLI ATLUS (Foto 4) ──
+                Item {
+                    id: p3ThemeConfirmModal
+                    anchors.fill: parent
+                    z: 80
+                    visible: p3Overlay.showThemeConfirm || opacity > 0.01
+                    opacity: p3Overlay.showThemeConfirm ? 1.0 : 0.0
+                    Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+
+                    readonly property var currentThemeData: p3Overlay.p3ThemesData[p3Overlay.selectedThemeIndex] || p3Overlay.p3ThemesData[0]
+
+                    // Latar Redup / Dimming
+                    Rectangle {
+                        anchors.fill: parent
+                        color: "#cc020716"
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                PhantomState.playSfx("select")
+                                p3Overlay.showThemeConfirm = false
+                            }
+                        }
+                    }
+
+                    // SISI KANAN: Hero Character Full Portrait Showcase (Makoto / Ren / Yu)
+                    Item {
+                        id: confirmPortraitShell
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        x: parent.width * 0.52
+                        width: parent.width * 0.48
+                        clip: true
+                        z: 30
+
+                        transform: [
+                            Translate {
+                                x: p3Overlay.showThemeConfirm ? 0 : 90
+                                Behavior on x {
+                                    NumberAnimation {
+                                        duration: 480
+                                        easing.type: Easing.OutBack
+                                        easing.overshoot: 1.8
+                                    }
+                                }
+                            },
+                            Scale {
+                                xScale: p3Overlay.showThemeConfirm ? 1.0 : 0.92
+                                yScale: p3Overlay.showThemeConfirm ? 1.0 : 0.92
+                                origin.x: confirmPortraitShell.width * 0.5
+                                origin.y: confirmPortraitShell.height * 0.5
+                                Behavior on xScale {
+                                    NumberAnimation {
+                                        duration: 480
+                                        easing.type: Easing.OutBack
+                                        easing.overshoot: 1.8
+                                    }
+                                }
+                                Behavior on yScale {
+                                    NumberAnimation {
+                                        duration: 480
+                                        easing.type: Easing.OutBack
+                                        easing.overshoot: 1.8
+                                    }
+                                }
+                            }
+                        ]
+
+                        // Balok Warna Latar Belakang Hero (Cyan P3 / Crimson P5 / Amber P4)
+                        Rectangle {
+                            anchors.fill: parent
+                            color: confirmPortraitShell.parent.currentThemeData.heroBgColor
+                            Behavior on color { ColorAnimation { duration: 250 } }
+                        }
+
+                        // Efek Aksen Garis Gradasi Vertikal
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            width: 12
+                            color: Qt.rgba(255/255, 255/255, 255/255, 0.4)
+                        }
+
+                        // Gambar Karakter Transparan HD (Makoto Evoker, Ren Shujin, Yu Katana)
+                        Image {
+                            anchors.fill: parent
+                            source: confirmPortraitShell.parent.currentThemeData.heroPortrait
+                            fillMode: Image.PreserveAspectFit
+                            horizontalAlignment: Image.AlignRight
+                            verticalAlignment: Image.AlignBottom
+                            smooth: true
+                            scale: 1.04
+                        }
+                    }
+
+                    // SISI KIRI: Panel Kartu Skewed Atlus (-18 Derajat)
+                    Item {
+                        id: confirmRevealPanel
+                        x: parent.width * 0.03
+                        y: parent.height * 0.44
+                        width: parent.width * 0.54
+                        height: parent.height * 0.52
+                        z: 40
+
+                        transform: [
+                            Rotation {
+                                angle: -18
+                                origin.x: 0
+                                origin.y: confirmRevealPanel.height
+                            },
+                            Scale {
+                                xScale: p3Overlay.showThemeConfirm ? 1.0 : 0.75
+                                origin.x: 0
+                                origin.y: confirmRevealPanel.height
+                                Behavior on xScale {
+                                    NumberAnimation {
+                                        duration: 420
+                                        easing.type: Easing.OutBack
+                                        easing.overshoot: 2.2
+                                    }
+                                }
+                            },
+                            Translate {
+                                x: p3Overlay.showThemeConfirm ? 0 : -140
+                                Behavior on x {
+                                    NumberAnimation {
+                                        duration: 420
+                                        easing.type: Easing.OutBack
+                                        easing.overshoot: 1.5
+                                    }
+                                }
+                            }
+                        ]
+
+                        // Latar Belakang Kartu Gelap Persona
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "#f2040916"
+                            border.color: Qt.rgba(255/255, 255/255, 255/255, 0.18)
+                            border.width: 1
+                        }
+
+                        // Garis Aksen Atas (Theme Accent Color)
+                        Rectangle {
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: 8
+                            color: confirmRevealPanel.parent.currentThemeData.accent
+                            Behavior on color { ColorAnimation { duration: 200 } }
+                        }
+
+                        // Tab Bar Navigasi 3 Timeline (P3 / P5 / P4)
+                        Row {
+                            id: confirmTabRow
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.topMargin: 16
+                            anchors.leftMargin: 20
+                            anchors.rightMargin: 40
+                            height: 42
+                            spacing: 10
+
+                            Repeater {
+                                model: p3Overlay.p3ThemesData
+                                delegate: Item {
+                                    required property var modelData
+                                    required property int index
+                                    width: (confirmTabRow.width - 20) / 3
+                                    height: confirmTabRow.height
+
+                                    Rectangle {
+                                        id: tabBox
+                                        anchors.fill: parent
+                                        color: index === p3Overlay.selectedThemeIndex ? modelData.accent : "#0a1122"
+                                        border.color: index === p3Overlay.selectedThemeIndex ? modelData.accent : Qt.rgba(255/255, 255/255, 255/255, 0.2)
+                                        border.width: 1
+                                        scale: tabArea.containsMouse ? 1.04 : 1.0
+                                        Behavior on scale { NumberAnimation { duration: 120 } }
+                                        Behavior on color { ColorAnimation { duration: 150 } }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: modelData.tabLabel
+                                            font.family: "JetBrainsMono NFM"
+                                            font.pixelSize: 13
+                                            font.weight: Font.Black
+                                            color: index === p3Overlay.selectedThemeIndex ? "#020718" : "#8df6ff"
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: tabArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            PhantomState.playSfx("select")
+                                            p3Overlay.selectedThemeIndex = index
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Area Tengah: Judul & Deskripsi Cerita Persona
+                        Rectangle {
+                            id: confirmUpperBar
+                            anchors.top: confirmTabRow.bottom
+                            anchors.topMargin: 8
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: parent.height * 0.44
+                            color: "#eb000000"
+
+                            Column {
+                                anchors.centerIn: parent
+                                spacing: 8
+                                width: parent.width - 40
+
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: confirmRevealPanel.parent.currentThemeData.name
+                                    font.family: "Rubik"
+                                    font.pixelSize: 26
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                    color: confirmRevealPanel.parent.currentThemeData.accent
+                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                }
+
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: confirmRevealPanel.parent.currentThemeData.role
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Bold
+                                    color: "#ffffff"
+                                }
+
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: confirmRevealPanel.parent.currentThemeData.lore
+                                    font.family: "Montserrat"
+                                    font.pixelSize: 12
+                                    color: "#8df6ff"
+                                    wrapMode: Text.Wrap
+                                    width: parent.width * 0.90
+                                    horizontalAlignment: Text.AlignHCenter
+                                }
+
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: "APPLY PROTOCOL TIMELINE THEME?"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Black
+                                    color: Qt.rgba(255/255, 255/255, 255/255, 0.6)
+                                }
+                            }
+                        }
+
+                        // Tombol Aksi Konfirmasi (Apply / Return)
+                        Row {
+                            anchors.top: confirmUpperBar.bottom
+                            anchors.topMargin: 16
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: 16
+
+                            // Tombol Eksekusi / Apply
+                            Rectangle {
+                                width: 230
+                                height: 44
+                                color: confirmRevealPanel.parent.currentThemeData.accent
+                                border.color: "#ffffff"
+                                border.width: 1
+                                radius: 4
+                                scale: applyBtnM.containsMouse ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 120 } }
+
+                                Row {
+                                    anchors.centerIn: parent
+                                    spacing: 8
+                                    Text {
+                                        text: PhantomState.themeId === confirmRevealPanel.parent.currentThemeData.id ? "ACTIVE ✓" : "EXECUTE // APPLY"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Black
+                                        color: "#020718"
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: applyBtnM
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        PhantomState.playSfx("confirm")
+                                        PhantomState.applyPreset(confirmRevealPanel.parent.currentThemeData.id)
+                                        p3Overlay.showThemeConfirm = false
+                                    }
+                                }
+                            }
+
+                            // Tombol Batal / Return
+                            Rectangle {
+                                width: 140
+                                height: 44
+                                color: "#0c152a"
+                                border.color: cancelBtnM.containsMouse ? "#ffffff" : Qt.rgba(255/255, 255/255, 255/255, 0.3)
+                                border.width: 1
+                                radius: 4
+                                scale: cancelBtnM.containsMouse ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 120 } }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "◄ CANCEL"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Bold
+                                    color: cancelBtnM.containsMouse ? "#ffffff" : "#8df6ff"
+                                }
+
+                                MouseArea {
+                                    id: cancelBtnM
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        PhantomState.playSfx("select")
+                                        p3Overlay.showThemeConfirm = false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── ANIMASI TRANSISI MULTI-BAR SKYSCRAPER SKEWED (P3rTransition2 Asli Atlus) ──
+            Item {
+                id: p3WipeTransition
+                anchors.fill: parent
+                z: 100
+                visible: running || opacity > 0.01
+                opacity: 0.0
+
+                property bool running: false
+
+                function trigger() {
+                    running = true
+                    opacity = 1.0
+                    bgBlock.x = -bgBlock.width
+                    wipeBar0.x = -wipeBar0.width
+                    wipeBar1.x = -wipeBar1.width
+                    wipeBar2.x = -wipeBar2.width
+                    wipeAnim.restart()
+                }
+
+                Rectangle {
+                    id: bgBlock
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width * 1.4
+                    color: "#030a1c"
+                    x: -width
+                }
+
+                Column {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 12
+
+                    Item {
+                        id: wipeBar0
+                        width: p3Overlay.width * 1.35
+                        height: p3Overlay.height * 0.35
+                        x: -width
+                        clip: true
+                        transform: Matrix4x4 {
+                            matrix: Qt.matrix4x4(1, -0.15, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+                        }
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "#0d1a3a"
+                        }
+                    }
+
+                    Item {
+                        id: wipeBar1
+                        width: p3Overlay.width * 1.35
+                        height: p3Overlay.height * 0.35
+                        x: -width
+                        clip: true
+                        transform: Matrix4x4 {
+                            matrix: Qt.matrix4x4(1, -0.15, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+                        }
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "#1a6aff"
+                        }
+                    }
+
+                    Item {
+                        id: wipeBar2
+                        width: p3Overlay.width * 1.35
+                        height: p3Overlay.height * 0.35
+                        x: -width
+                        clip: true
+                        transform: Matrix4x4 {
+                            matrix: Qt.matrix4x4(1, -0.15, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+                        }
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "#7dd4fc"
+                        }
+                    }
+                }
+
+                SequentialAnimation {
+                    id: wipeAnim
+                    running: false
+
+                    ParallelAnimation {
+                        NumberAnimation {
+                            target: bgBlock
+                            property: "x"
+                            from: -bgBlock.width
+                            to: 0
+                            duration: 320
+                            easing.type: Easing.OutExpo
+                        }
+                        SequentialAnimation {
+                            NumberAnimation {
+                                target: wipeBar0
+                                property: "x"
+                                from: -wipeBar0.width
+                                to: 0
+                                duration: 300
+                                easing.type: Easing.OutExpo
+                            }
+                        }
+                        SequentialAnimation {
+                            PauseAnimation { duration: 60 }
+                            NumberAnimation {
+                                target: wipeBar1
+                                property: "x"
+                                from: -wipeBar1.width
+                                to: 0
+                                duration: 300
+                                easing.type: Easing.OutExpo
+                            }
+                        }
+                        SequentialAnimation {
+                            PauseAnimation { duration: 120 }
+                            NumberAnimation {
+                                target: wipeBar2
+                                property: "x"
+                                from: -wipeBar2.width
+                                to: 0
+                                duration: 300
+                                easing.type: Easing.OutExpo
+                            }
+                        }
+                    }
+
+                    ScriptAction {
+                        script: {
+                            p3Overlay.currentSection = p3Overlay.targetSection
+                        }
+                    }
+
+                    PauseAnimation { duration: 80 }
+
+                    NumberAnimation {
+                        target: p3WipeTransition
+                        property: "opacity"
+                        from: 1.0
+                        to: 0.0
+                        duration: 220
+                        easing.type: Easing.InQuad
+                    }
+
+                    ScriptAction {
+                        script: {
+                            p3WipeTransition.running = false
                         }
                     }
                 }
