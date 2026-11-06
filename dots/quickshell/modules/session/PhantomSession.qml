@@ -966,7 +966,16 @@ Scope {
                 if (sec === currentSection) return
                 targetSection = sec
                 showThemeConfirm = false
-                p3WipeTransition.trigger()
+                if (sec === "main") {
+                    p3SectionVideo.stop()
+                    p3Part3Video.stop()
+                    currentSection = "main"
+                    stage = 1
+                    p3Part2Video.position = 0
+                    p3Part2Video.play()
+                } else {
+                    p3WipeTransition.trigger()
+                }
             }
             onCurrentSectionChanged: {
                 if (PhantomState.p3SessionSection !== currentSection) {
@@ -976,12 +985,12 @@ Scope {
                     p3SectionVideo.stop()
                     p3Part3Video.stop()
                     p3Overlay.stage = 1
-                    p3Part2Video.seek(0)
+                    p3Part2Video.position = 0
                     p3Part2Video.play()
                 } else {
                     p3Part2Video.stop()
                     p3Part3Video.pause()
-                    p3SectionVideo.seek(0)
+                    p3SectionVideo.position = 0
                     p3SectionVideo.play()
                 }
             }
@@ -1015,9 +1024,9 @@ Scope {
             }
 
             Component.onCompleted: {
-                p3Part2Video.seek(0)
-                p3Part3Video.seek(0)
-                p3SectionVideo.seek(0)
+                p3Part2Video.position = 0
+                p3Part3Video.position = 0
+                p3SectionVideo.position = 0
             }
 
             function resetMenu() {
@@ -1033,14 +1042,11 @@ Scope {
                 p3PngSequence.visible = true
 
                 p3Part2Video.stop()
-                p3Part2Video.visible = false
-                p3Part2Video.seek(0)
+                p3Part2Video.position = 0
                 p3Part3Video.stop()
-                p3Part3Video.visible = false
-                p3Part3Video.seek(0)
+                p3Part3Video.position = 0
                 p3SectionVideo.stop()
-                p3SectionVideo.visible = false
-                p3SectionVideo.seek(0)
+                p3SectionVideo.position = 0
 
                 p3FrameAnim.restart()
                 PhantomState.refreshWifi()
@@ -1063,7 +1069,7 @@ Scope {
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true
-                visible: p3Overlay.stage === 1
+                visible: p3Overlay.stage === 1 && p3Overlay.currentSection === "main"
                 z: 1
             }
 
@@ -1075,7 +1081,7 @@ Scope {
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true
-                visible: p3Overlay.stage >= 2
+                visible: p3Overlay.stage >= 2 && p3Overlay.currentSection === "main"
                 z: 2
             }
 
@@ -1105,7 +1111,7 @@ Scope {
                             stop()
                             p3PngSequence.visible = false
                             p3Overlay.stage = 1
-                            p3Part2Video.visible = true
+                            p3Part2Video.position = 0
                             p3Part2Video.play()
                         }
                     }
@@ -1122,21 +1128,30 @@ Scope {
                 visible: p3Overlay.stage === 1 && p3Overlay.currentSection === "main"
                 z: 4
 
+                onVisibleChanged: {
+                    if (visible) {
+                        position = 0
+                        play()
+                    }
+                }
                 onPositionChanged: {
                     if (duration > 0 && position >= duration - 50 && p3Overlay.stage === 1 && p3Overlay.currentSection === "main") {
                         p3Overlay.stage = 2
+                        p3Part3Video.position = 0
                         p3Part3Video.play()
                     }
                 }
                 onPlaybackStateChanged: {
                     if (playbackState === MediaPlayer.StoppedState && p3Overlay.stage === 1 && p3Overlay.currentSection === "main") {
                         p3Overlay.stage = 2
+                        p3Part3Video.position = 0
                         p3Part3Video.play()
                     }
                 }
                 onErrorOccurred: (error, errorString) => {
                     console.warn("[P3 VIDEO ERROR]", error, errorString)
                     p3Overlay.stage = 2
+                    p3Part3Video.position = 0
                     p3Part3Video.play()
                 }
             }
@@ -1151,6 +1166,16 @@ Scope {
                 volume: 0
                 visible: p3Overlay.stage >= 2 && p3Overlay.currentSection === "main"
                 z: 4
+
+                onVisibleChanged: {
+                    if (visible) play()
+                    else stop()
+                }
+                onPlaybackStateChanged: {
+                    if (playbackState === MediaPlayer.StoppedState && visible) {
+                        play()
+                    }
+                }
             }
 
             // Lapisan Poster Section Sub-Menu (Options S.E.E.S. Emblem)
@@ -1161,7 +1186,7 @@ Scope {
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true
-                visible: p3Overlay.currentSection !== "main"
+                visible: p3Overlay.currentSection !== "main" && p3SectionVideo.playbackState !== MediaPlayer.PlayingState
                 z: 2
             }
 
@@ -1175,6 +1200,21 @@ Scope {
                 volume: 0
                 visible: p3Overlay.currentSection !== "main"
                 z: 4
+
+                onVisibleChanged: {
+                    console.log("[P3 SECTION VIDEO VISIBLE]", visible)
+                    if (visible) play()
+                    else stop()
+                }
+                onPlaybackStateChanged: {
+                    console.log("[P3 SECTION VIDEO STATE]", playbackState)
+                    if (playbackState === MediaPlayer.StoppedState && visible) {
+                        play()
+                    }
+                }
+                onErrorOccurred: (error, errorString) => {
+                    console.warn("[P3 SECTION VIDEO ERROR]", error, errorString)
+                }
             }
 
             // ── Pusat Menu Game Taktis Lengkap Beranak (S.E.E.S. Tactical Hub - Aktif langsung saat stage >= 1) ──
@@ -1345,10 +1385,10 @@ Scope {
                 Item {
                     id: p3PaletteSubMenu
                     visible: p3Overlay.currentSection === "palette"
-                    anchors.right: parent.right
-                    anchors.rightMargin: 100
+                    anchors.left: parent.left
+                    anchors.leftMargin: 80
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 660
+                    width: 580
                     height: 520
 
                     ColumnLayout {
@@ -1371,105 +1411,130 @@ Scope {
                                 required property var modelData
                                 required property int index
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 88
+                                Layout.preferredHeight: 76
 
                                 readonly property bool isSelected: PhantomState.themeId === modelData.id
                                 readonly property bool isHovered: cMouse.containsMouse
 
                                 Rectangle {
                                     anchors.fill: parent
-                                    radius: 6
+                                    radius: 2
                                     clip: true
-                                    color: cCard.isSelected ? Qt.rgba(0/255, 20/255, 60/255, 0.90) : (cCard.isHovered ? Qt.rgba(12/255, 26/255, 78/255, 0.85) : Qt.rgba(6/255, 14/255, 46/255, 0.80))
-                                    border.color: cCard.isSelected ? modelData.accent : (cCard.isHovered ? "#ffffff" : Qt.rgba(0/255, 219/255, 255/255, 0.3))
-                                    border.width: cCard.isSelected ? 2 : 1
+                                    color: (cCard.isSelected || cCard.isHovered) ? "#ffffff" : "#091326"
+                                    border.color: (cCard.isSelected || cCard.isHovered) ? "#e60012" : Qt.rgba(0/255, 219/255, 255/255, 0.3)
+                                    border.width: (cCard.isSelected || cCard.isHovered) ? 2 : 1
+                                    scale: cCard.isHovered ? 1.02 : 1.0
+                                    Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                    Behavior on color { ColorAnimation { duration: 150 } }
 
-                                    Image {
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: 0
-                                        anchors.top: parent.top
-                                        anchors.bottom: parent.bottom
-                                        width: 170
-                                        source: modelData.charImg
-                                        fillMode: Image.PreserveAspectCrop
-                                        smooth: true
-                                        opacity: cCard.isSelected ? 1.0 : (cCard.isHovered ? 0.95 : 0.70)
-                                        scale: cCard.isHovered ? 1.04 : 1.0
-                                        Behavior on opacity { NumberAnimation { duration: 180 } }
-                                        Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
-                                    }
-
+                                    // Garis Aksen Merah Atlus di Bagian Atas Saat Aktif / Hovered (Sesuai Foto 3)
                                     Rectangle {
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: 120
                                         anchors.top: parent.top
-                                        anchors.bottom: parent.bottom
-                                        width: 60
-                                        gradient: Gradient {
-                                            orientation: Gradient.Horizontal
-                                            GradientStop { position: 0.0; color: cCard.isSelected ? Qt.rgba(0/255, 20/255, 60/255, 0.90) : (cCard.isHovered ? Qt.rgba(12/255, 26/255, 78/255, 0.85) : Qt.rgba(6/255, 14/255, 46/255, 0.80)) }
-                                            GradientStop { position: 1.0; color: "transparent" }
-                                        }
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        height: 4
+                                        color: "#e60012"
+                                        visible: cCard.isSelected || cCard.isHovered
                                     }
 
                                     RowLayout {
                                         anchors.fill: parent
-                                        anchors.margins: 14
-                                        spacing: 14
+                                        spacing: 0
 
-                                        Rectangle {
-                                            Layout.preferredWidth: 42
-                                            Layout.preferredHeight: 42
-                                            radius: 4
-                                            color: cCard.isSelected ? modelData.accent : "#030a20"
-                                            border.color: modelData.accent
-                                            border.width: 1
+                                        // Badge Kiri (Role + Strip Wajah Karakter Sesuai Foto 3)
+                                        Item {
+                                            Layout.preferredWidth: 100
+                                            Layout.fillHeight: true
 
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: modelData.role.substring(0, 3)
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 11
-                                                font.weight: Font.Black
-                                                color: cCard.isSelected ? "#020718" : modelData.accent
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                color: "#050b18"
+
+                                                Image {
+                                                    anchors.fill: parent
+                                                    source: modelData.charImg
+                                                    fillMode: Image.PreserveAspectCrop
+                                                    smooth: true
+                                                    opacity: (cCard.isSelected || cCard.isHovered) ? 1.0 : 0.75
+                                                }
+
+                                                Rectangle {
+                                                    anchors.top: parent.top
+                                                    anchors.left: parent.left
+                                                    anchors.margins: 4
+                                                    width: 38
+                                                    height: 18
+                                                    color: (cCard.isSelected || cCard.isHovered) ? "#e60012" : "#0a1936"
+                                                    radius: 2
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: modelData.role.substring(0, 3)
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 10
+                                                        font.weight: Font.Black
+                                                        color: "#ffffff"
+                                                    }
+                                                }
                                             }
                                         }
 
-                                        ColumnLayout {
+                                        // Body Kartu (Teks & Status)
+                                        Item {
                                             Layout.fillWidth: true
-                                            spacing: 2
-                                            Text {
-                                                text: modelData.name
-                                                font.family: "Inter Display"
-                                                font.pixelSize: 14
-                                                font.weight: Font.Black
-                                                color: cCard.isSelected ? modelData.accent : "#ffffff"
-                                            }
-                                            Text {
-                                                text: modelData.desc
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 9
-                                                font.weight: Font.Bold
-                                                color: "#8df6ff"
-                                                opacity: 0.85
-                                            }
-                                        }
+                                            Layout.fillHeight: true
 
-                                        Rectangle {
-                                            Layout.preferredWidth: 84
-                                            Layout.preferredHeight: 28
-                                            radius: 3
-                                            color: cCard.isSelected ? modelData.accent : Qt.rgba(2/255, 7/255, 24/255, 0.7)
-                                            border.color: modelData.accent
-                                            border.width: 1
+                                            RowLayout {
+                                                anchors.fill: parent
+                                                anchors.leftMargin: 16
+                                                anchors.rightMargin: 16
+                                                spacing: 12
 
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: cCard.isSelected ? "ACTIVE ✓" : "ACTIVATE"
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                font.weight: Font.Black
-                                                color: cCard.isSelected ? "#020718" : modelData.accent
+                                                ColumnLayout {
+                                                    Layout.fillWidth: true
+                                                    spacing: 3
+
+                                                    Text {
+                                                        text: modelData.name
+                                                        font.family: "Rubik"
+                                                        font.pixelSize: 16
+                                                        font.weight: Font.Black
+                                                        font.italic: true
+                                                        color: (cCard.isSelected || cCard.isHovered) ? "#020718" : "#ffffff"
+                                                    }
+                                                    Text {
+                                                        text: modelData.desc
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 9
+                                                        font.weight: Font.Bold
+                                                        color: (cCard.isSelected || cCard.isHovered) ? "#d31027" : "#65e7ff"
+                                                        elide: Text.ElideRight
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    Layout.preferredWidth: 84
+                                                    Layout.preferredHeight: 26
+                                                    radius: 2
+                                                    color: cCard.isSelected
+                                                        ? ((cCard.isSelected || cCard.isHovered) ? "#020718" : "#00dbff")
+                                                        : ((cCard.isSelected || cCard.isHovered) ? "#e60012" : Qt.rgba(2/255, 7/255, 24/255, 0.7))
+                                                    border.color: cCard.isSelected
+                                                        ? ((cCard.isSelected || cCard.isHovered) ? "#020718" : "#00dbff")
+                                                        : ((cCard.isSelected || cCard.isHovered) ? "#e60012" : Qt.rgba(0/255, 219/255, 255/255, 0.5))
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: cCard.isSelected ? "ACTIVE ✓" : (cCard.isHovered ? "SELECT" : "ACTIVATE")
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 10
+                                                        font.weight: Font.Black
+                                                        color: cCard.isSelected
+                                                            ? ((cCard.isSelected || cCard.isHovered) ? "#ffffff" : "#020718")
+                                                            : "#ffffff"
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -1489,14 +1554,14 @@ Scope {
                             }
                         }
 
-                        // Tombol Kembali Bergaya Atlus
+                        // Tombol Kembali Bergaya Atlus (Rata Kiri)
                         Item {
                             Layout.preferredWidth: 260
                             Layout.preferredHeight: 46
-                            Layout.alignment: Qt.AlignRight
+                            Layout.alignment: Qt.AlignLeft
 
                             RowLayout {
-                                anchors.right: parent.right
+                                anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 8
                                 scale: palBackMouse.containsMouse ? 1.08 : 1.0
@@ -1539,10 +1604,10 @@ Scope {
                 Item {
                     id: p3StatsSubMenu
                     visible: p3Overlay.currentSection === "stats"
-                    anchors.right: parent.right
-                    anchors.rightMargin: 100
+                    anchors.left: parent.left
+                    anchors.leftMargin: 80
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 640
+                    width: 600
                     height: 520
 
                     ColumnLayout {
@@ -1691,10 +1756,10 @@ Scope {
                         Item {
                             Layout.preferredWidth: 260
                             Layout.preferredHeight: 46
-                            Layout.alignment: Qt.AlignRight
+                            Layout.alignment: Qt.AlignLeft
 
                             RowLayout {
-                                anchors.right: parent.right
+                                anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 8
                                 scale: statsBackMouse.containsMouse ? 1.08 : 1.0
@@ -1737,10 +1802,10 @@ Scope {
                 Item {
                     id: p3NetworkSubMenu
                     visible: p3Overlay.currentSection === "network" || p3Overlay.currentSection === "bluetooth"
-                    anchors.right: parent.right
-                    anchors.rightMargin: 100
+                    anchors.left: parent.left
+                    anchors.leftMargin: 80
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 640
+                    width: 600
                     height: 520
 
                     ColumnLayout {
@@ -1813,10 +1878,10 @@ Scope {
                         Item {
                             Layout.preferredWidth: 260
                             Layout.preferredHeight: 46
-                            Layout.alignment: Qt.AlignRight
+                            Layout.alignment: Qt.AlignLeft
 
                             RowLayout {
-                                anchors.right: parent.right
+                                anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 8
                                 scale: netBackMouse.containsMouse ? 1.08 : 1.0
@@ -1989,9 +2054,8 @@ Scope {
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            height: 8
-                            color: confirmRevealPanel.parent.currentThemeData.accent
-                            Behavior on color { ColorAnimation { duration: 200 } }
+                            height: 6
+                            color: "#e60012"
                         }
 
                         // Tab Bar Navigasi 3 Timeline (P3 / P5 / P4)
@@ -2047,14 +2111,14 @@ Scope {
                             }
                         }
 
-                        // Area Tengah: Judul & Deskripsi Cerita Persona (FULL WIDTH ke kanan)
+                        // Area Tengah: Judul & Deskripsi Cerita Persona (FULL WIDTH ke kanan, Tinggi 65% Sesuai Foto 5)
                         Rectangle {
                             id: confirmUpperBar
                             anchors.top: confirmTabRow.bottom
-                            anchors.topMargin: parent.height * 0.015
+                            anchors.topMargin: 8
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            height: parent.height * 0.42
+                            height: parent.height * 0.65
                             color: "#eb000000"
 
                             Column {
@@ -2104,7 +2168,7 @@ Scope {
                         // Tombol Aksi Konfirmasi (Apply / Return)
                         Row {
                             anchors.top: confirmUpperBar.bottom
-                            anchors.topMargin: parent.height * 0.03
+                            anchors.topMargin: 16
                             anchors.left: parent.left
                             anchors.leftMargin: 480
                             spacing: 16
