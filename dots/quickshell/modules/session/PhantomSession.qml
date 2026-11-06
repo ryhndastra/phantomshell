@@ -1047,9 +1047,9 @@ Scope {
                     id: p3MainMenuContainer
                     visible: p3Overlay.currentSection === "main"
                     anchors.right: parent.right
-                    anchors.rightMargin: 90
+                    anchors.rightMargin: 60
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 700
+                    width: 620
                     height: 520
 
                     ColumnLayout {
