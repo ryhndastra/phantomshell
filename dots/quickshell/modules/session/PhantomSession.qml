@@ -914,11 +914,7 @@ Scope {
             }
 
             Component.onCompleted: {
-                p3Part2Video.play()
-                p3Part2Video.pause()
                 p3Part2Video.seek(0)
-                p3Part3Video.play()
-                p3Part3Video.pause()
                 p3Part3Video.seek(0)
             }
 
@@ -934,14 +930,6 @@ Scope {
                 p3Part2Video.seek(0)
                 p3Part3Video.stop()
                 p3Part3Video.visible = false
-                p3Part3Video.seek(0)
-
-                // Pre-roll GStreamer so first frame is immediately available in GPU memory
-                p3Part2Video.play()
-                p3Part2Video.pause()
-                p3Part2Video.seek(0)
-                p3Part3Video.play()
-                p3Part3Video.pause()
                 p3Part3Video.seek(0)
 
                 p3FrameAnim.restart()
@@ -1002,11 +990,11 @@ Scope {
                 }
             }
 
-            // Stage 1: Video Animasi Makoto Yuki Tenggelam ke Bawah Air (part2_optimized.mp4)
+            // Stage 1: Video Animasi Makoto Yuki Tenggelam ke Bawah Air (1080p 60fps Pristine)
             Video {
                 id: p3Part2Video
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2_optimized.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2_60fps.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 volume: 0
                 visible: false
@@ -1037,11 +1025,11 @@ Scope {
                 }
             }
 
-            // Stage 2: Video Animasi Mengambang Terus Menerus di Bawah Air (part3_optimized.mp4 Infinite Loop)
+            // Stage 2: Video Animasi Mengambang Terus Menerus di Bawah Air (1080p 60fps Pristine Loop)
             Video {
                 id: p3Part3Video
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3_optimized.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3_60fps.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
@@ -1061,13 +1049,13 @@ Scope {
                     id: p3MainMenuContainer
                     visible: p3Overlay.currentSection === "main"
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: 220
-                    anchors.verticalCenterOffset: 0
+                    anchors.horizontalCenterOffset: 240
+                    anchors.verticalCenterOffset: 25
                     width: 920
-                    height: 700
+                    height: 800
 
                     P3PowerItem {
-                        offsetY: -220
+                        offsetY: -250
                         itemRotation: 3
                         itemWidth: 880
                         itemHeight: 280
@@ -1078,11 +1066,11 @@ Scope {
                     }
 
                     P3PowerItem {
-                        offsetY: -110
+                        offsetY: -125
                         itemRotation: -4
                         itemWidth: 880
                         itemHeight: 280
-                        offsetX: 60
+                        offsetX: 65
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_network.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_network1.png")
                         action: () => { p3Overlay.currentSection = "network" }
@@ -1100,18 +1088,18 @@ Scope {
                     }
 
                     P3PowerItem {
-                        offsetY: 110
+                        offsetY: 125
                         itemRotation: -3
                         itemWidth: 880
                         itemHeight: 280
-                        offsetX: 70
+                        offsetX: 75
                         normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_palette.png")
                         hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_palette1.png")
                         action: () => { p3Overlay.currentSection = "palette" }
                     }
 
                     P3PowerItem {
-                        offsetY: 220
+                        offsetY: 250
                         itemRotation: -7
                         itemWidth: 880
                         itemHeight: 280
