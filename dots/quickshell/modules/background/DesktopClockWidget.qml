@@ -7,7 +7,7 @@ import qs.components
 Item {
     id: desktopClockWidget
     visible: PhantomState.showDesktopClock
-    width: PhantomState.isP3 ? 640 : 430
+    width: PhantomState.isP3 ? 370 : 430
     height: PhantomState.isP3 ? 140 : 250
     z: 10
     scale: PhantomState.desktopClockScale / 100.0

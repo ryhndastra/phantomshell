@@ -4,7 +4,7 @@ import QtQuick.Effects
 // Widget Tanggal & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
 Item {
     id: p3ClockRoot
-    implicitWidth: 660
+    implicitWidth: 370
     implicitHeight: 140
 
     property var currentTime: new Date()
@@ -202,67 +202,12 @@ Item {
             anchors.rightMargin: 15
             text: p3ClockRoot.watermarkText
             font.family: "Inter Display"
-            font.pixelSize: 84
+            font.pixelSize: 62
             font.weight: Font.Black
-            font.letterSpacing: -2
+            font.letterSpacing: -1.5
             color: p3ClockRoot.periodColor
             opacity: 0.22
             rotation: -5
-        }
-
-        // ── Badge Jam Digital Sistem (Menyatu Anggun Saat Di-hover) ──
-        Item {
-            id: sysTimeBadge
-            z: 50
-            anchors.left: parent.left
-            anchors.leftMargin: 24
-            anchors.verticalCenter: parent.verticalCenter
-            opacity: clockMouse.containsMouse ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: sysTimeRow.implicitWidth + 20
-                height: 32
-                radius: 4
-                color: Qt.rgba(2/255, 7/255, 24/255, 0.85)
-                border.color: Qt.rgba(p3ClockRoot.periodColor.r, p3ClockRoot.periodColor.g, p3ClockRoot.periodColor.b, 0.6)
-                border.width: 1
-
-                Row {
-                    id: sysTimeRow
-                    anchors.centerIn: parent
-                    spacing: 6
-
-                    Rectangle {
-                        width: 6; height: 6
-                        radius: 3
-                        color: p3ClockRoot.periodColor
-                        anchors.verticalCenter: parent.verticalCenter
-                        SequentialAnimation on opacity {
-                            loops: Animation.Infinite
-                            NumberAnimation { from: 0.3; to: 1.0; duration: 1000; easing.type: Easing.InOutQuad }
-                            NumberAnimation { from: 1.0; to: 0.3; duration: 1000; easing.type: Easing.InOutQuad }
-                        }
-                    }
-
-                    Text {
-                        text: p3ClockRoot.timeStr
-                        font.family: "JetBrainsMono NFM"
-                        font.pixelSize: 18
-                        font.weight: Font.Black
-                        color: "#ffffff"
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                }
-            }
-        }
-
-        MouseArea {
-            id: clockMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.NoButton
         }
 
         // ── Lingkaran Cahaya Halo Bulan Kuning Keemasan ──
@@ -442,14 +387,14 @@ Item {
                     }
                 }
 
-                // Teks Periode Waktu Bersinar di Bawah Tanggal (Dark Hour / Morning / Evening)
+                // Jam Digital Sistem di Bawah Tanggal (Menggantikan Teks Periode)
                 Text {
                     anchors.right: parent.right
-                    text: p3ClockRoot.periodLabel
+                    text: p3ClockRoot.timeStr
                     font.family: "Inter Display"
                     font.pixelSize: 24
                     font.weight: Font.Black
-                    font.letterSpacing: -0.5
+                    font.letterSpacing: 0
                     color: p3ClockRoot.periodColor
                     style: Text.Outline
                     styleColor: "#000b21"
