@@ -934,7 +934,7 @@ Scope {
                 z: 0
             }
 
-            // Lapisan Poster Bawah Air Statis (Menghilangkan kedipan hitam saat video loop/decode)
+            // Lapisan Poster Bawah Air Statis (Menghilangkan kedipan hitam saat video loop/decode - hanya aktif di stage 2)
             Image {
                 id: p3PosterBase
                 anchors.fill: parent
@@ -942,6 +942,7 @@ Scope {
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true
+                visible: p3Overlay.stage >= 2
                 z: 1
             }
 
@@ -991,6 +992,7 @@ Scope {
                 onPositionChanged: {
                     if (duration > 0 && position >= duration - 120 && p3Overlay.stage === 1) {
                         p3Overlay.stage = 2
+                        p3Part3Video.visible = true
                         p3Part3Video.play()
                         part2FadeOut.restart()
                     }
@@ -998,6 +1000,7 @@ Scope {
                 onPlaybackStateChanged: {
                     if (playbackState === MediaPlayer.StoppedState && p3Overlay.stage === 1) {
                         p3Overlay.stage = 2
+                        p3Part3Video.visible = true
                         p3Part3Video.play()
                         part2FadeOut.restart()
                     }
@@ -1005,6 +1008,7 @@ Scope {
                 onErrorOccurred: (error, errorString) => {
                     console.warn("[P3 VIDEO ERROR]", error, errorString)
                     p3Overlay.stage = 2
+                    p3Part3Video.visible = true
                     p3Part3Video.play()
                 }
             }
@@ -1031,7 +1035,7 @@ Scope {
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
-                visible: true
+                visible: p3Overlay.stage >= 2
                 z: 2
             }
 
@@ -1039,154 +1043,74 @@ Scope {
             Item {
                 id: p3TacticalHub
                 anchors.fill: parent
-                visible: p3Overlay.stage >= 1
+                visible: p3Overlay.stage >= 2
+                opacity: visible ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                 z: 10
 
-                // ── LEVEL 0: MENU UTAMA TINGKAT PERTAMA (Tipografi Atlus Persona 3 Reload Otentik) ──
+                // ── LEVEL 0: MENU UTAMA TINGKAT PERTAMA (Pola Polished Atlus Persona 3 Reload) ──
                 Item {
                     id: p3MainMenuContainer
                     visible: p3Overlay.currentSection === "main"
-                    anchors.right: parent.right
-                    anchors.rightMargin: 60
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 620
+                    anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: 60
+                    anchors.verticalCenterOffset: -20
+                    width: 800
                     height: 520
 
-                    ColumnLayout {
-                        anchors.fill: parent
-                        spacing: 14
+                    P3PowerItem {
+                        offsetY: -70
+                        itemRotation: 3
+                        itemWidth: 620
+                        itemHeight: 200
+                        offsetX: 60
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/stats.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/stats1.png")
+                        action: () => { p3Overlay.currentSection = "stats" }
+                    }
 
-                        // Header Menu Taktis SEES
-                        RowLayout {
-                            spacing: 8
-                            Rectangle {
-                                width: 8; height: 8
-                                radius: 4
-                                color: "#65e7ff"
-                                SequentialAnimation on opacity {
-                                    loops: Animation.Infinite
-                                    NumberAnimation { from: 0.3; to: 1.0; duration: 800; easing.type: Easing.InOutQuad }
-                                    NumberAnimation { from: 1.0; to: 0.3; duration: 800; easing.type: Easing.InOutQuad }
-                                }
-                            }
-                            Text {
-                                text: "S.E.E.S. // TACTICAL COMMAND PROTOCOL"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 12
-                                font.weight: Font.Black
-                                color: "#65e7ff"
-                            }
-                        }
+                    P3PowerItem {
+                        offsetY: 20
+                        itemRotation: -4
+                        itemWidth: 620
+                        itemHeight: 200
+                        offsetX: 70
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/network.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/network1.png")
+                        action: () => { p3Overlay.currentSection = "network" }
+                    }
 
-                        // 5 Menu Utama Bergaya Tipografi Mengambang Persona 3 Reload (Sama dengan Shutdown / Restart / Logout)
-                        Repeater {
-                            model: [
-                                { id: "stats", arcana: "I", title: "SYSTEM STATS", sub: "Hardware Telemetry & Protocol Toggles" },
-                                { id: "network", arcana: "II", title: "TATSUMI LINK", sub: "Wi-Fi Radar & Grid Connectivity" },
-                                { id: "bluetooth", arcana: "III", title: "EVOKER LINK", sub: "Wireless Audio & Tactical Devices" },
-                                { id: "palette", arcana: "IV", title: "METAVERSE ERAS", sub: "Timeline Palette & Character Select" },
-                                { id: "dispatch", arcana: "V", title: "DISPATCH", sub: "Shutdown, Restart, Logout Session" }
-                            ]
+                    P3PowerItem {
+                        offsetY: 110
+                        itemRotation: 2
+                        itemWidth: 620
+                        itemHeight: 200
+                        offsetX: 50
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/bluetooth.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/bluetooth1.png")
+                        action: () => { p3Overlay.currentSection = "bluetooth" }
+                    }
 
-                            delegate: Item {
-                                id: mainMenuItem
-                                required property var modelData
-                                required property int index
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 78
-                                rotation: [2, -4, 3, -2, -5][index % 5]
+                    P3PowerItem {
+                        offsetY: 200
+                        itemRotation: -3
+                        itemWidth: 640
+                        itemHeight: 200
+                        offsetX: 80
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/palette.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/palette1.png")
+                        action: () => { p3Overlay.currentSection = "palette" }
+                    }
 
-                                readonly property bool isHovered: itemMouse.containsMouse
-
-                                Item {
-                                    anchors.fill: parent
-                                    scale: mainMenuItem.isHovered ? 1.06 : 1.0
-                                    transformOrigin: Item.Left
-                                    Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutBack } }
-
-                                    // Pita Aksen Merah Atlus (Sama persis dengan style ribbon shutdown1.png)
-                                    Rectangle {
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: -16
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: mainMenuItem.isHovered ? Math.min(parent.width, 580) : 0
-                                        height: 52
-                                        color: "#ff1f29"
-                                        radius: 3
-                                        rotation: -1.5
-                                        visible: width > 0
-                                        Behavior on width { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-
-                                        // Garis aksen cyan di tepi bawah
-                                        Rectangle {
-                                            anchors.bottom: parent.bottom
-                                            anchors.left: parent.left
-                                            anchors.right: parent.right
-                                            height: 3
-                                            color: "#65e7ff"
-                                        }
-                                    }
-
-                                    ColumnLayout {
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: mainMenuItem.isHovered ? 26 : 8
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 1
-                                        Behavior on anchors.leftMargin { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-
-                                        RowLayout {
-                                            spacing: 12
-
-                                            // Angka Romawi Arcana
-                                            Text {
-                                                text: modelData.arcana + "."
-                                                font.family: "Rubik"
-                                                font.pixelSize: 26
-                                                font.weight: Font.Black
-                                                font.italic: true
-                                                color: mainMenuItem.isHovered ? "#ffffff" : Qt.rgba(101/255, 231/255, 255/255, 0.6)
-                                                Behavior on color { ColorAnimation { duration: 120 } }
-                                            }
-
-                                            // Judul Menu Utama Tipografi Atlus P3
-                                            Text {
-                                                text: modelData.title
-                                                font.family: "Rubik"
-                                                font.pixelSize: 42
-                                                font.weight: Font.Black
-                                                font.italic: true
-                                                font.capitalization: Font.AllUppercase
-                                                color: mainMenuItem.isHovered ? "#ffffff" : "#65e7ff"
-                                                Behavior on color { ColorAnimation { duration: 120 } }
-                                            }
-                                        }
-
-                                        // Subtitle Tracker Taktis
-                                        Text {
-                                            Layout.leftMargin: 38
-                                            text: "// " + modelData.sub.toUpperCase()
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 10
-                                            font.weight: Font.Bold
-                                            color: mainMenuItem.isHovered ? "#ffffff" : Qt.rgba(101/255, 231/255, 255/255, 0.55)
-                                            opacity: mainMenuItem.isHovered ? 1.0 : 0.75
-                                        }
-                                    }
-
-                                    MouseArea {
-                                        id: itemMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onEntered: PhantomState.playSfx("select")
-                                        onClicked: {
-                                            PhantomState.playSfx("confirm")
-                                            p3Overlay.currentSection = modelData.id
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    P3PowerItem {
+                        offsetY: 290
+                        itemRotation: -8
+                        itemWidth: 560
+                        itemHeight: 200
+                        offsetX: 60
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/dispatch.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/dispatch1.png")
+                        action: () => { p3Overlay.currentSection = "dispatch" }
                     }
                 }
 
@@ -1801,11 +1725,14 @@ Scope {
         required property var action
         property real itemRotation: 0
         property int offsetY: 0
+        property int itemWidth: 900
+        property int itemHeight: 350
+        property int offsetX: 30
 
-        x: 30
+        x: offsetX
         y: offsetY
-        width: 900
-        height: 350
+        width: itemWidth
+        height: itemHeight
         rotation: itemRotation
         property bool hovered: false
 
@@ -1841,8 +1768,8 @@ Scope {
 
         MouseArea {
             anchors.centerIn: parent
-            width: parent.width * 0.4
-            height: parent.height * 0.4
+            width: parent.width * 0.7
+            height: parent.height * 0.5
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onEntered: {
