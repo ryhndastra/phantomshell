@@ -1,5 +1,7 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
+import qs.config
 
 // Engine Wallpaper persona 3 reload lengkap: riak gelombang air mengalir, partikel cahaya mengapung, pergerakan pilar cahaya ambient, dan parallax 3d raymarching
 Item {
@@ -9,6 +11,12 @@ Item {
     property real mouseOffsetX: 0.0
     property real mouseOffsetY: 0.0
     property bool animActive: true
+
+    readonly property bool effectiveAnimRunning: animActive && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)
+
+    onEffectiveAnimRunningChanged: {
+        console.log("[P3WP DEBUG] currentWsId=" + currentWsId + " hasActiveWindows=" + hasActiveWindows + " effectiveAnimRunning=" + effectiveAnimRunning)
+    }
 
     // Gambar latar dasar samudra / langit malam p3 reload
     Image {
@@ -83,7 +91,7 @@ Item {
             to: 1000
             duration: 450000
             loops: Animation.Infinite
-            running: p3WallpaperRoot.animActive
+            running: p3WallpaperRoot.effectiveAnimRunning
         }
 
         vertexShader: Qt.resolvedUrl("../../assets/themes/p3/shaders/ripple.vert.qsb")
@@ -95,7 +103,7 @@ Item {
         sourceItem: s0_bg_clouds
         anchors.fill: parent
         hideSource: true
-        live: true
+        live: p3WallpaperRoot.effectiveAnimRunning
     }
 
     // ── Tahap 0b: Shader partikel bintang / tetesan cahaya air melayang ──
@@ -114,7 +122,7 @@ Item {
             to: 1000
             duration: 360000
             loops: Animation.Infinite
-            running: p3WallpaperRoot.animActive
+            running: p3WallpaperRoot.effectiveAnimRunning
         }
 
         vertexShader: Qt.resolvedUrl("../../assets/themes/p3/shaders/stars/stars.vert.qsb")
@@ -131,7 +139,7 @@ Item {
             sourceItem: s0_bg_stars
             anchors.fill: parent
             hideSource: true
-            live: true
+            live: p3WallpaperRoot.effectiveAnimRunning
         }
 
         ShaderEffect {
@@ -148,7 +156,7 @@ Item {
                 to: 10000
                 duration: 500000
                 loops: Animation.Infinite
-                running: p3WallpaperRoot.animActive
+                running: p3WallpaperRoot.effectiveAnimRunning
             }
 
             vertexShader: Qt.resolvedUrl("../../assets/themes/p3/shaders/motion/motion.vert.qsb")
@@ -170,7 +178,7 @@ Item {
         id: s1_out
         anchors.fill: parent
         sourceItem: s1_composite
-        live: true
+        live: p3WallpaperRoot.effectiveAnimRunning
         hideSource: true
     }
 
@@ -200,6 +208,7 @@ Item {
     // Pelacak kursor mouse di seluruh layar untuk memicu efek 3D parallax
     MouseArea {
         anchors.fill: parent
+        enabled: p3WallpaperRoot.effectiveAnimRunning
         hoverEnabled: true
         acceptedButtons: Qt.NoButton
         onPositionChanged: mouse => {

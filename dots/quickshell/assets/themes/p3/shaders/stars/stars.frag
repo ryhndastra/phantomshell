@@ -21,7 +21,7 @@ void main() {
     vec4 originalColor = texture(source, texCoord);
     vec3 sparkle = vec3(0.0);
 
-    for (int i = 0; i < 80; i++) {
+    for (int i = 0; i < 16; i++) {
         float fi = float(i);
         float seed  = hash(vec2(fi, 0.3));
         float seed2 = hash(vec2(fi, 1.7));

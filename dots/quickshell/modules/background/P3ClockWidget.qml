@@ -205,7 +205,7 @@ Item {
                         to: -waveContainerOuter.width
                         duration: 12000 + wavePairDelegate.index * 1800
                         loops: Animation.Infinite
-                        running: true
+                        running: (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)
                     }
                 }
             }

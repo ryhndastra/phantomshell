@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Hyprland
 
 // layanan statistik perangkat keras, spesifikasi sistem, dan pelacak aplikasi tiap workspace
 Scope {
@@ -28,7 +29,7 @@ Scope {
     property string sysUptime: "Active Session"
 
     property var workspaceApps: ({})
-    property int activeWorkspaceId: 1
+    property int activeWorkspaceId: Hyprland.focusedMonitor?.activeWorkspace?.id ?? 1
 
     Process {
         id: sysInfoProc

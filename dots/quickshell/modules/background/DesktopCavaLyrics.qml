@@ -123,7 +123,7 @@ Item {
     // kanvas spektrum audio cava sisi kiri
     Canvas {
         id: leftCavaCanvas
-        visible: PhantomState.showDesktopCava && bottomAudioBar.hasLiveAudio
+        visible: PhantomState.showDesktopCava && bottomAudioBar.hasLiveAudio && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)
         anchors.left: parent.left
         anchors.right: centerLyricsSlot.visible ? centerLyricsSlot.left : parent.horizontalCenter
         anchors.rightMargin: centerLyricsSlot.visible ? 18 : 6
@@ -163,7 +163,7 @@ Item {
     // kanvas spektrum audio cava sisi kanan
     Canvas {
         id: rightCavaCanvas
-        visible: PhantomState.showDesktopCava && bottomAudioBar.hasLiveAudio
+        visible: PhantomState.showDesktopCava && bottomAudioBar.hasLiveAudio && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)
         anchors.left: centerLyricsSlot.visible ? centerLyricsSlot.right : parent.horizontalCenter
         anchors.leftMargin: centerLyricsSlot.visible ? 18 : 6
         anchors.right: parent.right

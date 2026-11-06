@@ -56,6 +56,12 @@ Singleton {
     property bool sessionOpen: false
     property string p3SessionSection: "main"
     property bool p3CapsuleForceOpen: false
+    property bool p3WallpaperAutoPause: true
+    readonly property bool hasActiveWindows: {
+        if (!root.workspaceApps || !root.activeWorkspaceId) return false
+        const apps = root.workspaceApps[root.activeWorkspaceId]
+        return Boolean(apps && apps.length > 0)
+    }
     property bool lockOpen: false
     property bool wallpaperSelectorOpen: false
     property bool mediaPopupOpen: false
