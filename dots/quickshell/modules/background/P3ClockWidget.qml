@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Effects
+import qs.config
 
 // Widget Tanggal & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
 Item {

@@ -978,11 +978,11 @@ Scope {
                 }
             }
 
-            // Stage 1: Video Animasi Makoto Yuki Tenggelam ke Bawah Air (part2_fast.mp4)
+            // Stage 1: Video Animasi Makoto Yuki Tenggelam ke Bawah Air (part2.mp4)
             Video {
                 id: p3Part2Video
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2_fast.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 volume: 0
                 visible: false
@@ -998,7 +998,7 @@ Scope {
                     }
                 }
                 onPlaybackStateChanged: {
-                    if (playbackState === MediaPlayer.StoppedState && p3Overlay.stage === 1) {
+                    if (playbackState === MediaPlayer.StoppedState && p3Overlay.stage === 1 && position > 1000) {
                         p3Overlay.stage = 2
                         p3Part3Video.visible = true
                         p3Part3Video.play()
@@ -1044,8 +1044,6 @@ Scope {
                 id: p3TacticalHub
                 anchors.fill: parent
                 visible: p3Overlay.stage >= 2
-                opacity: visible ? 1.0 : 0.0
-                Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                 z: 10
 
                 // ── LEVEL 0: MENU UTAMA TINGKAT PERTAMA (Pola Polished Atlus Persona 3 Reload) ──
@@ -1053,7 +1051,7 @@ Scope {
                     id: p3MainMenuContainer
                     visible: p3Overlay.currentSection === "main"
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: 60
+                    anchors.horizontalCenterOffset: 130
                     anchors.verticalCenterOffset: -20
                     width: 800
                     height: 520
