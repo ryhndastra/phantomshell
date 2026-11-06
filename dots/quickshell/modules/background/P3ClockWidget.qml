@@ -4,7 +4,7 @@ import QtQuick.Effects
 // Widget Tanggal & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
 Item {
     id: p3ClockRoot
-    implicitWidth: 370
+    implicitWidth: 390
     implicitHeight: 140
 
     property var currentTime: new Date()
@@ -35,6 +35,11 @@ Item {
         return days[p3ClockRoot.currentTime.getDay()]
     }
 
+    readonly property bool isWeekend: {
+        const d = p3ClockRoot.currentTime.getDay()
+        return d === 0 || d === 6
+    }
+
     readonly property int currentHour: p3ClockRoot.currentTime.getHours()
 
     // Penentuan Periode Waktu Persona 3 Reload
@@ -49,13 +54,26 @@ Item {
     }
 
     readonly property string watermarkText: {
+        if (periodId === "darkhour") return "DARK HOUR"
+        if (isWeekend && (periodId === "morning" || periodId === "afterschool")) return "WEEKEND"
         switch (periodId) {
-            case "darkhour": return "DARK HOUR"
             case "morning": return "MORNING"
             case "afterschool": return "AFTER SCHOOL"
             case "evening": return "EVENING"
             case "latenight": return "LATE NIGHT"
             default: return "NIGHT"
+        }
+    }
+
+    // Warna Teks Periode Atlus Raksasa (Deep Tone)
+    readonly property color periodBgTextColor: {
+        switch (periodId) {
+            case "darkhour": return "#0b3d1d"  // Deep Dark Hour Green
+            case "evening": return "#1a2254"   // Deep Atlus Navy
+            case "morning": return "#102356"   // Deep Ocean Navy
+            case "afterschool": return "#142864"
+            case "latenight": return "#0c1436" // Deep Midnight
+            default: return "#142864"
         }
     }
 
@@ -123,15 +141,35 @@ Item {
         id: clockContent
         anchors.fill: parent
 
+        // ── Teks Periode Atlus Raksasa (Menonjol di Atas Gelombang Air Seperti di Game Asli P3R) ──
+        Text {
+            id: bgPeriodText
+            z: 2
+            anchors.top: parent.top
+            anchors.topMargin: -2
+            anchors.right: circle1.left
+            anchors.rightMargin: 10
+            text: p3ClockRoot.watermarkText
+            font.family: "Anton"
+            font.pixelSize: 88
+            font.weight: Font.Black
+            font.letterSpacing: -1
+            color: p3ClockRoot.periodBgTextColor
+            opacity: 0.96
+        }
+
         // ── Gelombang Air Laut Latar Belakang (Dinamis Berubah Warna Mengikuti Waktu) ──
         Item {
             id: waveContainerOuter
-            z: 1
+            z: 5
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
+            anchors.topMargin: 46
             anchors.bottom: parent.bottom
+            anchors.bottomMargin: 6
             clip: true
+            opacity: 0.88
 
             Repeater {
                 model: [
@@ -192,32 +230,14 @@ Item {
             }
         }
 
-        // ── Teks Watermark Raksasa Latar Belakang (DARK HOUR / MORNING / EVENING) ──
-        Text {
-            id: bgWatermark
-            z: 2
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: 6
-            anchors.right: circle1.left
-            anchors.rightMargin: 15
-            text: p3ClockRoot.watermarkText
-            font.family: "Inter Display"
-            font.pixelSize: 62
-            font.weight: Font.Black
-            font.letterSpacing: -1.5
-            color: p3ClockRoot.periodColor
-            opacity: 0.22
-            rotation: -5
-        }
-
         // ── Lingkaran Cahaya Halo Bulan Kuning Keemasan ──
         Rectangle {
             id: circle1
             z: 60
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenter: waveContainerOuter.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: 18
-            width: 76
+            width: 72
             height: width
             radius: width / 2
             color: "#ffd200"
@@ -314,16 +334,17 @@ Item {
             styleColor: "#635400d9"
         }
 
-        // ── Kluster HUD Tanggal & Periode Otentik Persona 3 Reload (Foto 1 & 6) ──
+        // ── Kluster HUD Tanggal & Periode Otentik Persona 3 Reload ──
         Item {
             id: p3DateCluster
             z: 50
-            anchors.verticalCenter: circle1.verticalCenter
+            anchors.verticalCenter: waveContainerOuter.verticalCenter
+            anchors.verticalCenterOffset: -2
             anchors.right: circle1.left
-            anchors.rightMargin: 20
+            anchors.rightMargin: 16
             width: dateClusterCol.implicitWidth
             height: dateClusterCol.implicitHeight
-            rotation: -5
+            rotation: -4
 
             Column {
                 id: dateClusterCol
@@ -365,9 +386,9 @@ Item {
                                 ctx.lineTo(18, 0)
                                 ctx.lineTo(9, 12)
                                 ctx.closePath()
-                                ctx.fillStyle = "#000b21"
+                                ctx.fillStyle = p3ClockRoot.p3WeekdayStr === "Sun" ? "#e03131" : "#000b21"
                                 ctx.fill()
-                                ctx.strokeStyle = p3ClockRoot.periodColor
+                                ctx.strokeStyle = p3ClockRoot.p3WeekdayStr === "Sun" ? "#ff6b6b" : p3ClockRoot.periodColor
                                 ctx.lineWidth = 1.5
                                 ctx.stroke()
                             }
