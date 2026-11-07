@@ -15,12 +15,12 @@ Item {
 
     // Posisi di pojok kiri atas wallpaper (pada bilah atap gerbong monorail)
     anchors.top: parent.top
-    anchors.topMargin: 42
+    anchors.topMargin: 38
     anchors.left: parent.left
     anchors.leftMargin: 48
 
     implicitWidth: wsRow.implicitWidth
-    implicitHeight: 38
+    implicitHeight: 46
 
     z: 10
 
@@ -38,7 +38,7 @@ Item {
     // Deretan Slot Workspace
     Row {
         id: wsRow
-        spacing: 20
+        spacing: 24
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
 
@@ -54,8 +54,8 @@ Item {
                 readonly property bool isOccupied: appList.length > 0
                 readonly property bool isHovered: wsMouse.containsMouse
 
-                width: Math.max(isOccupied ? (appList.length > 1 ? 40 : 28) : numText.implicitWidth, 32)
-                height: 34
+                width: Math.max(isOccupied ? (appList.length > 1 ? 52 : 36) : numText.implicitWidth, 38)
+                height: 42
 
                 // Scale interaktif halus
                 scale: isActive ? 1.12 : (isHovered ? 1.06 : 1.0)
@@ -82,12 +82,12 @@ Item {
                     anchors.centerIn: parent
                     visible: wsItem.isOccupied
                     width: appRow.implicitWidth
-                    height: 26
+                    height: 32
 
                     Row {
                         id: appRow
                         anchors.centerIn: parent
-                        spacing: 3
+                        spacing: 4
 
                         Repeater {
                             model: Math.min(wsItem.appList.length, 2)
@@ -95,8 +95,8 @@ Item {
                             delegate: Item {
                                 required property int index
                                 readonly property var appData: wsItem.appList[index]
-                                width: wsItem.appList.length > 1 ? 16 : 24
-                                height: wsItem.appList.length > 1 ? 16 : 24
+                                width: wsItem.appList.length > 1 ? 22 : 32
+                                height: wsItem.appList.length > 1 ? 22 : 32
 
                                 Image {
                                     anchors.fill: parent
@@ -113,7 +113,7 @@ Item {
                                     text: appData.glyph || "•"
                                     visible: !appData.iconUrl
                                     font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: wsItem.appList.length > 1 ? 11 : 15
+                                    font.pixelSize: wsItem.appList.length > 1 ? 14 : 20
                                     color: wsItem.isActive ? "#ffffff" : "#64aff0"
                                 }
                             }
@@ -128,7 +128,7 @@ Item {
                     visible: !wsItem.isOccupied
                     text: (wsItem.wsId < 10 ? "0" : "") + wsItem.wsId
                     font.family: "Bebas Neue"
-                    font.pixelSize: wsItem.isActive ? 32 : 30
+                    font.pixelSize: wsItem.isActive ? 42 : 38
                     font.bold: true
                     font.italic: true
                     // Putih murni saat active; warna biru lembut selaras background saat inactive
