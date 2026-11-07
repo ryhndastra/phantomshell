@@ -150,7 +150,7 @@ Item {
             var n = bars.length
             if (n === 0) return
             var step = width / n
-            var barW = Math.max(3, Math.min(16, step * 0.72))
+            var barW = 4
             var maxH = height
             for (var i = 0; i < n; i++) {
                 var pct = (bars[i] || 0) / 100.0
@@ -195,7 +195,7 @@ Item {
             var n = bars.length
             if (n === 0) return
             var step = width / n
-            var barW = Math.max(3, Math.min(16, step * 0.72))
+            var barW = 4
             var maxH = height
             for (var i = 0; i < n; i++) {
                 var pct = (bars[i] || 0) / 100.0

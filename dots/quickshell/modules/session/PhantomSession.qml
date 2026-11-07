@@ -2662,6 +2662,12 @@ Scope {
                                     onClicked: { const b = [24, 36, 48, 64]; const i = b.indexOf(PhantomState.cavaBarCount); PhantomState.cavaBarCount = b[(i + 1) % b.length]; PhantomState.saveState() }
                                 }
                                 P3StatRow {
+                                    label: "CAVA Bar Height"
+                                    badgeText: PhantomState.cavaMaxHeight + " PX"
+                                    clickable: true
+                                    onClicked: { const h = [60, 80, 110, 140]; const i = h.indexOf(PhantomState.cavaMaxHeight); PhantomState.cavaMaxHeight = h[(i + 1) % h.length]; PhantomState.saveState() }
+                                }
+                                P3StatRow {
                                     label: "Floating Lyrics"
                                     badgeText: PhantomState.showDesktopLyrics ? "SHOWN" : "OFF"
                                     clickable: true

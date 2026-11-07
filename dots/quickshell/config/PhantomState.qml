@@ -932,6 +932,7 @@ Singleton {
                         if (cfg.desktop.showDesktopClock !== undefined) root.showDesktopClock = cfg.desktop.showDesktopClock
                         if (cfg.desktop.showDesktopCava !== undefined) root.showDesktopCava = cfg.desktop.showDesktopCava
                         if (cfg.desktop.cavaBarCount !== undefined) root.cavaBarCount = cfg.desktop.cavaBarCount
+                        if (cfg.desktop.cavaMaxHeight !== undefined) root.cavaMaxHeight = cfg.desktop.cavaMaxHeight
                         if (cfg.desktop.showDesktopLyrics !== undefined) root.showDesktopLyrics = cfg.desktop.showDesktopLyrics
                         if (cfg.desktop.p3CapsuleForceOpen !== undefined) root.p3CapsuleForceOpen = cfg.desktop.p3CapsuleForceOpen
                         if (cfg.desktop.p3WallpaperAutoPause !== undefined) root.p3WallpaperAutoPause = cfg.desktop.p3WallpaperAutoPause
