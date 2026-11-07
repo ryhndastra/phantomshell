@@ -1714,8 +1714,9 @@ Scope {
                                     required property int index
                                     width: 560
                                     height: isActive ? 80 : 68
-                                    x: isActive ? 8 : 0
+                                    x: isActive ? 12 : (isHovered ? 8 : 0)
                                     readonly property bool isActive: p3Overlay.statsTab === index
+                                    readonly property bool isHovered: cardMouse.containsMouse
 
                                     Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                                     Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
@@ -1733,11 +1734,11 @@ Scope {
                                             ctx.lineTo(width, height);
                                             ctx.lineTo(width * 0.03, height);
                                             ctx.closePath();
-                                            ctx.fillStyle = cardWrap.isActive ? "#8df6ff" : "rgba(8, 24, 75, 0.88)";
+                                            ctx.fillStyle = cardWrap.isActive ? "#8df6ff" : (cardWrap.isHovered ? "rgba(18, 48, 125, 0.96)" : "rgba(8, 24, 75, 0.88)");
                                             ctx.fill();
                                             if (!cardWrap.isActive) {
-                                                ctx.strokeStyle = "rgba(0, 219, 255, 0.4)";
-                                                ctx.lineWidth = 1.5;
+                                                ctx.strokeStyle = cardWrap.isHovered ? "#00ffff" : "rgba(0, 219, 255, 0.4)";
+                                                ctx.lineWidth = cardWrap.isHovered ? 2.5 : 1.5;
                                                 ctx.stroke();
                                             }
 
@@ -1748,7 +1749,7 @@ Scope {
                                             ctx.lineTo(width + 6, height + 4);
                                             ctx.lineTo(width * 0.03 + 6, height + 4);
                                             ctx.closePath();
-                                            ctx.fillStyle = cardWrap.isActive ? "#62d6e6" : "rgba(3, 10, 36, 0.75)";
+                                            ctx.fillStyle = cardWrap.isActive ? "#62d6e6" : (cardWrap.isHovered ? "#00b4d8" : "rgba(3, 10, 36, 0.75)");
                                             ctx.fill();
                                         }
                                         onWidthChanged: requestPaint()
@@ -1756,6 +1757,7 @@ Scope {
                                         Connections {
                                             target: cardWrap
                                             function onIsActiveChanged() { cardCanvas.requestPaint() }
+                                            function onIsHoveredChanged() { cardCanvas.requestPaint() }
                                         }
                                         Connections {
                                             target: p3Overlay
@@ -1769,9 +1771,9 @@ Scope {
                                         y: 6
                                         width: 38
                                         height: 42
-                                        color: cardWrap.isActive ? "#000000" : "#071238"
-                                        border.color: cardWrap.isActive ? "#000000" : "#8df6ff"
-                                        border.width: 2.0
+                                        color: cardWrap.isActive ? "#000000" : (cardWrap.isHovered ? "#0a1e50" : "#071238")
+                                        border.color: cardWrap.isActive ? "#000000" : (cardWrap.isHovered ? "#00ffff" : "#8df6ff")
+                                        border.width: cardWrap.isHovered ? 2.5 : 2.0
                                         rotation: -6
 
                                         Text {
@@ -1780,7 +1782,7 @@ Scope {
                                             font.family: "Bebas Neue"
                                             font.pixelSize: 19
                                             font.bold: true
-                                            color: cardWrap.isActive ? "#ffffff" : "#d2fdff"
+                                            color: cardWrap.isActive ? "#ffffff" : (cardWrap.isHovered ? "#ffffff" : "#d2fdff")
                                             rotation: 6
                                         }
                                     }
@@ -1795,7 +1797,7 @@ Scope {
                                         font.family: "Rubik"
                                         font.pixelSize: 22
                                         font.weight: Font.Black
-                                        color: cardWrap.isActive ? "#041238" : "#8df6ff"
+                                        color: cardWrap.isActive ? "#041238" : (cardWrap.isHovered ? "#ffffff" : "#8df6ff")
                                     }
 
                                     // Badge Rank di Kanan Atas
@@ -1811,7 +1813,7 @@ Scope {
                                             font.family: "Bebas Neue"
                                             font.pixelSize: 13
                                             font.bold: true
-                                            color: cardWrap.isActive ? "#041238" : "#8df6ff"
+                                            color: cardWrap.isActive ? "#041238" : (cardWrap.isHovered ? "#00ffff" : "#8df6ff")
                                             anchors.bottom: parent.bottom
                                             bottomPadding: 3
                                         }
@@ -1820,7 +1822,7 @@ Scope {
                                             font.family: "Bebas Neue"
                                             font.pixelSize: 28
                                             font.bold: true
-                                            color: cardWrap.isActive ? "#041238" : "#8df6ff"
+                                            color: cardWrap.isActive ? "#041238" : (cardWrap.isHovered ? "#ffffff" : "#8df6ff")
                                         }
                                     }
 
@@ -1843,13 +1845,14 @@ Scope {
                                             ctx.lineTo(width - 8, height);
                                             ctx.lineTo(0, height);
                                             ctx.closePath();
-                                            ctx.fillStyle = cardWrap.isActive ? "#000000" : "#65e7ff";
+                                            ctx.fillStyle = cardWrap.isActive ? "#000000" : (cardWrap.isHovered ? "#9df0ff" : "#65e7ff");
                                             ctx.fill();
                                         }
                                         onWidthChanged: requestPaint()
                                         Connections {
                                             target: cardWrap
                                             function onIsActiveChanged() { subtitleCanvas.requestPaint() }
+                                            function onIsHoveredChanged() { subtitleCanvas.requestPaint() }
                                         }
 
                                         Text {
@@ -1866,6 +1869,7 @@ Scope {
                                     }
 
                                     MouseArea {
+                                        id: cardMouse
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
@@ -1976,7 +1980,7 @@ Scope {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: [
                                         "01 System Stats",
-                                        "02 Network",
+                                        "02 Wifi networks",
                                         "03 Bluetooth devices",
                                         "04 Sound Engine",
                                         "05 Bar & Desktop HUD",
@@ -2038,63 +2042,147 @@ Scope {
                                 }
                             }
 
-                            // ── TAB 1: NETWORK ──
-                            Column {
+                            // ── TAB 1: WIFI NETWORKS (PERSIS FOTO KE 3) ──
+                            Item {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 1
 
-                                P3StatRow {
-                                    label: "Wi-Fi"
-                                    badgeText: PhantomState.wifiConnected ? "Connected" : "Offline"
+                                Column {
+                                    id: wifiControlHeader
+                                    anchors.top: parent.top
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+
+                                    P3StatRow {
+                                        label: "Wi-Fi Radio"
+                                        badgeText: PhantomState.wifiConnected ? "ENABLED" : "DISABLED"
+                                        clickable: true
+                                        onClicked: PhantomState.setWifiPower(!PhantomState.wifiConnected)
+                                    }
+                                    P3StatRow {
+                                        label: "Scan Networks"
+                                        badgeText: PhantomState.wifiScanning ? "SCANNING..." : "RESCAN"
+                                        clickable: !PhantomState.wifiScanning
+                                        onClicked: PhantomState.scanWifi()
+                                    }
                                 }
-                                P3StatRow {
-                                    label: "SSID"
-                                    badgeText: PhantomState.wifiSsid || "None"
-                                }
-                                P3StatRow {
-                                    label: "Signal"
-                                    badgeText: PhantomState.wifiSignal + "%"
-                                }
-                                P3StatRow {
-                                    label: "Security"
-                                    badgeText: "WPA2 / WPA3"
-                                }
-                                P3StatRow {
-                                    label: "Hardware"
-                                    badgeText: "Tatsumi Radar Active"
-                                }
-                                P3StatRow {
-                                    label: "Rescan"
-                                    badgeText: "SCAN NOW"
-                                    clickable: true
-                                    onClicked: PhantomState.refreshWifi()
-                                    showDivider: false
+
+                                Flickable {
+                                    anchors.top: wifiControlHeader.bottom
+                                    anchors.bottom: parent.bottom
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    clip: true
+                                    contentWidth: width
+                                    contentHeight: wifiListCol.implicitHeight
+
+                                    Column {
+                                        id: wifiListCol
+                                        width: parent.width
+
+                                        Repeater {
+                                            model: PhantomState.wifiNetworks
+                                            delegate: P3StatRow {
+                                                width: wifiListCol.width
+                                                label: modelData.ssid
+                                                badgeText: modelData.inUse ? "Connected" : (modelData.signal + "%")
+                                                clickable: true
+                                                onClicked: {
+                                                    if (modelData.inUse) {
+                                                        PhantomState.disconnectWifi(modelData.ssid)
+                                                    } else {
+                                                        PhantomState.connectWifi(modelData.ssid)
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Item {
+                                            width: parent.width
+                                            height: 54
+                                            visible: (!PhantomState.wifiNetworks || PhantomState.wifiNetworks.length === 0)
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: PhantomState.wifiScanning ? "Scanning nearby frequencies..." : (PhantomState.wifiConnected ? "No networks in range (Click RESCAN)" : "Wi-Fi radio is disabled")
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                                color: Qt.rgba(141/255, 246/255, 255/255, 0.7)
+                                            }
+                                        }
+                                    }
                                 }
                             }
 
-                            // ── TAB 2: BLUETOOTH DEVICES (PERSIS FOTO MEDIA_CHECK) ──
-                            Column {
+                            // ── TAB 2: BLUETOOTH DEVICES (DYNAMIC LINK & PAIR) ──
+                            Item {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 2
 
-                                P3StatRow {
-                                    label: "Adapter"
-                                    badgeText: PhantomState.bluetoothPowered ? "Powered On" : "Disabled"
+                                Column {
+                                    id: btControlHeader
+                                    anchors.top: parent.top
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+
+                                    P3StatRow {
+                                        label: "Bluetooth Radio"
+                                        badgeText: PhantomState.btConnected ? "ENABLED" : "DISABLED"
+                                        clickable: true
+                                        onClicked: PhantomState.setBluetoothPower(!PhantomState.btConnected)
+                                    }
+                                    P3StatRow {
+                                        label: "Hardware Scan"
+                                        badgeText: PhantomState.btScanning ? "SCANNING..." : "SCAN HARDWARE"
+                                        clickable: !PhantomState.btScanning
+                                        onClicked: PhantomState.scanBluetooth()
+                                    }
                                 }
-                                P3StatRow {
-                                    label: "Device Link"
-                                    badgeText: PhantomState.bluetoothConnectedCount > 0 ? PhantomState.bluetoothDeviceName : "No Adapter"
-                                }
-                                P3StatRow {
-                                    label: "Status"
-                                    badgeText: PhantomState.bluetoothConnectedCount > 0 ? "Connected" : "Disabled"
-                                }
-                                P3StatRow {
-                                    label: "Hardware Scan"
-                                    badgeText: "SCAN HARDWARE"
-                                    clickable: true
-                                    onClicked: PhantomState.refreshBluetooth()
-                                    showDivider: false
+
+                                Flickable {
+                                    anchors.top: btControlHeader.bottom
+                                    anchors.bottom: parent.bottom
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    clip: true
+                                    contentWidth: width
+                                    contentHeight: btListCol.implicitHeight
+
+                                    Column {
+                                        id: btListCol
+                                        width: parent.width
+
+                                        Repeater {
+                                            model: PhantomState.btDevices
+                                            delegate: P3StatRow {
+                                                width: btListCol.width
+                                                label: modelData.name || modelData.mac
+                                                badgeText: modelData.connected ? "Connected" : (modelData.paired ? "Paired" : "Connect")
+                                                clickable: true
+                                                onClicked: {
+                                                    if (modelData.connected) {
+                                                        PhantomState.disconnectBluetooth(modelData.mac, modelData.name)
+                                                    } else {
+                                                        PhantomState.connectBluetooth(modelData.mac, modelData.name)
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Item {
+                                            width: parent.width
+                                            height: 54
+                                            visible: (!PhantomState.btDevices || PhantomState.btDevices.length === 0)
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: PhantomState.btScanning ? "Scanning nearby devices..." : (PhantomState.btConnected ? "No paired devices found (Click SCAN HARDWARE)" : "Bluetooth adapter is powered OFF")
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                                color: Qt.rgba(141/255, 246/255, 255/255, 0.7)
+                                            }
+                                        }
+                                    }
                                 }
                             }
 
@@ -2105,15 +2193,19 @@ Scope {
 
                                 P3StatRow {
                                     label: "Master Output"
-                                    badgeText: Math.round(PhantomState.volume * 100) + "%"
+                                    badgeText: Math.round(PhantomState.volumePct) + "%"
                                     clickable: true
-                                    onClicked: { PhantomState.volume = (PhantomState.volume >= 1.0 ? 0.2 : PhantomState.volume + 0.1); PhantomState.saveState() }
+                                    onClicked: {
+                                        const cur = PhantomState.volumePct
+                                        const next = (cur >= 100 ? 20 : Math.min(100, Math.floor(cur / 10) * 10 + 15))
+                                        PhantomState.setSystemVolume(next)
+                                    }
                                 }
                                 P3StatRow {
                                     label: "Mute Output"
-                                    badgeText: PhantomState.muted ? "MUTED" : "ACTIVE"
+                                    badgeText: PhantomState.volumeMuted ? "MUTED" : "ACTIVE"
                                     clickable: true
-                                    onClicked: { PhantomState.muted = !PhantomState.muted; PhantomState.saveState() }
+                                    onClicked: PhantomState.toggleSystemMute()
                                 }
                                 P3StatRow {
                                     label: "Sound Effects (SFX)"
@@ -2738,7 +2830,7 @@ Scope {
                 }
             }
 
-            // ── ANIMASI TRANSISI STATS (P3R Vertical Ribbon Bands Swipe Sesuai Foto 2 & 3) ──
+            // ── ANIMASI TRANSISI STATS (P3R Vertical Ribbon Bands Swipe: Cyan, Blue, Solid Navy Sesuai Foto 2 & 3) ──
             Item {
                 id: p3StatsTransition
                 anchors.fill: parent
@@ -2751,93 +2843,114 @@ Scope {
                 function trigger() {
                     running = true
                     opacity = 1.0
-                    wipeScale1.origin.x = 0
-                    wipeScale2.origin.x = 0
-                    wipeScale3.origin.x = 0
-                    wipeScale1.xScale = 0
-                    wipeScale2.xScale = 0
-                    wipeScale3.xScale = 0
+                    bandCyan.x = -p3Overlay.width
+                    bandBlue.x = -p3Overlay.width
+                    bandNavy.x = -p3Overlay.width
                     statsRibbonWipeAnim.restart()
                 }
 
-                // Layer 1 (Bawah): Cyan (#7dd5fc)
+                // Band 1 (Bawah): Cyan (#7dd5fc) - memimpin sapuan ke kanan
                 Rectangle {
-                    id: wipeBlockCyan
-                    anchors.fill: parent
+                    id: bandCyan
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    x: -parent.width
                     color: "#7dd5fc"
                     z: 1
-                    transform: Scale { id: wipeScale1; xScale: 0; origin.x: 0 }
                 }
 
-                // Layer 2 (Tengah): Blue (#1b6afe)
+                // Band 2 (Tengah): Blue (#1b6afe) - menyusul di belakang cyan
                 Rectangle {
-                    id: wipeBlockBlue
-                    anchors.fill: parent
+                    id: bandBlue
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    x: -parent.width
                     color: "#1b6afe"
                     z: 2
-                    transform: Scale { id: wipeScale2; xScale: 0; origin.x: 0 }
                 }
 
-                // Layer 3 (Atas): Deep Navy (#071330)
+                // Band 3 (Atas): Deep Navy (#071330) - menyusul dan menutup layar penuh
                 Rectangle {
-                    id: wipeBlockNavy
-                    anchors.fill: parent
+                    id: bandNavy
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    x: -parent.width
                     color: "#071330"
                     z: 3
-                    transform: Scale { id: wipeScale3; xScale: 0; origin.x: 0 }
                 }
 
                 SequentialAnimation {
                     id: statsRibbonWipeAnim
                     running: false
 
-                    // Fase 1: Sapuan Masuk dari Kiri ke Kanan (Staggered Foto 3 & Foto 2)
-                    // Cyan menyapu lebih dulu (delay 0), Blue menyusul (delay 80ms), Navy menyusul menutup layar (delay 180ms)
+                    // Fase 1: Sapuan Masuk dari Kiri ke Kanan (Wipe In)
+                    // Cyan paling cepat mencapai ujung kanan, Blue menyusul, Navy menutup layar penuh (Foto 3 & Foto 2)
                     ParallelAnimation {
-                        SequentialAnimation {
-                            NumberAnimation { target: wipeScale1; property: "xScale"; from: 0; to: 1; duration: 240; easing.type: Easing.OutQuart }
+                        NumberAnimation {
+                            target: bandCyan
+                            property: "x"
+                            from: -p3Overlay.width
+                            to: 0
+                            duration: 280
+                            easing.type: Easing.OutQuart
                         }
-                        SequentialAnimation {
-                            PauseAnimation { duration: 30 }
-                            NumberAnimation { target: wipeScale2; property: "xScale"; from: 0; to: 1; duration: 300; easing.type: Easing.OutQuart }
+                        NumberAnimation {
+                            target: bandBlue
+                            property: "x"
+                            from: -p3Overlay.width
+                            to: 0
+                            duration: 320
+                            easing.type: Easing.OutQuart
                         }
-                        SequentialAnimation {
-                            PauseAnimation { duration: 80 }
-                            NumberAnimation { target: wipeScale3; property: "xScale"; from: 0; to: 1; duration: 380; easing.type: Easing.InQuad }
+                        NumberAnimation {
+                            target: bandNavy
+                            property: "x"
+                            from: -p3Overlay.width
+                            to: 0
+                            duration: 360
+                            easing.type: Easing.OutQuart
                         }
                     }
 
-                    // Saat wipeScale3 mencapai 1: Layar 100% tertutup rapat oleh Deep Navy (#071330 - Foto 2)
+                    // Section Swap terjadi saat layar 100% tertutup rapat oleh Deep Navy (Foto 2)
                     ScriptAction {
                         script: {
                             p3Overlay.currentSection = p3Overlay.targetSection
                         }
                     }
 
-                    // Hold singkat untuk decode frame 0 video Resume_60fps.mp4 di balik tirai
+                    // Hold singkat untuk decode video Resume_60fps.mp4 frame 0
                     PauseAnimation { duration: 70 }
 
                     // Fase 2: Sapuan Keluar ke Kanan (Wipe Out)
-                    // Pindahkan titik tumpu skala ke sisi Kanan (origin.x = width) agar membuka bersih ke kanan
-                    ScriptAction {
-                        script: {
-                            wipeScale1.origin.x = p3Overlay.width
-                            wipeScale2.origin.x = p3Overlay.width
-                            wipeScale3.origin.x = p3Overlay.width
-                        }
-                    }
-
+                    // Navy bergerak ke kanan lebih dulu mengungkap Blue, lalu Cyan, lalu menu Stats
                     ParallelAnimation {
-                        SequentialAnimation {
-                            NumberAnimation { target: wipeScale3; property: "xScale"; from: 1; to: 0; duration: 260; easing.type: Easing.InQuart }
+                        NumberAnimation {
+                            target: bandNavy
+                            property: "x"
+                            from: 0
+                            to: p3Overlay.width
+                            duration: 280
+                            easing.type: Easing.InQuart
                         }
-                        SequentialAnimation {
-                            PauseAnimation { duration: 80 }
-                            NumberAnimation { target: wipeScale2; property: "xScale"; from: 1; to: 0; duration: 320; easing.type: Easing.InQuart }
+                        NumberAnimation {
+                            target: bandBlue
+                            property: "x"
+                            from: 0
+                            to: p3Overlay.width
+                            duration: 320
+                            easing.type: Easing.InQuart
                         }
-                        SequentialAnimation {
-                            PauseAnimation { duration: 180 }
-                            NumberAnimation { target: wipeScale1; property: "xScale"; from: 1; to: 0; duration: 360; easing.type: Easing.InQuart }
+                        NumberAnimation {
+                            target: bandCyan
+                            property: "x"
+                            from: 0
+                            to: p3Overlay.width
+                            duration: 360
+                            easing.type: Easing.InQuart
                         }
                     }
 
@@ -2927,24 +3040,35 @@ Scope {
 
     component P3StatRow: Item {
         id: rowRoot
-        required property string label
-        required property string badgeText
+        property string label: ""
+        property string badgeText: ""
         property bool showDivider: true
         property bool clickable: false
+        property color badgeColor: "#8df6ff"
+        property color badgeHoverColor: "#c2f9ff"
         signal clicked()
 
         width: parent ? parent.width : 470
-        height: 54
+        height: 52
+
+        Rectangle {
+            anchors.fill: parent
+            color: (rowRoot.clickable && rowMouse.containsMouse) ? Qt.rgba(0/255, 219/255, 255/255, 0.08) : "transparent"
+            Behavior on color { ColorAnimation { duration: 120 } }
+        }
 
         Text {
             anchors.left: parent.left
             anchors.leftMargin: 20
+            anchors.right: badgeShell.left
+            anchors.rightMargin: 12
             anchors.verticalCenter: parent.verticalCenter
             text: rowRoot.label
             font.family: "Rubik"
-            font.pixelSize: 18
+            font.pixelSize: 17
             font.weight: Font.Bold
-            color: "#ffffff"
+            color: (rowRoot.clickable && rowMouse.containsMouse) ? "#c2f9ff" : "#ffffff"
+            elide: Text.ElideRight
         }
 
         // Slanted Parallelogram Badge Khas Persona 3 Reload (Sesuai Foto 1)
@@ -2971,7 +3095,7 @@ Scope {
                     ctx.lineTo(w - skew, h)
                     ctx.lineTo(0, h)
                     ctx.closePath()
-                    ctx.fillStyle = (rowRoot.clickable && rowMouse.containsMouse) ? "#c2f9ff" : "#8df6ff"
+                    ctx.fillStyle = (rowRoot.clickable && rowMouse.containsMouse) ? rowRoot.badgeHoverColor : rowRoot.badgeColor
                     ctx.fill()
                 }
                 onWidthChanged: requestPaint()
@@ -2990,17 +3114,17 @@ Scope {
                 font.weight: Font.Bold
                 color: "#030e28"
             }
+        }
 
-            MouseArea {
-                id: rowMouse
-                anchors.fill: parent
-                enabled: rowRoot.clickable
-                cursorShape: Qt.PointingHandCursor
-                hoverEnabled: true
-                onClicked: {
-                    PhantomState.playSfx("select")
-                    rowRoot.clicked()
-                }
+        MouseArea {
+            id: rowMouse
+            anchors.fill: parent
+            enabled: rowRoot.clickable
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onClicked: {
+                PhantomState.playSfx("select")
+                rowRoot.clicked()
             }
         }
 

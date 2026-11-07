@@ -132,7 +132,7 @@ Scope {
     function setWifiPower(enable) {
         root.wifiConnected = enable
         root.wifiStatusMsg = enable ? "Enabling Wi-Fi radio..." : "Wi-Fi radio disabled"
-        Quickshell.execDetached(["bash", "-c", "nmcli radio wifi " + (enable ? "on" : "off")])
+        Quickshell.execDetached(["bash", "-c", enable ? "rfkill unblock wifi 2>/dev/null; nmcli radio wifi on" : "nmcli radio wifi off"])
         wifiRefreshDelay.restart()
     }
 
@@ -269,7 +269,7 @@ Scope {
     function setBluetoothPower(enable) {
         root.btConnected = enable
         root.btStatusMsg = enable ? "Powering Bluetooth ON..." : "Bluetooth powered OFF"
-        Quickshell.execDetached(["bash", "-c", "bluetoothctl power " + (enable ? "on" : "off")])
+        Quickshell.execDetached(["bash", "-c", enable ? "rfkill unblock bluetooth 2>/dev/null; bluetoothctl power on" : "bluetoothctl power off"])
         btRefreshDelay.restart()
     }
 
