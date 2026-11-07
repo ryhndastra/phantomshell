@@ -1073,7 +1073,7 @@ Scope {
                 z: 1
             }
 
-            // Lapisan Poster Bawah Air Statis (Menghilangkan kedipan hitam saat video loop/decode - hanya aktif di stage 2)
+            // Lapisan Poster Bawah Air Statis
             Image {
                 id: p3PosterBase
                 anchors.fill: parent
@@ -1081,7 +1081,7 @@ Scope {
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true
-                visible: p3Overlay.stage >= 2 && p3Overlay.currentSection === "main" && !p3Part3Video.hasStarted
+                visible: false
                 z: 2
             }
 
@@ -1156,117 +1156,16 @@ Scope {
                 }
             }
 
-            // Stage 2: Video Animasi Mengambang Terus Menerus di Bawah Air (Seamless 60fps Dual A/B Looper)
-            Item {
+            // Stage 2: Video Animasi Mengambang Terus Menerus di Bawah Air (1080p 60fps Pristine Ping-Pong Loop)
+            Video {
                 id: p3Part3Video
                 anchors.fill: parent
+                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3_60fps.mp4")
+                fillMode: VideoOutput.PreserveAspectCrop
+                loops: MediaPlayer.Infinite
+                volume: 0
                 visible: p3Overlay.stage >= 2 && p3Overlay.currentSection === "main"
                 z: 4
-
-                property bool hasStarted: false
-                property bool activePlayer: false // false: A, true: B
-                property bool isFading: false
-                readonly property int crossfadeMs: 800
-
-                property int position: activePlayer ? p3Part3VideoB.position : p3Part3VideoA.position
-                onPositionChanged: {
-                    if (position === 0) {
-                        p3Part3VideoA.position = 0
-                        p3Part3VideoB.position = 0
-                    }
-                }
-
-                function play() {
-                    startLoop()
-                }
-
-                function stop() {
-                    fadePart3ToA.stop()
-                    fadePart3ToB.stop()
-                    isFading = false
-                    p3Part3VideoA.stop()
-                    p3Part3VideoB.stop()
-                }
-
-                function pause() {
-                    p3Part3VideoA.pause()
-                    p3Part3VideoB.pause()
-                }
-
-                function startLoop() {
-                    fadePart3ToA.stop()
-                    fadePart3ToB.stop()
-                    isFading = false
-                    activePlayer = false
-                    hasStarted = false
-                    p3Part3VideoA.opacity = 1
-                    p3Part3VideoB.opacity = 0
-                    p3Part3VideoB.stop()
-                    p3Part3VideoA.position = 0
-                    p3Part3VideoA.play()
-                }
-
-                Video {
-                    id: p3Part3VideoA
-                    anchors.fill: parent
-                    source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3_60fps.mp4")
-                    fillMode: VideoOutput.PreserveAspectCrop
-                    volume: 0
-                    opacity: 1
-                    visible: opacity > 0
-
-                    onPositionChanged: {
-                        if (position > 300) p3Part3Video.hasStarted = true
-                        if (!p3Part3Video.isFading && !p3Part3Video.activePlayer && duration > 0 && position >= duration - p3Part3Video.crossfadeMs) {
-                            p3Part3Video.isFading = true
-                            p3Part3VideoB.position = 0
-                            p3Part3VideoB.play()
-                            fadePart3ToB.restart()
-                        }
-                    }
-                }
-
-                Video {
-                    id: p3Part3VideoB
-                    anchors.fill: parent
-                    source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3_60fps.mp4")
-                    fillMode: VideoOutput.PreserveAspectCrop
-                    volume: 0
-                    opacity: 0
-                    visible: opacity > 0
-
-                    onPositionChanged: {
-                        if (position > 300) p3Part3Video.hasStarted = true
-                        if (!p3Part3Video.isFading && p3Part3Video.activePlayer && duration > 0 && position >= duration - p3Part3Video.crossfadeMs) {
-                            p3Part3Video.isFading = true
-                            p3Part3VideoA.position = 0
-                            p3Part3VideoA.play()
-                            fadePart3ToA.restart()
-                        }
-                    }
-                }
-
-                ParallelAnimation {
-                    id: fadePart3ToB
-                    NumberAnimation { target: p3Part3VideoA; property: "opacity"; to: 0; duration: p3Part3Video.crossfadeMs; easing.type: Easing.InOutQuad }
-                    NumberAnimation { target: p3Part3VideoB; property: "opacity"; to: 1; duration: p3Part3Video.crossfadeMs; easing.type: Easing.InOutQuad }
-                    onFinished: {
-                        p3Part3Video.activePlayer = true
-                        p3Part3Video.isFading = false
-                        p3Part3VideoA.stop()
-                    }
-                }
-
-                ParallelAnimation {
-                    id: fadePart3ToA
-                    NumberAnimation { target: p3Part3VideoB; property: "opacity"; to: 0; duration: p3Part3Video.crossfadeMs; easing.type: Easing.InOutQuad }
-                    NumberAnimation { target: p3Part3VideoA; property: "opacity"; to: 1; duration: p3Part3Video.crossfadeMs; easing.type: Easing.InOutQuad }
-                    onFinished: {
-                        p3Part3Video.activePlayer = false
-                        p3Part3Video.isFading = false
-                        p3Part3VideoB.stop()
-                    }
-                }
 
                 onVisibleChanged: {
                     if (visible) play()
@@ -1274,7 +1173,7 @@ Scope {
                 }
             }
 
-            // Lapisan Poster Section Sub-Menu (Options S.E.E.S. Emblem)
+            // Lapisan Poster Section Sub-Menu
             Image {
                 id: p3PosterSection
                 anchors.fill: parent
@@ -1282,121 +1181,20 @@ Scope {
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true
-                visible: p3Overlay.currentSection !== "main" && !p3SectionVideo.hasStarted
+                visible: false
                 z: 2
             }
 
-            // Video Animasi Section Sub-Menu (Options_60fps.mp4: S.E.E.S. Emblem 1080p 60fps Dual A/B Seamless Looper)
-            Item {
+            // Video Animasi Section Sub-Menu (Options_60fps.mp4: S.E.E.S. 1080p 60fps Pristine Ping-Pong Loop)
+            Video {
                 id: p3SectionVideo
                 anchors.fill: parent
+                source: Qt.resolvedUrl("../../assets/themes/p3/videos/Options_60fps.mp4")
+                fillMode: VideoOutput.PreserveAspectCrop
+                loops: MediaPlayer.Infinite
+                volume: 0
                 visible: p3Overlay.currentSection !== "main"
                 z: 4
-
-                property bool hasStarted: false
-                property bool activePlayer: false // false: A, true: B
-                property bool isFading: false
-                readonly property int crossfadeMs: 800
-
-                property int position: activePlayer ? p3SectionVideoB.position : p3SectionVideoA.position
-                onPositionChanged: {
-                    if (position === 0) {
-                        p3SectionVideoA.position = 0
-                        p3SectionVideoB.position = 0
-                    }
-                }
-
-                function play() {
-                    startLoop()
-                }
-
-                function stop() {
-                    fadeSectionToA.stop()
-                    fadeSectionToB.stop()
-                    isFading = false
-                    p3SectionVideoA.stop()
-                    p3SectionVideoB.stop()
-                }
-
-                function pause() {
-                    p3SectionVideoA.pause()
-                    p3SectionVideoB.pause()
-                }
-
-                function startLoop() {
-                    fadeSectionToA.stop()
-                    fadeSectionToB.stop()
-                    isFading = false
-                    activePlayer = false
-                    hasStarted = false
-                    p3SectionVideoA.opacity = 1
-                    p3SectionVideoB.opacity = 0
-                    p3SectionVideoB.stop()
-                    p3SectionVideoA.position = 0
-                    p3SectionVideoA.play()
-                }
-
-                Video {
-                    id: p3SectionVideoA
-                    anchors.fill: parent
-                    source: Qt.resolvedUrl("../../assets/themes/p3/videos/Options_60fps.mp4")
-                    fillMode: VideoOutput.PreserveAspectCrop
-                    volume: 0
-                    opacity: 1
-                    visible: opacity > 0
-
-                    onPositionChanged: {
-                        if (position > 300) p3SectionVideo.hasStarted = true
-                        if (!p3SectionVideo.isFading && !p3SectionVideo.activePlayer && duration > 0 && position >= duration - p3SectionVideo.crossfadeMs) {
-                            p3SectionVideo.isFading = true
-                            p3SectionVideoB.position = 0
-                            p3SectionVideoB.play()
-                            fadeSectionToB.restart()
-                        }
-                    }
-                }
-
-                Video {
-                    id: p3SectionVideoB
-                    anchors.fill: parent
-                    source: Qt.resolvedUrl("../../assets/themes/p3/videos/Options_60fps.mp4")
-                    fillMode: VideoOutput.PreserveAspectCrop
-                    volume: 0
-                    opacity: 0
-                    visible: opacity > 0
-
-                    onPositionChanged: {
-                        if (position > 300) p3SectionVideo.hasStarted = true
-                        if (!p3SectionVideo.isFading && p3SectionVideo.activePlayer && duration > 0 && position >= duration - p3SectionVideo.crossfadeMs) {
-                            p3SectionVideo.isFading = true
-                            p3SectionVideoA.position = 0
-                            p3SectionVideoA.play()
-                            fadeSectionToA.restart()
-                        }
-                    }
-                }
-
-                ParallelAnimation {
-                    id: fadeSectionToB
-                    NumberAnimation { target: p3SectionVideoA; property: "opacity"; to: 0; duration: p3SectionVideo.crossfadeMs; easing.type: Easing.InOutQuad }
-                    NumberAnimation { target: p3SectionVideoB; property: "opacity"; to: 1; duration: p3SectionVideo.crossfadeMs; easing.type: Easing.InOutQuad }
-                    onFinished: {
-                        p3SectionVideo.activePlayer = true
-                        p3SectionVideo.isFading = false
-                        p3SectionVideoA.stop()
-                    }
-                }
-
-                ParallelAnimation {
-                    id: fadeSectionToA
-                    NumberAnimation { target: p3SectionVideoB; property: "opacity"; to: 0; duration: p3SectionVideo.crossfadeMs; easing.type: Easing.InOutQuad }
-                    NumberAnimation { target: p3SectionVideoA; property: "opacity"; to: 1; duration: p3SectionVideo.crossfadeMs; easing.type: Easing.InOutQuad }
-                    onFinished: {
-                        p3SectionVideo.activePlayer = false
-                        p3SectionVideo.isFading = false
-                        p3SectionVideoB.stop()
-                    }
-                }
 
                 onVisibleChanged: {
                     if (visible) play()
