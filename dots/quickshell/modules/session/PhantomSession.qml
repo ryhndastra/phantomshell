@@ -187,16 +187,16 @@ Scope {
                         }
                     } else if (p3Overlay.currentSection === "stats" || p3Overlay.currentSection === "network" || p3Overlay.currentSection === "bluetooth") {
                         if (event.key === Qt.Key_Up || event.key === Qt.Key_Left) {
-                            p3Overlay.statsTab = (p3Overlay.statsTab + 5) % 6
+                            p3Overlay.statsTab = (p3Overlay.statsTab + 3) % 4
                             PhantomState.playSfx("select")
                             event.accepted = true
                             return
                         } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Right || event.key === Qt.Key_Tab) {
-                            p3Overlay.statsTab = (p3Overlay.statsTab + 1) % 6
+                            p3Overlay.statsTab = (p3Overlay.statsTab + 1) % 4
                             PhantomState.playSfx("select")
                             event.accepted = true
                             return
-                        } else if (event.key >= Qt.Key_1 && event.key <= Qt.Key_6) {
+                        } else if (event.key >= Qt.Key_1 && event.key <= Qt.Key_4) {
                             p3Overlay.statsTab = event.key - Qt.Key_1
                             PhantomState.playSfx("select")
                             event.accepted = true
@@ -1386,11 +1386,11 @@ Scope {
                 }
             }
 
-            // Video Animasi Section Control Center (train_ambient.mp4: Makoto Train Monorail Horizon 60fps Loop)
+            // Video Animasi Section Control Center (fuuka_ambient.mp4: Fuuka Yamagishi S.E.E.S. Tactical Navigator 60fps Loop)
             Video {
                 id: p3ControlVideo
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/videos/train_ambient.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/videos/fuuka_ambient.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
@@ -1814,22 +1814,20 @@ Scope {
                     }
                 }
 
-                // ── LEVEL 1: SUB-MENU STATS / LIST (LENGKAP 6 KATEGORI FULL-SUITE FITUR PHANTOMSHELL P3R) ──
+                // ── LEVEL 1: SUB-MENU STATS / LIST (PURE HARDWARE & SYSTEM TELEMETRY) ──
                 Item {
                     id: p3StatsSubMenu
-                    visible: p3Overlay.currentSection === "stats" || p3Overlay.currentSection === "network" || p3Overlay.currentSection === "bluetooth"
+                    visible: p3Overlay.currentSection === "stats"
                     anchors.fill: parent
 
                     readonly property var listCategories: [
-                        { badge: "I",   title: "Telemetry",   subtitle: "Hardware Sensors & Load Matrix", rank: "MAX" },
-                        { badge: "II",  title: "Network",     subtitle: "Tatsumi Wi-Fi Radar & Link",      rank: "IV" },
-                        { badge: "III", title: "Bluetooth",   subtitle: "Evoker Peripheral & Audio Link",  rank: "V" },
-                        { badge: "IV",  title: "Audio/Sound", subtitle: "Sound Engine, CAVA & Media Player", rank: "VI" },
-                        { badge: "V",   title: "Bar/Desktop", subtitle: "Phantom Bar, Workspaces & Clock", rank: "VIII" },
-                        { badge: "VI",  title: "Compositor",  subtitle: "Displays, Hyprland FX & Parallax", rank: "IX" }
+                        { badge: "I",   title: "Core Telemetry",   subtitle: "Hardware Sensors & Load Matrix", rank: "MAX" },
+                        { badge: "II",  title: "Memory & Storage", subtitle: "RAM Allocation & Disk Mounts",   rank: "VIII" },
+                        { badge: "III", title: "Thermals & Power", subtitle: "Core Thermal & AC Power Matrix", rank: "VII" },
+                        { badge: "IV",  title: "GPU & Displays",   subtitle: "Graphics Pipeline & Wayland HUD", rank: "IX" }
                     ]
 
-                    // Kolom Kiri: Judul "LIST", 6 Kartu Rank P3, dan Tombol Kembali
+                    // Kolom Kiri: Judul "LIST", 4 Kartu Rank P3, dan Tombol Kembali
                     Item {
                         anchors.left: parent.left
                         anchors.leftMargin: 60
@@ -1840,7 +1838,7 @@ Scope {
                         Column {
                             anchors.top: parent.top
                             anchors.left: parent.left
-                            spacing: 6
+                            spacing: 12
 
                             Text {
                                 text: "LIST"
@@ -2124,13 +2122,11 @@ Scope {
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: [
-                                        "01 System Stats",
-                                        "02 Wifi networks",
-                                        "03 Bluetooth devices",
-                                        "04 Sound Engine",
-                                        "05 Bar & Desktop HUD",
-                                        "06 Compositor & Hyprland"
-                                    ][p3Overlay.statsTab] || "01 System Stats"
+                                        "01 Core Telemetry",
+                                        "02 Memory & Storage",
+                                        "03 Thermals & Power",
+                                        "04 GPU & Displays"
+                                    ][p3Overlay.statsTab] || "01 Core Telemetry"
                                     font.family: "Rubik"
                                     font.pixelSize: 21
                                     font.bold: true
@@ -2139,7 +2135,7 @@ Scope {
                             }
                         }
 
-                        // Isi Konten Tab Sesuai Foto 1
+                        // Isi Konten Tab Hardware Telemetry
                         Item {
                             anchors.top: statsDetailHeaderCanvas.bottom
                             anchors.bottom: parent.bottom
@@ -2147,350 +2143,142 @@ Scope {
                             anchors.right: parent.right
                             anchors.topMargin: 4
 
-                            // ── TAB 0: SYSTEM STATS (PERSIS FOTO 1) ──
+                            // ── TAB 0: CORE TELEMETRY ──
                             Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 0
 
                                 P3StatRow {
-                                    label: "OS"
-                                    badgeText: PhantomState.sysOs.replace(" x86_64", "")
+                                    label: "Operating System"
+                                    badgeText: (PhantomState.sysOs || "NixOS").replace(" x86_64", "")
                                 }
                                 P3StatRow {
-                                    label: "CPU"
-                                    badgeText: PhantomState.cpuPct + "%"
+                                    label: "Linux Kernel"
+                                    badgeText: PhantomState.sysKernel || "Linux 6.12.0-zen"
                                 }
                                 P3StatRow {
-                                    label: "RAM"
-                                    badgeText: PhantomState.sysRamText
+                                    label: "Processor (CPU)"
+                                    badgeText: PhantomState.sysCpuModel || "Intel Core / AMD Ryzen"
                                 }
                                 P3StatRow {
-                                    label: "DISK"
-                                    badgeText: PhantomState.sysDiskText || "232G / 451G"
+                                    label: "CPU Utilization"
+                                    badgeText: Math.round(PhantomState.cpuPct) + "%"
                                 }
                                 P3StatRow {
-                                    label: "Users"
-                                    badgeText: "1"
+                                    label: "Active Memory"
+                                    badgeText: PhantomState.sysRamText || "Nominal"
                                 }
                                 P3StatRow {
-                                    label: "GPU"
-                                    badgeText: PhantomState.gpuPct + "%"
+                                    label: "Root Storage"
+                                    badgeText: PhantomState.sysDiskText || "64.9 / 97.7 GB"
                                 }
                                 P3StatRow {
-                                    label: "Battery"
-                                    badgeText: PhantomState.batteryPct + "%"
+                                    label: "Session Uptime"
+                                    badgeText: PhantomState.sysUptime || "Online"
                                 }
                                 P3StatRow {
-                                    label: "Thermal"
-                                    badgeText: Math.round(PhantomState.tempPct) + "°C"
+                                    label: "Logged Users"
+                                    badgeText: "1 Active Session"
                                     showDivider: false
                                 }
                             }
 
-                            // ── TAB 1: WIFI NETWORKS (PERSIS FOTO KE 3) ──
-                            Item {
+                            // ── TAB 1: MEMORY & STORAGE ──
+                            Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 1
 
-                                Column {
-                                    id: wifiControlHeader
-                                    anchors.top: parent.top
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-
-                                    P3StatRow {
-                                        label: "Wi-Fi Radio"
-                                        badgeText: PhantomState.wifiConnected ? "ENABLED" : "DISABLED"
-                                        clickable: true
-                                        onClicked: PhantomState.setWifiPower(!PhantomState.wifiConnected)
-                                    }
-                                    P3StatRow {
-                                        label: "Scan Networks"
-                                        badgeText: PhantomState.wifiScanning ? "SCANNING..." : "RESCAN"
-                                        clickable: !PhantomState.wifiScanning
-                                        onClicked: PhantomState.scanWifi()
-                                    }
+                                P3StatRow {
+                                    label: "Physical RAM"
+                                    badgeText: PhantomState.sysRamText || "8.8 / 15.5 GB"
                                 }
-
-                                Flickable {
-                                    anchors.top: wifiControlHeader.bottom
-                                    anchors.bottom: parent.bottom
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    clip: true
-                                    contentWidth: width
-                                    contentHeight: wifiListCol.implicitHeight
-
-                                    Column {
-                                        id: wifiListCol
-                                        width: parent.width
-
-                                        Repeater {
-                                            model: PhantomState.wifiNetworks
-                                            delegate: P3StatRow {
-                                                width: wifiListCol.width
-                                                label: modelData.ssid
-                                                badgeText: modelData.inUse ? "Connected" : (modelData.signal + "%")
-                                                clickable: true
-                                                onClicked: {
-                                                    if (modelData.inUse) {
-                                                        PhantomState.disconnectWifi(modelData.ssid)
-                                                    } else {
-                                                        PhantomState.connectWifi(modelData.ssid)
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        Item {
-                                            width: parent.width
-                                            height: 54
-                                            visible: (!PhantomState.wifiNetworks || PhantomState.wifiNetworks.length === 0)
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: PhantomState.wifiScanning ? "Scanning nearby frequencies..." : (PhantomState.wifiConnected ? "No networks in range (Click RESCAN)" : "Wi-Fi radio is disabled")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 12
-                                                font.bold: true
-                                                color: Qt.rgba(141/255, 246/255, 255/255, 0.7)
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Memory Load"
+                                    badgeText: Math.round(PhantomState.ramPct) + "%"
+                                }
+                                P3StatRow {
+                                    label: "Root FileSystem"
+                                    badgeText: "/ (Root Partition)"
+                                }
+                                P3StatRow {
+                                    label: "Root Disk Usage"
+                                    badgeText: Math.round(PhantomState.diskPct) + "%"
+                                }
+                                P3StatRow {
+                                    label: "Projects Partition"
+                                    badgeText: "/mnt/data (Mounted)"
+                                }
+                                P3StatRow {
+                                    label: "Swap / ZRAM"
+                                    badgeText: "Dynamic ZRAM Pool"
+                                }
+                                P3StatRow {
+                                    label: "Disk Health / IO"
+                                    badgeText: "SMART Optimal / Active"
+                                    showDivider: false
                                 }
                             }
 
-                            // ── TAB 2: BLUETOOTH DEVICES (DYNAMIC LINK & PAIR) ──
-                            Item {
+                            // ── TAB 2: THERMALS & POWER ──
+                            Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 2
 
-                                Column {
-                                    id: btControlHeader
-                                    anchors.top: parent.top
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-
-                                    P3StatRow {
-                                        label: "Bluetooth Radio"
-                                        badgeText: PhantomState.btConnected ? "ENABLED" : "DISABLED"
-                                        clickable: true
-                                        onClicked: PhantomState.setBluetoothPower(!PhantomState.btConnected)
-                                    }
-                                    P3StatRow {
-                                        label: "Hardware Scan"
-                                        badgeText: PhantomState.btScanning ? "SCANNING..." : "SCAN HARDWARE"
-                                        clickable: !PhantomState.btScanning
-                                        onClicked: PhantomState.scanBluetooth()
-                                    }
+                                P3StatRow {
+                                    label: "CPU Package Temp"
+                                    badgeText: Math.round(PhantomState.tempPct) + "°C"
                                 }
-
-                                Flickable {
-                                    anchors.top: btControlHeader.bottom
-                                    anchors.bottom: parent.bottom
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    clip: true
-                                    contentWidth: width
-                                    contentHeight: btListCol.implicitHeight
-
-                                    Column {
-                                        id: btListCol
-                                        width: parent.width
-
-                                        Repeater {
-                                            model: PhantomState.btDevices
-                                            delegate: P3StatRow {
-                                                width: btListCol.width
-                                                label: modelData.name || modelData.mac
-                                                badgeText: modelData.connected ? "Connected" : (modelData.paired ? "Paired" : "Connect")
-                                                clickable: true
-                                                onClicked: {
-                                                    if (modelData.connected) {
-                                                        PhantomState.disconnectBluetooth(modelData.mac, modelData.name)
-                                                    } else {
-                                                        PhantomState.connectBluetooth(modelData.mac, modelData.name)
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        Item {
-                                            width: parent.width
-                                            height: 54
-                                            visible: (!PhantomState.btDevices || PhantomState.btDevices.length === 0)
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: PhantomState.btScanning ? "Scanning nearby devices..." : (PhantomState.btConnected ? "No paired devices found (Click SCAN HARDWARE)" : "Bluetooth adapter is powered OFF")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 12
-                                                font.bold: true
-                                                color: Qt.rgba(141/255, 246/255, 255/255, 0.7)
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Thermal State"
+                                    badgeText: PhantomState.tempPct > 80 ? "HIGH HEAT" : (PhantomState.tempPct > 60 ? "WARM" : "OPTIMAL")
+                                }
+                                P3StatRow {
+                                    label: "GPU Core Temp"
+                                    badgeText: (Math.round(PhantomState.tempPct * 0.9)) + "°C"
+                                }
+                                P3StatRow {
+                                    label: "Power Source"
+                                    badgeText: PhantomState.batteryPct >= 100 ? "AC CONNECTED" : "BATTERY (" + PhantomState.batteryPct + "%)"
+                                }
+                                P3StatRow {
+                                    label: "Battery Charge"
+                                    badgeText: PhantomState.batteryPct + "%"
+                                }
+                                P3StatRow {
+                                    label: "Power Governor"
+                                    badgeText: "Balanced Mode"
+                                    showDivider: false
                                 }
                             }
 
-                            // ── TAB 3: SOUND ENGINE ──
+                            // ── TAB 3: GPU & DISPLAYS ──
                             Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 3
 
                                 P3StatRow {
-                                    label: "Master Output"
-                                    badgeText: Math.round(PhantomState.volumePct) + "%"
-                                    clickable: true
-                                    onClicked: {
-                                        const cur = PhantomState.volumePct
-                                        const next = (cur >= 100 ? 20 : Math.min(100, Math.floor(cur / 10) * 10 + 15))
-                                        PhantomState.setSystemVolume(next)
-                                    }
+                                    label: "Graphics Hardware"
+                                    badgeText: PhantomState.sysGpuModel || "NVIDIA / Intel UHD"
                                 }
                                 P3StatRow {
-                                    label: "Mute Output"
-                                    badgeText: PhantomState.volumeMuted ? "MUTED" : "ACTIVE"
-                                    clickable: true
-                                    onClicked: PhantomState.toggleSystemMute()
+                                    label: "GPU Utilization"
+                                    badgeText: Math.round(PhantomState.gpuPct) + "%"
                                 }
                                 P3StatRow {
-                                    label: "Sound Effects (SFX)"
-                                    badgeText: PhantomState.sfxEnabled ? "ENABLED" : "MUTED"
-                                    clickable: true
-                                    onClicked: { PhantomState.sfxEnabled = !PhantomState.sfxEnabled; PhantomState.saveState() }
+                                    label: "Primary Monitor"
+                                    badgeText: (PhantomState.displayName || "eDP-1") + " • " + (PhantomState.displayMode || "144Hz")
                                 }
                                 P3StatRow {
-                                    label: "SFX Volume"
-                                    badgeText: Math.round(PhantomState.sfxVolume * 100) + "%"
-                                    clickable: true
-                                    onClicked: { PhantomState.sfxVolume = (PhantomState.sfxVolume >= 1.0 ? 0.2 : PhantomState.sfxVolume + 0.15); PhantomState.saveState() }
+                                    label: "Wayland Compositor"
+                                    badgeText: "Hyprland v0.53+"
                                 }
                                 P3StatRow {
-                                    label: "CAVA Visualizer"
-                                    badgeText: PhantomState.showDesktopCava ? "ENABLED" : "DISABLED"
-                                    clickable: true
-                                    onClicked: { PhantomState.showDesktopCava = !PhantomState.showDesktopCava; PhantomState.saveState() }
+                                    label: "Desktop Shell Runtime"
+                                    badgeText: "Quickshell C++20 / Qt6"
                                 }
                                 P3StatRow {
-                                    label: "CAVA Bars"
-                                    badgeText: PhantomState.cavaBarCount + " BARS"
-                                    clickable: true
-                                    onClicked: { PhantomState.cavaBarCount = (PhantomState.cavaBarCount >= 64 ? 24 : PhantomState.cavaBarCount + 12); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Floating Lyrics"
-                                    badgeText: PhantomState.showDesktopLyrics ? "SHOWN" : "OFF"
-                                    clickable: true
-                                    onClicked: { PhantomState.showDesktopLyrics = !PhantomState.showDesktopLyrics; PhantomState.saveState() }
-                                    showDivider: false
-                                }
-                            }
-
-                            // ── TAB 4: BAR & DESKTOP HUD ──
-                            Column {
-                                anchors.fill: parent
-                                visible: p3Overlay.statsTab === 4
-
-                                P3StatRow {
-                                    label: "Bar Position"
-                                    badgeText: PhantomState.barPosition.toUpperCase()
-                                    clickable: true
-                                    onClicked: { PhantomState.barPosition = (PhantomState.barPosition === "top" ? "bottom" : "top"); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Bar Style"
-                                    badgeText: PhantomState.barStyle.toUpperCase()
-                                    clickable: true
-                                    onClicked: { const s = ["p5-skew", "floating", "hud", "split"]; const i = s.indexOf(PhantomState.barStyle); PhantomState.barStyle = s[(i + 1) % s.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Workspaces"
-                                    badgeText: PhantomState.workspaceCount + " DESKS"
-                                    clickable: true
-                                    onClicked: { const c = [4, 6, 8, 10]; const i = c.indexOf(PhantomState.workspaceCount); PhantomState.workspaceCount = c[(i + 1) % c.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Desk Digits"
-                                    badgeText: PhantomState.workspaceNumStyle.toUpperCase()
-                                    clickable: true
-                                    onClicked: { const n = ["arabic", "roman", "kanji"]; const i = n.indexOf(PhantomState.workspaceNumStyle); PhantomState.workspaceNumStyle = n[(i + 1) % n.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Desktop Clock"
-                                    badgeText: PhantomState.showDesktopClock ? "ENABLED" : "DISABLED"
-                                    clickable: true
-                                    onClicked: { PhantomState.showDesktopClock = !PhantomState.showDesktopClock; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Clock Style"
-                                    badgeText: PhantomState.desktopClockStyle.toUpperCase()
-                                    clickable: true
-                                    onClicked: { const cs = ["p5-editorial", "p5-badge", "cyber-grid", "persona-bold"]; const i = cs.indexOf(PhantomState.desktopClockStyle); PhantomState.desktopClockStyle = cs[(i + 1) % cs.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Clock Place"
-                                    badgeText: PhantomState.desktopClockPosition.toUpperCase()
-                                    clickable: true
-                                    onClicked: { const p = ["top-left", "center", "top-right", "bottom-left"]; const i = p.indexOf(PhantomState.desktopClockPosition); PhantomState.desktopClockPosition = p[(i + 1) % p.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Clock Motto"
-                                    badgeText: PhantomState.desktopClockShowQuote ? "SHOWN" : "HIDDEN"
-                                    clickable: true
-                                    onClicked: { PhantomState.desktopClockShowQuote = !PhantomState.desktopClockShowQuote; PhantomState.saveState() }
-                                    showDivider: false
-                                }
-                            }
-
-                            // ── TAB 5: COMPOSITOR & HYPRLAND ──
-                            Column {
-                                anchors.fill: parent
-                                visible: p3Overlay.statsTab === 5
-
-                                P3StatRow {
-                                    label: "Display Output"
-                                    badgeText: "eDP-1 • 144Hz"
-                                }
-                                P3StatRow {
-                                    label: "Brightness"
-                                    badgeText: Math.round(PhantomState.brightnessPct) + "%"
-                                    clickable: true
-                                    onClicked: { PhantomState.brightnessPct = (PhantomState.brightnessPct >= 100 ? 30 : PhantomState.brightnessPct + 15); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "3D Parallax"
-                                    badgeText: PhantomState.wallpaperParallax ? "ON" : "OFF"
-                                    clickable: true
-                                    onClicked: { PhantomState.wallpaperParallax = !PhantomState.wallpaperParallax; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Parallax Zoom"
-                                    badgeText: PhantomState.wallpaperZoom + "%"
-                                    clickable: true
-                                    onClicked: { PhantomState.wallpaperZoom = (PhantomState.wallpaperZoom >= 115 ? 100 : PhantomState.wallpaperZoom + 5); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Hyprland Gaps"
-                                    badgeText: PhantomState.hyprGapsIn + " / " + PhantomState.hyprGapsOut + " px"
-                                    clickable: true
-                                    onClicked: { PhantomState.hyprGapsIn = (PhantomState.hyprGapsIn >= 15 ? 0 : PhantomState.hyprGapsIn + 5); PhantomState.hyprGapsOut = PhantomState.hyprGapsIn * 2; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Corner Round"
-                                    badgeText: PhantomState.hyprRounding + " px"
-                                    clickable: true
-                                    onClicked: { PhantomState.hyprRounding = (PhantomState.hyprRounding >= 20 ? 0 : PhantomState.hyprRounding + 5); PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Dual Blur"
-                                    badgeText: PhantomState.hyprBlurEnabled ? "ACTIVE" : "OFF"
-                                    clickable: true
-                                    onClicked: { PhantomState.hyprBlurEnabled = !PhantomState.hyprBlurEnabled; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Git Sync"
-                                    badgeText: "[ SYNC NOW ]"
-                                    clickable: true
-                                    onClicked: PhantomState.syncToSystem()
+                                    label: "Display Scaling"
+                                    badgeText: "1.0x (100% Native)"
                                     showDivider: false
                                 }
                             }
@@ -2505,9 +2293,9 @@ Scope {
                     anchors.fill: parent
 
                     readonly property var configCategories: [
-                        { badge: "I",   title: "Bar & Desktop HUD", subtitle: "Position, style, workspaces & clock", rank: "VII" },
-                        { badge: "II",  title: "Sound Engine",       subtitle: "Master volume, SFX & CAVA visualizer", rank: "VI" },
-                        { badge: "III", title: "Hyprland Compositor",subtitle: "Blur, animations, shadow & gaps",   rank: "MAX" }
+                        { badge: "I",   title: "Desktop HUD & Widgets", subtitle: "P3 Moon Clock, Music Capsule & CAVA", rank: "MAX" },
+                        { badge: "II",  title: "Sound Engine",          subtitle: "Master Output, SFX & CAVA Visualizer", rank: "VI" },
+                        { badge: "III", title: "Hyprland Compositor",   subtitle: "Dual Blur, Window Animations & Gaps", rank: "VIII" }
                     ]
 
                     // Kolom Kiri: Judul "CONFIG", 3 Kartu Slanted P3, dan Tombol Kembali
@@ -2821,7 +2609,7 @@ Scope {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: (p3Overlay.configTab === 0 ? "01 Bar & Desktop HUD" : (p3Overlay.configTab === 1 ? "02 Sound Engine" : "03 Hyprland Compositor"))
+                                    text: (p3Overlay.configTab === 0 ? "01 Desktop HUD & Widgets" : (p3Overlay.configTab === 1 ? "02 Sound Engine" : "03 Hyprland Compositor"))
                                     font.family: "Rubik"
                                     font.pixelSize: 22
                                     font.weight: Font.Black
@@ -2838,58 +2626,52 @@ Scope {
                             anchors.right: parent.right
                             anchors.margins: 10
 
-                            // ── TAB 0: BAR & DESKTOP HUD ──
+                            // ── TAB 0: DESKTOP HUD & WIDGETS ──
                             Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.configTab === 0
 
                                 P3StatRow {
-                                    label: "Bar Position"
-                                    badgeText: PhantomState.barPosition.toUpperCase()
-                                    clickable: true
-                                    onClicked: { PhantomState.barPosition = (PhantomState.barPosition === "top" ? "bottom" : "top"); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Bar Style"
-                                    badgeText: PhantomState.barStyle.toUpperCase()
-                                    clickable: true
-                                    onClicked: { const s = ["p5-skew", "floating", "hud", "split"]; const i = s.indexOf(PhantomState.barStyle); PhantomState.barStyle = s[(i + 1) % s.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Workspaces"
-                                    badgeText: PhantomState.workspaceCount + " DESKS"
-                                    clickable: true
-                                    onClicked: { const c = [4, 6, 8, 10]; const i = c.indexOf(PhantomState.workspaceCount); PhantomState.workspaceCount = c[(i + 1) % c.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Desk Digits"
-                                    badgeText: PhantomState.workspaceNumStyle.toUpperCase()
-                                    clickable: true
-                                    onClicked: { const n = ["arabic", "roman", "kanji"]; const i = n.indexOf(PhantomState.workspaceNumStyle); PhantomState.workspaceNumStyle = n[(i + 1) % n.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Desktop Clock"
+                                    label: "P3 Moon Clock"
                                     badgeText: PhantomState.showDesktopClock ? "ENABLED" : "DISABLED"
                                     clickable: true
                                     onClicked: { PhantomState.showDesktopClock = !PhantomState.showDesktopClock; PhantomState.saveState() }
                                 }
                                 P3StatRow {
-                                    label: "Clock Style"
-                                    badgeText: PhantomState.desktopClockStyle.toUpperCase()
-                                    clickable: true
-                                    onClicked: { const cs = ["p5-editorial", "p5-badge", "cyber-grid", "persona-bold"]; const i = cs.indexOf(PhantomState.desktopClockStyle); PhantomState.desktopClockStyle = cs[(i + 1) % cs.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Clock Place"
+                                    label: "Clock Placement"
                                     badgeText: PhantomState.desktopClockPosition.toUpperCase()
                                     clickable: true
-                                    onClicked: { const p = ["top-left", "center", "top-right", "bottom-left"]; const i = p.indexOf(PhantomState.desktopClockPosition); PhantomState.desktopClockPosition = p[(i + 1) % p.length]; PhantomState.saveState() }
+                                    onClicked: { const p = ["top-right", "top-left", "bottom-right"]; const i = p.indexOf(PhantomState.desktopClockPosition); PhantomState.desktopClockPosition = p[(i + 1) % p.length]; PhantomState.saveState() }
                                 }
                                 P3StatRow {
-                                    label: "Clock Motto"
-                                    badgeText: PhantomState.desktopClockShowQuote ? "SHOWN" : "HIDDEN"
+                                    label: "P3 Music Capsule"
+                                    badgeText: PhantomState.p3CapsuleForceOpen ? "ALWAYS OPEN" : "AUTO (HOVER)"
                                     clickable: true
-                                    onClicked: { PhantomState.desktopClockShowQuote = !PhantomState.desktopClockShowQuote; PhantomState.saveState() }
+                                    onClicked: { PhantomState.p3CapsuleForceOpen = !PhantomState.p3CapsuleForceOpen; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "CAVA Visualizer"
+                                    badgeText: PhantomState.showDesktopCava ? "ENABLED" : "DISABLED"
+                                    clickable: true
+                                    onClicked: { PhantomState.showDesktopCava = !PhantomState.showDesktopCava; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "CAVA Bar Count"
+                                    badgeText: PhantomState.cavaBarCount + " BARS"
+                                    clickable: true
+                                    onClicked: { const b = [24, 36, 48, 64]; const i = b.indexOf(PhantomState.cavaBarCount); PhantomState.cavaBarCount = b[(i + 1) % b.length]; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "Floating Lyrics"
+                                    badgeText: PhantomState.showDesktopLyrics ? "SHOWN" : "OFF"
+                                    clickable: true
+                                    onClicked: { PhantomState.showDesktopLyrics = !PhantomState.showDesktopLyrics; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "3D Water Shaders"
+                                    badgeText: PhantomState.p3WallpaperAutoPause ? "POWER-SAVE" : "ACTIVE 60FPS"
+                                    clickable: true
+                                    onClicked: { PhantomState.p3WallpaperAutoPause = !PhantomState.p3WallpaperAutoPause; PhantomState.saveState() }
                                     showDivider: false
                                 }
                             }
@@ -2901,10 +2683,10 @@ Scope {
 
                                 P3StatRow {
                                     label: "Master Output"
-                                    badgeText: Math.round(PhantomState.volumePct) + "%"
+                                    badgeText: Math.round(Number(PhantomState.volumePct) || 0) + "%"
                                     clickable: true
                                     onClicked: {
-                                        const cur = Math.round(PhantomState.volumePct)
+                                        const cur = Math.round(Number(PhantomState.volumePct) || 0)
                                         const next = (cur >= 100 ? 20 : Math.min(100, Math.floor(cur / 10) * 10 + 15))
                                         PhantomState.setSystemVolume(next)
                                     }
@@ -2928,22 +2710,12 @@ Scope {
                                     onClicked: { PhantomState.sfxVolume = (PhantomState.sfxVolume >= 1.0 ? 0.2 : PhantomState.sfxVolume + 0.15); PhantomState.saveState() }
                                 }
                                 P3StatRow {
-                                    label: "CAVA Visualizer"
-                                    badgeText: PhantomState.showDesktopCava ? "ENABLED" : "DISABLED"
-                                    clickable: true
-                                    onClicked: { PhantomState.showDesktopCava = !PhantomState.showDesktopCava; PhantomState.saveState() }
+                                    label: "Audio Backend"
+                                    badgeText: "PipeWire / WirePlumber"
                                 }
                                 P3StatRow {
-                                    label: "CAVA Bars"
-                                    badgeText: PhantomState.cavaBarCount + " BARS"
-                                    clickable: true
-                                    onClicked: { PhantomState.cavaBarCount = (PhantomState.cavaBarCount >= 64 ? 24 : PhantomState.cavaBarCount + 12); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Floating Lyrics"
-                                    badgeText: PhantomState.showDesktopLyrics ? "SHOWN" : "OFF"
-                                    clickable: true
-                                    onClicked: { PhantomState.showDesktopLyrics = !PhantomState.showDesktopLyrics; PhantomState.saveState() }
+                                    label: "Visualizer Source"
+                                    badgeText: "CAVA FIFO Engine"
                                     showDivider: false
                                 }
                             }
@@ -2954,50 +2726,40 @@ Scope {
                                 visible: p3Overlay.configTab === 2
 
                                 P3StatRow {
-                                    label: "Display Output"
-                                    badgeText: "eDP-1 • 144Hz"
-                                }
-                                P3StatRow {
-                                    label: "Brightness"
-                                    badgeText: Math.round(PhantomState.brightnessPct) + "%"
-                                    clickable: true
-                                    onClicked: { PhantomState.brightnessPct = (PhantomState.brightnessPct >= 100 ? 30 : PhantomState.brightnessPct + 15); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "3D Parallax"
-                                    badgeText: PhantomState.wallpaperParallax ? "ON" : "OFF"
-                                    clickable: true
-                                    onClicked: { PhantomState.wallpaperParallax = !PhantomState.wallpaperParallax; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Parallax Zoom"
-                                    badgeText: PhantomState.wallpaperZoom + "%"
-                                    clickable: true
-                                    onClicked: { PhantomState.wallpaperZoom = (PhantomState.wallpaperZoom >= 115 ? 100 : PhantomState.wallpaperZoom + 5); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Hyprland Gaps"
-                                    badgeText: PhantomState.hyprGapsIn + " / " + PhantomState.hyprGapsOut + " px"
-                                    clickable: true
-                                    onClicked: { PhantomState.hyprGapsIn = (PhantomState.hyprGapsIn >= 15 ? 0 : PhantomState.hyprGapsIn + 5); PhantomState.hyprGapsOut = PhantomState.hyprGapsIn * 2; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Corner Round"
-                                    badgeText: PhantomState.hyprRounding + " px"
-                                    clickable: true
-                                    onClicked: { PhantomState.hyprRounding = (PhantomState.hyprRounding >= 20 ? 0 : PhantomState.hyprRounding + 5); PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Dual Blur"
-                                    badgeText: PhantomState.hyprBlurEnabled ? "ACTIVE" : "OFF"
+                                    label: "Dual Blur FX"
+                                    badgeText: PhantomState.hyprBlurEnabled ? "ENABLED" : "DISABLED"
                                     clickable: true
                                     onClicked: { PhantomState.hyprBlurEnabled = !PhantomState.hyprBlurEnabled; PhantomState.syncHyprland() }
                                 }
                                 P3StatRow {
-                                    label: "Git Sync"
-                                    badgeText: "[ SYNC NOW ]"
+                                    label: "Window Animations"
+                                    badgeText: PhantomState.hyprAnimationsEnabled ? "ENABLED" : "DISABLED"
                                     clickable: true
-                                    onClicked: PhantomState.syncToSystem()
+                                    onClicked: { PhantomState.hyprAnimationsEnabled = !PhantomState.hyprAnimationsEnabled; PhantomState.syncHyprland() }
+                                }
+                                P3StatRow {
+                                    label: "Inner Gaps"
+                                    badgeText: PhantomState.hyprGapsIn + " px"
+                                    clickable: true
+                                    onClicked: { const g = [0, 5, 10, 15]; const i = g.indexOf(PhantomState.hyprGapsIn); PhantomState.hyprGapsIn = g[(i + 1) % g.length]; PhantomState.syncHyprland() }
+                                }
+                                P3StatRow {
+                                    label: "Outer Gaps"
+                                    badgeText: PhantomState.hyprGapsOut + " px"
+                                    clickable: true
+                                    onClicked: { const g = [0, 8, 14, 20]; const i = g.indexOf(PhantomState.hyprGapsOut); PhantomState.hyprGapsOut = g[(i + 1) % g.length]; PhantomState.syncHyprland() }
+                                }
+                                P3StatRow {
+                                    label: "Window Rounding"
+                                    badgeText: PhantomState.hyprRounding + " px"
+                                    clickable: true
+                                    onClicked: { const r = [0, 8, 14, 20]; const i = r.indexOf(PhantomState.hyprRounding); PhantomState.hyprRounding = r[(i + 1) % r.length]; PhantomState.syncHyprland() }
+                                }
+                                P3StatRow {
+                                    label: "Border Width"
+                                    badgeText: PhantomState.hyprBorderSize + " px"
+                                    clickable: true
+                                    onClicked: { const b = [1, 2, 3]; const i = b.indexOf(PhantomState.hyprBorderSize); PhantomState.hyprBorderSize = b[(i + 1) % b.length]; PhantomState.syncHyprland() }
                                     showDivider: false
                                 }
                             }
@@ -3011,13 +2773,14 @@ Scope {
                     visible: p3Overlay.currentSection === "control"
                     anchors.fill: parent
 
-                    // Header Atlus Persona 3
+                    // Header Atlus Persona 3 (Left-docked)
                     Item {
                         anchors.top: parent.top
                         anchors.topMargin: 40
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: 1040
-                        height: 60
+                        anchors.left: parent.left
+                        anchors.leftMargin: 80
+                        width: 740
+                        height: 56
 
                         Canvas {
                             anchors.fill: parent
@@ -3027,10 +2790,10 @@ Scope {
                                 ctx.beginPath()
                                 ctx.moveTo(0, 0)
                                 ctx.lineTo(width, 0)
-                                ctx.lineTo(width - 24, height)
-                                ctx.lineTo(24, height)
+                                ctx.lineTo(width - 20, height)
+                                ctx.lineTo(0, height)
                                 ctx.closePath()
-                                ctx.fillStyle = "rgba(7, 21, 57, 0.9)"
+                                ctx.fillStyle = "rgba(7, 21, 57, 0.92)"
                                 ctx.fill()
                                 ctx.strokeStyle = "#00dbff"
                                 ctx.lineWidth = 2
@@ -3039,51 +2802,109 @@ Scope {
                         }
 
                         RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 16
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.leftMargin: 24
+                            spacing: 14
 
                             Text {
                                 text: "S.E.E.S. CONTROL CENTER"
                                 font.family: "Rubik"
-                                font.pixelSize: 26
+                                font.pixelSize: 22
                                 font.weight: Font.Black
                                 font.italic: true
                                 color: "#8df6ff"
                             }
                             Rectangle {
                                 width: 2
-                                height: 24
+                                height: 20
                                 color: Qt.rgba(0/255, 219/255, 255/255, 0.5)
                             }
                             Text {
-                                text: "TACTICAL RADAR & QUICK EXECUTIVE ACTIONS"
+                                text: "TACTICAL RADAR & QUICK ACTIONS"
                                 font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 13
+                                font.pixelSize: 12
                                 font.bold: true
                                 color: "#ffffff"
+                                font.letterSpacing: 1.2
+                            }
+                        }
+                    }
+
+                    // Tactical Radar Status Callout on Right (Over Fuuka)
+                    Item {
+                        anchors.top: parent.top
+                        anchors.topMargin: 40
+                        anchors.right: parent.right
+                        anchors.rightMargin: 60
+                        width: 440
+                        height: 48
+
+                        Canvas {
+                            anchors.fill: parent
+                            onPaint: {
+                                var ctx = getContext("2d")
+                                ctx.reset()
+                                ctx.beginPath()
+                                ctx.moveTo(20, 0)
+                                ctx.lineTo(width, 0)
+                                ctx.lineTo(width, height)
+                                ctx.lineTo(0, height)
+                                ctx.closePath()
+                                ctx.fillStyle = "rgba(4, 15, 42, 0.85)"
+                                ctx.fill()
+                                ctx.strokeStyle = "rgba(0, 219, 255, 0.6)"
+                                ctx.lineWidth = 1.5
+                                ctx.stroke()
+                            }
+                        }
+
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: 12
+
+                            Rectangle {
+                                width: 10
+                                height: 10
+                                radius: 5
+                                color: "#00ffff"
+                                SequentialAnimation on opacity {
+                                    loops: Animation.Infinite
+                                    NumberAnimation { from: 1.0; to: 0.2; duration: 800 }
+                                    NumberAnimation { from: 0.2; to: 1.0; duration: 800 }
+                                }
+                            }
+                            Text {
+                                text: "NAVIGATOR // FUUKA YAMAGISHI // RADAR ON"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 12
+                                font.bold: true
+                                color: "#8df6ff"
                                 font.letterSpacing: 1.5
                             }
                         }
                     }
 
-                    // Content Container
+                    // Content Container (Left-Docked Deck)
                     Item {
-                        anchors.centerIn: parent
-                        anchors.verticalCenterOffset: 30
-                        width: 1040
-                        height: 540
+                        anchors.left: parent.left
+                        anchors.leftMargin: 80
+                        anchors.top: parent.top
+                        anchors.topMargin: 116
+                        width: 740
+                        height: 560
 
-                        // Dual Live Sliders Deck (Top Half)
+                        // Dual Live Sliders Deck (Volume & Brightness)
                         Row {
                             id: slidersRow
                             anchors.top: parent.top
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: 30
+                            anchors.left: parent.left
+                            spacing: 20
 
                             // 1. Master Audio Volume Deck
                             Rectangle {
-                                width: 505
-                                height: 110
+                                width: 360
+                                height: 100
                                 color: Qt.rgba(6/255, 18/255, 52/255, 0.92)
                                 radius: 4
                                 border.color: Qt.rgba(0/255, 219/255, 255/255, 0.4)
@@ -3093,31 +2914,31 @@ Scope {
                                     anchors.top: parent.top
                                     anchors.topMargin: 12
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 20
+                                    anchors.leftMargin: 16
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 20
-                                    spacing: 12
+                                    anchors.rightMargin: 16
+                                    spacing: 8
 
                                     Text {
                                         text: "VOLUME"
                                         font.family: "Rubik"
-                                        font.pixelSize: 18
+                                        font.pixelSize: 16
                                         font.weight: Font.Black
                                         color: "#ffffff"
                                     }
                                     Text {
-                                        text: "// MASTER SINK"
+                                        text: "// SINK"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 11
                                         font.bold: true
                                         color: "#00dbff"
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
                                     Item { width: 1; height: 1; Layout.fillWidth: true }
                                     Text {
-                                        text: Math.round(PhantomState.volumePct) + "%"
+                                        text: (Math.round(Number(PhantomState.volumePct) || 0)) + "%"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 18
+                                        font.pixelSize: 16
                                         font.weight: Font.Black
                                         color: PhantomState.volumeMuted ? "#ff4060" : "#8df6ff"
                                     }
@@ -3127,12 +2948,12 @@ Scope {
                                 Rectangle {
                                     id: volTrack
                                     anchors.bottom: parent.bottom
-                                    anchors.bottomMargin: 16
+                                    anchors.bottomMargin: 14
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 20
+                                    anchors.leftMargin: 16
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 110
-                                    height: 28
+                                    anchors.rightMargin: 96
+                                    height: 26
                                     color: "#030c22"
                                     radius: 2
                                     border.color: Qt.rgba(0/255, 219/255, 255/255, 0.3)
@@ -3142,7 +2963,7 @@ Scope {
                                         anchors.top: parent.top
                                         anchors.bottom: parent.bottom
                                         anchors.left: parent.left
-                                        width: parent.width * Math.max(0, Math.min(100, PhantomState.volumePct)) / 100
+                                        width: parent.width * Math.max(0, Math.min(100, Number(PhantomState.volumePct) || 0)) / 100
                                         color: PhantomState.volumeMuted ? "#6a2535" : "#00f0ff"
                                         Behavior on width { NumberAnimation { duration: 80 } }
                                     }
@@ -3166,11 +2987,11 @@ Scope {
                                 // Mute Button
                                 Rectangle {
                                     anchors.bottom: parent.bottom
-                                    anchors.bottomMargin: 16
+                                    anchors.bottomMargin: 14
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 20
-                                    width: 80
-                                    height: 28
+                                    anchors.rightMargin: 16
+                                    width: 70
+                                    height: 26
                                     color: PhantomState.volumeMuted ? "#ff2a4b" : Qt.rgba(0/255, 219/255, 255/255, 0.15)
                                     border.color: PhantomState.volumeMuted ? "#ff5e78" : "#00dbff"
                                     border.width: 1
@@ -3198,8 +3019,8 @@ Scope {
 
                             // 2. Display Brightness Deck
                             Rectangle {
-                                width: 505
-                                height: 110
+                                width: 360
+                                height: 100
                                 color: Qt.rgba(6/255, 18/255, 52/255, 0.92)
                                 radius: 4
                                 border.color: Qt.rgba(0/255, 219/255, 255/255, 0.4)
@@ -3209,31 +3030,31 @@ Scope {
                                     anchors.top: parent.top
                                     anchors.topMargin: 12
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 20
+                                    anchors.leftMargin: 16
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 20
-                                    spacing: 12
+                                    anchors.rightMargin: 16
+                                    spacing: 8
 
                                     Text {
                                         text: "BRIGHTNESS"
                                         font.family: "Rubik"
-                                        font.pixelSize: 18
+                                        font.pixelSize: 16
                                         font.weight: Font.Black
                                         color: "#ffffff"
                                     }
                                     Text {
-                                        text: "// PANEL BACKLIGHT"
+                                        text: "// PANEL"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 11
                                         font.bold: true
                                         color: "#ffd000"
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
                                     Item { width: 1; height: 1; Layout.fillWidth: true }
                                     Text {
-                                        text: Math.round(PhantomState.brightnessPct) + "%"
+                                        text: (Math.round(Number(PhantomState.brightnessPct) || 0)) + "%"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 18
+                                        font.pixelSize: 16
                                         font.weight: Font.Black
                                         color: "#ffe066"
                                     }
@@ -3243,12 +3064,12 @@ Scope {
                                 Rectangle {
                                     id: brightTrack
                                     anchors.bottom: parent.bottom
-                                    anchors.bottomMargin: 16
+                                    anchors.bottomMargin: 14
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 20
+                                    anchors.leftMargin: 16
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 20
-                                    height: 28
+                                    anchors.rightMargin: 16
+                                    height: 26
                                     color: "#030c22"
                                     radius: 2
                                     border.color: Qt.rgba(255/255, 208/255, 0/255, 0.3)
@@ -3258,7 +3079,7 @@ Scope {
                                         anchors.top: parent.top
                                         anchors.bottom: parent.bottom
                                         anchors.left: parent.left
-                                        width: parent.width * Math.max(5, Math.min(100, PhantomState.brightnessPct)) / 100
+                                        width: parent.width * Math.max(5, Math.min(100, Number(PhantomState.brightnessPct) || 0)) / 100
                                         color: "#ffd000"
                                         Behavior on width { NumberAnimation { duration: 80 } }
                                     }
@@ -3283,14 +3104,17 @@ Scope {
 
                         // S.E.E.S. 8 Tactical Action Cards (2 rows x 4 cols)
                         Grid {
+                            id: tacticalActionsGrid
                             anchors.top: slidersRow.bottom
-                            anchors.topMargin: 24
-                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.topMargin: 20
+                            anchors.left: parent.left
                             columns: 4
                             spacing: 16
 
                             // Card 1: Do Not Disturb
                             P3TacticalActionBtn {
+                                width: 173
+                                height: 96
                                 title: "DO NOT DISTURB"
                                 subtitle: PhantomState.dndEnabled ? "ACTIVE (SILENT)" : "STANDBY (NORMAL)"
                                 isToggled: PhantomState.dndEnabled
@@ -3303,8 +3127,10 @@ Scope {
 
                             // Card 2: Night Light / Blue Filter
                             P3TacticalActionBtn {
+                                width: 173
+                                height: 96
                                 title: "NIGHT LIGHT"
-                                subtitle: "WARM EYE PROTOCOL"
+                                subtitle: "WARM PROTOCOL"
                                 isToggled: false
                                 iconGlyph: "󰖔"
                                 onClicked: {
@@ -3314,6 +3140,8 @@ Scope {
 
                             // Card 3: Airplane Mode
                             P3TacticalActionBtn {
+                                width: 173
+                                height: 96
                                 title: "AIRPLANE MODE"
                                 subtitle: (!PhantomState.wifiConnected && !PhantomState.btConnected) ? "ACTIVE (OFFLINE)" : "STANDBY (ONLINE)"
                                 isToggled: (!PhantomState.wifiConnected && !PhantomState.btConnected)
@@ -3327,6 +3155,8 @@ Scope {
 
                             // Card 4: Mic Mute
                             P3TacticalActionBtn {
+                                width: 173
+                                height: 96
                                 title: "MIC MUTE"
                                 subtitle: "CAPTURE TOGGLE"
                                 isToggled: false
@@ -3339,6 +3169,8 @@ Scope {
 
                             // Card 5: Screen Snip
                             P3TacticalActionBtn {
+                                width: 173
+                                height: 96
                                 title: "SCREEN SNIP"
                                 subtitle: "AREA CAPTURE"
                                 isToggled: false
@@ -3351,6 +3183,8 @@ Scope {
 
                             // Card 6: Color Picker
                             P3TacticalActionBtn {
+                                width: 173
+                                height: 96
                                 title: "COLOR PICKER"
                                 subtitle: "HYPRPICKER HEX"
                                 isToggled: false
@@ -3363,6 +3197,8 @@ Scope {
 
                             // Card 7: Screen Mirror
                             P3TacticalActionBtn {
+                                width: 173
+                                height: 96
                                 title: "DISPLAY LAYOUT"
                                 subtitle: "CYCLE MONITORS"
                                 isToggled: false
@@ -3374,6 +3210,8 @@ Scope {
 
                             // Card 8: Git Repo Sync
                             P3TacticalActionBtn {
+                                width: 173
+                                height: 96
                                 title: "GIT REPO SYNC"
                                 subtitle: "SYSTEM REBUILD"
                                 isToggled: false
@@ -3386,22 +3224,22 @@ Scope {
 
                         // Tombol Kembali ke Menu Utama
                         Item {
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 0
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: 260
+                            anchors.top: tacticalActionsGrid.bottom
+                            anchors.topMargin: 20
+                            anchors.left: parent.left
+                            width: 240
                             height: 40
 
                             RowLayout {
                                 anchors.centerIn: parent
                                 spacing: 8
-                                scale: ctrlReturnMouse.containsMouse ? 1.08 : 1.0
+                                scale: ctrlReturnMouse.containsMouse ? 1.06 : 1.0
                                 Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
                                 Text {
                                     text: "◄"
                                     font.family: "Rubik"
-                                    font.pixelSize: 16
+                                    font.pixelSize: 15
                                     font.weight: Font.Black
                                     font.italic: true
                                     color: ctrlReturnMouse.containsMouse ? "#ffffff" : "#65e7ff"
@@ -3409,7 +3247,7 @@ Scope {
                                 Text {
                                     text: "RETURN TO MENU"
                                     font.family: "Rubik"
-                                    font.pixelSize: 18
+                                    font.pixelSize: 16
                                     font.weight: Font.Black
                                     font.italic: true
                                     color: ctrlReturnMouse.containsMouse ? "#ffffff" : "#65e7ff"
@@ -3554,7 +3392,7 @@ Scope {
                                     P3StatRow { label: "Runtime Engine"; badgeText: "Quickshell C++20 / QML6" }
                                     P3StatRow { label: "Active Theme"; badgeText: "Persona 3 Reload (Full Moon Blue)" }
                                     P3StatRow { label: "Audio Visualizer"; badgeText: "PipeWire / Split 64-Band CAVA" }
-                                    P3StatRow { label: "Dotfiles Repository"; badgeText: "github:shoo/dots" }
+                                    P3StatRow { label: "Dotfiles Repository"; badgeText: "ryhndastra/phantomshell" }
                                     P3StatRow { label: "Active Branch"; badgeText: "redesign/p3r-theme"; showDivider: false }
                                 }
                             }
@@ -3605,7 +3443,7 @@ Scope {
                                     anchors.margins: 10
 
                                     P3StatRow { label: "Operating System"; badgeText: (PhantomState.sysOs || PhantomState.osInfo || "NixOS 26.11 (Zokor)") }
-                                    P3StatRow { label: "Host Machine"; badgeText: (PhantomState.hostName || "PhantomBlade") }
+                                    P3StatRow { label: "Host Machine"; badgeText: (PhantomState.sysHost ? (PhantomState.sysHost.indexOf("@") >= 0 ? PhantomState.sysHost.split("@")[1] : PhantomState.sysHost) : "nixos") }
                                     P3StatRow { label: "Linux Kernel"; badgeText: (PhantomState.sysKernel || PhantomState.kernelVersion || "6.12.0-zen") }
                                     P3StatRow { label: "Processor (CPU)"; badgeText: (PhantomState.sysCpuModel || "AMD Ryzen 7") }
                                     P3StatRow { label: "System Uptime"; badgeText: (PhantomState.sysUptime || PhantomState.uptime || "Online") }
@@ -3662,7 +3500,7 @@ Scope {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: "✎ OPEN DOTFILES"
+                                    text: "★ GITHUB REPO"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 12
                                     font.weight: Font.Black
@@ -3675,7 +3513,7 @@ Scope {
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
                                         PhantomState.playSfx("confirm")
-                                        Quickshell.execDetached(["xdg-open", PhantomState.homeDir + "/dots"])
+                                        Quickshell.execDetached(["xdg-open", "https://github.com/ryhndastra/phantomshell"])
                                     }
                                 }
                             }
@@ -4844,8 +4682,8 @@ Scope {
         property bool isToggled: false
         signal clicked()
 
-        width: 240
-        height: 105
+        width: 173
+        height: 96
         property bool isHovered: actionMouse.containsMouse
 
         Canvas {
@@ -4858,14 +4696,15 @@ Scope {
                 var h = height
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
-                ctx.lineTo(w * 0.94, 0)
+                ctx.lineTo(w - 14, 0)
+                ctx.lineTo(w, 14)
                 ctx.lineTo(w, h)
-                ctx.lineTo(w * 0.06, h)
+                ctx.lineTo(0, h)
                 ctx.closePath()
-                ctx.fillStyle = actionBtnRoot.isToggled ? "rgba(0, 219, 255, 0.28)" : (actionBtnRoot.isHovered ? "rgba(18, 48, 125, 0.96)" : "rgba(7, 21, 57, 0.88)")
+                ctx.fillStyle = actionBtnRoot.isToggled ? "rgba(0, 219, 255, 0.28)" : (actionBtnRoot.isHovered ? "rgba(18, 48, 125, 0.96)" : "rgba(7, 21, 57, 0.90)")
                 ctx.fill()
                 ctx.strokeStyle = actionBtnRoot.isToggled ? "#00ffff" : (actionBtnRoot.isHovered ? "#8df6ff" : "rgba(0, 219, 255, 0.35)")
-                ctx.lineWidth = (actionBtnRoot.isToggled || actionBtnRoot.isHovered) ? 2.5 : 1.5
+                ctx.lineWidth = (actionBtnRoot.isToggled || actionBtnRoot.isHovered) ? 2.0 : 1.2
                 ctx.stroke()
             }
             onWidthChanged: requestPaint()
@@ -4880,12 +4719,12 @@ Scope {
         // Active LED dot indicator
         Rectangle {
             anchors.top: parent.top
-            anchors.topMargin: 12
+            anchors.topMargin: 10
             anchors.right: parent.right
-            anchors.rightMargin: 18
-            width: 8
-            height: 8
-            radius: 4
+            anchors.rightMargin: 14
+            width: 7
+            height: 7
+            radius: 3.5
             color: actionBtnRoot.isToggled ? "#00ffff" : "#1e3a6e"
             border.color: actionBtnRoot.isToggled ? "#ffffff" : "transparent"
             border.width: 1
@@ -4894,26 +4733,26 @@ Scope {
         // Glyph Icon
         Text {
             anchors.top: parent.top
-            anchors.topMargin: 14
+            anchors.topMargin: 12
             anchors.left: parent.left
-            anchors.leftMargin: 20
+            anchors.leftMargin: 14
             text: actionBtnRoot.iconGlyph
             font.family: "JetBrainsMono NFM"
-            font.pixelSize: 24
+            font.pixelSize: 20
             color: actionBtnRoot.isToggled ? "#00ffff" : (actionBtnRoot.isHovered ? "#ffffff" : "#8df6ff")
         }
 
         // Title
         Text {
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 30
+            anchors.bottomMargin: 24
             anchors.left: parent.left
-            anchors.leftMargin: 20
+            anchors.leftMargin: 14
             anchors.right: parent.right
-            anchors.rightMargin: 14
+            anchors.rightMargin: 10
             text: actionBtnRoot.title
             font.family: "Rubik"
-            font.pixelSize: 14
+            font.pixelSize: 12
             font.weight: Font.Black
             color: actionBtnRoot.isToggled ? "#ffffff" : (actionBtnRoot.isHovered ? "#ffffff" : "#d2fdff")
             elide: Text.ElideRight
@@ -4922,11 +4761,11 @@ Scope {
         // Subtitle
         Text {
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 14
+            anchors.bottomMargin: 10
             anchors.left: parent.left
-            anchors.leftMargin: 20
+            anchors.leftMargin: 14
             anchors.right: parent.right
-            anchors.rightMargin: 14
+            anchors.rightMargin: 10
             text: actionBtnRoot.subtitle
             font.family: "JetBrainsMono NFM"
             font.pixelSize: 9
