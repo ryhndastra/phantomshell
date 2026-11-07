@@ -1306,28 +1306,36 @@ Variants {
                         anchors.bottomMargin: 14
                         spacing: 18
 
-                        RowLayout {
-                            spacing: 6
-                            Rectangle {
-                                width: 22; height: 22; radius: 11
-                                color: "#00dbff"
-                                antialiasing: true
+                        Item {
+                            implicitWidth: aRow.implicitWidth
+                            implicitHeight: aRow.implicitHeight
+
+                            RowLayout {
+                                id: aRow
+                                anchors.fill: parent
+                                spacing: 6
+                                Rectangle {
+                                    width: 22; height: 22; radius: 11
+                                    color: "#00dbff"
+                                    antialiasing: true
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "A"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 12
+                                        font.bold: true
+                                        color: "#030e28"
+                                    }
+                                }
                                 Text {
-                                    anchors.centerIn: parent
-                                    text: "A"
+                                    text: "Launch"
+                                    color: "#ffffff"
                                     font.family: "Rubik"
-                                    font.pixelSize: 12
+                                    font.pixelSize: 13
                                     font.bold: true
-                                    color: "#030e28"
                                 }
                             }
-                            Text {
-                                text: "Launch"
-                                color: "#ffffff"
-                                font.family: "Rubik"
-                                font.pixelSize: 13
-                                font.bold: true
-                            }
+
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
@@ -1335,28 +1343,36 @@ Variants {
                             }
                         }
 
-                        RowLayout {
-                            spacing: 6
-                            Rectangle {
-                                width: 22; height: 22; radius: 11
-                                color: "#ff3366"
-                                antialiasing: true
+                        Item {
+                            implicitWidth: bRow.implicitWidth
+                            implicitHeight: bRow.implicitHeight
+
+                            RowLayout {
+                                id: bRow
+                                anchors.fill: parent
+                                spacing: 6
+                                Rectangle {
+                                    width: 22; height: 22; radius: 11
+                                    color: "#ff3366"
+                                    antialiasing: true
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "B"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 12
+                                        font.bold: true
+                                        color: "#ffffff"
+                                    }
+                                }
                                 Text {
-                                    anchors.centerIn: parent
-                                    text: "B"
-                                    font.family: "Rubik"
-                                    font.pixelSize: 12
-                                    font.bold: true
+                                    text: "Close"
                                     color: "#ffffff"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 13
+                                    font.bold: true
                                 }
                             }
-                            Text {
-                                text: "Close"
-                                color: "#ffffff"
-                                font.family: "Rubik"
-                                font.pixelSize: 13
-                                font.bold: true
-                            }
+
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
