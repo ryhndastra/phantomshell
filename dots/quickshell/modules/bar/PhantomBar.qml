@@ -127,11 +127,7 @@ Scope {
                             if (mouse.button === Qt.RightButton) {
                                 PhantomState.toggleSettings()
                             } else {
-                                if (PhantomState.isP3) {
-                                    PhantomState.toggleDashboard()
-                                } else {
-                                    PhantomState.toggleLauncher()
-                                }
+                                PhantomState.toggleLauncher()
                             }
                         }
                     }

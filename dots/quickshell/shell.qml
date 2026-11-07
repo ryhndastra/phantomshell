@@ -19,7 +19,6 @@ import qs.modules.settings
 import qs.modules.session
 import qs.modules.lock
 import qs.modules.overlays
-import "modules/menu"
 
 // titik masuk utama seluruh modul phantomshell
 ShellRoot {
@@ -45,9 +44,6 @@ ShellRoot {
 
     // modul pusat kontrol dan grafik statistik sistem
     PhantomDashboard {}
-
-    // modul menu game otentik persona 3 reload (pause & tactical menu)
-    P3GameMenu {}
 
     // modul jendela pengaturan sistem
     PhantomSettings {}

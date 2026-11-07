@@ -205,6 +205,10 @@ Singleton {
     }
 
     function toggleDashboard() {
+        if (isP3) {
+            toggleSession()
+            return
+        }
         console.log("[TOGGLE DASHBOARD] isP3=" + isP3 + " themeId=" + themeId + " current dashOpen=" + dashboardOpen)
         const next = !dashboardOpen
         if (next) closeAllModals()
