@@ -154,15 +154,21 @@ Variants {
                     PhantomState.playSfx("open")
                     launcherWin.query = ""
                     launcherWin.selectedIndex = 0
-                    searchInput.text = ""
-                    searchInput.forceActiveFocus()
+                    if (PhantomState.isP3) {
+                        p3SearchInput.text = ""
+                        p3SearchInput.forceActiveFocus()
+                    } else {
+                        searchInput.text = ""
+                        searchInput.forceActiveFocus()
+                    }
                 } else {
                     PhantomState.playSfx("close")
                 }
             }
             function onModalForceExclusiveChanged() {
                 if (PhantomState.launcherOpen && PhantomState.modalForceExclusive) {
-                    searchInput.forceActiveFocus()
+                    if (PhantomState.isP3) p3SearchInput.forceActiveFocus()
+                    else searchInput.forceActiveFocus()
                 }
             }
         }
@@ -171,8 +177,13 @@ Variants {
             if (visible && PhantomState.launcherOpen) {
                 query = ""
                 selectedIndex = 0
-                searchInput.text = ""
-                searchInput.forceActiveFocus()
+                if (PhantomState.isP3) {
+                    p3SearchInput.text = ""
+                    p3SearchInput.forceActiveFocus()
+                } else {
+                    searchInput.text = ""
+                    searchInput.forceActiveFocus()
+                }
             }
         }
 
@@ -189,9 +200,10 @@ Variants {
                 onClicked: PhantomState.launcherOpen = false
             }
 
-            // kontainer utama aplikasi launcher di tengah layar
+            // kontainer utama aplikasi launcher di tengah layar (Persona 5)
             Item {
                 id: launcherStage
+                visible: !PhantomState.isP3
                 width: Math.min(parent.width - 80, 900)
                 height: Math.min(parent.height - 80, 680)
                 anchors.centerIn: parent
@@ -868,6 +880,439 @@ Variants {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             PhantomState.launcherOpen = false
+                        }
+                    }
+                }
+            }
+
+            // =========================================================================
+            // KONTAINER APLIKASI LAUNCHER KHUSUS PERSONA 3 RELOAD: S.E.E.S. MAIL MENU
+            // Terinspirasi dari UI "MAIL" (Today's New Message) Persona 3 Reload
+            // Diposisikan di BOTTOM-LEFT layar sesuai arahan pengguna dan game aslinya
+            // =========================================================================
+            Item {
+                id: p3MailStage
+                visible: PhantomState.isP3
+                anchors.left: parent.left
+                anchors.leftMargin: 70
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 42
+                width: 580
+                height: Math.min(parent.height - 90, 680)
+
+                // Rotasi miring khas game P3R
+                rotation: -3.5
+                transformOrigin: Item.BottomLeft
+
+                // Animasi buka/tutup halus
+                opacity: PhantomState.launcherOpen ? 1.0 : 0.0
+                scale: PhantomState.launcherOpen ? 1.0 : 0.92
+                Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
+
+                // Penahan klik agar tidak menutup launcher saat mengklik di dalam kartu
+                MouseArea { anchors.fill: parent }
+
+                // Bayangan luar kartu P3R
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: -4
+                    radius: 6
+                    color: Qt.rgba(0/255, 219/255, 255/255, 0.22)
+                }
+
+                // Badan kartu utama (Kartu hitam dengan border putih tebal 2.5px persis seperti di game)
+                Rectangle {
+                    id: p3MailCard
+                    anchors.fill: parent
+                    radius: 4
+                    color: Qt.rgba(5/255, 11/255, 28/255, 0.96)
+                    border.color: "#ffffff"
+                    border.width: 2.5
+                    clip: true
+
+                    // Watermark "MAIL" besar di latar belakang atas kartu
+                    Text {
+                        anchors.top: parent.top
+                        anchors.topMargin: 0
+                        anchors.left: parent.left
+                        anchors.leftMargin: 16
+                        text: "MAIL"
+                        font.family: "Rubik"
+                        font.pixelSize: 84
+                        font.weight: Font.Black
+                        font.italic: true
+                        color: Qt.rgba(1, 1, 1, 0.08)
+                    }
+
+                    // Pita miring biru "TODAY'S New Message" di kanan atas kartu
+                    Canvas {
+                        id: p3RibbonCanvas
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.topMargin: -1
+                        anchors.rightMargin: 16
+                        width: 230
+                        height: 56
+                        onPaint: {
+                            var ctx = getContext("2d")
+                            ctx.reset()
+                            ctx.beginPath()
+                            ctx.moveTo(35, 0)
+                            ctx.lineTo(width, 0)
+                            ctx.lineTo(width, height)
+                            ctx.lineTo(0, height)
+                            ctx.closePath()
+                            ctx.fillStyle = "#004bbb"
+                            ctx.fill()
+                            ctx.strokeStyle = "#00ffff"
+                            ctx.lineWidth = 1.5
+                            ctx.stroke()
+                        }
+
+                        Column {
+                            anchors.centerIn: parent
+                            anchors.horizontalCenterOffset: 12
+                            spacing: -4
+
+                            Text {
+                                text: "TODAY'S"
+                                font.family: "Rubik"
+                                font.pixelSize: 20
+                                font.weight: Font.Black
+                                font.italic: true
+                                color: "#ffffff"
+                            }
+                            Text {
+                                text: "New Message"
+                                font.family: "Dancing Script"
+                                font.pixelSize: 18
+                                font.bold: true
+                                font.italic: true
+                                color: "#8df6ff"
+                            }
+                        }
+                    }
+
+                    // Kolom Input Pencarian Aplikasi (Di bawah Ribbon)
+                    Rectangle {
+                        id: p3SearchContainer
+                        anchors.top: p3RibbonCanvas.bottom
+                        anchors.topMargin: 12
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 20
+                        anchors.rightMargin: 20
+                        height: 44
+                        radius: 4
+                        color: Qt.rgba(2/255, 7/255, 20/255, 0.92)
+                        border.color: p3SearchInput.activeFocus ? "#00ffff" : Qt.rgba(0/255, 219/255, 255/255, 0.45)
+                        border.width: 1.5
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 10
+
+                            Text {
+                                text: "✉"
+                                font.pixelSize: 16
+                                color: "#00dbff"
+                            }
+
+                            TextInput {
+                                id: p3SearchInput
+                                Layout.fillWidth: true
+                                color: "#ffffff"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 14
+                                font.weight: Font.Black
+                                selectionColor: "#00dbff"
+                                selectedTextColor: "#000000"
+                                clip: true
+
+                                onTextChanged: {
+                                    launcherWin.query = text
+                                    launcherWin.selectedIndex = 0
+                                }
+
+                                Keys.onPressed: (event) => {
+                                    if (event.key === Qt.Key_Escape) {
+                                        PhantomState.launcherOpen = false
+                                        event.accepted = true
+                                    } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
+                                        if (launcherWin.filteredItems.length > 0) {
+                                            launcherWin.selectedIndex = (launcherWin.selectedIndex + 1) % launcherWin.filteredItems.length
+                                        }
+                                        event.accepted = true
+                                    } else if (event.key === Qt.Key_Up) {
+                                        if (launcherWin.filteredItems.length > 0) {
+                                            launcherWin.selectedIndex = (launcherWin.selectedIndex - 1 + launcherWin.filteredItems.length) % launcherWin.filteredItems.length
+                                        }
+                                        event.accepted = true
+                                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                                        launcherWin.executeItem(launcherWin.selectedIndex)
+                                        event.accepted = true
+                                    }
+                                }
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "Search apps or >settings, >theme..."
+                                    color: "#5b78a2"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 12
+                                    font.weight: Font.Bold
+                                    visible: p3SearchInput.text.length === 0
+                                }
+                            }
+                        }
+                    }
+
+                    // Daftar Aplikasi (Sesuai Gaya Kartu Pesan Masuk P3R)
+                    ListView {
+                        id: p3AppList
+                        anchors.top: p3SearchContainer.bottom
+                        anchors.topMargin: 10
+                        anchors.bottom: p3BottomPrompts.top
+                        anchors.bottomMargin: 10
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 20
+                        anchors.rightMargin: 20
+                        clip: true
+                        spacing: 5
+                        model: launcherWin.filteredItems
+                        currentIndex: launcherWin.selectedIndex
+
+                        onCurrentIndexChanged: {
+                            positionViewAtIndex(currentIndex, ListView.Contain)
+                        }
+
+                        delegate: Item {
+                            id: p3RowDelegate
+                            width: p3AppList.width
+                            height: 54
+                            readonly property bool isSelected: index === launcherWin.selectedIndex
+                            readonly property bool isHovered: p3RowMouse.containsMouse
+
+                            // Warna duotone avatar bergaya P3
+                            readonly property var duotoneColors: ["#00a8cc", "#d63384", "#dc3545", "#d4a017", "#198754", "#0d6efd"]
+                            readonly property color avatarBg: duotoneColors[index % duotoneColors.length]
+
+                            // Latar Belakang Kartu: Putih bersih solid saat selected (seperti Mitsuru Kirijo)
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 4
+                                color: p3RowDelegate.isSelected ? "#ffffff" : (p3RowDelegate.isHovered ? Qt.rgba(255, 255, 255, 0.08) : Qt.rgba(10/255, 20/255, 45/255, 0.85))
+                                border.color: p3RowDelegate.isSelected ? "#0038a8" : Qt.rgba(0/255, 219/255, 255/255, 0.2)
+                                border.width: p3RowDelegate.isSelected ? 2 : 1
+
+                                Behavior on color { ColorAnimation { duration: 120 } }
+                            }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 10
+                                anchors.rightMargin: 14
+                                spacing: 10
+
+                                // 1. Tanda Seru Biru "!" (Sesuai Screenshot Game P3R)
+                                Rectangle {
+                                    Layout.preferredWidth: 20
+                                    Layout.preferredHeight: 20
+                                    radius: 10
+                                    color: "#00dbff"
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "!"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Black
+                                        color: "#030e28"
+                                    }
+                                }
+
+                                // 2. Bingkai Avatar / Ikon Aplikasi
+                                Rectangle {
+                                    Layout.preferredWidth: 38
+                                    Layout.preferredHeight: 38
+                                    radius: 4
+                                    color: p3RowDelegate.avatarBg
+                                    clip: true
+
+                                    Image {
+                                        anchors.fill: parent
+                                        anchors.margins: 4
+                                        source: modelData.appIcon || ""
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                        visible: modelData.appIcon !== "" && status === Image.Ready
+                                    }
+
+                                    P5Icon {
+                                        anchors.centerIn: parent
+                                        name: modelData.iconName || "app"
+                                        color: "#ffffff"
+                                        size: 20
+                                        visible: !modelData.appIcon || modelData.appIcon === ""
+                                    }
+                                }
+
+                                // 3. Nama Aplikasi & Deskripsi (Format Pesan Masuk P3R)
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+
+                                    RowLayout {
+                                        spacing: 6
+                                        Text {
+                                            text: "✉"
+                                            font.pixelSize: 13
+                                            color: p3RowDelegate.isSelected ? "#004bbd" : "#00dbff"
+                                        }
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: modelData.name
+                                            color: p3RowDelegate.isSelected ? "#041238" : "#ffffff"
+                                            font.family: "Rubik"
+                                            font.pixelSize: 14
+                                            font.weight: Font.Black
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: modelData.desc
+                                        color: p3RowDelegate.isSelected ? "#2b4674" : "#7fa2cc"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                        elide: Text.ElideRight
+                                    }
+                                }
+
+                                // 4. Lencana Aksi di Kanan
+                                Rectangle {
+                                    Layout.preferredWidth: 54
+                                    Layout.preferredHeight: 20
+                                    radius: 3
+                                    color: p3RowDelegate.isSelected ? "#0038a8" : Qt.rgba(0/255, 219/255, 255/255, 0.15)
+                                    border.color: p3RowDelegate.isSelected ? "#0038a8" : "#00dbff"
+                                    border.width: 1
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modelData.badge || "RUN"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: p3RowDelegate.isSelected ? "#ffffff" : "#8df6ff"
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: p3RowMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onEntered: {
+                                    if (launcherWin.selectedIndex !== index) PhantomState.playSfx("select")
+                                    launcherWin.selectedIndex = index
+                                }
+                                onClicked: {
+                                    launcherWin.selectedIndex = index
+                                    launcherWin.executeItem(index)
+                                }
+                            }
+                        }
+                    }
+
+                    // Petunjuk Navigasi Tombol di Bagian Bawah
+                    RowLayout {
+                        id: p3BottomPrompts
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.leftMargin: 20
+                        anchors.bottomMargin: 14
+                        spacing: 18
+
+                        RowLayout {
+                            spacing: 6
+                            Rectangle {
+                                width: 22; height: 22; radius: 11
+                                color: "#00dbff"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "A"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                    color: "#030e28"
+                                }
+                            }
+                            Text {
+                                text: "Launch"
+                                color: "#ffffff"
+                                font.family: "Rubik"
+                                font.pixelSize: 13
+                                font.bold: true
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: launcherWin.executeItem(launcherWin.selectedIndex)
+                            }
+                        }
+
+                        RowLayout {
+                            spacing: 6
+                            Rectangle {
+                                width: 22; height: 22; radius: 11
+                                color: "#ff3366"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "B"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                    color: "#ffffff"
+                                }
+                            }
+                            Text {
+                                text: "Close"
+                                color: "#ffffff"
+                                font.family: "Rubik"
+                                font.pixelSize: 13
+                                font.bold: true
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: PhantomState.launcherOpen = false
+                            }
+                        }
+
+                        RowLayout {
+                            spacing: 6
+                            Text {
+                                text: "↑/↓"
+                                color: "#00dbff"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 13
+                                font.bold: true
+                            }
+                            Text {
+                                text: "Select"
+                                color: "#8df6ff"
+                                font.family: "Rubik"
+                                font.pixelSize: 13
+                                font.bold: true
+                            }
                         }
                     }
                 }
