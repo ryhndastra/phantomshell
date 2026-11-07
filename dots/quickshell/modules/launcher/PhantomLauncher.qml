@@ -887,8 +887,8 @@ Variants {
 
             // =========================================================================
             // KONTAINER APLIKASI LAUNCHER KHUSUS PERSONA 3 RELOAD: S.E.E.S. MAIL MENU
-            // Terinspirasi dari UI "MAIL" (Today's New Message) Persona 3 Reload
-            // Diposisikan di BOTTOM-LEFT layar sesuai arahan pengguna dan game aslinya
+            // 1:1 Rekreasi Akurat Menu "MAIL" (Today's New Message) Persona 3 Reload
+            // Miring -5.5 derajat, Bayangan 3D Tebal, Avatar Diagonal Slash, Kartu Mitsuru Kirijo
             // =========================================================================
             Item {
                 id: p3MailStage
@@ -896,114 +896,150 @@ Variants {
                 anchors.left: parent.left
                 anchors.leftMargin: 56
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: 32
-                width: 630
-                height: Math.min(parent.height - 70, 710)
+                anchors.bottomMargin: 38
+                width: 590
+                height: Math.min(parent.height - 70, 700)
 
-                // Animasi buka/tutup halus
+                // Rotasi miring otentik Persona 3 Reload (-5.5 derajat) dengan layer multisample antialiasing
+                transformOrigin: Item.BottomLeft
+                rotation: -5.5
+                layer.enabled: true
+                layer.smooth: true
+                layer.samples: 4
+
+                // Animasi buka/tutup taktil halus
                 opacity: PhantomState.launcherOpen ? 1.0 : 0.0
                 scale: PhantomState.launcherOpen ? 1.0 : 0.94
                 Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                 Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
 
-                // Penahan klik agar tidak menutup launcher saat mengklik di dalam kartu
+                // Penahan klik agar tidak tembus ke background
                 MouseArea { anchors.fill: parent }
 
-                // Latar Belakang Kartu Miring P3R (Render via Canvas Anti-Aliased Subpixel)
+                // ---------------------------------------------------------------------
+                // Latar Belakang Kartu P3R & Pelat Bayangan 3D Hitam Tebal (Canvas 2D)
+                // ---------------------------------------------------------------------
                 Canvas {
-                    id: p3CardBgCanvas
+                    id: p3CardBackdrop
                     anchors.fill: parent
                     antialiasing: true
+
+                    function drawRoundRect(ctx, x, y, w, h, r) {
+                        ctx.beginPath();
+                        ctx.moveTo(x + r, y);
+                        ctx.lineTo(x + w - r, y);
+                        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                        ctx.lineTo(x + w, y + h - r);
+                        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                        ctx.lineTo(x + r, y + h);
+                        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                        ctx.lineTo(x, y + r);
+                        ctx.quadraticCurveTo(x, y, x + r, y);
+                        ctx.closePath();
+                    }
+
                     onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.reset()
-                        var w = width
-                        var h = height
+                        var ctx = getContext("2d");
+                        ctx.reset();
 
-                        // 1. Bayangan Luar Cyan/Navy di Bawah dan Kanan Kartu
-                        ctx.beginPath()
-                        ctx.moveTo(14, 18)
-                        ctx.lineTo(w - 6, 8)
-                        ctx.lineTo(w + 2, h - 8)
-                        ctx.lineTo(8, h + 2)
-                        ctx.closePath()
-                        ctx.fillStyle = "rgba(0, 219, 255, 0.28)"
-                        ctx.fill()
+                        var pad = 4;
+                        var w = width - pad * 2 - 14;
+                        var h = height - pad * 2 - 10;
+                        var r = 6;
 
-                        // 2. Badan Kartu Utama Persona 3 Reload (Perspektif Trapesium Mulus)
-                        ctx.beginPath()
-                        ctx.moveTo(8, 12)
-                        ctx.lineTo(w - 12, 4)
-                        ctx.lineTo(w - 6, h - 16)
-                        ctx.lineTo(2, h - 4)
-                        ctx.closePath()
-                        ctx.fillStyle = "rgba(5, 11, 28, 0.98)"
-                        ctx.fill()
+                        // 1. Pelat Ekstrusi 3D Hitam Solid (Offset +12px kanan, +10px bawah)
+                        drawRoundRect(ctx, pad + 12, pad + 10, w, h, r);
+                        ctx.fillStyle = "#070b14";
+                        ctx.fill();
 
-                        // 3. Garis Border Putih Tebal 2.5px Anti-Aliased Mulus Sempurna
-                        ctx.lineWidth = 2.5
-                        ctx.strokeStyle = "#ffffff"
-                        ctx.stroke()
+                        // 2. Badan Kartu Utama Slate Gelap P3R (#131926)
+                        drawRoundRect(ctx, pad, pad, w, h, r);
+                        ctx.fillStyle = "#131926";
+                        ctx.fill();
+
+                        // 3. Garis Tepi Putih Bersih Tebal Otentik 3.5px
+                        ctx.lineWidth = 3.5;
+                        ctx.strokeStyle = "#ffffff";
+                        ctx.stroke();
                     }
                 }
 
-                // Konten Kartu Utama (Item level horizontal agar teks & garis baris tajam sempurna)
+                // ---------------------------------------------------------------------
+                // Konten Kartu Utama (Watermark, Ribbon, Search, Daftar Aplikasi & Prompts)
+                // ---------------------------------------------------------------------
                 Item {
-                    id: p3MailContent
+                    id: p3CardArea
                     anchors.fill: parent
-                    anchors.margins: 12
+                    anchors.margins: 8
                     clip: true
 
-                    // Watermark "MAIL" besar di latar belakang atas kartu
+                    // 1. Watermark Ikonik "MAIL" Besar di Kiri Atas
                     Text {
-                        anchors.top: parent.top
-                        anchors.topMargin: 0
                         anchors.left: parent.left
-                        anchors.leftMargin: 12
+                        anchors.leftMargin: 16
+                        anchors.top: parent.top
+                        anchors.topMargin: 2
                         text: "MAIL"
                         font.family: "Rubik"
-                        font.pixelSize: 96
+                        font.pixelSize: 84
                         font.weight: Font.Black
                         font.italic: true
-                        color: Qt.rgba(1, 1, 1, 0.07)
+                        color: "#26354d"
                         renderType: Text.CurveRendering
                     }
 
-                    // Pita miring biru "TODAY'S New Message" di kanan atas kartu
+                    // 2. Pita Miring Biru "TODAY'S New Message" di Kanan Atas
                     Canvas {
                         id: p3RibbonCanvas
                         anchors.top: parent.top
                         anchors.right: parent.right
-                        anchors.topMargin: -4
-                        anchors.rightMargin: 10
+                        anchors.topMargin: -2
+                        anchors.rightMargin: 0
                         width: 240
                         height: 58
                         antialiasing: true
+
                         onPaint: {
-                            var ctx = getContext("2d")
-                            ctx.reset()
-                            ctx.beginPath()
-                            ctx.moveTo(38, 0)
-                            ctx.lineTo(width, 0)
-                            ctx.lineTo(width, height)
-                            ctx.lineTo(0, height)
-                            ctx.closePath()
-                            ctx.fillStyle = "#0055d4"
-                            ctx.fill()
-                            ctx.strokeStyle = "#00ffff"
-                            ctx.lineWidth = 1.5
-                            ctx.stroke()
+                            var ctx = getContext("2d");
+                            ctx.reset();
+                            var w = width;
+                            var h = height;
+
+                            // Bayangan gelap di bawah pita miring (3D fold)
+                            ctx.beginPath();
+                            ctx.moveTo(34, 4);
+                            ctx.lineTo(w, 4);
+                            ctx.lineTo(w, h + 8);
+                            ctx.lineTo(26, h + 8);
+                            ctx.closePath();
+                            ctx.fillStyle = "#061332";
+                            ctx.fill();
+
+                            // Pita Biru Kobalt Utama
+                            ctx.beginPath();
+                            ctx.moveTo(42, 0);
+                            ctx.lineTo(w, 0);
+                            ctx.lineTo(w, h);
+                            ctx.lineTo(0, h);
+                            ctx.closePath();
+                            ctx.fillStyle = "#0052cc";
+                            ctx.fill();
+
+                            // Garis outline cyan halus
+                            ctx.lineWidth = 1.5;
+                            ctx.strokeStyle = "#00d0ff";
+                            ctx.stroke();
                         }
 
                         Column {
                             anchors.centerIn: parent
-                            anchors.horizontalCenterOffset: 16
-                            spacing: -3
+                            anchors.horizontalCenterOffset: 14
+                            spacing: -4
 
                             Text {
                                 text: "TODAY'S"
                                 font.family: "Rubik"
-                                font.pixelSize: 21
+                                font.pixelSize: 20
                                 font.weight: Font.Black
                                 font.italic: true
                                 color: "#ffffff"
@@ -1015,38 +1051,38 @@ Variants {
                                 font.pixelSize: 19
                                 font.bold: true
                                 font.italic: true
-                                color: "#8df6ff"
+                                color: "#ffffff"
                                 renderType: Text.CurveRendering
                             }
                         }
                     }
 
-                    // Kolom Input Pencarian Aplikasi (Di bawah Ribbon)
+                    // 3. Baris Input Pencarian Aplikasi (Diskrit & Selaras dengan UI P3R)
                     Rectangle {
                         id: p3SearchContainer
                         anchors.top: p3RibbonCanvas.bottom
-                        anchors.topMargin: 12
+                        anchors.topMargin: 8
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 12
-                        height: 44
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        height: 38
                         radius: 3
-                        color: Qt.rgba(2/255, 7/255, 20/255, 0.94)
-                        border.color: p3SearchInput.activeFocus ? "#00ffff" : Qt.rgba(0/255, 219/255, 255/255, 0.35)
+                        color: "#0c1320"
+                        border.color: p3SearchInput.activeFocus ? "#00e5ff" : "#24324a"
                         border.width: 1.5
                         antialiasing: true
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 14
-                            anchors.rightMargin: 14
-                            spacing: 10
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 8
 
                             Text {
                                 text: "✉"
-                                font.pixelSize: 16
-                                color: p3SearchInput.activeFocus ? "#00ffff" : "#00dbff"
+                                font.pixelSize: 15
+                                color: p3SearchInput.activeFocus ? "#00e5ff" : "#4e6a91"
                             }
 
                             TextInput {
@@ -1054,8 +1090,8 @@ Variants {
                                 Layout.fillWidth: true
                                 color: "#ffffff"
                                 font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 13
-                                font.weight: Font.Black
+                                font.pixelSize: 12
+                                font.weight: Font.Bold
                                 selectionColor: "#00dbff"
                                 selectedTextColor: "#000000"
                                 clip: true
@@ -1087,10 +1123,10 @@ Variants {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "Search dispatch or >settings, >theme..."
-                                    color: "#5b78a2"
+                                    text: "Search applications or >settings, >theme..."
+                                    color: "#4e6a91"
                                     font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
                                     font.weight: Font.Bold
                                     visible: p3SearchInput.text.length === 0
                                 }
@@ -1098,7 +1134,7 @@ Variants {
                         }
                     }
 
-                    // Daftar Aplikasi (Sesuai Gaya Kartu Pesan Masuk P3R)
+                    // 4. Daftar Baris Pesan Masuk / Aplikasi (ListView Otentik Persona 3 Reload)
                     ListView {
                         id: p3AppList
                         anchors.top: p3SearchContainer.bottom
@@ -1107,10 +1143,10 @@ Variants {
                         anchors.bottomMargin: 10
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.leftMargin: 16
+                        anchors.leftMargin: 12
                         anchors.rightMargin: 16
                         clip: true
-                        spacing: 4
+                        spacing: 5
                         model: launcherWin.filteredItems
                         currentIndex: launcherWin.selectedIndex
 
@@ -1120,166 +1156,223 @@ Variants {
 
                         delegate: Item {
                             id: p3RowDelegate
-                            width: p3AppList.width
-                            height: 58
+                            width: p3AppList.width - (isSelected ? 0 : 8)
+                            height: 54
                             readonly property bool isSelected: index === launcherWin.selectedIndex
                             readonly property bool isHovered: p3RowMouse.containsMouse
 
-                            // Sentuhan taktil Persona 3: kartu aktif sedikit bergeser ke kanan
-                            x: isSelected ? 6 : (isHovered ? 3 : 0)
-                            Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                            // Pergeseran taktil: baris aktif sedikit melompat ke kanan
+                            x: isSelected ? 8 : (isHovered ? 4 : 0)
+                            Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
 
-                            // Warna duotone avatar bergaya P3
-                            readonly property var duotoneColors: ["#0088cc", "#c2185b", "#d32f2f", "#e65100", "#2e7d32", "#1565c0"]
-                            readonly property color avatarBg: duotoneColors[index % duotoneColors.length]
+                            // Palet warna karakter Persona 3 Reload untuk avatar tidak aktif
+                            readonly property var duotoneColors: ["#0099cc", "#9c27b0", "#1565c0", "#e65100", "#2e7d32", "#00838f"]
+                            readonly property color avatarColor: isSelected ? "#e60039" : duotoneColors[index % duotoneColors.length]
 
-                            // Latar Belakang Kartu:
-                            // Saat SELECTED: Putih solid bersih dengan border biru royal (seperti Mitsuru Kirijo)
-                            // Saat UNSELECTED: Transparan bersih tanpa border kotak kaku, menghilangkan kesan bergerigi/crowded
+                            // A. Ikon Lingkaran Biru Tanda Seru "!" di Sebelah Kiri Baris
                             Rectangle {
-                                anchors.fill: parent
-                                radius: 4
-                                color: p3RowDelegate.isSelected ? "#ffffff" : (p3RowDelegate.isHovered ? Qt.rgba(255, 255, 255, 0.08) : Qt.rgba(8/255, 18/255, 42/255, 0.65))
-                                border.color: p3RowDelegate.isSelected ? "#0038a8" : "transparent"
-                                border.width: p3RowDelegate.isSelected ? 2.5 : 0
+                                id: exclBadge
+                                x: 6
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 20
+                                height: 20
+                                radius: 10
+                                color: p3RowDelegate.isSelected ? "#00c0f0" : "#0090c0"
                                 antialiasing: true
 
-                                Behavior on color { ColorAnimation { duration: 120 } }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "!"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Black
+                                    color: "#030c1e"
+                                }
                             }
 
-                            // Garis pemisah halus antar baris pesan tidak aktif
-                            Rectangle {
-                                anchors.bottom: parent.bottom
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: 8
-                                anchors.rightMargin: 8
-                                height: 1
-                                color: Qt.rgba(255, 255, 255, 0.05)
-                                visible: !p3RowDelegate.isSelected
-                            }
+                            // B. Avatar Karakter dengan Potongan Diagonal Slash 25 Derajat
+                            Item {
+                                id: avatarContainer
+                                x: 32
+                                y: 3
+                                width: 66
+                                height: 48
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 12
-                                anchors.rightMargin: 14
-                                spacing: 12
-
-                                // 1. Tanda Seru Biru "!" (Sesuai Screenshot Game P3R)
-                                Rectangle {
-                                    Layout.preferredWidth: 22
-                                    Layout.preferredHeight: 22
-                                    radius: 11
-                                    color: "#00dbff"
+                                Canvas {
+                                    id: avatarCanvas
+                                    anchors.fill: parent
                                     antialiasing: true
+                                    onPaint: {
+                                        var ctx = getContext("2d");
+                                        ctx.reset();
+                                        ctx.beginPath();
+                                        ctx.moveTo(0, 0);
+                                        ctx.lineTo(width, 0);
+                                        ctx.lineTo(width - 18, height);
+                                        ctx.lineTo(0, height);
+                                        ctx.closePath();
+                                        ctx.fillStyle = p3RowDelegate.avatarColor;
+                                        ctx.fill();
+                                    }
 
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "!"
-                                        font.family: "Rubik"
-                                        font.pixelSize: 13
-                                        font.weight: Font.Black
-                                        color: "#030e28"
+                                    Connections {
+                                        target: p3RowDelegate
+                                        function onAvatarColorChanged() { avatarCanvas.requestPaint() }
+                                        function onIsSelectedChanged() { avatarCanvas.requestPaint() }
                                     }
                                 }
 
-                                // 2. Bingkai Avatar / Ikon Aplikasi
-                                Rectangle {
-                                    Layout.preferredWidth: 40
-                                    Layout.preferredHeight: 40
-                                    radius: 4
-                                    // Saat selected, berikan kontras merah cerah khas Mitsuru atau biru kobalt
-                                    color: p3RowDelegate.isSelected ? (index % 2 === 0 ? "#e60039" : "#0055d4") : p3RowDelegate.avatarBg
-                                    antialiasing: true
-                                    clip: true
+                                // Ikon Aplikasi di dalam Avatar Slashed
+                                Image {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: 6
+                                    width: 32
+                                    height: 32
+                                    source: modelData.appIcon || ""
+                                    fillMode: Image.PreserveAspectFit
+                                    smooth: true
+                                    mipmap: true
+                                    visible: modelData.appIcon !== "" && status === Image.Ready
+                                }
 
-                                    Image {
-                                        anchors.fill: parent
-                                        anchors.margins: 4
-                                        source: modelData.appIcon || ""
-                                        fillMode: Image.PreserveAspectFit
-                                        smooth: true
-                                        mipmap: true
-                                        visible: modelData.appIcon !== "" && status === Image.Ready
+                                P5Icon {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: 10
+                                    name: modelData.iconName || "app"
+                                    color: "#ffffff"
+                                    size: 22
+                                    visible: !modelData.appIcon || modelData.appIcon === ""
+                                }
+                            }
+
+                            // C. Kartu Pesan (Menyambung presisi dengan sudut diagonal slash avatar)
+                            Item {
+                                id: messageCard
+                                x: 80
+                                y: 3
+                                width: p3RowDelegate.width - 80 + (p3RowDelegate.isSelected ? 8 : 0)
+                                height: 48
+
+                                Canvas {
+                                    id: msgBgCanvas
+                                    anchors.fill: parent
+                                    antialiasing: true
+                                    onPaint: {
+                                        var ctx = getContext("2d");
+                                        ctx.reset();
+                                        var w = width;
+                                        var h = height;
+
+                                        if (p3RowDelegate.isSelected) {
+                                            // --- KARTU MITSURU KIRIJO: PUTIH SOLID DENGAN BORDER BIRU ROYAL ---
+                                            ctx.beginPath();
+                                            ctx.moveTo(18, 0);
+                                            ctx.lineTo(w, 0);
+                                            ctx.lineTo(w, h);
+                                            ctx.lineTo(0, h);
+                                            ctx.closePath();
+                                            ctx.fillStyle = "#ffffff";
+                                            ctx.fill();
+
+                                            // Border Biru Royal Tebal 2.5px
+                                            ctx.lineWidth = 2.5;
+                                            ctx.strokeStyle = "#0038a8";
+                                            ctx.stroke();
+
+                                            // Aksen Garis Cyan Elektrik di Tepi Bawah Kartu
+                                            ctx.beginPath();
+                                            ctx.moveTo(0, h);
+                                            ctx.lineTo(w, h);
+                                            ctx.lineWidth = 2.5;
+                                            ctx.strokeStyle = "#0099ff";
+                                            ctx.stroke();
+                                        } else {
+                                            // --- KARTU TIDAK TERPILIH: SLATE GELAP BERSIH ---
+                                            ctx.beginPath();
+                                            ctx.moveTo(18, 0);
+                                            ctx.lineTo(w, 0);
+                                            ctx.lineTo(w, h);
+                                            ctx.lineTo(0, h);
+                                            ctx.closePath();
+                                            ctx.fillStyle = p3RowDelegate.isHovered ? "#2a3750" : "#1e293c";
+                                            ctx.fill();
+
+                                            // Garis Pemisah Halus di Bawah
+                                            ctx.beginPath();
+                                            ctx.moveTo(0, h);
+                                            ctx.lineTo(w, h);
+                                            ctx.lineWidth = 1.0;
+                                            ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+                                            ctx.stroke();
+                                        }
                                     }
 
-                                    P5Icon {
-                                        anchors.centerIn: parent
-                                        name: modelData.iconName || "app"
-                                        color: "#ffffff"
-                                        size: 22
-                                        visible: !modelData.appIcon || modelData.appIcon === ""
+                                    Connections {
+                                        target: p3RowDelegate
+                                        function onIsSelectedChanged() { msgBgCanvas.requestPaint() }
+                                        function onIsHoveredChanged() { msgBgCanvas.requestPaint() }
+                                        function onWidthChanged() { msgBgCanvas.requestPaint() }
                                     }
                                 }
 
-                                // 3. Nama Aplikasi & Deskripsi (Format Pesan Masuk P3R)
-                                ColumnLayout {
-                                    Layout.fillWidth: true
+                                // Konten Teks Nama Aplikasi & Deskripsi
+                                Column {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 24
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 14
+                                    anchors.verticalCenter: parent.verticalCenter
                                     spacing: 2
 
                                     RowLayout {
+                                        width: parent.width
                                         spacing: 6
+
                                         Text {
                                             text: "✉"
                                             font.pixelSize: 14
-                                            color: p3RowDelegate.isSelected ? "#004bbd" : "#00dbff"
+                                            color: p3RowDelegate.isSelected ? "#0048d0" : "#00dbff"
                                         }
-                                        Text {
+
+                                        Column {
                                             Layout.fillWidth: true
-                                            text: modelData.name
-                                            color: p3RowDelegate.isSelected ? "#041238" : "#ffffff"
-                                            font.family: "Rubik"
-                                            font.pixelSize: 15
-                                            font.weight: Font.Black
-                                            elide: Text.ElideRight
-                                            renderType: Text.CurveRendering
+                                            spacing: 1
+
+                                            Text {
+                                                width: parent.width
+                                                text: modelData.name
+                                                color: p3RowDelegate.isSelected ? "#0038a8" : "#ffffff"
+                                                font.family: "Rubik"
+                                                font.pixelSize: 14
+                                                font.weight: p3RowDelegate.isSelected ? Font.Black : Font.Bold
+                                                elide: Text.ElideRight
+                                                renderType: Text.CurveRendering
+                                            }
+
+                                            // Garis bawah biru otentik di bawah nama kontak terpilih
+                                            Rectangle {
+                                                width: Math.min(parent.width, 180)
+                                                height: 1.5
+                                                color: "#0038a8"
+                                                visible: p3RowDelegate.isSelected
+                                            }
                                         }
                                     }
 
                                     Text {
-                                        Layout.fillWidth: true
-                                        text: modelData.desc
-                                        color: p3RowDelegate.isSelected ? "#2b4674" : "#7fa2cc"
-                                        font.family: "JetBrainsMono NFM"
+                                        width: parent.width
+                                        text: modelData.desc || ""
+                                        color: p3RowDelegate.isSelected ? "#060f22" : "#9fb4cc"
+                                        font.family: "Rubik"
                                         font.pixelSize: 11
                                         font.bold: true
                                         elide: Text.ElideRight
                                         renderType: Text.CurveRendering
                                     }
                                 }
-
-                                // 4. Status Aksi di Kanan:
-                                // Bersih dan rapi; tombol OPEN hanya muncul saat kartu terpilih (Selected),
-                                // menghilangkan deretan tombol kaku bergerigi yang mengotori tampilan
-                                Rectangle {
-                                    visible: p3RowDelegate.isSelected
-                                    Layout.preferredWidth: 68
-                                    Layout.preferredHeight: 22
-                                    radius: 3
-                                    color: "#0038a8"
-                                    antialiasing: true
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "OPEN ↵"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 10
-                                        font.bold: true
-                                        color: "#ffffff"
-                                    }
-                                }
-
-                                Text {
-                                    visible: !p3RowDelegate.isSelected
-                                    text: "NEW"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 10
-                                    font.bold: true
-                                    color: Qt.rgba(0/255, 219/255, 255/255, 0.45)
-                                    Layout.rightMargin: 4
-                                }
                             }
 
+                            // D. Area Interaksi Klik dan Hover
                             MouseArea {
                                 id: p3RowMouse
                                 anchors.fill: parent
@@ -1297,34 +1390,39 @@ Variants {
                         }
                     }
 
-                    // Petunjuk Navigasi Tombol di Bagian Bawah
+                    // 5. Tombol Petunjuk Navigasi Konsol Game Otentik P3R di Bagian Bawah
                     RowLayout {
                         id: p3BottomPrompts
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left
                         anchors.leftMargin: 20
                         anchors.bottomMargin: 14
-                        spacing: 18
+                        spacing: 20
 
+                        // (A) Launch
                         Item {
-                            implicitWidth: aRow.implicitWidth
-                            implicitHeight: aRow.implicitHeight
+                            implicitWidth: btnARow.implicitWidth
+                            implicitHeight: btnARow.implicitHeight
 
                             RowLayout {
-                                id: aRow
+                                id: btnARow
                                 anchors.fill: parent
-                                spacing: 6
+                                spacing: 7
                                 Rectangle {
-                                    width: 22; height: 22; radius: 11
-                                    color: "#00dbff"
+                                    width: 22
+                                    height: 22
+                                    radius: 11
+                                    color: "#ffffff"
+                                    border.color: "#0a1120"
+                                    border.width: 1.5
                                     antialiasing: true
                                     Text {
                                         anchors.centerIn: parent
                                         text: "A"
                                         font.family: "Rubik"
                                         font.pixelSize: 12
-                                        font.bold: true
-                                        color: "#030e28"
+                                        font.weight: Font.Black
+                                        color: "#0a1120"
                                     }
                                 }
                                 Text {
@@ -1333,6 +1431,7 @@ Variants {
                                     font.family: "Rubik"
                                     font.pixelSize: 13
                                     font.bold: true
+                                    font.italic: true
                                 }
                             }
 
@@ -1343,25 +1442,30 @@ Variants {
                             }
                         }
 
+                        // (B) Close
                         Item {
-                            implicitWidth: bRow.implicitWidth
-                            implicitHeight: bRow.implicitHeight
+                            implicitWidth: btnBRow.implicitWidth
+                            implicitHeight: btnBRow.implicitHeight
 
                             RowLayout {
-                                id: bRow
+                                id: btnBRow
                                 anchors.fill: parent
-                                spacing: 6
+                                spacing: 7
                                 Rectangle {
-                                    width: 22; height: 22; radius: 11
-                                    color: "#ff3366"
+                                    width: 22
+                                    height: 22
+                                    radius: 11
+                                    color: "#ffffff"
+                                    border.color: "#0a1120"
+                                    border.width: 1.5
                                     antialiasing: true
                                     Text {
                                         anchors.centerIn: parent
                                         text: "B"
                                         font.family: "Rubik"
                                         font.pixelSize: 12
-                                        font.bold: true
-                                        color: "#ffffff"
+                                        font.weight: Font.Black
+                                        color: "#0a1120"
                                     }
                                 }
                                 Text {
@@ -1370,6 +1474,7 @@ Variants {
                                     font.family: "Rubik"
                                     font.pixelSize: 13
                                     font.bold: true
+                                    font.italic: true
                                 }
                             }
 
@@ -1380,6 +1485,7 @@ Variants {
                             }
                         }
 
+                        // Petunjuk Navigasi Arah Panah
                         RowLayout {
                             spacing: 6
                             Text {
@@ -1395,6 +1501,7 @@ Variants {
                                 font.family: "Rubik"
                                 font.pixelSize: 13
                                 font.bold: true
+                                font.italic: true
                             }
                         }
                     }
