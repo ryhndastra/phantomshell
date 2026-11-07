@@ -60,6 +60,37 @@ ColumnLayout {
         onTriggered: { PhantomState.desktopClockShowQuote = !PhantomState.desktopClockShowQuote; PhantomState.saveState() }
     }
 
+    P5SectionHeader { text: "DESKTOP WORKSPACES CONFIGURATION" }
+
+    P5ConfigSliderRow {
+        label: "Base Workspaces Count"
+        desc: "Base number of workspaces to always show. Workspaces with active apps appear dynamically beyond this number."
+        minVal: 4; maxVal: 12
+        currentVal: PhantomState.workspaceCount
+        unit: ""
+        onValueModified: newValue => {
+            PhantomState.workspaceCount = newValue
+            PhantomState.saveState()
+        }
+    }
+
+    P5ConfigChoiceRow {
+        label: "Desktop Workspaces Placement"
+        desc: "Select quadrant for desktop workspaces (Auto automatically balances with clock)"
+        currentValue: PhantomState.desktopWorkspacesPosition
+        options: [
+            { id: "auto",         label: "AUTO" },
+            { id: "top-left",     label: "TOP-L" },
+            { id: "top-right",    label: "TOP-R" },
+            { id: "bottom-left",  label: "BOT-L" },
+            { id: "bottom-right", label: "BOT-R" }
+        ]
+        onSelected: val => {
+            PhantomState.desktopWorkspacesPosition = val
+            PhantomState.saveState()
+        }
+    }
+
     P5SectionHeader { text: "SPLIT LEFT/RIGHT CAVA & CENTER LIVE LYRICS" }
 
     P5ConfigToggleRow {

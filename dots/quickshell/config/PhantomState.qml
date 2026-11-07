@@ -485,6 +485,41 @@ Singleton {
     property int workspaceCount: 6
     property string workspaceNumStyle: "arabic"
 
+    // Menghasilkan daftar ID workspace yang harus ditampilkan secara dinamis:
+    // Slot dasar (1 s.d. workspaceCount) selalu tampil.
+    // Workspace ekstra (> workspaceCount) hanya muncul jika ada aplikasi aktif (occupied) atau sedang difokuskan (active).
+    readonly property var visibleWorkspaces: {
+        const baseCount = Math.max(1, root.workspaceCount || 6)
+        const list = []
+        for (let i = 1; i <= baseCount; i++) {
+            list.push(i)
+        }
+
+        const activeId = root.activeWorkspaceId || 1
+        const appsMap = root.workspaceApps || {}
+
+        const extraIds = new Set()
+        if (activeId > baseCount && activeId < 100) {
+            extraIds.add(activeId)
+        }
+
+        for (const key in appsMap) {
+            const idNum = parseInt(key)
+            if (!isNaN(idNum) && idNum > baseCount && idNum < 100) {
+                if (appsMap[key] && appsMap[key].length > 0) {
+                    extraIds.add(idNum)
+                }
+            }
+        }
+
+        const sortedExtras = Array.from(extraIds).sort((a, b) => a - b)
+        for (let j = 0; j < sortedExtras.length; j++) {
+            list.push(sortedExtras[j])
+        }
+
+        return list
+    }
+
     // opsi tombol utilitas bar
     property bool showUtilButtons: true
     property bool showUtilSnip: true
@@ -532,6 +567,7 @@ Singleton {
     property bool showDesktopClock: true
     property string desktopClockStyle: "p5-editorial"
     property string desktopClockPosition: "top-right"
+    property string desktopWorkspacesPosition: "auto"
     property int desktopClockScale: 100
     property bool desktopClockShowSeconds: false
     property bool desktopClockShowQuote: true
@@ -700,6 +736,7 @@ Singleton {
                 showDesktopClock: root.showDesktopClock,
                 desktopClockStyle: root.desktopClockStyle,
                 desktopClockPosition: root.desktopClockPosition,
+                desktopWorkspacesPosition: root.desktopWorkspacesPosition,
                 desktopClockScale: root.desktopClockScale,
                 desktopClockShowSeconds: root.desktopClockShowSeconds,
                 desktopClockShowQuote: root.desktopClockShowQuote,
@@ -943,6 +980,7 @@ Singleton {
                     }
                     if (cfg && cfg.desktop) {
                         if (cfg.desktop.desktopClockPosition !== undefined) root.desktopClockPosition = cfg.desktop.desktopClockPosition
+                        if (cfg.desktop.desktopWorkspacesPosition !== undefined) root.desktopWorkspacesPosition = cfg.desktop.desktopWorkspacesPosition
                         if (cfg.desktop.showDesktopClock !== undefined) root.showDesktopClock = cfg.desktop.showDesktopClock
                         if (cfg.desktop.desktopClockScale !== undefined) root.desktopClockScale = cfg.desktop.desktopClockScale
                         if (cfg.desktop.showDesktopCava !== undefined) root.showDesktopCava = cfg.desktop.showDesktopCava

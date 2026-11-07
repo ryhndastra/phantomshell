@@ -13,11 +13,20 @@ import qs.config
 Item {
     id: root
 
-    // Deteksi jika jam berada di top-left, maka workspace otomatis meluncur ke top-right
-    readonly property bool isDockedRight: PhantomState.desktopClockPosition === "top-left"
+    // Deteksi posisi sesuai setting desktopWorkspacesPosition atau auto berdasarkan posisi jam desktop
+    readonly property string effectivePosition: {
+        const customPos = PhantomState.desktopWorkspacesPosition || "auto"
+        if (customPos !== "auto") return customPos
+        return PhantomState.desktopClockPosition === "top-left" ? "top-right" : "top-left"
+    }
 
-    anchors.top: parent.top
-    anchors.topMargin: 38
+    readonly property bool isDockedRight: effectivePosition === "top-right" || effectivePosition === "bottom-right"
+    readonly property bool isDockedBottom: effectivePosition === "bottom-left" || effectivePosition === "bottom-right"
+
+    anchors.top: !isDockedBottom ? parent.top : undefined
+    anchors.bottom: isDockedBottom ? parent.bottom : undefined
+    anchors.topMargin: !isDockedBottom ? 38 : 0
+    anchors.bottomMargin: isDockedBottom ? 38 : 0
 
     x: isDockedRight ? (parent.width - width - 48) : 48
     width: wsRow.implicitWidth
@@ -50,12 +59,13 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         Repeater {
-            model: PhantomState.workspaceCount
+            model: PhantomState.visibleWorkspaces
 
             delegate: Item {
                 id: wsItem
                 required property int index
-                readonly property int wsId: index + 1
+                required property var modelData
+                readonly property int wsId: (typeof modelData === "number" ? modelData : (index + 1))
                 readonly property bool isActive: (Hyprland.focusedMonitor?.activeWorkspace?.id ?? Hyprland.focusedWorkspace?.id ?? 1) === wsId
                 readonly property var appList: (PhantomState.workspaceApps && PhantomState.workspaceApps[String(wsId)]) ? PhantomState.workspaceApps[String(wsId)] : []
                 readonly property bool isOccupied: appList.length > 0

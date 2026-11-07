@@ -265,11 +265,12 @@ Scope {
                             anchors.verticalCenter: parent.verticalCenter
 
                             Repeater {
-                                model: PhantomState.workspaceCount
+                                model: PhantomState.visibleWorkspaces
                                 delegate: Item {
                                     id: p3WsDel
                                     required property int index
-                                    readonly property int wsId: index + 1
+                                    required property var modelData
+                                    readonly property int wsId: (typeof modelData === "number" ? modelData : (index + 1))
                                     readonly property bool isActive: (Hyprland.focusedMonitor?.activeWorkspace?.id ?? Hyprland.focusedWorkspace?.id ?? 1) === wsId
 
                                     width: isActive ? 26 : 14
@@ -390,11 +391,12 @@ Scope {
                         spacing: 4
 
                         Repeater {
-                            model: PhantomState.workspaceCount
+                            model: PhantomState.visibleWorkspaces
                             delegate: Item {
                                 id: wsDel
                                 required property int index
-                                readonly property int wsId: index + 1
+                                required property var modelData
+                                readonly property int wsId: (typeof modelData === "number" ? modelData : (index + 1))
                                 readonly property bool isActive: !PhantomState.specialWorkspaceActive
                                     && ((Hyprland.focusedMonitor?.activeWorkspace?.id ?? Hyprland.focusedWorkspace?.id ?? 1) === wsId)
                                 readonly property bool isUnderlyingActive: PhantomState.specialWorkspaceActive
