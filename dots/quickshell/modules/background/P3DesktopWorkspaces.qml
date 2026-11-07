@@ -6,18 +6,21 @@ import Quickshell.Hyprland
 import qs.config
 
 // Indikator Workspace Numerik Stensil Kaca Persona 3 Reload
-// Terintegrasi langsung pada background jendela monorail kiri atas tanpa panel bar
+// Menyatu dengan background gerbong monorail kiri atas.
+// Nomor samar/almost transparent menyatu dengan background.
+// Saat occupied, ikon aplikasi me-override nomor workspace.
+// Saat active, tampil putih/terang bersih tanpa underline.
 Item {
     id: root
 
-    // Posisi di pojok kiri atas wallpaper (area kaca jendela monorail di bawah frame atap)
+    // Posisi di pojok kiri atas wallpaper (pada bilah atap gerbong monorail)
     anchors.top: parent.top
-    anchors.topMargin: 46
+    anchors.topMargin: 42
     anchors.left: parent.left
     anchors.leftMargin: 48
 
     implicitWidth: wsRow.implicitWidth
-    implicitHeight: 64
+    implicitHeight: 38
 
     z: 10
 
@@ -32,12 +35,12 @@ Item {
         }
     }
 
-    // Deretan Workspace Numerik
+    // Deretan Slot Workspace
     Row {
         id: wsRow
-        spacing: 22
+        spacing: 20
         anchors.left: parent.left
-        anchors.top: parent.top
+        anchors.verticalCenter: parent.verticalCenter
 
         Repeater {
             model: PhantomState.workspaceCount
@@ -51,98 +54,85 @@ Item {
                 readonly property bool isOccupied: appList.length > 0
                 readonly property bool isHovered: wsMouse.containsMouse
 
-                width: Math.max(numText.implicitWidth, iconRow.implicitWidth, 34)
-                height: 56
+                width: Math.max(isOccupied ? (appList.length > 1 ? 40 : 28) : numText.implicitWidth, 32)
+                height: 34
 
                 // Scale interaktif halus
-                scale: isActive ? 1.08 : (isHovered ? 1.04 : 1.0)
-                transformOrigin: Item.TopLeft
+                scale: isActive ? 1.12 : (isHovered ? 1.06 : 1.0)
+                transformOrigin: Item.Center
                 Behavior on scale {
-                    NumberAnimation { duration: 180; easing.type: Easing.OutBack }
+                    NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
                 }
 
                 // Opacity kontrol:
-                // Active: 1.0 (Putih solid tegas)
-                // Inactive + Empty: 0.22 (Nyaru/samar dengan latar kaca awan)
-                // Inactive + Occupied: 0.42 (Subtle translucent glass)
+                // Active: 1.0 (Putih / icon tegas terang)
+                // Inactive: 0.30 (Samar-samar, almost transparent, nyaru dengan latar belakang)
                 // Hovered: 0.85 (Feedback interaktif)
                 opacity: {
                     if (isActive) return 1.0
                     if (isHovered) return 0.85
-                    if (isOccupied) return 0.45
-                    return 0.22
+                    return 0.30
                 }
                 Behavior on opacity {
                     NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
                 }
 
-                // Angka Workspace (01, 02, 03...)
-                Text {
-                    id: numText
-                    anchors.top: parent.top
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: (wsItem.wsId < 10 ? "0" : "") + wsItem.wsId
-                    font.family: "Bebas Neue"
-                    font.pixelSize: wsItem.isActive ? 38 : 34
-                    font.bold: true
-                    font.italic: true
-                    color: "#ffffff"
-
-                    // Bayangan halus stensil kaca agar kontras tetap terjaga
-                    style: Text.Outline
-                    styleColor: wsItem.isActive ? Qt.rgba(0, 0, 0, 0.45) : Qt.rgba(0, 0, 0, 0.2)
-                }
-
-                // Garis Aksen Stensil Kaca Khusus Active (Putih Bersih sesuai instruksi)
-                Rectangle {
-                    id: activeUnderline
-                    anchors.top: numText.bottom
-                    anchors.topMargin: 2
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: numText.implicitWidth + 8
-                    height: 2.5
-                    radius: 1
-                    color: "#ffffff"
-                    visible: wsItem.isActive
-                }
-
-                // Ikon Aplikasi untuk Workspace yang Terisi (Occupied)
-                Row {
-                    id: iconRow
-                    anchors.top: wsItem.isActive ? activeUnderline.bottom : numText.bottom
-                    anchors.topMargin: wsItem.isActive ? 5 : 4
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 4
+                // 1. Ikon Aplikasi: Meng-override nomor workspace saat ada aplikasi (occupied)
+                Item {
+                    anchors.centerIn: parent
                     visible: wsItem.isOccupied
+                    width: appRow.implicitWidth
+                    height: 26
 
-                    Repeater {
-                        model: wsItem.appList
+                    Row {
+                        id: appRow
+                        anchors.centerIn: parent
+                        spacing: 3
 
-                        delegate: Item {
-                            required property var modelData
-                            width: 14
-                            height: 14
+                        Repeater {
+                            model: Math.min(wsItem.appList.length, 2)
 
-                            Image {
-                                anchors.fill: parent
-                                source: modelData.iconUrl || ""
-                                visible: Boolean(modelData.iconUrl)
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
-                                cache: true
-                                smooth: true
-                            }
+                            delegate: Item {
+                                required property int index
+                                readonly property var appData: wsItem.appList[index]
+                                width: wsItem.appList.length > 1 ? 16 : 24
+                                height: wsItem.appList.length > 1 ? 16 : 24
 
-                            Text {
-                                anchors.centerIn: parent
-                                text: modelData.glyph || "•"
-                                visible: !modelData.iconUrl
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 10
-                                color: "#ffffff"
+                                Image {
+                                    anchors.fill: parent
+                                    source: appData.iconUrl || ""
+                                    visible: Boolean(appData.iconUrl)
+                                    fillMode: Image.PreserveAspectFit
+                                    asynchronous: true
+                                    cache: true
+                                    smooth: true
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: appData.glyph || "•"
+                                    visible: !appData.iconUrl
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: wsItem.appList.length > 1 ? 11 : 15
+                                    color: wsItem.isActive ? "#ffffff" : "#64aff0"
+                                }
                             }
                         }
                     }
+                }
+
+                // 2. Nomor Workspace: Hanya tampil saat workspace KOSONG (tidak ter-override icon)
+                Text {
+                    id: numText
+                    anchors.centerIn: parent
+                    visible: !wsItem.isOccupied
+                    text: (wsItem.wsId < 10 ? "0" : "") + wsItem.wsId
+                    font.family: "Bebas Neue"
+                    font.pixelSize: wsItem.isActive ? 32 : 30
+                    font.bold: true
+                    font.italic: true
+                    // Putih murni saat active; warna biru lembut selaras background saat inactive
+                    color: wsItem.isActive ? "#ffffff" : "#64aff0"
                 }
 
                 // Area Interaksi Mouse: Klik untuk pindah workspace
