@@ -350,18 +350,57 @@ Scope {
                             }
                         }
 
-                        // Lencana Angka Romawi Miring di Sisi Kiri
-                        Rectangle {
-                            x: -6
-                            y: 8
-                            width: 44
-                            height: 54
-                            color: cardWrap.isActive ? "#061230" : "#0a1848"
-                            border.color: cardWrap.isActive ? "#000000" : "#00dbff"
-                            border.width: 2
-                            radius: 2
-                            rotation: -8
-                            antialiasing: true
+                        // Lencana Angka Romawi Miring di Sisi Kiri (Render via Canvas Anti-Aliased Halus Mulus)
+                        Item {
+                            x: -12
+                            y: 4
+                            width: 56
+                            height: 64
+
+                            Canvas {
+                                id: badgeCanvas
+                                anchors.fill: parent
+                                antialiasing: true
+                                onPaint: {
+                                    var ctx = getContext("2d")
+                                    ctx.reset()
+                                    ctx.save()
+                                    ctx.translate(width / 2, height / 2)
+                                    ctx.rotate(-8 * Math.PI / 180)
+
+                                    var bw = 42
+                                    var bh = 52
+                                    var bx = -bw / 2
+                                    var by = -bh / 2
+                                    var r = 3
+
+                                    ctx.beginPath()
+                                    ctx.moveTo(bx + r, by)
+                                    ctx.lineTo(bx + bw - r, by)
+                                    ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r)
+                                    ctx.lineTo(bx + bw, by + bh - r)
+                                    ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh)
+                                    ctx.lineTo(bx + r, by + bh)
+                                    ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r)
+                                    ctx.lineTo(bx, by + r)
+                                    ctx.quadraticCurveTo(bx, by, bx + r, by)
+                                    ctx.closePath()
+
+                                    ctx.fillStyle = cardWrap.isActive ? "#061230" : "#0a1848"
+                                    ctx.fill()
+
+                                    ctx.lineWidth = 2.0
+                                    ctx.strokeStyle = cardWrap.isActive ? "#000000" : "#00dbff"
+                                    ctx.stroke()
+                                    ctx.restore()
+                                }
+                                onWidthChanged: requestPaint()
+                                onHeightChanged: requestPaint()
+                                Connections {
+                                    target: cardWrap
+                                    function onIsActiveChanged() { badgeCanvas.requestPaint() }
+                                }
+                            }
 
                             Text {
                                 anchors.centerIn: parent
@@ -370,7 +409,6 @@ Scope {
                                 font.pixelSize: 24
                                 font.weight: Font.Black
                                 color: cardWrap.isActive ? "#00dbff" : "#d2fdff"
-                                rotation: 8
                                 renderType: Text.CurveRendering
                             }
                         }

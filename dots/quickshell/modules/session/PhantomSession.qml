@@ -1908,25 +1908,65 @@ Scope {
                                         }
                                     }
 
-                                    // Lencana Angka Romawi Miring (I s.d. VI)
-                                    Rectangle {
-                                        x: -4
-                                        y: 6
-                                        width: 38
-                                        height: 42
-                                        color: cardWrap.isActive ? "#000000" : (cardWrap.isHovered ? "#0a1e50" : "#071238")
-                                        border.color: cardWrap.isActive ? "#000000" : (cardWrap.isHovered ? "#00ffff" : "#8df6ff")
-                                        border.width: cardWrap.isHovered ? 2.5 : 2.0
-                                        rotation: -6
+                                    // Lencana Angka Romawi Miring (I s.d. IV) - Render via Canvas Anti-Aliased Halus Mulus
+                                    Item {
+                                        x: -10
+                                        y: 2
+                                        width: 50
+                                        height: 52
+
+                                        Canvas {
+                                            id: statsBadgeCanvas
+                                            anchors.fill: parent
+                                            antialiasing: true
+                                            onPaint: {
+                                                var ctx = getContext("2d");
+                                                ctx.reset();
+                                                ctx.save();
+                                                ctx.translate(width / 2, height / 2);
+                                                ctx.rotate(-6 * Math.PI / 180);
+
+                                                var bw = 36;
+                                                var bh = 40;
+                                                var bx = -bw / 2;
+                                                var by = -bh / 2;
+                                                var r = 3;
+
+                                                ctx.beginPath();
+                                                ctx.moveTo(bx + r, by);
+                                                ctx.lineTo(bx + bw - r, by);
+                                                ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r);
+                                                ctx.lineTo(bx + bw, by + bh - r);
+                                                ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh);
+                                                ctx.lineTo(bx + r, by + bh);
+                                                ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r);
+                                                ctx.lineTo(bx, by + r);
+                                                ctx.quadraticCurveTo(bx, by, bx + r, by);
+                                                ctx.closePath();
+
+                                                ctx.fillStyle = cardWrap.isActive ? "#000000" : (cardWrap.isHovered ? "#0a1e50" : "#071238");
+                                                ctx.fill();
+
+                                                ctx.lineWidth = cardWrap.isHovered ? 2.5 : 2.0;
+                                                ctx.strokeStyle = cardWrap.isActive ? "#000000" : (cardWrap.isHovered ? "#00ffff" : "#8df6ff");
+                                                ctx.stroke();
+                                                ctx.restore();
+                                            }
+                                            Connections {
+                                                target: cardWrap
+                                                function onIsActiveChanged() { statsBadgeCanvas.requestPaint() }
+                                                function onIsHoveredChanged() { statsBadgeCanvas.requestPaint() }
+                                            }
+                                        }
 
                                         Text {
                                             anchors.centerIn: parent
                                             text: cardWrap.modelData.badge
                                             font.family: "Bebas Neue"
-                                            font.pixelSize: 19
+                                            font.pixelSize: 20
                                             font.bold: true
                                             color: cardWrap.isActive ? "#ffffff" : (cardWrap.isHovered ? "#ffffff" : "#d2fdff")
-                                            rotation: 6
+                                            renderType: Text.CurveRendering
                                         }
                                     }
 

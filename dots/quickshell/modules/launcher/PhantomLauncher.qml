@@ -894,56 +894,72 @@ Variants {
                 id: p3MailStage
                 visible: PhantomState.isP3
                 anchors.left: parent.left
-                anchors.leftMargin: 64
+                anchors.leftMargin: 56
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: 38
-                width: 620
-                height: Math.min(parent.height - 80, 700)
-
-                // Rotasi miring khas game P3R
-                rotation: -3.5
-                transformOrigin: Item.BottomLeft
-
-                // Anti-aliasing hardware multisampling 4x pada seluruh kontainer miring
-                layer.enabled: true
-                layer.smooth: true
-                layer.samples: 4
+                anchors.bottomMargin: 32
+                width: 630
+                height: Math.min(parent.height - 70, 710)
 
                 // Animasi buka/tutup halus
                 opacity: PhantomState.launcherOpen ? 1.0 : 0.0
-                scale: PhantomState.launcherOpen ? 1.0 : 0.92
+                scale: PhantomState.launcherOpen ? 1.0 : 0.94
                 Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                 Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
 
                 // Penahan klik agar tidak menutup launcher saat mengklik di dalam kartu
                 MouseArea { anchors.fill: parent }
 
-                // Bayangan luar kartu P3R
-                Rectangle {
+                // Latar Belakang Kartu Miring P3R (Render via Canvas Anti-Aliased Subpixel)
+                Canvas {
+                    id: p3CardBgCanvas
                     anchors.fill: parent
-                    anchors.margins: -4
-                    radius: 6
-                    color: Qt.rgba(0/255, 219/255, 255/255, 0.22)
                     antialiasing: true
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
+                        var w = width
+                        var h = height
+
+                        // 1. Bayangan Luar Cyan/Navy di Bawah dan Kanan Kartu
+                        ctx.beginPath()
+                        ctx.moveTo(14, 18)
+                        ctx.lineTo(w - 6, 8)
+                        ctx.lineTo(w + 2, h - 8)
+                        ctx.lineTo(8, h + 2)
+                        ctx.closePath()
+                        ctx.fillStyle = "rgba(0, 219, 255, 0.28)"
+                        ctx.fill()
+
+                        // 2. Badan Kartu Utama Persona 3 Reload (Perspektif Trapesium Mulus)
+                        ctx.beginPath()
+                        ctx.moveTo(8, 12)
+                        ctx.lineTo(w - 12, 4)
+                        ctx.lineTo(w - 6, h - 16)
+                        ctx.lineTo(2, h - 4)
+                        ctx.closePath()
+                        ctx.fillStyle = "rgba(5, 11, 28, 0.98)"
+                        ctx.fill()
+
+                        // 3. Garis Border Putih Tebal 2.5px Anti-Aliased Mulus Sempurna
+                        ctx.lineWidth = 2.5
+                        ctx.strokeStyle = "#ffffff"
+                        ctx.stroke()
+                    }
                 }
 
-                // Badan kartu utama (Kartu hitam dengan border putih tebal 2.5px persis seperti di game)
-                Rectangle {
-                    id: p3MailCard
+                // Konten Kartu Utama (Item level horizontal agar teks & garis baris tajam sempurna)
+                Item {
+                    id: p3MailContent
                     anchors.fill: parent
-                    radius: 4
-                    color: Qt.rgba(5/255, 11/255, 28/255, 0.97)
-                    border.color: "#ffffff"
-                    border.width: 2.5
-                    antialiasing: true
+                    anchors.margins: 12
                     clip: true
 
                     // Watermark "MAIL" besar di latar belakang atas kartu
                     Text {
                         anchors.top: parent.top
-                        anchors.topMargin: -4
+                        anchors.topMargin: 0
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
+                        anchors.leftMargin: 12
                         text: "MAIL"
                         font.family: "Rubik"
                         font.pixelSize: 96
@@ -958,8 +974,8 @@ Variants {
                         id: p3RibbonCanvas
                         anchors.top: parent.top
                         anchors.right: parent.right
-                        anchors.topMargin: -1
-                        anchors.rightMargin: 14
+                        anchors.topMargin: -4
+                        anchors.rightMargin: 10
                         width: 240
                         height: 58
                         antialiasing: true
@@ -1012,8 +1028,8 @@ Variants {
                         anchors.topMargin: 12
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.leftMargin: 20
-                        anchors.rightMargin: 20
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
                         height: 44
                         radius: 3
                         color: Qt.rgba(2/255, 7/255, 20/255, 0.94)
