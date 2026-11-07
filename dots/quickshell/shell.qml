@@ -131,6 +131,10 @@ ShellRoot {
             PhantomState.p3StatsTab = tab
         }
 
+        function setConfigTab(tab: int): void {
+            PhantomState.p3ConfigTab = tab
+        }
+
         function showThemeConfirm(idx: int): void {
             PhantomState.p3ThemeConfirmIdx = idx
             PhantomState.p3ThemeConfirm = true

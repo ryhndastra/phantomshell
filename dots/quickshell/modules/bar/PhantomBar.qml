@@ -338,15 +338,12 @@ Scope {
                                 const dataStr = String(event.data || "")
                                 const isOpen = dataStr.indexOf("special") !== -1
                                 if (!isOpen && PhantomState.specialWorkspaceActive) {
-                                    PhantomState.ensureSpecialWorkspaceOpen()
+                                    PhantomState.setSpecialWorkspaceActive(false)
                                 } else if (isOpen && !PhantomState.specialWorkspaceActive) {
                                     PhantomState.setSpecialWorkspaceActive(true)
                                 }
                                 PhantomState.refreshWorkspaces()
                             } else if (evName === "workspace" || evName === "workspacev2" || evName === "focusedmon" || evName === "focusedmonv2") {
-                                if (PhantomState.specialWorkspaceActive) {
-                                    PhantomState.ensureSpecialWorkspaceOpen()
-                                }
                                 PhantomState.scheduleModalFocusPulse()
                                 Hyprland.refreshWorkspaces()
                                 PhantomState.refreshWorkspaces()
@@ -360,15 +357,10 @@ Scope {
                                             "hyprctl", "eval",
                                             "hl.dispatch(hl.dsp.window.move({ workspace = 'special:special', window = 'address:0x" + addr + "' })); if not hl.get_active_special_workspace() then hl.dispatch(hl.dsp.workspace.toggle_special('special')) end"
                                         ])
-                                    } else {
-                                        PhantomState.ensureSpecialWorkspaceOpen()
                                     }
                                 }
                                 PhantomState.refreshWorkspaces()
                             } else if (evName === "closewindow" || evName === "movewindow" || evName === "movewindowv2") {
-                                if (PhantomState.specialWorkspaceActive) {
-                                    PhantomState.ensureSpecialWorkspaceOpen()
-                                }
                                 PhantomState.refreshWorkspaces()
                             }
                         }
@@ -480,9 +472,6 @@ Scope {
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
                                         Hyprland.dispatch("hl.dsp.focus({ workspace = " + String(wsDel.wsId) + " })")
-                                        if (PhantomState.specialWorkspaceActive) {
-                                            PhantomState.ensureSpecialWorkspaceOpen()
-                                        }
                                         Hyprland.refreshWorkspaces()
                                         PhantomState.refreshWorkspaces()
                                     }

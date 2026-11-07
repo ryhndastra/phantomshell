@@ -959,7 +959,12 @@ Scope {
                     PhantomState.p3StatsTab = statsTab
                 }
             }
-            property int configTab: 0
+            property int configTab: PhantomState.p3ConfigTab
+            onConfigTabChanged: {
+                if (PhantomState.p3ConfigTab !== configTab) {
+                    PhantomState.p3ConfigTab = configTab
+                }
+            }
 
             readonly property var p3ThemesData: [
                 {
@@ -1135,6 +1140,11 @@ Scope {
                 function onP3StatsTabChanged() {
                     if (p3Overlay.statsTab !== PhantomState.p3StatsTab) {
                         p3Overlay.statsTab = PhantomState.p3StatsTab
+                    }
+                }
+                function onP3ConfigTabChanged() {
+                    if (p3Overlay.configTab !== PhantomState.p3ConfigTab) {
+                        p3Overlay.configTab = PhantomState.p3ConfigTab
                     }
                 }
                 function onP3ThemeConfirmChanged() {
@@ -2335,7 +2345,7 @@ Scope {
                     readonly property var configCategories: [
                         { badge: "I",   title: "Desktop HUD & Widgets", subtitle: "P3 Moon Clock, Music Capsule & CAVA", rank: "MAX" },
                         { badge: "II",  title: "Sound Engine",          subtitle: "Master Output, SFX & CAVA Visualizer", rank: "VI" },
-                        { badge: "III", title: "Hyprland Compositor",   subtitle: "Dual Blur, Window Animations & Gaps", rank: "VIII" }
+                        { badge: "III", title: "Hyprland Compositor",   subtitle: "Dual Blur, Gaps & Workspaces", rank: "VIII" }
                     ]
 
                     // Kolom Kiri: Judul "CONFIG", 3 Kartu Slanted P3, dan Tombol Kembali
@@ -2806,7 +2816,31 @@ Scope {
                                     badgeText: PhantomState.hyprBorderSize + " px"
                                     clickable: true
                                     onClicked: { const b = [1, 2, 3]; const i = b.indexOf(PhantomState.hyprBorderSize); PhantomState.hyprBorderSize = b[(i + 1) % b.length]; PhantomState.syncHyprland() }
+                                }
+                                P3StatRow {
+                                    label: "Base Workspaces"
+                                    badgeText: PhantomState.workspaceCount + " SLOTS"
+                                    clickable: true
+                                    onClicked: {
+                                        const counts = [4, 5, 6, 8, 10]
+                                        const i = counts.indexOf(PhantomState.workspaceCount)
+                                        PhantomState.workspaceCount = counts[(i + 1) % counts.length]
+                                        PhantomState.saveState()
+                                        PhantomState.playSfx("select")
+                                    }
+                                }
+                                P3StatRow {
+                                    label: "Workspace Placement"
+                                    badgeText: (PhantomState.desktopWorkspacesPosition || "auto").toUpperCase()
+                                    clickable: true
                                     showDivider: false
+                                    onClicked: {
+                                        const pos = ["auto", "top-left", "top-right", "bottom-left", "bottom-right"]
+                                        const i = pos.indexOf(PhantomState.desktopWorkspacesPosition)
+                                        PhantomState.desktopWorkspacesPosition = pos[(i + 1) % pos.length]
+                                        PhantomState.saveState()
+                                        PhantomState.playSfx("select")
+                                    }
                                 }
                             }
                         }
