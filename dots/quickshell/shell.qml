@@ -107,6 +107,14 @@ ShellRoot {
             PhantomState.toggleSession()
         }
 
+        function openSession(): void {
+            if (!PhantomState.sessionOpen) PhantomState.toggleSession()
+        }
+
+        function closeSession(): void {
+            if (PhantomState.sessionOpen) PhantomState.toggleSession()
+        }
+
         function setSessionSection(sec: string): void {
             PhantomState.p3SessionSection = sec
         }
