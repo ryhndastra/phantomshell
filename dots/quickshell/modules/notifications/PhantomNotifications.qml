@@ -68,10 +68,10 @@ Scope {
             id: snsPhoneWin
             required property ShellScreen modelData
             screen: modelData
-            visible: PhantomState.notificationsOpen
+            visible: PhantomState.notificationsOpen && !PhantomState.isP3
 
             HyprlandFocusGrab {
-                active: PhantomState.notificationsOpen
+                active: PhantomState.notificationsOpen && !PhantomState.isP3
                 windows: [snsPhoneWin]
                 onCleared: PhantomState.notificationsOpen = false
             }

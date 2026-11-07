@@ -216,6 +216,15 @@ Singleton {
     }
 
     function toggleNotifications() {
+        if (root.isP3) {
+            if (root.launcherOpen && root.p3LauncherTab === "mail") {
+                root.launcherOpen = false
+            } else {
+                root.p3LauncherTab = "mail"
+                root.launcherOpen = true
+            }
+            return
+        }
         const next = !notificationsOpen
         if (next) closeAllModals()
         notificationsOpen = next

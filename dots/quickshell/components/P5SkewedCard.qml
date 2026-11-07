@@ -3,15 +3,15 @@ import qs.config
 
 Item {
     id: root
-    property color fillColor: PhantomState.surface
-    property color borderColor: PhantomState.borderLight
-    property color shadowColor: PhantomState.primary
-    property real borderWidth: 2
-    property real skewPx: PhantomState.polygonMode ? 6 : 0
-    property bool showShadowOffset: true
-    property real shadowOffsetX: 3
-    property real shadowOffsetY: 3
-    property real radius: PhantomState.cornerRadius
+    property color fillColor: PhantomState.isP3 ? Qt.rgba(7/255, 14/255, 34/255, 0.90) : PhantomState.surface
+    property color borderColor: PhantomState.isP3 ? Qt.rgba(0/255, 219/255, 255/255, 0.45) : PhantomState.borderLight
+    property color shadowColor: PhantomState.isP3 ? "transparent" : PhantomState.primary
+    property real borderWidth: PhantomState.isP3 ? 1 : 2
+    property real skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 6 : 0)
+    property bool showShadowOffset: !PhantomState.isP3
+    property real shadowOffsetX: PhantomState.isP3 ? 0 : 3
+    property real shadowOffsetY: PhantomState.isP3 ? 0 : 3
+    property real radius: PhantomState.isP3 ? 4 : PhantomState.cornerRadius
 
     onFillColorChanged: canvas.requestPaint()
     onBorderColorChanged: canvas.requestPaint()
@@ -25,6 +25,7 @@ Item {
         function onPolygonModeChanged() { canvas.requestPaint() }
         function onPrimaryChanged() { canvas.requestPaint() }
         function onSurfaceChanged() { canvas.requestPaint() }
+        function onThemeIdChanged() { canvas.requestPaint() }
     }
 
     // mode sudut membulat saat mode poligon nonaktif

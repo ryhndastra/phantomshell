@@ -2911,61 +2911,6 @@ Scope {
                         }
                     }
 
-                    // Tactical Radar Status Callout on Right (Dihilangkan sesuai permintaan user di foto 3)
-                    Item {
-                        anchors.top: parent.top
-                        anchors.topMargin: 40
-                        anchors.right: parent.right
-                        anchors.rightMargin: 60
-                        width: 440
-                        height: 48
-                        visible: false
-
-                        Canvas {
-                            anchors.fill: parent
-                            onPaint: {
-                                var ctx = getContext("2d")
-                                ctx.reset()
-                                ctx.beginPath()
-                                ctx.moveTo(20, 0)
-                                ctx.lineTo(width, 0)
-                                ctx.lineTo(width, height)
-                                ctx.lineTo(0, height)
-                                ctx.closePath()
-                                ctx.fillStyle = "rgba(4, 15, 42, 0.85)"
-                                ctx.fill()
-                                ctx.strokeStyle = "rgba(0, 219, 255, 0.6)"
-                                ctx.lineWidth = 1.5
-                                ctx.stroke()
-                            }
-                        }
-
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 12
-
-                            Rectangle {
-                                width: 10
-                                height: 10
-                                radius: 5
-                                color: "#00ffff"
-                                SequentialAnimation on opacity {
-                                    loops: Animation.Infinite
-                                    NumberAnimation { from: 1.0; to: 0.2; duration: 800 }
-                                    NumberAnimation { from: 0.2; to: 1.0; duration: 800 }
-                                }
-                            }
-                            Text {
-                                text: "S.E.E.S. LEADER // MAKOTO YUKI // MONORAIL LINK"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 12
-                                font.bold: true
-                                color: "#8df6ff"
-                                font.letterSpacing: 1.5
-                            }
-                        }
-                    }
-
                     // Content Container (Left-Docked Deck)
                     Item {
                         anchors.left: parent.left
