@@ -833,6 +833,7 @@ Singleton {
     property alias diskPct: systemService.diskPct
     property alias tempPct: systemService.tempPct
     property alias batteryPct: systemService.batteryPct
+    property alias pollStats: systemService.pollStats
 
     property alias sysHost: systemService.sysHost
     property alias sysOs: systemService.sysOs
