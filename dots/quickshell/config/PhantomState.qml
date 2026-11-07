@@ -842,6 +842,7 @@ Singleton {
     property alias sysCpuModel: systemService.sysCpuModel
     property alias sysGpuModel: systemService.sysGpuModel
     property alias sysRamText: systemService.sysRamText
+    property alias sysDiskText: systemService.sysDiskText
     property alias sysUptime: systemService.sysUptime
 
     property alias workspaceApps: systemService.workspaceApps

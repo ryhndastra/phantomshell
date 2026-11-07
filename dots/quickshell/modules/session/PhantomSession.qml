@@ -1929,1569 +1929,332 @@ Scope {
                         }
                     }
 
-                    // Kolom Kanan: Detail Panel Kaca P3 (Live Full-Suite Configuration)
+                    // Kolom Kanan: Detail Panel Kaca P3 (Sesuai Foto 1 & P3R Asli)
                     Rectangle {
                         id: statsDetailPanel
                         anchors.right: parent.right
-                        anchors.rightMargin: 60
+                        anchors.rightMargin: 70
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 690
-                        height: 640
-                        color: Qt.rgba(4 / 255, 12 / 255, 42 / 255, 0.92)
-                        radius: 8
-                        border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.5)
-                        border.width: 1.5
+                        width: 470
+                        height: 560
+                        color: Qt.rgba(5 / 255, 14 / 255, 40 / 255, 0.92)
+                        radius: 4
+                        border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.35)
+                        border.width: 1
                         clip: true
 
-                        // Banner Header Detail
-                        Rectangle {
-                            id: statsDetailHeader
+                        // Banner Header Detail Slanted Cyan (Sesuai Foto 1)
+                        Canvas {
+                            id: statsDetailHeaderCanvas
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.right: parent.right
                             height: 52
-                            gradient: Gradient {
-                                orientation: Gradient.Horizontal
-                                GradientStop { position: 0.0; color: "#8ef5ff" }
-                                GradientStop { position: 1.0; color: "#00dbff" }
+                            onPaint: {
+                                var ctx = getContext("2d")
+                                ctx.reset()
+                                var w = width
+                                var h = height
+                                ctx.beginPath()
+                                ctx.moveTo(0, 0)
+                                ctx.lineTo(w, 0)
+                                ctx.lineTo(w - 18, h)
+                                ctx.lineTo(0, h)
+                                ctx.closePath()
+                                ctx.fillStyle = "#8df6ff"
+                                ctx.fill()
                             }
+                            onWidthChanged: requestPaint()
 
-                            RowLayout {
+                            Row {
                                 anchors.fill: parent
                                 anchors.leftMargin: 20
                                 anchors.rightMargin: 20
-                                spacing: 14
+                                spacing: 12
 
                                 Text {
-                                    text: ["01", "02", "03", "04", "05", "06"][p3Overlay.statsTab] || "01"
-                                    font.family: "Bebas Neue"
-                                    font.pixelSize: 30
-                                    font.bold: true
-                                    color: "#041238"
-                                }
-                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
                                     text: [
-                                        "Telemetry // Hardware & Sensor Matrix",
-                                        "Tatsumi Radar // Wi-Fi Networks & Link",
-                                        "Evoker Link // Bluetooth Audio & Devices",
-                                        "Sound Engine // Master Volume, CAVA & Player",
-                                        "Bar & Desktop HUD // Layout, Workspaces & Clock",
-                                        "Compositor & Displays // Hyprland FX & Parallax"
-                                    ][p3Overlay.statsTab] || "Details"
-                                    font.family: "Bebas Neue"
+                                        "01 System Stats",
+                                        "02 Network",
+                                        "03 Bluetooth devices",
+                                        "04 Sound Engine",
+                                        "05 Bar & Desktop HUD",
+                                        "06 Compositor & Hyprland"
+                                    ][p3Overlay.statsTab] || "01 System Stats"
+                                    font.family: "Rubik"
                                     font.pixelSize: 21
                                     font.bold: true
-                                    color: "#041238"
-                                    Layout.fillWidth: true
+                                    color: "#030e28"
                                 }
                             }
                         }
 
-                        // Isi Konten Tab 0: SYSTEM STATS & TELEMETRY
+                        // Isi Konten Tab Sesuai Foto 1
                         Item {
-                            anchors.top: statsDetailHeader.bottom
+                            anchors.top: statsDetailHeaderCanvas.bottom
                             anchors.bottom: parent.bottom
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            anchors.margins: 16
-                            visible: p3Overlay.statsTab === 0
+                            anchors.topMargin: 4
 
-                            ColumnLayout {
+                            // ── TAB 0: SYSTEM STATS (PERSIS FOTO 1) ──
+                            Column {
                                 anchors.fill: parent
-                                spacing: 8
+                                visible: p3Overlay.statsTab === 0
 
-                                // 5 Gauge Bar Telemetri Hardware
-                                Repeater {
-                                    model: [
-                                        { label: "CPU", sub: PhantomState.sysCpuModel || "12th Gen Intel Core i5-12450H", val: PhantomState.cpuPct },
-                                        { label: "RAM", sub: PhantomState.sysRamText || "Memory Matrix", val: PhantomState.ramPct },
-                                        { label: "GPU", sub: PhantomState.sysGpuModel || "NVIDIA RTX 3050 Mobile", val: PhantomState.gpuPct },
-                                        { label: "STORAGE", sub: "NVMe Root Pool (Nix Store)", val: PhantomState.diskPct },
-                                        { label: "POWER", sub: "System Power Cell & Thermal (" + Math.round(PhantomState.tempPct) + "°C)", val: PhantomState.batteryPct }
-                                    ]
-                                    delegate: Rectangle {
-                                        required property var modelData
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 50
-                                        radius: 6
-                                        color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.8)
-                                        border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.3)
-                                        border.width: 1
-
-                                        ColumnLayout {
-                                            anchors.fill: parent
-                                            anchors.margins: 7
-                                            spacing: 4
-
-                                            RowLayout {
-                                                Layout.fillWidth: true
-                                                Text {
-                                                    text: modelData.label
-                                                    font.family: "Rubik"
-                                                    font.pixelSize: 13
-                                                    font.weight: Font.Black
-                                                    color: "#ffffff"
-                                                }
-                                                Text {
-                                                    text: modelData.sub
-                                                    font.family: "JetBrainsMono NFM"
-                                                    font.pixelSize: 10
-                                                    color: "#7dd4fc"
-                                                    elide: Text.ElideRight
-                                                    Layout.fillWidth: true
-                                                    Layout.leftMargin: 8
-                                                }
-                                                Text {
-                                                    text: Math.round(modelData.val) + "%"
-                                                    font.family: "JetBrainsMono NFM"
-                                                    font.pixelSize: 12
-                                                    font.weight: Font.Black
-                                                    color: modelData.val > 88 ? "#ff3355" : "#00dbff"
-                                                }
-                                            }
-
-                                            Rectangle {
-                                                Layout.fillWidth: true
-                                                Layout.preferredHeight: 6
-                                                radius: 3
-                                                color: Qt.rgba(0, 0, 0, 0.6)
-
-                                                Rectangle {
-                                                    width: parent.width * Math.max(0.02, Math.min(1.0, modelData.val / 100.0))
-                                                    height: parent.height
-                                                    radius: 3
-                                                    gradient: Gradient {
-                                                        orientation: Gradient.Horizontal
-                                                        GradientStop { position: 0.0; color: "#0088ff" }
-                                                        GradientStop { position: 1.0; color: modelData.val > 88 ? "#ff3355" : "#00dbff" }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "OS"
+                                    badgeText: PhantomState.sysOs.replace(" x86_64", "")
                                 }
-
-                                // Info Spesifikasi Sistem Dossier
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 58
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.8)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.25)
-                                    border.width: 1
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 10
-                                        spacing: 12
-
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 2
-                                            Text {
-                                                text: "HOST: " + (PhantomState.sysHost || "sho@nixos")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                font.weight: Font.Bold
-                                                color: "#ffffff"
-                                            }
-                                            Text {
-                                                text: "KERNEL: " + (PhantomState.sysKernel || "Linux 7.1.8")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 9
-                                                color: "#7dd4fc"
-                                            }
-                                        }
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 2
-                                            Text {
-                                                text: "OS: " + (PhantomState.sysOs || "NixOS 26.11 x86_64")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                font.weight: Font.Bold
-                                                color: "#ffffff"
-                                            }
-                                            Text {
-                                                text: "SESSION: " + (PhantomState.sysUptime || "Hyprland Wayland")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 9
-                                                color: "#7dd4fc"
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "CPU"
+                                    badgeText: PhantomState.cpuPct + "%"
                                 }
-
-                                // Tombol Refresh Telemetri Live
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 38
-                                    radius: 4
-                                    color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.18)
-                                    border.color: "#00dbff"
-                                    border.width: 1
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "⟳ REFRESH SYSTEM SENSORS NOW"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 10
-                                        font.weight: Font.Black
-                                        color: "#00dbff"
-                                    }
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            PhantomState.playSfx("select")
-                                            PhantomState.refreshSystemDossier()
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "RAM"
+                                    badgeText: PhantomState.sysRamText
+                                }
+                                P3StatRow {
+                                    label: "DISK"
+                                    badgeText: PhantomState.sysDiskText || "232G / 451G"
+                                }
+                                P3StatRow {
+                                    label: "Users"
+                                    badgeText: "1"
+                                }
+                                P3StatRow {
+                                    label: "GPU"
+                                    badgeText: PhantomState.gpuPct + "%"
+                                }
+                                P3StatRow {
+                                    label: "Battery"
+                                    badgeText: PhantomState.batteryPct + "%"
+                                }
+                                P3StatRow {
+                                    label: "Thermal"
+                                    badgeText: Math.round(PhantomState.tempPct) + "°C"
+                                    showDivider: false
                                 }
                             }
-                        }
 
-                        // Isi Konten Tab 1: WI-FI NETWORKS & CONNECTION
-                        Item {
-                            anchors.top: statsDetailHeader.bottom
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: 16
-                            visible: p3Overlay.statsTab === 1
-
-                            ColumnLayout {
+                            // ── TAB 1: NETWORK ──
+                            Column {
                                 anchors.fill: parent
-                                spacing: 10
+                                visible: p3Overlay.statsTab === 1
 
-                                // Status Kartu Wi-Fi Aktif
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 74
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: PhantomState.wifiConnected ? "#00dbff" : "#ff4466"
-                                    border.width: 1.5
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 14
-                                        spacing: 12
-
-                                        P5Icon {
-                                            name: "wifi"
-                                            size: 24
-                                            color: PhantomState.wifiConnected ? "#00dbff" : "#ff4466"
-                                        }
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 2
-                                            Text {
-                                                text: PhantomState.wifiSsid || "Not Connected"
-                                                font.family: "Rubik"
-                                                font.pixelSize: 15
-                                                font.weight: Font.Black
-                                                color: "#ffffff"
-                                            }
-                                            Text {
-                                                text: (PhantomState.wifiConnected ? ("IP: " + (PhantomState.wifiIp || "--") + " • Signal: " + PhantomState.wifiSignal + "%") : "No active link") + " • " + (PhantomState.wifiSecurity || "WPA2")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                color: "#7dd4fc"
-                                            }
-                                        }
-                                        Rectangle {
-                                            Layout.preferredWidth: 94
-                                            Layout.preferredHeight: 30
-                                            radius: 4
-                                            color: PhantomState.wifiConnected ? "#00dbff" : "#ff4466"
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: PhantomState.wifiConnected ? "CONNECTED" : "OFFLINE"
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                font.weight: Font.Black
-                                                color: "#030c26"
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Wi-Fi"
+                                    badgeText: PhantomState.wifiConnected ? "Connected" : "Offline"
                                 }
-
-                                // Bilah Aksi Pemindaian
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 10
-
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 38
-                                        radius: 4
-                                        color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.2)
-                                        border.color: "#00dbff"
-                                        border.width: 1
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: PhantomState.wifiScanning ? "SCANNING ACCESS POINTS..." : "⟳ RESCAN NETWORKS"
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 10
-                                            font.weight: Font.Black
-                                            color: "#00dbff"
-                                        }
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                PhantomState.playSfx("select")
-                                                PhantomState.scanWifi()
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "SSID"
+                                    badgeText: PhantomState.wifiSsid || "None"
                                 }
-
-                                // Daftar Jaringan Wi-Fi Terdeteksi
-                                Flickable {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    contentHeight: wifiListCol.height
-                                    clip: true
-
-                                    ColumnLayout {
-                                        id: wifiListCol
-                                        width: parent.width
-                                        spacing: 6
-
-                                        Repeater {
-                                            model: PhantomState.wifiNetworks
-                                            delegate: Rectangle {
-                                                required property var modelData
-                                                Layout.fillWidth: true
-                                                Layout.preferredHeight: 46
-                                                radius: 4
-                                                color: modelData.inUse ? Qt.rgba(0/255, 219/255, 255/255, 0.18) : Qt.rgba(2/255, 8/255, 28/255, 0.7)
-                                                border.color: modelData.inUse ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                                border.width: 1
-
-                                                RowLayout {
-                                                    anchors.fill: parent
-                                                    anchors.leftMargin: 12
-                                                    anchors.rightMargin: 12
-                                                    spacing: 10
-
-                                                    P5Icon {
-                                                        name: "wifi"
-                                                        size: 14
-                                                        color: modelData.inUse ? "#00dbff" : "#7dd4fc"
-                                                    }
-                                                    ColumnLayout {
-                                                        Layout.fillWidth: true
-                                                        spacing: 1
-                                                        Text {
-                                                            text: modelData.ssid
-                                                            font.family: "Inter Display"
-                                                            font.pixelSize: 12
-                                                            font.weight: Font.Bold
-                                                            color: "#ffffff"
-                                                            elide: Text.ElideRight
-                                                        }
-                                                        Text {
-                                                            text: "Signal: " + modelData.signal + "% • " + modelData.security
-                                                            font.family: "JetBrainsMono NFM"
-                                                            font.pixelSize: 9
-                                                            color: "#7aa2d6"
-                                                        }
-                                                    }
-                                                    Rectangle {
-                                                        Layout.preferredWidth: modelData.inUse ? 74 : 70
-                                                        Layout.preferredHeight: 26
-                                                        radius: 3
-                                                        color: modelData.inUse ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.25)
-                                                        border.color: "#00dbff"
-                                                        border.width: 1
-
-                                                        Text {
-                                                            anchors.centerIn: parent
-                                                            text: modelData.inUse ? "ACTIVE ✓" : "CONNECT"
-                                                            font.family: "JetBrainsMono NFM"
-                                                            font.pixelSize: 9
-                                                            font.weight: Font.Black
-                                                            color: modelData.inUse ? "#030c26" : "#ffffff"
-                                                        }
-                                                        MouseArea {
-                                                            anchors.fill: parent
-                                                            enabled: !modelData.inUse
-                                                            cursorShape: Qt.PointingHandCursor
-                                                            onClicked: {
-                                                                PhantomState.playSfx("confirm")
-                                                                PhantomState.connectWifi(modelData.ssid, "")
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Signal"
+                                    badgeText: PhantomState.wifiSignal + "%"
+                                }
+                                P3StatRow {
+                                    label: "Security"
+                                    badgeText: "WPA2 / WPA3"
+                                }
+                                P3StatRow {
+                                    label: "Hardware"
+                                    badgeText: "Tatsumi Radar Active"
+                                }
+                                P3StatRow {
+                                    label: "Rescan"
+                                    badgeText: "SCAN NOW"
+                                    clickable: true
+                                    onClicked: PhantomState.refreshWifi()
+                                    showDivider: false
                                 }
                             }
-                        }
 
-                        // Isi Konten Tab 2: BLUETOOTH AUDIO & DEVICES
-                        Item {
-                            anchors.top: statsDetailHeader.bottom
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: 16
-                            visible: p3Overlay.statsTab === 2
-
-                            ColumnLayout {
+                            // ── TAB 2: BLUETOOTH DEVICES (PERSIS FOTO MEDIA_CHECK) ──
+                            Column {
                                 anchors.fill: parent
-                                spacing: 10
+                                visible: p3Overlay.statsTab === 2
 
-                                // Status Kartu Bluetooth Aktif
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 74
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: PhantomState.btConnected ? "#00dbff" : "#7aa2d6"
-                                    border.width: 1.5
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 14
-                                        spacing: 12
-
-                                        P5Icon {
-                                            name: "bluetooth"
-                                            size: 24
-                                            color: "#00dbff"
-                                        }
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 2
-                                            Text {
-                                                text: PhantomState.btDeviceName || "Bluetooth Adapter Ready"
-                                                font.family: "Rubik"
-                                                font.pixelSize: 15
-                                                font.weight: Font.Black
-                                                color: "#ffffff"
-                                            }
-                                            Text {
-                                                text: PhantomState.btDeviceMac ? ("MAC: " + PhantomState.btDeviceMac) : "Audio & Controller S.E.E.S. Link"
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                color: "#7dd4fc"
-                                            }
-                                        }
-                                        Rectangle {
-                                            Layout.preferredWidth: 94
-                                            Layout.preferredHeight: 30
-                                            radius: 4
-                                            color: PhantomState.btConnected ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.3)
-                                            Text {
-                                                anchors.centerIn: parent
-                                                text: PhantomState.btConnected ? "LINKED ✓" : "STANDBY"
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                font.weight: Font.Black
-                                                color: PhantomState.btConnected ? "#030c26" : "#ffffff"
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Adapter"
+                                    badgeText: PhantomState.bluetoothPowered ? "Powered On" : "Disabled"
                                 }
-
-                                // Bilah Aksi Pemindaian Bluetooth
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 10
-
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 38
-                                        radius: 4
-                                        color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.2)
-                                        border.color: "#00dbff"
-                                        border.width: 1
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: PhantomState.btScanning ? "SCANNING NEARBY HARDWARE..." : "⟳ SCAN BLUETOOTH HARDWARE"
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 10
-                                            font.weight: Font.Black
-                                            color: "#00dbff"
-                                        }
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                PhantomState.playSfx("select")
-                                                PhantomState.scanBluetooth()
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Device Link"
+                                    badgeText: PhantomState.bluetoothConnectedCount > 0 ? PhantomState.bluetoothDeviceName : "No Adapter"
                                 }
-
-                                // Daftar Perangkat Bluetooth
-                                Flickable {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    contentHeight: btListCol.height
-                                    clip: true
-
-                                    ColumnLayout {
-                                        id: btListCol
-                                        width: parent.width
-                                        spacing: 6
-
-                                        Item {
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 120
-                                            visible: PhantomState.btDevices.length === 0
-
-                                            ColumnLayout {
-                                                anchors.centerIn: parent
-                                                spacing: 6
-                                                Text {
-                                                    text: "NO PAIRED BLUETOOTH DEVICES DETECTED"
-                                                    font.family: "Bebas Neue"
-                                                    font.pixelSize: 20
-                                                    color: "#7dd4fc"
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                }
-                                                Text {
-                                                    text: "Enable pairing mode on your headphones or gamepad, then click Scan."
-                                                    font.family: "JetBrainsMono NFM"
-                                                    font.pixelSize: 10
-                                                    color: PhantomState.muted
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                }
-                                            }
-                                        }
-
-                                        Repeater {
-                                            model: PhantomState.btDevices
-                                            delegate: Rectangle {
-                                                required property var modelData
-                                                Layout.fillWidth: true
-                                                Layout.preferredHeight: 46
-                                                radius: 4
-                                                color: modelData.connected ? Qt.rgba(0/255, 219/255, 255/255, 0.18) : Qt.rgba(2/255, 8/255, 28/255, 0.7)
-                                                border.color: modelData.connected ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                                border.width: 1
-
-                                                RowLayout {
-                                                    anchors.fill: parent
-                                                    anchors.leftMargin: 12
-                                                    anchors.rightMargin: 12
-                                                    spacing: 10
-
-                                                    P5Icon {
-                                                        name: "bluetooth"
-                                                        size: 14
-                                                        color: modelData.connected ? "#00dbff" : "#7dd4fc"
-                                                    }
-                                                    ColumnLayout {
-                                                        Layout.fillWidth: true
-                                                        spacing: 1
-                                                        Text {
-                                                            text: modelData.name || "Unknown Device"
-                                                            font.family: "Inter Display"
-                                                            font.pixelSize: 12
-                                                            font.weight: Font.Bold
-                                                            color: "#ffffff"
-                                                            elide: Text.ElideRight
-                                                        }
-                                                        Text {
-                                                            text: modelData.mac + (modelData.paired ? " • Paired" : " • Available")
-                                                            font.family: "JetBrainsMono NFM"
-                                                            font.pixelSize: 9
-                                                            color: "#7aa2d6"
-                                                        }
-                                                    }
-                                                    Rectangle {
-                                                        Layout.preferredWidth: modelData.connected ? 84 : 70
-                                                        Layout.preferredHeight: 26
-                                                        radius: 3
-                                                        color: modelData.connected ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.25)
-                                                        border.color: "#00dbff"
-                                                        border.width: 1
-
-                                                        Text {
-                                                            anchors.centerIn: parent
-                                                            text: modelData.connected ? "DISCONNECT" : "CONNECT"
-                                                            font.family: "JetBrainsMono NFM"
-                                                            font.pixelSize: 9
-                                                            font.weight: Font.Black
-                                                            color: modelData.connected ? "#030c26" : "#ffffff"
-                                                        }
-                                                        MouseArea {
-                                                            anchors.fill: parent
-                                                            cursorShape: Qt.PointingHandCursor
-                                                            onClicked: {
-                                                                PhantomState.playSfx("confirm")
-                                                                if (modelData.connected) {
-                                                                    PhantomState.disconnectBluetooth(modelData.mac, modelData.name)
-                                                                } else {
-                                                                    PhantomState.connectBluetooth(modelData.mac, modelData.name)
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Status"
+                                    badgeText: PhantomState.bluetoothConnectedCount > 0 ? "Connected" : "Disabled"
+                                }
+                                P3StatRow {
+                                    label: "Hardware Scan"
+                                    badgeText: "SCAN HARDWARE"
+                                    clickable: true
+                                    onClicked: PhantomState.refreshBluetooth()
+                                    showDivider: false
                                 }
                             }
-                        }
 
-                        // Isi Konten Tab 3: SOUND ENGINE, SFX, CAVA & MEDIA PLAYER
-                        Flickable {
-                            anchors.top: statsDetailHeader.bottom
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: 16
-                            contentHeight: audioCol.height
-                            clip: true
-                            visible: p3Overlay.statsTab === 3
+                            // ── TAB 3: SOUND ENGINE ──
+                            Column {
+                                anchors.fill: parent
+                                visible: p3Overlay.statsTab === 3
 
-                            ColumnLayout {
-                                id: audioCol
-                                width: parent.width
-                                spacing: 12
-
-                                // Master Audio Output Slider & Mute
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 88
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: PhantomState.volumeMuted ? "#ff3355" : "#00dbff"
-                                    border.width: 1.5
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 10
-
-                                            P5Icon {
-                                                name: PhantomState.volumeMuted ? "volume-x" : "volume-2"
-                                                size: 20
-                                                color: PhantomState.volumeMuted ? "#ff3355" : "#00dbff"
-                                            }
-                                            Text {
-                                                text: "MASTER AUDIO OUTPUT"
-                                                font.family: "Rubik"
-                                                font.pixelSize: 13
-                                                font.weight: Font.Black
-                                                color: "#ffffff"
-                                            }
-                                            Item { Layout.fillWidth: true }
-                                            Text {
-                                                text: PhantomState.volumePct + "%" + (PhantomState.volumeMuted ? " [MUTED]" : "")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 12
-                                                font.weight: Font.Black
-                                                color: PhantomState.volumeMuted ? "#ff3355" : "#00dbff"
-                                            }
-                                            Rectangle {
-                                                Layout.preferredWidth: 70
-                                                Layout.preferredHeight: 26
-                                                radius: 4
-                                                color: PhantomState.volumeMuted ? "#ff3355" : Qt.rgba(0/255, 219/255, 255/255, 0.25)
-                                                border.color: PhantomState.volumeMuted ? "#ff3355" : "#00dbff"
-                                                border.width: 1
-
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    text: PhantomState.volumeMuted ? "UNMUTE" : "MUTE"
-                                                    font.family: "JetBrainsMono NFM"
-                                                    font.pixelSize: 9
-                                                    font.weight: Font.Black
-                                                    color: PhantomState.volumeMuted ? "#ffffff" : "#00dbff"
-                                                }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onClicked: {
-                                                        PhantomState.playSfx("confirm")
-                                                        PhantomState.toggleSystemMute()
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        Rectangle {
-                                            id: volTrack
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 10
-                                            radius: 5
-                                            color: Qt.rgba(0, 0, 0, 0.6)
-                                            clip: true
-
-                                            Rectangle {
-                                                width: parent.width * Math.max(0.0, Math.min(1.0, PhantomState.volumePct / 100.0))
-                                                height: parent.height
-                                                radius: 5
-                                                gradient: Gradient {
-                                                    orientation: Gradient.Horizontal
-                                                    GradientStop { position: 0.0; color: "#0066ff" }
-                                                    GradientStop { position: 1.0; color: "#00dbff" }
-                                                }
-                                            }
-
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                function updateVol(mouse) {
-                                                    let pct = Math.round(Math.max(0, Math.min(100, (mouse.x / width) * 100)))
-                                                    PhantomState.setSystemVolume(pct)
-                                                }
-                                                onPressed: (mouse) => updateVol(mouse)
-                                                onPositionChanged: (mouse) => { if (pressed) updateVol(mouse) }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Master Output"
+                                    badgeText: Math.round(PhantomState.volume * 100) + "%"
+                                    clickable: true
+                                    onClicked: { PhantomState.volume = (PhantomState.volume >= 1.0 ? 0.2 : PhantomState.volume + 0.1); PhantomState.saveState() }
                                 }
-
-                                // UI Sound FX Toggle & Volume
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 88
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: PhantomState.sfxEnabled ? "#00dbff" : "#1a3d80"
-                                    border.width: 1.5
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 10
-
-                                            P5Icon {
-                                                name: "sparkles"
-                                                size: 20
-                                                color: PhantomState.sfxEnabled ? "#00dbff" : "#7aa2d6"
-                                            }
-                                            Text {
-                                                text: "UI SOUND EFFECTS (SFX)"
-                                                font.family: "Rubik"
-                                                font.pixelSize: 13
-                                                font.weight: Font.Black
-                                                color: "#ffffff"
-                                            }
-                                            Item { Layout.fillWidth: true }
-                                            Text {
-                                                text: Math.round(PhantomState.sfxVolume * 100) + "%" + (PhantomState.sfxEnabled ? " [ON]" : " [OFF]")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 12
-                                                font.weight: Font.Black
-                                                color: PhantomState.sfxEnabled ? "#00dbff" : "#7aa2d6"
-                                            }
-                                            Rectangle {
-                                                Layout.preferredWidth: 70
-                                                Layout.preferredHeight: 26
-                                                radius: 4
-                                                color: PhantomState.sfxEnabled ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.25)
-                                                border.color: "#00dbff"
-                                                border.width: 1
-
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    text: PhantomState.sfxEnabled ? "DISABLE" : "ENABLE"
-                                                    font.family: "JetBrainsMono NFM"
-                                                    font.pixelSize: 9
-                                                    font.weight: Font.Black
-                                                    color: PhantomState.sfxEnabled ? "#030c26" : "#ffffff"
-                                                }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onClicked: {
-                                                        PhantomState.sfxEnabled = !PhantomState.sfxEnabled
-                                                        PhantomState.playSfx("confirm")
-                                                        PhantomState.saveState()
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        Rectangle {
-                                            id: sfxTrack
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 10
-                                            radius: 5
-                                            color: Qt.rgba(0, 0, 0, 0.6)
-                                            clip: true
-
-                                            Rectangle {
-                                                width: parent.width * Math.max(0.0, Math.min(1.0, PhantomState.sfxVolume))
-                                                height: parent.height
-                                                radius: 5
-                                                gradient: Gradient {
-                                                    orientation: Gradient.Horizontal
-                                                    GradientStop { position: 0.0; color: "#0066ff" }
-                                                    GradientStop { position: 1.0; color: "#00dbff" }
-                                                }
-                                            }
-
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                function updateSfx(mouse) {
-                                                    let val = Math.max(0.0, Math.min(1.0, mouse.x / width))
-                                                    PhantomState.sfxVolume = Math.round(val * 100) / 100.0
-                                                    PhantomState.saveState()
-                                                }
-                                                onPressed: (mouse) => updateSfx(mouse)
-                                                onPositionChanged: (mouse) => { if (pressed) updateSfx(mouse) }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Mute Output"
+                                    badgeText: PhantomState.muted ? "MUTED" : "ACTIVE"
+                                    clickable: true
+                                    onClicked: { PhantomState.muted = !PhantomState.muted; PhantomState.saveState() }
                                 }
-
-                                // Now Playing Media Player
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 120
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.35)
-                                    border.width: 1.5
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 12
-
-                                        Rectangle {
-                                            Layout.preferredWidth: 68
-                                            Layout.preferredHeight: 68
-                                            radius: 6
-                                            color: "#030c24"
-                                            border.color: "#00dbff"
-                                            border.width: 1
-                                            clip: true
-
-                                            Image {
-                                                anchors.fill: parent
-                                                source: PhantomState.mediaArtUrl || ""
-                                                fillMode: Image.PreserveAspectCrop
-                                                visible: PhantomState.mediaArtUrl !== ""
-                                            }
-                                            P5Icon {
-                                                anchors.centerIn: parent
-                                                name: "music"
-                                                size: 26
-                                                color: "#00dbff"
-                                                visible: PhantomState.mediaArtUrl === ""
-                                            }
-                                        }
-
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 3
-
-                                            Text {
-                                                text: (PhantomState.mediaPlayerName || "MPRIS Sink").toUpperCase()
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                font.weight: Font.Black
-                                                color: "#7dd4fc"
-                                            }
-
-                                            Text {
-                                                text: PhantomState.mediaTitle || "No Active Audio Stream"
-                                                font.family: "Rubik"
-                                                font.pixelSize: 14
-                                                font.weight: Font.Black
-                                                color: "#ffffff"
-                                                elide: Text.ElideRight
-                                                Layout.fillWidth: true
-                                            }
-                                            Text {
-                                                text: (PhantomState.mediaArtist || "S.E.E.S. Audio Archive") + " • " + (PhantomState.mediaAlbum || "Persona Series")
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 10
-                                                color: "#7aa2d6"
-                                                elide: Text.ElideRight
-                                                Layout.fillWidth: true
-                                            }
-
-                                            RowLayout {
-                                                spacing: 8
-                                                Layout.topMargin: 2
-
-                                                Rectangle {
-                                                    width: 34; height: 28; radius: 4
-                                                    color: Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                                    border.color: "#00dbff"; border.width: 1
-                                                    Text { anchors.centerIn: parent; text: "◄◄"; font.pixelSize: 10; color: "#ffffff"; font.bold: true }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { PhantomState.playSfx("select"); PhantomState.mediaPrev() }
-                                                    }
-                                                }
-                                                Rectangle {
-                                                    width: 44; height: 28; radius: 4
-                                                    color: "#00dbff"
-                                                    Text { anchors.centerIn: parent; text: PhantomState.mediaPlaying ? "❚❚" : "►"; font.pixelSize: 12; color: "#030c26"; font.bold: true }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { PhantomState.playSfx("confirm"); PhantomState.mediaPlayPause() }
-                                                    }
-                                                }
-                                                Rectangle {
-                                                    width: 34; height: 28; radius: 4
-                                                    color: Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                                    border.color: "#00dbff"; border.width: 1
-                                                    Text { anchors.centerIn: parent; text: "►►"; font.pixelSize: 10; color: "#ffffff"; font.bold: true }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { PhantomState.playSfx("select"); PhantomState.mediaNext() }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Sound Effects (SFX)"
+                                    badgeText: PhantomState.sfxEnabled ? "ENABLED" : "MUTED"
+                                    clickable: true
+                                    onClicked: { PhantomState.sfxEnabled = !PhantomState.sfxEnabled; PhantomState.saveState() }
                                 }
-
-                                // CAVA Visualizer & Lyrics Matrix
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 140
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.25)
-                                    border.width: 1
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            Text { text: "DESKTOP CAVA AUDIO VISUALIZER"; font.family: "JetBrainsMono NFM"; font.pixelSize: 11; font.weight: Font.Black; color: "#ffffff" }
-                                            Item { Layout.fillWidth: true }
-                                            Rectangle {
-                                                width: 80; height: 24; radius: 3
-                                                color: PhantomState.showDesktopCava ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                                border.color: "#00dbff"; border.width: 1
-                                                Text { anchors.centerIn: parent; text: PhantomState.showDesktopCava ? "ENABLED ✓" : "DISABLED"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.showDesktopCava ? "#030c26" : "#ffffff" }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.showDesktopCava = !PhantomState.showDesktopCava; PhantomState.saveState() }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 12
-                                            Text { text: "CAVA Bars (" + PhantomState.cavaBarCount + ")"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc" }
-                                            Rectangle {
-                                                Layout.fillWidth: true
-                                                Layout.preferredHeight: 8
-                                                radius: 4
-                                                color: "#000000"
-                                                Rectangle {
-                                                    width: parent.width * ((PhantomState.cavaBarCount - 16) / (64 - 16))
-                                                    height: parent.height; radius: 4; color: "#00dbff"
-                                                }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onPositionChanged: (mouse) => {
-                                                        if (pressed) {
-                                                            let r = Math.max(0, Math.min(1, mouse.x / width))
-                                                            PhantomState.cavaBarCount = Math.round(16 + r * 48)
-                                                            PhantomState.saveState()
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 10
-                                            Rectangle {
-                                                Layout.fillWidth: true
-                                                Layout.preferredHeight: 34
-                                                radius: 4
-                                                color: PhantomState.cavaIdleWave ? Qt.rgba(0/255, 219/255, 255/255, 0.22) : "#02081d"
-                                                border.color: PhantomState.cavaIdleWave ? "#00dbff" : "#1a3d80"; border.width: 1
-                                                RowLayout {
-                                                    anchors.fill: parent; anchors.margins: 8
-                                                    Text { text: "IDLE SINE WAVE"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Bold; color: "#ffffff" }
-                                                    Item { Layout.fillWidth: true }
-                                                    Text { text: PhantomState.cavaIdleWave ? "ON" : "OFF"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.cavaIdleWave ? "#00dbff" : "#7aa2d6" }
-                                                }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.cavaIdleWave = !PhantomState.cavaIdleWave; PhantomState.saveState() }
-                                                }
-                                            }
-                                            Rectangle {
-                                                Layout.fillWidth: true
-                                                Layout.preferredHeight: 34
-                                                radius: 4
-                                                color: PhantomState.showDesktopLyrics ? Qt.rgba(0/255, 219/255, 255/255, 0.22) : "#02081d"
-                                                border.color: PhantomState.showDesktopLyrics ? "#00dbff" : "#1a3d80"; border.width: 1
-                                                RowLayout {
-                                                    anchors.fill: parent; anchors.margins: 8
-                                                    Text { text: "FLOATING LYRICS"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Bold; color: "#ffffff" }
-                                                    Item { Layout.fillWidth: true }
-                                                    Text { text: PhantomState.showDesktopLyrics ? "ON" : "OFF"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.showDesktopLyrics ? "#00dbff" : "#7aa2d6" }
-                                                }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.showDesktopLyrics = !PhantomState.showDesktopLyrics; PhantomState.saveState() }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "SFX Volume"
+                                    badgeText: Math.round(PhantomState.sfxVolume * 100) + "%"
+                                    clickable: true
+                                    onClicked: { PhantomState.sfxVolume = (PhantomState.sfxVolume >= 1.0 ? 0.2 : PhantomState.sfxVolume + 0.15); PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "CAVA Visualizer"
+                                    badgeText: PhantomState.showDesktopCava ? "ENABLED" : "DISABLED"
+                                    clickable: true
+                                    onClicked: { PhantomState.showDesktopCava = !PhantomState.showDesktopCava; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "CAVA Bars"
+                                    badgeText: PhantomState.cavaBarCount + " BARS"
+                                    clickable: true
+                                    onClicked: { PhantomState.cavaBarCount = (PhantomState.cavaBarCount >= 64 ? 24 : PhantomState.cavaBarCount + 12); PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "Floating Lyrics"
+                                    badgeText: PhantomState.showDesktopLyrics ? "SHOWN" : "OFF"
+                                    clickable: true
+                                    onClicked: { PhantomState.showDesktopLyrics = !PhantomState.showDesktopLyrics; PhantomState.saveState() }
+                                    showDivider: false
                                 }
                             }
-                        }
 
-                        // Isi Konten Tab 4: BAR & DESKTOP HUD LAYOUT
-                        Flickable {
-                            anchors.top: statsDetailHeader.bottom
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: 16
-                            contentHeight: barCol.height
-                            clip: true
-                            visible: p3Overlay.statsTab === 4
+                            // ── TAB 4: BAR & DESKTOP HUD ──
+                            Column {
+                                anchors.fill: parent
+                                visible: p3Overlay.statsTab === 4
 
-                            ColumnLayout {
-                                id: barCol
-                                width: parent.width
-                                spacing: 12
-
-                                // Bar Positioning & Visual Style
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 140
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.3)
-                                    border.width: 1.5
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        Text { text: "PHANTOM BAR EDGE POSITION & STYLE"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black; color: "#8ef5ff" }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 8
-                                            Text { text: "Position:"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc"; Layout.preferredWidth: 60 }
-                                            Repeater {
-                                                model: [ { id: "top", label: "↑ TOP" }, { id: "bottom", label: "↓ BOTTOM" } ]
-                                                delegate: Rectangle {
-                                                    required property var modelData
-                                                    Layout.fillWidth: true
-                                                    Layout.preferredHeight: 30
-                                                    radius: 4
-                                                    color: PhantomState.barPosition === modelData.id ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.18)
-                                                    border.color: "#00dbff"; border.width: 1
-                                                    Text { anchors.centerIn: parent; text: modelData.label; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; font.weight: Font.Black; color: PhantomState.barPosition === modelData.id ? "#030c26" : "#ffffff" }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { PhantomState.playSfx("confirm"); PhantomState.barPosition = modelData.id; PhantomState.saveState() }
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 6
-                                            Text { text: "Style:"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc"; Layout.preferredWidth: 60 }
-                                            Repeater {
-                                                model: [ { id: "p5-skew", label: "★ SKEW" }, { id: "float", label: "FLOAT" }, { id: "hug", label: "HUG BAR" }, { id: "islands", label: "ISLANDS" } ]
-                                                delegate: Rectangle {
-                                                    required property var modelData
-                                                    Layout.fillWidth: true
-                                                    Layout.preferredHeight: 30
-                                                    radius: 4
-                                                    color: PhantomState.barStyle === modelData.id ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.18)
-                                                    border.color: "#00dbff"; border.width: 1
-                                                    Text { anchors.centerIn: parent; text: modelData.label; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.barStyle === modelData.id ? "#030c26" : "#ffffff" }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: {
-                                                            PhantomState.playSfx("confirm")
-                                                            PhantomState.barStyle = modelData.id
-                                                            PhantomState.polygonMode = (modelData.id === "p5-skew")
-                                                            PhantomState.barShowBackground = (modelData.id === "hug")
-                                                            PhantomState.saveState()
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Bar Position"
+                                    badgeText: PhantomState.barPosition.toUpperCase()
+                                    clickable: true
+                                    onClicked: { PhantomState.barPosition = (PhantomState.barPosition === "top" ? "bottom" : "top"); PhantomState.saveState() }
                                 }
-
-                                // Workspace Count & Numbering Style
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 120
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.3)
-                                    border.width: 1.5
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        Text { text: "HYPRLAND WORKSPACES & NUMBERING"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black; color: "#8ef5ff" }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 8
-                                            Text { text: "Count:"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc"; Layout.preferredWidth: 60 }
-                                            Repeater {
-                                                model: [ 4, 6, 8, 10 ]
-                                                delegate: Rectangle {
-                                                    required property int modelData
-                                                    Layout.fillWidth: true
-                                                    Layout.preferredHeight: 28
-                                                    radius: 4
-                                                    color: PhantomState.workspaceCount === modelData ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.18)
-                                                    border.color: "#00dbff"; border.width: 1
-                                                    Text { anchors.centerIn: parent; text: modelData + " DESKS"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.workspaceCount === modelData ? "#030c26" : "#ffffff" }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { PhantomState.playSfx("confirm"); PhantomState.workspaceCount = modelData; PhantomState.saveState() }
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 8
-                                            Text { text: "Digits:"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc"; Layout.preferredWidth: 60 }
-                                            Repeater {
-                                                model: [ { id: "arabic", label: "1, 2, 3" }, { id: "roman", label: "I, II, III" }, { id: "kanji", label: "一, 二, 三" } ]
-                                                delegate: Rectangle {
-                                                    required property var modelData
-                                                    Layout.fillWidth: true
-                                                    Layout.preferredHeight: 28
-                                                    radius: 4
-                                                    color: PhantomState.workspaceNumStyle === modelData.id ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.18)
-                                                    border.color: "#00dbff"; border.width: 1
-                                                    Text { anchors.centerIn: parent; text: modelData.label; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.workspaceNumStyle === modelData.id ? "#030c26" : "#ffffff" }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { PhantomState.playSfx("confirm"); PhantomState.workspaceNumStyle = modelData.id; PhantomState.saveState() }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Bar Style"
+                                    badgeText: PhantomState.barStyle.toUpperCase()
+                                    clickable: true
+                                    onClicked: { const s = ["p5-skew", "floating", "hud", "split"]; const i = s.indexOf(PhantomState.barStyle); PhantomState.barStyle = s[(i + 1) % s.length]; PhantomState.saveState() }
                                 }
-
-                                // Desktop Clock Widget Suite
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 210
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.3)
-                                    border.width: 1.5
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            Text { text: "DESKTOP CLOCK HUD WIDGET"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black; color: "#8ef5ff" }
-                                            Item { Layout.fillWidth: true }
-                                            Rectangle {
-                                                width: 80; height: 24; radius: 3
-                                                color: PhantomState.showDesktopClock ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                                border.color: "#00dbff"; border.width: 1
-                                                Text { anchors.centerIn: parent; text: PhantomState.showDesktopClock ? "ENABLED ✓" : "DISABLED"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.showDesktopClock ? "#030c26" : "#ffffff" }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.showDesktopClock = !PhantomState.showDesktopClock; PhantomState.saveState() }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 6
-                                            Text { text: "Style:"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc"; Layout.preferredWidth: 60 }
-                                            Repeater {
-                                                model: [ { id: "p5-editorial", label: "P5 SLANT" }, { id: "minimal", label: "MINIMAL" }, { id: "cyber", label: "CYBER HUD" } ]
-                                                delegate: Rectangle {
-                                                    required property var modelData
-                                                    Layout.fillWidth: true; Layout.preferredHeight: 28; radius: 4
-                                                    color: PhantomState.desktopClockStyle === modelData.id ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.18)
-                                                    border.color: "#00dbff"; border.width: 1
-                                                    Text { anchors.centerIn: parent; text: modelData.label; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.desktopClockStyle === modelData.id ? "#030c26" : "#ffffff" }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { PhantomState.playSfx("confirm"); PhantomState.desktopClockStyle = modelData.id; PhantomState.saveState() }
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 6
-                                            Text { text: "Place:"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc"; Layout.preferredWidth: 60 }
-                                            Repeater {
-                                                model: [ { id: "top-left", label: "TOP-L" }, { id: "center", label: "CENTER" }, { id: "top-right", label: "TOP-R" }, { id: "bottom-left", label: "BOT-L" } ]
-                                                delegate: Rectangle {
-                                                    required property var modelData
-                                                    Layout.fillWidth: true; Layout.preferredHeight: 28; radius: 4
-                                                    color: PhantomState.desktopClockPosition === modelData.id ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.18)
-                                                    border.color: "#00dbff"; border.width: 1
-                                                    Text { anchors.centerIn: parent; text: modelData.label; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.desktopClockPosition === modelData.id ? "#030c26" : "#ffffff" }
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { PhantomState.playSfx("confirm"); PhantomState.desktopClockPosition = modelData.id; PhantomState.saveState() }
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 12
-                                            Text { text: "Scale (" + PhantomState.desktopClockScale + "%):"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc" }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 8; radius: 4; color: "#000000"
-                                                Rectangle {
-                                                    width: parent.width * ((PhantomState.desktopClockScale - 70) / (150 - 70))
-                                                    height: parent.height; radius: 4; color: "#00dbff"
-                                                }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onPositionChanged: (mouse) => {
-                                                        if (pressed) {
-                                                            let r = Math.max(0, Math.min(1, mouse.x / width))
-                                                            PhantomState.desktopClockScale = Math.round(70 + r * 80)
-                                                            PhantomState.saveState()
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            Text { text: "Display Persona Motto Tag under Clock"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#ffffff" }
-                                            Item { Layout.fillWidth: true }
-                                            Rectangle {
-                                                width: 70; height: 24; radius: 3
-                                                color: PhantomState.desktopClockShowQuote ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                                border.color: "#00dbff"; border.width: 1
-                                                Text { anchors.centerIn: parent; text: PhantomState.desktopClockShowQuote ? "SHOWN" : "HIDDEN"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.desktopClockShowQuote ? "#030c26" : "#ffffff" }
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.desktopClockShowQuote = !PhantomState.desktopClockShowQuote; PhantomState.saveState() }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Workspaces"
+                                    badgeText: PhantomState.workspaceCount + " DESKS"
+                                    clickable: true
+                                    onClicked: { const c = [4, 6, 8, 10]; const i = c.indexOf(PhantomState.workspaceCount); PhantomState.workspaceCount = c[(i + 1) % c.length]; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "Desk Digits"
+                                    badgeText: PhantomState.workspaceNumStyle.toUpperCase()
+                                    clickable: true
+                                    onClicked: { const n = ["arabic", "roman", "kanji"]; const i = n.indexOf(PhantomState.workspaceNumStyle); PhantomState.workspaceNumStyle = n[(i + 1) % n.length]; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "Desktop Clock"
+                                    badgeText: PhantomState.showDesktopClock ? "ENABLED" : "DISABLED"
+                                    clickable: true
+                                    onClicked: { PhantomState.showDesktopClock = !PhantomState.showDesktopClock; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "Clock Style"
+                                    badgeText: PhantomState.desktopClockStyle.toUpperCase()
+                                    clickable: true
+                                    onClicked: { const cs = ["p5-editorial", "p5-badge", "cyber-grid", "persona-bold"]; const i = cs.indexOf(PhantomState.desktopClockStyle); PhantomState.desktopClockStyle = cs[(i + 1) % cs.length]; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "Clock Place"
+                                    badgeText: PhantomState.desktopClockPosition.toUpperCase()
+                                    clickable: true
+                                    onClicked: { const p = ["top-left", "center", "top-right", "bottom-left"]; const i = p.indexOf(PhantomState.desktopClockPosition); PhantomState.desktopClockPosition = p[(i + 1) % p.length]; PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "Clock Motto"
+                                    badgeText: PhantomState.desktopClockShowQuote ? "SHOWN" : "HIDDEN"
+                                    clickable: true
+                                    onClicked: { PhantomState.desktopClockShowQuote = !PhantomState.desktopClockShowQuote; PhantomState.saveState() }
+                                    showDivider: false
                                 }
                             }
-                        }
 
-                        // Isi Konten Tab 5: COMPOSITOR, DISPLAYS & HYPRLAND FX
-                        Flickable {
-                            anchors.top: statsDetailHeader.bottom
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: 16
-                            contentHeight: compCol.height
-                            clip: true
-                            visible: p3Overlay.statsTab === 5
+                            // ── TAB 5: COMPOSITOR & HYPRLAND ──
+                            Column {
+                                anchors.fill: parent
+                                visible: p3Overlay.statsTab === 5
 
-                            ColumnLayout {
-                                id: compCol
-                                width: parent.width
-                                spacing: 12
-
-                                // Layar Monitor & Kecerahan
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 124
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.3)
-                                    border.width: 1.5
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        Text { text: "OUTPUT MONITOR & DISPLAY BRIGHTNESS"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black; color: "#8ef5ff" }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            Text {
-                                                text: (PhantomState.displayName || "eDP-1") + " • " + (PhantomState.displayMode || "1920x1080@144Hz")
-                                                font.family: "JetBrainsMono NFM"; font.pixelSize: 11; font.weight: Font.Bold; color: "#ffffff"
-                                            }
-                                            Item { Layout.fillWidth: true }
-                                            Rectangle {
-                                                width: 80; height: 26; radius: 4
-                                                color: Qt.rgba(0/255, 219/255, 255/255, 0.25); border.color: "#00dbff"; border.width: 1
-                                                Text { anchors.centerIn: parent; text: "CYCLE MODE"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: "#ffffff" }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.cycleDisplayMode() }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 12
-                                            Text { text: "Brightness (" + PhantomState.brightnessPct + "%):"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc" }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 8; radius: 4; color: "#000000"
-                                                Rectangle {
-                                                    width: parent.width * Math.max(0.1, Math.min(1.0, PhantomState.brightnessPct / 100.0))
-                                                    height: parent.height; radius: 4; color: "#00dbff"
-                                                }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onPositionChanged: (mouse) => {
-                                                        if (pressed) {
-                                                            let pct = Math.round(Math.max(10, Math.min(100, (mouse.x / width) * 100)))
-                                                            PhantomState.setSystemBrightness(pct)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Display Output"
+                                    badgeText: "eDP-1 • 144Hz"
                                 }
-
-                                // 3D Parallax Depth & Wallpaper Zoom
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 90
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.3)
-                                    border.width: 1.5
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            Text { text: "3D WALLPAPER PARALLAX MOTION"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black; color: "#8ef5ff" }
-                                            Item { Layout.fillWidth: true }
-                                            Rectangle {
-                                                width: 80; height: 24; radius: 3
-                                                color: PhantomState.wallpaperParallax ? "#00dbff" : Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                                border.color: "#00dbff"; border.width: 1
-                                                Text { anchors.centerIn: parent; text: PhantomState.wallpaperParallax ? "ON ✓" : "OFF"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.wallpaperParallax ? "#030c26" : "#ffffff" }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.wallpaperParallax = !PhantomState.wallpaperParallax; PhantomState.saveState() }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 12
-                                            Text { text: "Layer Scale (" + PhantomState.wallpaperZoom + "%):"; font.family: "JetBrainsMono NFM"; font.pixelSize: 10; color: "#7dd4fc" }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 8; radius: 4; color: "#000000"
-                                                Rectangle {
-                                                    width: parent.width * ((PhantomState.wallpaperZoom - 100) / (125 - 100))
-                                                    height: parent.height; radius: 4; color: "#00dbff"
-                                                }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onPositionChanged: (mouse) => {
-                                                        if (pressed) {
-                                                            let r = Math.max(0, Math.min(1, mouse.x / width))
-                                                            PhantomState.wallpaperZoom = Math.round(100 + r * 25)
-                                                            PhantomState.saveState()
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Brightness"
+                                    badgeText: Math.round(PhantomState.brightnessPct) + "%"
+                                    clickable: true
+                                    onClicked: { PhantomState.brightnessPct = (PhantomState.brightnessPct >= 100 ? 30 : PhantomState.brightnessPct + 15); PhantomState.saveState() }
                                 }
-
-                                // Hyprland Compositor Live Mechanics
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 180
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.3)
-                                    border.width: 1.5
-
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 8
-
-                                        Text { text: "HYPRLAND COMPOSITOR LIVE GEOMETRY & BLUR"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black; color: "#8ef5ff" }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 10
-                                            Text { text: "Gaps In (" + PhantomState.hyprGapsIn + "px):"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; color: "#7dd4fc"; Layout.preferredWidth: 100 }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 8; radius: 4; color: "#000000"
-                                                Rectangle { width: parent.width * (PhantomState.hyprGapsIn / 20.0); height: parent.height; radius: 4; color: "#00dbff" }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onPositionChanged: (mouse) => { if (pressed) { PhantomState.hyprGapsIn = Math.round(Math.max(0, Math.min(1, mouse.x / width)) * 20); PhantomState.syncHyprland() } }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 10
-                                            Text { text: "Gaps Out (" + PhantomState.hyprGapsOut + "px):"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; color: "#7dd4fc"; Layout.preferredWidth: 100 }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 8; radius: 4; color: "#000000"
-                                                Rectangle { width: parent.width * (PhantomState.hyprGapsOut / 30.0); height: parent.height; radius: 4; color: "#00dbff" }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onPositionChanged: (mouse) => { if (pressed) { PhantomState.hyprGapsOut = Math.round(Math.max(0, Math.min(1, mouse.x / width)) * 30); PhantomState.syncHyprland() } }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 10
-                                            Text { text: "Corner Round (" + PhantomState.hyprRounding + "px):"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; color: "#7dd4fc"; Layout.preferredWidth: 100 }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 8; radius: 4; color: "#000000"
-                                                Rectangle { width: parent.width * (PhantomState.hyprRounding / 20.0); height: parent.height; radius: 4; color: "#00dbff" }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onPositionChanged: (mouse) => { if (pressed) { PhantomState.hyprRounding = Math.round(Math.max(0, Math.min(1, mouse.x / width)) * 20); PhantomState.syncHyprland() } }
-                                                }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 8
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 30; radius: 4
-                                                color: PhantomState.hyprBlurEnabled ? Qt.rgba(0/255, 219/255, 255/255, 0.22) : "#02081d"
-                                                border.color: PhantomState.hyprBlurEnabled ? "#00dbff" : "#1a3d80"; border.width: 1
-                                                Text { anchors.centerIn: parent; text: "DUAL BLUR: " + (PhantomState.hyprBlurEnabled ? "ON" : "OFF"); font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.hyprBlurEnabled ? "#00dbff" : "#7aa2d6" }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.hyprBlurEnabled = !PhantomState.hyprBlurEnabled; PhantomState.syncHyprland() }
-                                                }
-                                            }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 30; radius: 4
-                                                color: PhantomState.hyprAnimationsEnabled ? Qt.rgba(0/255, 219/255, 255/255, 0.22) : "#02081d"
-                                                border.color: PhantomState.hyprAnimationsEnabled ? "#00dbff" : "#1a3d80"; border.width: 1
-                                                Text { anchors.centerIn: parent; text: "ANIMATIONS: " + (PhantomState.hyprAnimationsEnabled ? "ON" : "OFF"); font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: PhantomState.hyprAnimationsEnabled ? "#00dbff" : "#7aa2d6" }
-                                                MouseArea {
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onClicked: { PhantomState.playSfx("select"); PhantomState.hyprAnimationsEnabled = !PhantomState.hyprAnimationsEnabled; PhantomState.syncHyprland() }
-                                                }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "3D Parallax"
+                                    badgeText: PhantomState.wallpaperParallax ? "ON" : "OFF"
+                                    clickable: true
+                                    onClicked: { PhantomState.wallpaperParallax = !PhantomState.wallpaperParallax; PhantomState.saveState() }
                                 }
-
-                                // Git Repository Synchronization
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 74
-                                    radius: 6
-                                    color: Qt.rgba(2 / 255, 8 / 255, 30 / 255, 0.85)
-                                    border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.25)
-                                    border.width: 1
-
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        spacing: 12
-
-                                        P5Icon { name: "git-branch"; size: 20; color: "#00dbff" }
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 2
-                                            Text {
-                                                text: "ACTIVE BRANCH: " + (PhantomState.gitBranch || "redesign/p3r-theme")
-                                                font.family: "JetBrainsMono NFM"; font.pixelSize: 11; font.weight: Font.Bold; color: "#ffffff"
-                                            }
-                                            Text {
-                                                text: "HASH: " + (PhantomState.gitLocalHash || "HEAD") + " • STATUS: " + (PhantomState.syncStatus || "Clean")
-                                                font.family: "JetBrainsMono NFM"; font.pixelSize: 9; color: "#7dd4fc"
-                                            }
-                                        }
-                                        Rectangle {
-                                            width: 100; height: 32; radius: 4
-                                            color: "#00dbff"
-                                            Text { anchors.centerIn: parent; text: "SYNC SYSTEM"; font.family: "JetBrainsMono NFM"; font.pixelSize: 9; font.weight: Font.Black; color: "#030c26" }
-                                            MouseArea {
-                                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                onClicked: { PhantomState.playSfx("confirm"); PhantomState.syncToSystem() }
-                                            }
-                                        }
-                                    }
+                                P3StatRow {
+                                    label: "Parallax Zoom"
+                                    badgeText: PhantomState.wallpaperZoom + "%"
+                                    clickable: true
+                                    onClicked: { PhantomState.wallpaperZoom = (PhantomState.wallpaperZoom >= 115 ? 100 : PhantomState.wallpaperZoom + 5); PhantomState.saveState() }
+                                }
+                                P3StatRow {
+                                    label: "Hyprland Gaps"
+                                    badgeText: PhantomState.hyprGapsIn + " / " + PhantomState.hyprGapsOut + " px"
+                                    clickable: true
+                                    onClicked: { PhantomState.hyprGapsIn = (PhantomState.hyprGapsIn >= 15 ? 0 : PhantomState.hyprGapsIn + 5); PhantomState.hyprGapsOut = PhantomState.hyprGapsIn * 2; PhantomState.syncHyprland() }
+                                }
+                                P3StatRow {
+                                    label: "Corner Round"
+                                    badgeText: PhantomState.hyprRounding + " px"
+                                    clickable: true
+                                    onClicked: { PhantomState.hyprRounding = (PhantomState.hyprRounding >= 20 ? 0 : PhantomState.hyprRounding + 5); PhantomState.syncHyprland() }
+                                }
+                                P3StatRow {
+                                    label: "Dual Blur"
+                                    badgeText: PhantomState.hyprBlurEnabled ? "ACTIVE" : "OFF"
+                                    clickable: true
+                                    onClicked: { PhantomState.hyprBlurEnabled = !PhantomState.hyprBlurEnabled; PhantomState.syncHyprland() }
+                                }
+                                P3StatRow {
+                                    label: "Git Sync"
+                                    badgeText: "[ SYNC NOW ]"
+                                    clickable: true
+                                    onClicked: PhantomState.syncToSystem()
+                                    showDivider: false
                                 }
                             }
                         }
@@ -3840,7 +2603,7 @@ Scope {
                     wipeBar0.x = -wipeBar0.width
                     wipeBar1.x = -wipeBar1.width
                     wipeBar2.x = -wipeBar2.width
-                    wipeAnim.restart()
+                    themeWipeAnim.restart()
                 }
 
                 Rectangle {
@@ -3904,7 +2667,7 @@ Scope {
                 }
 
                 SequentialAnimation {
-                    id: wipeAnim
+                    id: themeWipeAnim
                     running: false
 
                     ParallelAnimation {
@@ -3975,7 +2738,7 @@ Scope {
                 }
             }
 
-            // ── ANIMASI TRANSISI STATS (S.E.E.S. Dual Hydraulic Shutter Slam & Central Target Iris - 100% Berbeda dari Theme) ──
+            // ── ANIMASI TRANSISI STATS (P3R Vertical Ribbon Bands Swipe Sesuai Foto 2 & 3) ──
             Item {
                 id: p3StatsTransition
                 anchors.fill: parent
@@ -3988,246 +2751,93 @@ Scope {
                 function trigger() {
                     running = true
                     opacity = 1.0
-                    topShutter.y = -p3Overlay.height * 0.55
-                    bottomShutter.y = p3Overlay.height
-                    laserLine.scale = 0.0
-                    laserLine.opacity = 0.0
-                    seesAperture.scale = 0.6
-                    seesAperture.opacity = 0.0
-                    shutterAnim.restart()
+                    wipeScale1.origin.x = 0
+                    wipeScale2.origin.x = 0
+                    wipeScale3.origin.x = 0
+                    wipeScale1.xScale = 0
+                    wipeScale2.xScale = 0
+                    wipeScale3.xScale = 0
+                    statsRibbonWipeAnim.restart()
                 }
 
-                // 1. Shutter Atas (Menutup dari atas ke tengah)
+                // Layer 1 (Bawah): Cyan (#7dd5fc)
                 Rectangle {
-                    id: topShutter
-                    x: 0
-                    y: -p3Overlay.height * 0.55
-                    width: parent.width
-                    height: p3Overlay.height * 0.55
-                    color: "#030c24"
-
-                    // Strip aksen cyan di bibir bawah shutter
-                    Rectangle {
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 3
-                        color: "#00dbff"
-                    }
-                    Rectangle {
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 3
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 1
-                        color: "#0055ff"
-                    }
+                    id: wipeBlockCyan
+                    anchors.fill: parent
+                    color: "#7dd5fc"
+                    z: 1
+                    transform: Scale { id: wipeScale1; xScale: 0; origin.x: 0 }
                 }
 
-                // 2. Shutter Bawah (Menutup dari bawah ke tengah)
+                // Layer 2 (Tengah): Blue (#1b6afe)
                 Rectangle {
-                    id: bottomShutter
-                    x: 0
-                    y: p3Overlay.height
-                    width: parent.width
-                    height: p3Overlay.height * 0.55
-                    color: "#020718"
-
-                    // Strip aksen cyan di bibir atas shutter
-                    Rectangle {
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 3
-                        color: "#00dbff"
-                    }
-                    Rectangle {
-                        anchors.top: parent.top
-                        anchors.topMargin: 3
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 1
-                        color: "#0055ff"
-                    }
+                    id: wipeBlockBlue
+                    anchors.fill: parent
+                    color: "#1b6afe"
+                    z: 2
+                    transform: Scale { id: wipeScale2; xScale: 0; origin.x: 0 }
                 }
 
-                // 3. Garis Laser Horizontal di Garis Pertemuan Tengah
+                // Layer 3 (Atas): Deep Navy (#071330)
                 Rectangle {
-                    id: laserLine
-                    anchors.centerIn: parent
-                    width: parent.width
-                    height: 2
-                    color: "#00f0ff"
-                    scale: 0.0
-                    opacity: 0.0
-                }
-
-                // 4. Emblem Reticle Pusat S.E.E.S. Target Aperture
-                Item {
-                    id: seesAperture
-                    anchors.centerIn: parent
-                    width: 480
-                    height: 90
-                    scale: 0.6
-                    opacity: 0.0
-
-                    Rectangle {
-                        anchors.fill: parent
-                        color: "#02091d"
-                        border.color: "#00dbff"
-                        border.width: 2
-                        radius: 4
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 14
-                            spacing: 12
-
-                            Rectangle {
-                                width: 44; height: 44
-                                color: "#00dbff"
-                                radius: 4
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "S.E.E.S."
-                                    font.family: "Bebas Neue"
-                                    font.pixelSize: 15
-                                    font.bold: true
-                                    color: "#02091d"
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-                                Text {
-                                    text: "SYSTEM ARCHIVE // TACTICAL DOSSIER"
-                                    font.family: "Rubik"
-                                    font.pixelSize: 13
-                                    font.weight: Font.Black
-                                    color: "#ffffff"
-                                }
-                                Text {
-                                    text: "DATA STREAM SYNCHRONIZING • PROTOCOL 03"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 9
-                                    font.weight: Font.Bold
-                                    color: "#00dbff"
-                                }
-                            }
-
-                            Text {
-                                text: "LOCK [OK]"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 11
-                                font.weight: Font.Black
-                                color: "#00f59b"
-                            }
-                        }
-                    }
+                    id: wipeBlockNavy
+                    anchors.fill: parent
+                    color: "#071330"
+                    z: 3
+                    transform: Scale { id: wipeScale3; xScale: 0; origin.x: 0 }
                 }
 
                 SequentialAnimation {
-                    id: shutterAnim
+                    id: statsRibbonWipeAnim
                     running: false
 
-                    // Fase 1: Kedua Shutter Slam ke Tengah (Slam Shutter)
+                    // Fase 1: Sapuan Masuk dari Kiri ke Kanan (Staggered Foto 3 & Foto 2)
+                    // Cyan menyapu lebih dulu (delay 0), Blue menyusul (delay 80ms), Navy menyusul menutup layar (delay 180ms)
                     ParallelAnimation {
-                        NumberAnimation {
-                            target: topShutter
-                            property: "y"
-                            from: -p3Overlay.height * 0.55
-                            to: 0
-                            duration: 260
-                            easing.type: Easing.OutQuart
+                        SequentialAnimation {
+                            NumberAnimation { target: wipeScale1; property: "xScale"; from: 0; to: 1; duration: 240; easing.type: Easing.OutQuart }
                         }
-                        NumberAnimation {
-                            target: bottomShutter
-                            property: "y"
-                            from: p3Overlay.height
-                            to: p3Overlay.height * 0.45
-                            duration: 260
-                            easing.type: Easing.OutQuart
+                        SequentialAnimation {
+                            PauseAnimation { duration: 30 }
+                            NumberAnimation { target: wipeScale2; property: "xScale"; from: 0; to: 1; duration: 300; easing.type: Easing.OutQuart }
+                        }
+                        SequentialAnimation {
+                            PauseAnimation { duration: 80 }
+                            NumberAnimation { target: wipeScale3; property: "xScale"; from: 0; to: 1; duration: 380; easing.type: Easing.InQuad }
                         }
                     }
 
-                    // Fase 2: Laser & Reticle Muncul di Tengah
-                    ParallelAnimation {
-                        NumberAnimation {
-                            target: laserLine
-                            property: "scale"
-                            from: 0.0
-                            to: 1.0
-                            duration: 120
-                            easing.type: Easing.OutExpo
-                        }
-                        NumberAnimation {
-                            target: laserLine
-                            property: "opacity"
-                            from: 0.0
-                            to: 1.0
-                            duration: 80
-                        }
-                        NumberAnimation {
-                            target: seesAperture
-                            property: "scale"
-                            from: 0.7
-                            to: 1.0
-                            duration: 140
-                            easing.type: Easing.OutBack
-                        }
-                        NumberAnimation {
-                            target: seesAperture
-                            property: "opacity"
-                            from: 0.0
-                            to: 1.0
-                            duration: 100
-                        }
-                    }
-
-                    // Section Swap terjadi saat layar 100% tertutup rapat
+                    // Saat wipeScale3 mencapai 1: Layar 100% tertutup rapat oleh Deep Navy (#071330 - Foto 2)
                     ScriptAction {
                         script: {
                             p3Overlay.currentSection = p3Overlay.targetSection
                         }
                     }
 
-                    // Hold 100ms agar GStreamer selesai decode frame 0 di balik shutter
-                    PauseAnimation { duration: 100 }
+                    // Hold singkat untuk decode frame 0 video Resume_60fps.mp4 di balik tirai
+                    PauseAnimation { duration: 70 }
 
-                    // Fase 3: Shutter Membuka Kembali ke Atas & Bawah (Hydraulic Retract)
+                    // Fase 2: Sapuan Keluar ke Kanan (Wipe Out)
+                    // Pindahkan titik tumpu skala ke sisi Kanan (origin.x = width) agar membuka bersih ke kanan
+                    ScriptAction {
+                        script: {
+                            wipeScale1.origin.x = p3Overlay.width
+                            wipeScale2.origin.x = p3Overlay.width
+                            wipeScale3.origin.x = p3Overlay.width
+                        }
+                    }
+
                     ParallelAnimation {
-                        NumberAnimation {
-                            target: topShutter
-                            property: "y"
-                            from: 0
-                            to: -p3Overlay.height * 0.55
-                            duration: 260
-                            easing.type: Easing.InQuart
+                        SequentialAnimation {
+                            NumberAnimation { target: wipeScale3; property: "xScale"; from: 1; to: 0; duration: 260; easing.type: Easing.InQuart }
                         }
-                        NumberAnimation {
-                            target: bottomShutter
-                            property: "y"
-                            from: p3Overlay.height * 0.45
-                            to: p3Overlay.height
-                            duration: 260
-                            easing.type: Easing.InQuart
+                        SequentialAnimation {
+                            PauseAnimation { duration: 80 }
+                            NumberAnimation { target: wipeScale2; property: "xScale"; from: 1; to: 0; duration: 320; easing.type: Easing.InQuart }
                         }
-                        NumberAnimation {
-                            target: seesAperture
-                            property: "opacity"
-                            from: 1.0
-                            to: 0.0
-                            duration: 180
-                            easing.type: Easing.InQuad
-                        }
-                        NumberAnimation {
-                            target: laserLine
-                            property: "opacity"
-                            from: 1.0
-                            to: 0.0
-                            duration: 180
-                            easing.type: Easing.InQuad
+                        SequentialAnimation {
+                            PauseAnimation { duration: 180 }
+                            NumberAnimation { target: wipeScale1; property: "xScale"; from: 1; to: 0; duration: 360; easing.type: Easing.InQuart }
                         }
                     }
 
@@ -4312,6 +2922,96 @@ Scope {
             }
             onExited: powerItemRoot.hovered = false
             onClicked: powerItemRoot.action()
+        }
+    }
+
+    component P3StatRow: Item {
+        id: rowRoot
+        required property string label
+        required property string badgeText
+        property bool showDivider: true
+        property bool clickable: false
+        signal clicked()
+
+        width: parent ? parent.width : 470
+        height: 54
+
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            text: rowRoot.label
+            font.family: "Rubik"
+            font.pixelSize: 18
+            font.weight: Font.Bold
+            color: "#ffffff"
+        }
+
+        // Slanted Parallelogram Badge Khas Persona 3 Reload (Sesuai Foto 1)
+        Item {
+            id: badgeShell
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            width: Math.max(50, valText.implicitWidth + 24)
+            height: 30
+
+            Canvas {
+                id: badgeCanvas
+                anchors.fill: parent
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    var w = width
+                    var h = height
+                    var skew = 7
+                    ctx.beginPath()
+                    ctx.moveTo(skew, 0)
+                    ctx.lineTo(w, 0)
+                    ctx.lineTo(w - skew, h)
+                    ctx.lineTo(0, h)
+                    ctx.closePath()
+                    ctx.fillStyle = (rowRoot.clickable && rowMouse.containsMouse) ? "#c2f9ff" : "#8df6ff"
+                    ctx.fill()
+                }
+                onWidthChanged: requestPaint()
+                Connections {
+                    target: rowMouse
+                    function onContainsMouseChanged() { badgeCanvas.requestPaint() }
+                }
+            }
+
+            Text {
+                id: valText
+                anchors.centerIn: parent
+                text: rowRoot.badgeText
+                font.family: "JetBrainsMono NFM"
+                font.pixelSize: 12
+                font.weight: Font.Bold
+                color: "#030e28"
+            }
+
+            MouseArea {
+                id: rowMouse
+                anchors.fill: parent
+                enabled: rowRoot.clickable
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+                onClicked: {
+                    PhantomState.playSfx("select")
+                    rowRoot.clicked()
+                }
+            }
+        }
+
+        // Garis Pembatas Halus Antar Baris
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 1
+            color: Qt.rgba(255/255, 255/255, 255/255, 0.08)
+            visible: rowRoot.showDivider
         }
     }
 }

@@ -26,6 +26,7 @@ Scope {
     property string sysCpuModel: "12th Gen Intel Core i5-12450H"
     property string sysGpuModel: "NVIDIA GeForce RTX 3050 Mobile + Intel UHD"
     property string sysRamText: "11 GiB / 23 GiB"
+    property string sysDiskText: "232G / 451G"
     property string sysUptime: "Active Session"
 
     property var workspaceApps: ({})
@@ -39,9 +40,10 @@ Scope {
             "KERN=$(uname -sr 2>/dev/null); " +
             "CPU=$(grep -m1 'model name' /proc/cpuinfo 2>/dev/null | cut -d':' -f2 | sed 's/(R)//g; s/(TM)//g; s/^[ \\t]*//'); " +
             "RAM=$(free -h 2>/dev/null | awk '/^Mem:/ {print $3 \" / \" $2}'); " +
+            "DISK=$(df -h / 2>/dev/null | tail -1 | awk '{print $3 \" / \" $2}'); " +
             "UP_SEC=$(awk '{print int($1)}' /proc/uptime 2>/dev/null); " +
             "UP_H=$((UP_SEC / 3600)); UP_M=$(((UP_SEC % 3600) / 60)); " +
-            "echo \"${HOST}|${OS}|${KERN}|${CPU}|${RAM}|${UP_H}h ${UP_M}m\""
+            "echo \"${HOST}|${OS}|${KERN}|${CPU}|${RAM}|${UP_H}h ${UP_M}m|${DISK}\""
         ]
         stdout: SplitParser {
             onRead: data => {
@@ -53,6 +55,7 @@ Scope {
                     if (parts[3]) root.sysCpuModel = parts[3]
                     if (parts[4]) root.sysRamText = parts[4]
                     if (parts[5]) root.sysUptime = parts[5]
+                    if (parts.length >= 7 && parts[6]) root.sysDiskText = parts[6]
                 }
             }
         }
