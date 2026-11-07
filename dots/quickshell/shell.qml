@@ -111,6 +111,10 @@ ShellRoot {
             PhantomState.p3SessionSection = sec
         }
 
+        function setStatsTab(tab: int): void {
+            PhantomState.p3StatsTab = tab
+        }
+
         function showThemeConfirm(idx: int): void {
             PhantomState.p3ThemeConfirmIdx = idx
             PhantomState.p3ThemeConfirm = true
