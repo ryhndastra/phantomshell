@@ -78,6 +78,7 @@ Singleton {
     property int velvetTransitionTick: 0
     property int p3MenuCard: 0
     property string p3LauncherTab: "apps"
+    property int p3ReaderIndex: -1
 
     // state animasi transisi tema dan wallpaper
     property int transitionTick: 0

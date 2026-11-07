@@ -88,6 +88,13 @@ ShellRoot {
             PhantomState.launcherOpen = true
         }
 
+        function openP3ReaderIndex(idx: int): void {
+            PhantomState.p3LauncherTab = "mail"
+            PhantomState.p3ReaderIndex = -1
+            PhantomState.p3ReaderIndex = idx
+            PhantomState.launcherOpen = true
+        }
+
         function toggleSettings(): void {
             PhantomState.toggleSettings()
         }

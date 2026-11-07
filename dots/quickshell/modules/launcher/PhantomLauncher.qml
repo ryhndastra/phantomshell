@@ -888,6 +888,7 @@ Variants {
             // =========================================================================
             // KONTAINER APLIKASI LAUNCHER KHUSUS PERSONA 3 RELOAD: S.E.E.S. MAIL MENU
             // Dynamic Tabs: "APPS" (S.E.E.S. System Apps) & "MAIL" (TODAY'S New Message)
+            // Overlay Mail Detail Reader (Membaca pesan panjang secara utuh ala P3R)
             // =========================================================================
             Item {
                 id: p3MailStage
@@ -902,6 +903,29 @@ Variants {
                 // State Tab Aktif: "apps" (Launcher Aplikasi) atau "mail" (Riwayat Notifikasi)
                 readonly property string activeTab: PhantomState.p3LauncherTab
                 property int selectedNotifIndex: 0
+
+                // State Overlay Mail Reader untuk Membaca Pesan Notifikasi Lengkap
+                property var activeDetailNotif: null
+                property int activeDetailIndex: -1
+
+                Connections {
+                    target: PhantomState
+                    function onP3ReaderIndexChanged() {
+                        if (PhantomState.p3ReaderIndex >= 0 && PhantomState.p3ReaderIndex < PhantomState.imNotifications.count) {
+                            var n = PhantomState.imNotifications.get(PhantomState.p3ReaderIndex)
+                            if (n) {
+                                p3MailStage.activeDetailNotif = {
+                                    "sender": n.senderName || n.sender || "New Message",
+                                    "body": n.msgBody || n.message || "",
+                                    "time": n.msgTime || n.time || "",
+                                    "icon": n.msgIcon || n.appIcon || "",
+                                    "color": "#e60039"
+                                }
+                                p3MailStage.activeDetailIndex = PhantomState.p3ReaderIndex
+                            }
+                        }
+                    }
+                }
 
                 // Rotasi miring otentik Persona 3 Reload (-5.5 derajat) dengan layer multisample antialiasing
                 transformOrigin: Item.BottomLeft
@@ -1060,7 +1084,7 @@ Variants {
                         }
                     }
 
-                    // 3. Tab Switcher: [ APPS ] & [ MAIL (Count) ]
+                    // 3. Tab Switcher: [ APPS ] & [ MAIL (Count) ] + [Clear All]
                     Row {
                         id: p3TabRow
                         anchors.top: p3RibbonCanvas.bottom
@@ -1075,7 +1099,7 @@ Variants {
                             height: 26
                             radius: 3
                             color: p3MailStage.activeTab === "apps" ? "#0038a8" : "transparent"
-                            border.color: p3MailStage.activeTab === "apps" ? "#00d0ff" : "rgba(255, 255, 255, 0.18)"
+                            border.color: p3MailStage.activeTab === "apps" ? "#00d0ff" : "#2EFFFFFF"
                             border.width: 1.5
 
                             RowLayout {
@@ -1101,6 +1125,7 @@ Variants {
                                 onClicked: {
                                     if (p3MailStage.activeTab !== "apps") {
                                         PhantomState.p3LauncherTab = "apps"
+                                        p3MailStage.activeDetailNotif = null
                                         PhantomState.playSfx("select")
                                         p3SearchInput.forceActiveFocus()
                                     }
@@ -1114,7 +1139,7 @@ Variants {
                             height: 26
                             radius: 3
                             color: p3MailStage.activeTab === "mail" ? "#0038a8" : "transparent"
-                            border.color: p3MailStage.activeTab === "mail" ? "#00d0ff" : "rgba(255, 255, 255, 0.18)"
+                            border.color: p3MailStage.activeTab === "mail" ? "#00d0ff" : "#2EFFFFFF"
                             border.width: 1.5
 
                             RowLayout {
@@ -1156,9 +1181,43 @@ Variants {
                                 onClicked: {
                                     if (p3MailStage.activeTab !== "mail") {
                                         PhantomState.p3LauncherTab = "mail"
+                                        p3MailStage.activeDetailNotif = null
                                         PhantomState.playSfx("select")
                                         p3SearchInput.forceActiveFocus()
                                     }
+                                }
+                            }
+                        }
+
+                        // Tombol Clear All (Hanya di mode MAIL jika ada pesan)
+                        Rectangle {
+                            visible: p3MailStage.activeTab === "mail" && PhantomState.imNotifications.count > 0
+                            width: 72
+                            height: 26
+                            radius: 3
+                            color: clearAllMouse.containsMouse ? "#e60039" : "transparent"
+                            border.color: clearAllMouse.containsMouse ? "#ff3366" : "#33FFFFFF"
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "Clear All"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 10
+                                font.bold: true
+                                color: clearAllMouse.containsMouse ? "#ffffff" : "#8ca4c4"
+                            }
+
+                            MouseArea {
+                                id: clearAllMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    PhantomState.imNotifications.clear()
+                                    p3MailStage.activeDetailNotif = null
+                                    p3MailStage.activeDetailIndex = -1
+                                    PhantomState.playSfx("select")
                                 }
                             }
                         }
@@ -1224,32 +1283,43 @@ Variants {
 
                                 Keys.onPressed: (event) => {
                                     if (event.key === Qt.Key_Escape) {
-                                        PhantomState.launcherOpen = false
-                                        event.accepted = true
+                                        if (p3MailStage.activeDetailNotif !== null) {
+                                            p3MailStage.activeDetailNotif = null
+                                            p3MailStage.activeDetailIndex = -1
+                                            PhantomState.playSfx("close")
+                                            event.accepted = true
+                                        } else {
+                                            PhantomState.launcherOpen = false
+                                            event.accepted = true
+                                        }
                                     } else if (event.key === Qt.Key_Tab) {
-                                        // Tab berpindah antara APPS dan MAIL
                                         PhantomState.p3LauncherTab = (p3MailStage.activeTab === "apps" ? "mail" : "apps")
+                                        p3MailStage.activeDetailNotif = null
                                         PhantomState.playSfx("select")
                                         event.accepted = true
                                     } else if (event.key === Qt.Key_Down) {
-                                        if (p3MailStage.activeTab === "apps") {
-                                            if (launcherWin.filteredItems.length > 0) {
-                                                launcherWin.selectedIndex = (launcherWin.selectedIndex + 1) % launcherWin.filteredItems.length
-                                            }
-                                        } else {
-                                            if (PhantomState.imNotifications.count > 0) {
-                                                p3MailStage.selectedNotifIndex = (p3MailStage.selectedNotifIndex + 1) % PhantomState.imNotifications.count
+                                        if (p3MailStage.activeDetailNotif === null) {
+                                            if (p3MailStage.activeTab === "apps") {
+                                                if (launcherWin.filteredItems.length > 0) {
+                                                    launcherWin.selectedIndex = (launcherWin.selectedIndex + 1) % launcherWin.filteredItems.length
+                                                }
+                                            } else {
+                                                if (PhantomState.imNotifications.count > 0) {
+                                                    p3MailStage.selectedNotifIndex = (p3MailStage.selectedNotifIndex + 1) % PhantomState.imNotifications.count
+                                                }
                                             }
                                         }
                                         event.accepted = true
                                     } else if (event.key === Qt.Key_Up) {
-                                        if (p3MailStage.activeTab === "apps") {
-                                            if (launcherWin.filteredItems.length > 0) {
-                                                launcherWin.selectedIndex = (launcherWin.selectedIndex - 1 + launcherWin.filteredItems.length) % launcherWin.filteredItems.length
-                                            }
-                                        } else {
-                                            if (PhantomState.imNotifications.count > 0) {
-                                                p3MailStage.selectedNotifIndex = (p3MailStage.selectedNotifIndex - 1 + PhantomState.imNotifications.count) % PhantomState.imNotifications.count
+                                        if (p3MailStage.activeDetailNotif === null) {
+                                            if (p3MailStage.activeTab === "apps") {
+                                                if (launcherWin.filteredItems.length > 0) {
+                                                    launcherWin.selectedIndex = (launcherWin.selectedIndex - 1 + launcherWin.filteredItems.length) % launcherWin.filteredItems.length
+                                                }
+                                            } else {
+                                                if (PhantomState.imNotifications.count > 0) {
+                                                    p3MailStage.selectedNotifIndex = (p3MailStage.selectedNotifIndex - 1 + PhantomState.imNotifications.count) % PhantomState.imNotifications.count
+                                                }
                                             }
                                         }
                                         event.accepted = true
@@ -1257,17 +1327,45 @@ Variants {
                                         if (p3MailStage.activeTab === "apps") {
                                             launcherWin.executeItem(launcherWin.selectedIndex)
                                         } else {
-                                            // Di mode MAIL: Enter menghapus notifikasi terpilih
-                                            if (PhantomState.imNotifications.count > 0) {
-                                                var idx = p3MailStage.selectedNotifIndex
-                                                PhantomState.imNotifications.remove(idx)
+                                            if (p3MailStage.activeDetailNotif !== null) {
+                                                p3MailStage.activeDetailNotif = null
+                                                p3MailStage.activeDetailIndex = -1
+                                                PhantomState.playSfx("close")
+                                            } else if (PhantomState.imNotifications.count > 0) {
+                                                // Buka Overlay Mail Detail Reader
+                                                var n = PhantomState.imNotifications.get(p3MailStage.selectedNotifIndex)
+                                                if (n) {
+                                                    p3MailStage.activeDetailNotif = {
+                                                        "sender": n.senderName || n.sender || "New Message",
+                                                        "body": n.msgBody || n.message || "",
+                                                        "time": n.msgTime || n.time || "",
+                                                        "icon": n.msgIcon || n.appIcon || "",
+                                                        "color": "#e60039"
+                                                    }
+                                                    p3MailStage.activeDetailIndex = p3MailStage.selectedNotifIndex
+                                                    PhantomState.playSfx("open")
+                                                }
+                                            }
+                                        }
+                                        event.accepted = true
+                                    } else if (event.key === Qt.Key_Delete) {
+                                        if (p3MailStage.activeTab === "mail") {
+                                            if (p3MailStage.activeDetailNotif !== null) {
+                                                if (p3MailStage.activeDetailIndex >= 0 && p3MailStage.activeDetailIndex < PhantomState.imNotifications.count) {
+                                                    PhantomState.imNotifications.remove(p3MailStage.activeDetailIndex)
+                                                }
+                                                p3MailStage.activeDetailNotif = null
+                                                p3MailStage.activeDetailIndex = -1
+                                                PhantomState.playSfx("select")
+                                            } else if (PhantomState.imNotifications.count > 0) {
+                                                PhantomState.imNotifications.remove(p3MailStage.selectedNotifIndex)
                                                 if (p3MailStage.selectedNotifIndex >= PhantomState.imNotifications.count && p3MailStage.selectedNotifIndex > 0) {
                                                     p3MailStage.selectedNotifIndex--
                                                 }
                                                 PhantomState.playSfx("select")
                                             }
+                                            event.accepted = true
                                         }
-                                        event.accepted = true
                                     }
                                 }
 
@@ -1287,7 +1385,7 @@ Variants {
                     // 5. Pesan Kosong Jika Tidak Ada Notifikasi
                     Item {
                         anchors.centerIn: p3AppList
-                        visible: p3MailStage.activeTab === "mail" && PhantomState.imNotifications.count === 0
+                        visible: p3MailStage.activeTab === "mail" && PhantomState.imNotifications.count === 0 && p3MailStage.activeDetailNotif === null
                         width: 300
                         height: 120
 
@@ -1322,7 +1420,7 @@ Variants {
                         }
                     }
 
-                    // 6. Daftar Aplikasi / Notifikasi (ListView Bersih Tanpa Button A/B/X)
+                    // 6. Daftar Aplikasi / Notifikasi (ListView Bersih)
                     ListView {
                         id: p3AppList
                         anchors.top: p3SearchContainer.bottom
@@ -1363,7 +1461,7 @@ Variants {
 
                             // Palet warna karakter Persona 3 Reload untuk avatar tidak aktif
                             readonly property var duotoneColors: ["#0099cc", "#9c27b0", "#1565c0", "#e65100", "#2e7d32", "#00838f"]
-                            readonly property color avatarColor: isSelected ? "#e60039" : duotoneColors[index % duotoneColors.length]
+                            readonly property color avatarColor: isSelected ? "#e60039" : ((typeof index === "number" && index >= 0) ? duotoneColors[index % duotoneColors.length] : "#0099cc")
 
                             // A. Ikon Lingkaran Biru Tanda Seru "!" di Sebelah Kiri Baris
                             Rectangle {
@@ -1516,7 +1614,7 @@ Variants {
                                     anchors.left: parent.left
                                     anchors.leftMargin: 24
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 14
+                                    anchors.rightMargin: p3RowDelegate.isApps ? 14 : 34
                                     anchors.verticalCenter: parent.verticalCenter
                                     spacing: 2
 
@@ -1525,7 +1623,7 @@ Variants {
                                         spacing: 6
 
                                         Text {
-                                            text: p3RowDelegate.isApps ? "✉" : "✉"
+                                            text: "✉"
                                             font.pixelSize: 14
                                             color: p3RowDelegate.isSelected ? "#0048d0" : "#00dbff"
                                         }
@@ -1578,6 +1676,40 @@ Variants {
                                         renderType: Text.CurveRendering
                                     }
                                 }
+
+                                // Tombol Hapus Cepat "×" di Sisi Kanan Notifikasi
+                                Rectangle {
+                                    id: quickDismissBtn
+                                    visible: !p3RowDelegate.isApps && (p3RowDelegate.isHovered || p3RowDelegate.isSelected)
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 8
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 22
+                                    height: 22
+                                    radius: 11
+                                    color: qDismissMouse.containsMouse ? "#e60039" : (p3RowDelegate.isSelected ? "#260038A8" : "#26FFFFFF")
+                                    z: 15
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "×"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 13
+                                        font.bold: true
+                                        color: qDismissMouse.containsMouse ? "#ffffff" : (p3RowDelegate.isSelected ? "#0038a8" : "#ffffff")
+                                    }
+
+                                    MouseArea {
+                                        id: qDismissMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            PhantomState.imNotifications.remove(index)
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
+                                }
                             }
 
                             // D. Area Interaksi Klik dan Hover
@@ -1600,9 +1732,295 @@ Variants {
                                         launcherWin.selectedIndex = index
                                         launcherWin.executeItem(index)
                                     } else {
-                                        // Klik notifikasi menghapusnya dari list
-                                        PhantomState.imNotifications.remove(index)
-                                        PhantomState.playSfx("select")
+                                        // Buka Overlay Mail Detail Reader
+                                        p3MailStage.selectedNotifIndex = index
+                                        p3MailStage.activeDetailNotif = {
+                                            "sender": p3RowDelegate.itemName,
+                                            "body": p3RowDelegate.itemDesc,
+                                            "time": p3RowDelegate.itemTime,
+                                            "icon": p3RowDelegate.itemIcon,
+                                            "color": p3RowDelegate.avatarColor
+                                        }
+                                        p3MailStage.activeDetailIndex = index
+                                        PhantomState.playSfx("open")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // -----------------------------------------------------------------
+                    // 7. Overlay Mail Detail Reader (P3R In-Game Authentic Message Card)
+                    // -----------------------------------------------------------------
+                    Item {
+                        id: p3MailReaderModal
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        z: 50
+                        opacity: p3MailStage.activeDetailNotif !== null ? 1.0 : 0.0
+                        visible: opacity > 0.0
+                        Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+
+                        // Latar Belakang Redup Gelap Mencegah Klik ke Bawah
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "#F5080C16"
+                            radius: 4
+                            MouseArea { anchors.fill: parent } // block clicks
+                        }
+
+                        // Badan Kartu Pembaca Pesan P3R
+                        Item {
+                            anchors.fill: parent
+                            anchors.margins: 14
+
+                            // Pita Header "MESSAGE DETAIL // INBOX"
+                            Canvas {
+                                id: readerRibbon
+                                anchors.top: parent.top
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                height: 38
+                                antialiasing: true
+                                onPaint: {
+                                    var ctx = getContext("2d");
+                                    ctx.reset();
+                                    ctx.beginPath();
+                                    ctx.moveTo(0, 0);
+                                    ctx.lineTo(width, 0);
+                                    ctx.lineTo(width - 16, height);
+                                    ctx.lineTo(0, height);
+                                    ctx.closePath();
+                                    ctx.fillStyle = "#0048cc";
+                                    ctx.fill();
+                                    ctx.lineWidth = 1.5;
+                                    ctx.strokeStyle = "#00d0ff";
+                                    ctx.stroke();
+                                }
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 24
+
+                                    Text {
+                                        text: "✉ MESSAGE DETAIL"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Black
+                                        font.italic: true
+                                        color: "#ffffff"
+                                        renderType: Text.CurveRendering
+                                    }
+                                    Item { Layout.fillWidth: true }
+                                    Text {
+                                        text: p3MailStage.activeDetailNotif ? p3MailStage.activeDetailNotif.time : ""
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 11
+                                        font.bold: true
+                                        color: "#8df6ff"
+                                    }
+                                }
+                            }
+
+                            // Header Profil Pengirim
+                            RowLayout {
+                                id: readerSenderRow
+                                anchors.top: readerRibbon.bottom
+                                anchors.topMargin: 14
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                spacing: 12
+
+                                // Slashed Avatar Pengirim
+                                Item {
+                                    width: 58
+                                    height: 44
+                                    Canvas {
+                                        anchors.fill: parent
+                                        antialiasing: true
+                                        onPaint: {
+                                            var ctx = getContext("2d");
+                                            ctx.reset();
+                                            ctx.beginPath();
+                                            ctx.moveTo(0, 0);
+                                            ctx.lineTo(width, 0);
+                                            ctx.lineTo(width - 16, height);
+                                            ctx.lineTo(0, height);
+                                            ctx.closePath();
+                                            ctx.fillStyle = p3MailStage.activeDetailNotif ? p3MailStage.activeDetailNotif.color : "#e60039";
+                                            ctx.fill();
+                                        }
+                                    }
+                                    Image {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        x: 6
+                                        width: 28
+                                        height: 28
+                                        source: p3MailStage.activeDetailNotif ? (p3MailStage.activeDetailNotif.icon || "") : ""
+                                        fillMode: Image.PreserveAspectFit
+                                        visible: source !== ""
+                                    }
+                                    P5Icon {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        x: 8
+                                        name: "chat"
+                                        color: "#ffffff"
+                                        size: 20
+                                        visible: !p3MailStage.activeDetailNotif || !p3MailStage.activeDetailNotif.icon || p3MailStage.activeDetailNotif.icon === ""
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
+                                    Text {
+                                        text: "TRANSMISSION SOURCE"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: "#00dbff"
+                                        font.letterSpacing: 1.5
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: p3MailStage.activeDetailNotif ? p3MailStage.activeDetailNotif.sender : ""
+                                        font.family: "Rubik"
+                                        font.pixelSize: 17
+                                        font.weight: Font.Black
+                                        color: "#ffffff"
+                                        elide: Text.ElideRight
+                                        renderType: Text.CurveRendering
+                                    }
+                                }
+                            }
+
+                            // Garis Pemisah
+                            Rectangle {
+                                id: readerDivider
+                                anchors.top: readerSenderRow.bottom
+                                anchors.topMargin: 12
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                height: 1.5
+                                color: "#5900DBFF"
+                            }
+
+                            // Area Isi Pesan Lengkap (Scrollable Flickable)
+                            Flickable {
+                                id: readerFlick
+                                anchors.top: readerDivider.bottom
+                                anchors.topMargin: 14
+                                anchors.bottom: readerActionsRow.top
+                                anchors.bottomMargin: 14
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 10
+                                anchors.rightMargin: 10
+                                contentWidth: width
+                                contentHeight: msgFullText.implicitHeight
+                                clip: true
+                                boundsBehavior: Flickable.StopAtBounds
+
+                                Text {
+                                    id: msgFullText
+                                    width: readerFlick.width
+                                    text: p3MailStage.activeDetailNotif ? p3MailStage.activeDetailNotif.body : ""
+                                    wrapMode: Text.WordWrap
+                                    font.family: "Rubik"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Medium
+                                    lineHeight: 1.4
+                                    color: "#e2ecf8"
+                                    renderType: Text.CurveRendering
+                                }
+                            }
+
+                            // Baris Tombol Aksi di Bagian Bawah Reader
+                            RowLayout {
+                                id: readerActionsRow
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: 8
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                spacing: 12
+
+                                // Tombol Hapus Pesan (DISMISS)
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 34
+                                    radius: 3
+                                    color: delMouse.containsMouse ? "#c2002f" : "#e60039"
+                                    antialiasing: true
+
+                                    RowLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        Text { text: "×"; font.pixelSize: 16; font.bold: true; color: "#ffffff" }
+                                        Text {
+                                            text: "DISMISS / CLEAR"
+                                            font.family: "Rubik"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Black
+                                            color: "#ffffff"
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: delMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (p3MailStage.activeDetailIndex >= 0 && p3MailStage.activeDetailIndex < PhantomState.imNotifications.count) {
+                                                PhantomState.imNotifications.remove(p3MailStage.activeDetailIndex)
+                                            }
+                                            p3MailStage.activeDetailNotif = null
+                                            p3MailStage.activeDetailIndex = -1
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
+                                }
+
+                                // Tombol Tutup (CLOSE / BACK)
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 34
+                                    radius: 3
+                                    color: closeMouse.containsMouse ? "#0044b3" : "#0038a8"
+                                    border.color: "#00d0ff"
+                                    border.width: 1.5
+                                    antialiasing: true
+
+                                    RowLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        Text { text: "↵"; font.pixelSize: 14; font.bold: true; color: "#ffffff" }
+                                        Text {
+                                            text: "CLOSE / BACK"
+                                            font.family: "Rubik"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Black
+                                            color: "#ffffff"
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: closeMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            p3MailStage.activeDetailNotif = null
+                                            p3MailStage.activeDetailIndex = -1
+                                            PhantomState.playSfx("select")
+                                        }
                                     }
                                 }
                             }
