@@ -1369,11 +1369,11 @@ Scope {
                 }
             }
 
-            // Video Animasi Section System Config (part2_60fps.mp4: Makoto Underwater Caustics 60fps Pristine Loop)
+            // Video Animasi Section System Config (skills_ambient.mp4: Makoto Evoker & Skills Geometric 60fps Loop)
             Video {
                 id: p3ConfigVideo
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part2_60fps.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/videos/skills_ambient.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
@@ -1386,11 +1386,11 @@ Scope {
                 }
             }
 
-            // Video Animasi Section Control Center (menu_ambient.mp4: S.E.E.S. Tactical Radar Ambient Loop)
+            // Video Animasi Section Control Center (train_ambient.mp4: Makoto Train Monorail Horizon 60fps Loop)
             Video {
                 id: p3ControlVideo
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/videos/menu_ambient.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/videos/train_ambient.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
@@ -1403,11 +1403,11 @@ Scope {
                 }
             }
 
-            // Video Animasi Section S.E.E.S. Archive (part3_60fps.mp4: Makoto Deep Blue Underwater Tartarus Loop)
+            // Video Animasi Section S.E.E.S. Archive (dorm_ambient.mp4: S.E.E.S. Squad Iwatodai Dormitory Dark Hour 60fps Loop)
             Video {
                 id: p3ArchiveVideo
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/p3r menu/part3_60fps.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/videos/dorm_ambient.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
@@ -1443,8 +1443,8 @@ Scope {
                         itemWidth: 800
                         itemHeight: 220
                         offsetX: 20
-                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_stats.png")
-                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_stats1.png")
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_stats.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_stats1.png")
                         action: () => { p3Overlay.navigateTo("stats") }
                     }
 
@@ -1454,8 +1454,8 @@ Scope {
                         itemWidth: 800
                         itemHeight: 220
                         offsetX: 40
-                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_config.png")
-                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_config1.png")
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_config.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_config1.png")
                         action: () => { p3Overlay.navigateTo("config") }
                     }
 
@@ -1465,8 +1465,8 @@ Scope {
                         itemWidth: 800
                         itemHeight: 220
                         offsetX: 10
-                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_control.png")
-                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_control1.png")
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_control.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_control1.png")
                         action: () => { p3Overlay.navigateTo("control") }
                     }
 
@@ -1476,8 +1476,8 @@ Scope {
                         itemWidth: 800
                         itemHeight: 220
                         offsetX: 50
-                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_palette.png")
-                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_palette1.png")
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_palette.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_palette1.png")
                         action: () => { p3Overlay.navigateTo("palette") }
                     }
 
@@ -1487,8 +1487,8 @@ Scope {
                         itemWidth: 800
                         itemHeight: 220
                         offsetX: 20
-                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_archive.png")
-                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_archive1.png")
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_archive.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_archive1.png")
                         action: () => { p3Overlay.navigateTo("archive") }
                     }
 
@@ -1498,8 +1498,8 @@ Scope {
                         itemWidth: 800
                         itemHeight: 220
                         offsetX: 40
-                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_dispatch.png")
-                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v3_dispatch1.png")
+                        normalIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_dispatch.png")
+                        hoverIcon: Qt.resolvedUrl("../../assets/themes/p3/iconpack/p3_v4_dispatch1.png")
                         action: () => { p3Overlay.navigateTo("dispatch") }
                     }
                 }
@@ -3469,7 +3469,7 @@ Scope {
                             spacing: 16
 
                             Text {
-                                text: "S.E.E.S. CLASSIFIED ARCHIVE"
+                                text: "PHANTOMSHELL ARCHIVE"
                                 font.family: "Rubik"
                                 font.pixelSize: 26
                                 font.weight: Font.Black
@@ -3482,7 +3482,7 @@ Scope {
                                 color: Qt.rgba(0/255, 219/255, 255/255, 0.5)
                             }
                             Text {
-                                text: "SPECIALIZED EXTRACURRICULAR EXECUTION SQUAD // LEVEL 99 DOSSIER"
+                                text: "SYSTEM SPECIFICATIONS & COMPONENT DOSSIER"
                                 font.family: "JetBrainsMono NFM"
                                 font.pixelSize: 13
                                 font.bold: true
@@ -3504,7 +3504,7 @@ Scope {
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 30
 
-                            // 1. Operative Dossier Card (Left)
+                            // 1. Project Dossier Card (Left)
                             Rectangle {
                                 width: 505
                                 height: 420
@@ -3534,7 +3534,7 @@ Scope {
                                     }
                                     Text {
                                         anchors.centerIn: parent
-                                        text: "OPERATIVE DOSSIER // ARCHITECT"
+                                        text: "PROJECT DOSSIER // PHANTOMSHELL"
                                         font.family: "Rubik"
                                         font.pixelSize: 18
                                         font.weight: Font.Black
@@ -3549,17 +3549,17 @@ Scope {
                                     anchors.right: parent.right
                                     anchors.margins: 10
 
-                                    P3StatRow { label: "Operative Codename"; badgeText: "Sho (Joker)" }
-                                    P3StatRow { label: "Security Clearance"; badgeText: "Level 99 • Wildcard" }
-                                    P3StatRow { label: "Assigned Squad"; badgeText: "S.E.E.S. Tartarus" }
-                                    P3StatRow { label: "Active Personas"; badgeText: "Orpheus • Thanatos • Arsene" }
-                                    P3StatRow { label: "Shell System Engine"; badgeText: "PhantomShell v2.4" }
-                                    P3StatRow { label: "Git Repository Branch"; badgeText: "redesign/p3r-theme" }
-                                    P3StatRow { label: "Metaverse Status"; badgeText: "MISSION READY"; showDivider: false }
+                                    P3StatRow { label: "Shell Environment"; badgeText: "PhantomShell v2.4 (NixOS)" }
+                                    P3StatRow { label: "Compositor Target"; badgeText: "Hyprland (Wayland)" }
+                                    P3StatRow { label: "Runtime Engine"; badgeText: "Quickshell C++20 / QML6" }
+                                    P3StatRow { label: "Active Theme"; badgeText: "Persona 3 Reload (Full Moon Blue)" }
+                                    P3StatRow { label: "Audio Visualizer"; badgeText: "PipeWire / Split 64-Band CAVA" }
+                                    P3StatRow { label: "Dotfiles Repository"; badgeText: "github:shoo/dots" }
+                                    P3StatRow { label: "Active Branch"; badgeText: "redesign/p3r-theme"; showDivider: false }
                                 }
                             }
 
-                            // 2. Machine Architecture Card (Right)
+                            // 2. Hardware & Host Telemetry Card (Right)
                             Rectangle {
                                 width: 505
                                 height: 420
@@ -3589,7 +3589,7 @@ Scope {
                                     }
                                     Text {
                                         anchors.centerIn: parent
-                                        text: "HOST MACHINE TELEMETRY"
+                                        text: "HARDWARE & SYSTEM TELEMETRY"
                                         font.family: "Rubik"
                                         font.pixelSize: 18
                                         font.weight: Font.Black
@@ -3604,25 +3604,25 @@ Scope {
                                     anchors.right: parent.right
                                     anchors.margins: 10
 
-                                    P3StatRow { label: "Operating System"; badgeText: (PhantomState.osInfo || "NixOS 26.11 (Zokor)") }
+                                    P3StatRow { label: "Operating System"; badgeText: (PhantomState.sysOs || PhantomState.osInfo || "NixOS 26.11 (Zokor)") }
                                     P3StatRow { label: "Host Machine"; badgeText: (PhantomState.hostName || "PhantomBlade") }
-                                    P3StatRow { label: "Linux Kernel"; badgeText: (PhantomState.kernelVersion || "6.12.0-zen") }
-                                    P3StatRow { label: "Wayland Compositor"; badgeText: "Hyprland v0.53+" }
-                                    P3StatRow { label: "System Uptime"; badgeText: (PhantomState.uptime || "Online") }
-                                    P3StatRow { label: "Active Memory"; badgeText: (PhantomState.memUsage || "Nominal") }
-                                    P3StatRow { label: "Shell Runtime"; badgeText: "Quickshell C++20 / QML6"; showDivider: false }
+                                    P3StatRow { label: "Linux Kernel"; badgeText: (PhantomState.sysKernel || PhantomState.kernelVersion || "6.12.0-zen") }
+                                    P3StatRow { label: "Processor (CPU)"; badgeText: (PhantomState.sysCpuModel || "AMD Ryzen 7") }
+                                    P3StatRow { label: "System Uptime"; badgeText: (PhantomState.sysUptime || PhantomState.uptime || "Online") }
+                                    P3StatRow { label: "Memory Allocation"; badgeText: (PhantomState.sysRamText || PhantomState.memUsage || "Nominal") }
+                                    P3StatRow { label: "Storage Root"; badgeText: (PhantomState.sysDiskText || PhantomState.diskUsage || "Mounted"); showDivider: false }
                                 }
                             }
                         }
 
-                        // Bottom Actions Row (Git Sync, Update, Return)
+                        // Bottom Actions Row (Refresh Specs, Open Dotfiles, Git Update, Return)
                         Row {
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: 0
                             anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: 20
+                            spacing: 16
 
-                            // Sync Button
+                            // Refresh Specs Button
                             Rectangle {
                                 width: 220
                                 height: 42
@@ -3633,9 +3633,9 @@ Scope {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: "SYNC TO SYSTEM"
+                                    text: "↻ REFRESH SPECS"
                                     font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 13
+                                    font.pixelSize: 12
                                     font.weight: Font.Black
                                     color: arcSyncMouse.containsMouse ? "#030e28" : "#ffffff"
                                 }
@@ -3646,7 +3646,36 @@ Scope {
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
                                         PhantomState.playSfx("confirm")
-                                        PhantomState.syncToSystem()
+                                        PhantomState.refreshSystemDossier()
+                                    }
+                                }
+                            }
+
+                            // Open Dotfiles Button
+                            Rectangle {
+                                width: 220
+                                height: 42
+                                color: arcDotfilesMouse.containsMouse ? "#00ffff" : Qt.rgba(0/255, 219/255, 255/255, 0.15)
+                                border.color: "#00dbff"
+                                border.width: 1.5
+                                radius: 3
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "✎ OPEN DOTFILES"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 12
+                                    font.weight: Font.Black
+                                    color: arcDotfilesMouse.containsMouse ? "#030e28" : "#ffffff"
+                                }
+                                MouseArea {
+                                    id: arcDotfilesMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        PhantomState.playSfx("confirm")
+                                        Quickshell.execDetached(["xdg-open", PhantomState.homeDir + "/dots"])
                                     }
                                 }
                             }
@@ -3664,7 +3693,7 @@ Scope {
                                     anchors.centerIn: parent
                                     text: "CHECK GIT UPDATES"
                                     font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 13
+                                    font.pixelSize: 12
                                     font.weight: Font.Black
                                     color: arcUpdMouse.containsMouse ? "#030e28" : "#ffffff"
                                 }
@@ -3693,7 +3722,7 @@ Scope {
                                     anchors.centerIn: parent
                                     text: "RETURN TO MENU"
                                     font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 13
+                                    font.pixelSize: 12
                                     font.weight: Font.Black
                                     color: arcRetMouse.containsMouse ? "#030e28" : "#ffffff"
                                 }
@@ -4671,6 +4700,7 @@ Scope {
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectFit
                 source: powerItemRoot.normalIcon
+                cache: false
                 mipmap: true
                 smooth: true
                 opacity: powerItemRoot.hovered ? 0.0 : 1.0
@@ -4682,6 +4712,7 @@ Scope {
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectFit
                 source: powerItemRoot.hoverIcon
+                cache: false
                 mipmap: true
                 smooth: true
                 opacity: powerItemRoot.hovered ? 1.0 : 0.0
