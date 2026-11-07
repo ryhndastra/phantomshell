@@ -2837,7 +2837,7 @@ Scope {
                         }
                     }
 
-                    // Tactical Radar Status Callout on Right (Over Fuuka)
+                    // Tactical Radar Status Callout on Right (Dihilangkan sesuai permintaan user di foto 3)
                     Item {
                         anchors.top: parent.top
                         anchors.topMargin: 40
@@ -2845,6 +2845,7 @@ Scope {
                         anchors.rightMargin: 60
                         width: 440
                         height: 48
+                        visible: false
 
                         Canvas {
                             anchors.fill: parent

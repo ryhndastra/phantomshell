@@ -894,15 +894,20 @@ Variants {
                 id: p3MailStage
                 visible: PhantomState.isP3
                 anchors.left: parent.left
-                anchors.leftMargin: 70
+                anchors.leftMargin: 64
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: 42
-                width: 580
-                height: Math.min(parent.height - 90, 680)
+                anchors.bottomMargin: 38
+                width: 620
+                height: Math.min(parent.height - 80, 700)
 
                 // Rotasi miring khas game P3R
                 rotation: -3.5
                 transformOrigin: Item.BottomLeft
+
+                // Anti-aliasing hardware multisampling 4x pada seluruh kontainer miring
+                layer.enabled: true
+                layer.smooth: true
+                layer.samples: 4
 
                 // Animasi buka/tutup halus
                 opacity: PhantomState.launcherOpen ? 1.0 : 0.0
@@ -919,6 +924,7 @@ Variants {
                     anchors.margins: -4
                     radius: 6
                     color: Qt.rgba(0/255, 219/255, 255/255, 0.22)
+                    antialiasing: true
                 }
 
                 // Badan kartu utama (Kartu hitam dengan border putih tebal 2.5px persis seperti di game)
@@ -926,23 +932,25 @@ Variants {
                     id: p3MailCard
                     anchors.fill: parent
                     radius: 4
-                    color: Qt.rgba(5/255, 11/255, 28/255, 0.96)
+                    color: Qt.rgba(5/255, 11/255, 28/255, 0.97)
                     border.color: "#ffffff"
                     border.width: 2.5
+                    antialiasing: true
                     clip: true
 
                     // Watermark "MAIL" besar di latar belakang atas kartu
                     Text {
                         anchors.top: parent.top
-                        anchors.topMargin: 0
+                        anchors.topMargin: -4
                         anchors.left: parent.left
                         anchors.leftMargin: 16
                         text: "MAIL"
                         font.family: "Rubik"
-                        font.pixelSize: 84
+                        font.pixelSize: 96
                         font.weight: Font.Black
                         font.italic: true
-                        color: Qt.rgba(1, 1, 1, 0.08)
+                        color: Qt.rgba(1, 1, 1, 0.07)
+                        renderType: Text.CurveRendering
                     }
 
                     // Pita miring biru "TODAY'S New Message" di kanan atas kartu
@@ -951,19 +959,20 @@ Variants {
                         anchors.top: parent.top
                         anchors.right: parent.right
                         anchors.topMargin: -1
-                        anchors.rightMargin: 16
-                        width: 230
-                        height: 56
+                        anchors.rightMargin: 14
+                        width: 240
+                        height: 58
+                        antialiasing: true
                         onPaint: {
                             var ctx = getContext("2d")
                             ctx.reset()
                             ctx.beginPath()
-                            ctx.moveTo(35, 0)
+                            ctx.moveTo(38, 0)
                             ctx.lineTo(width, 0)
                             ctx.lineTo(width, height)
                             ctx.lineTo(0, height)
                             ctx.closePath()
-                            ctx.fillStyle = "#004bbb"
+                            ctx.fillStyle = "#0055d4"
                             ctx.fill()
                             ctx.strokeStyle = "#00ffff"
                             ctx.lineWidth = 1.5
@@ -972,24 +981,26 @@ Variants {
 
                         Column {
                             anchors.centerIn: parent
-                            anchors.horizontalCenterOffset: 12
-                            spacing: -4
+                            anchors.horizontalCenterOffset: 16
+                            spacing: -3
 
                             Text {
                                 text: "TODAY'S"
                                 font.family: "Rubik"
-                                font.pixelSize: 20
+                                font.pixelSize: 21
                                 font.weight: Font.Black
                                 font.italic: true
                                 color: "#ffffff"
+                                renderType: Text.CurveRendering
                             }
                             Text {
                                 text: "New Message"
                                 font.family: "Dancing Script"
-                                font.pixelSize: 18
+                                font.pixelSize: 19
                                 font.bold: true
                                 font.italic: true
                                 color: "#8df6ff"
+                                renderType: Text.CurveRendering
                             }
                         }
                     }
@@ -1004,21 +1015,22 @@ Variants {
                         anchors.leftMargin: 20
                         anchors.rightMargin: 20
                         height: 44
-                        radius: 4
-                        color: Qt.rgba(2/255, 7/255, 20/255, 0.92)
-                        border.color: p3SearchInput.activeFocus ? "#00ffff" : Qt.rgba(0/255, 219/255, 255/255, 0.45)
+                        radius: 3
+                        color: Qt.rgba(2/255, 7/255, 20/255, 0.94)
+                        border.color: p3SearchInput.activeFocus ? "#00ffff" : Qt.rgba(0/255, 219/255, 255/255, 0.35)
                         border.width: 1.5
+                        antialiasing: true
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 12
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 14
                             spacing: 10
 
                             Text {
                                 text: "✉"
                                 font.pixelSize: 16
-                                color: "#00dbff"
+                                color: p3SearchInput.activeFocus ? "#00ffff" : "#00dbff"
                             }
 
                             TextInput {
@@ -1026,7 +1038,7 @@ Variants {
                                 Layout.fillWidth: true
                                 color: "#ffffff"
                                 font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 14
+                                font.pixelSize: 13
                                 font.weight: Font.Black
                                 selectionColor: "#00dbff"
                                 selectedTextColor: "#000000"
@@ -1059,7 +1071,7 @@ Variants {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "Search apps or >settings, >theme..."
+                                    text: "Search dispatch or >settings, >theme..."
                                     color: "#5b78a2"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 12
@@ -1079,10 +1091,10 @@ Variants {
                         anchors.bottomMargin: 10
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.leftMargin: 20
-                        anchors.rightMargin: 20
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
                         clip: true
-                        spacing: 5
+                        spacing: 4
                         model: launcherWin.filteredItems
                         currentIndex: launcherWin.selectedIndex
 
@@ -1093,37 +1105,57 @@ Variants {
                         delegate: Item {
                             id: p3RowDelegate
                             width: p3AppList.width
-                            height: 54
+                            height: 58
                             readonly property bool isSelected: index === launcherWin.selectedIndex
                             readonly property bool isHovered: p3RowMouse.containsMouse
 
+                            // Sentuhan taktil Persona 3: kartu aktif sedikit bergeser ke kanan
+                            x: isSelected ? 6 : (isHovered ? 3 : 0)
+                            Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+
                             // Warna duotone avatar bergaya P3
-                            readonly property var duotoneColors: ["#00a8cc", "#d63384", "#dc3545", "#d4a017", "#198754", "#0d6efd"]
+                            readonly property var duotoneColors: ["#0088cc", "#c2185b", "#d32f2f", "#e65100", "#2e7d32", "#1565c0"]
                             readonly property color avatarBg: duotoneColors[index % duotoneColors.length]
 
-                            // Latar Belakang Kartu: Putih bersih solid saat selected (seperti Mitsuru Kirijo)
+                            // Latar Belakang Kartu:
+                            // Saat SELECTED: Putih solid bersih dengan border biru royal (seperti Mitsuru Kirijo)
+                            // Saat UNSELECTED: Transparan bersih tanpa border kotak kaku, menghilangkan kesan bergerigi/crowded
                             Rectangle {
                                 anchors.fill: parent
                                 radius: 4
-                                color: p3RowDelegate.isSelected ? "#ffffff" : (p3RowDelegate.isHovered ? Qt.rgba(255, 255, 255, 0.08) : Qt.rgba(10/255, 20/255, 45/255, 0.85))
-                                border.color: p3RowDelegate.isSelected ? "#0038a8" : Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                border.width: p3RowDelegate.isSelected ? 2 : 1
+                                color: p3RowDelegate.isSelected ? "#ffffff" : (p3RowDelegate.isHovered ? Qt.rgba(255, 255, 255, 0.08) : Qt.rgba(8/255, 18/255, 42/255, 0.65))
+                                border.color: p3RowDelegate.isSelected ? "#0038a8" : "transparent"
+                                border.width: p3RowDelegate.isSelected ? 2.5 : 0
+                                antialiasing: true
 
                                 Behavior on color { ColorAnimation { duration: 120 } }
                             }
 
+                            // Garis pemisah halus antar baris pesan tidak aktif
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                height: 1
+                                color: Qt.rgba(255, 255, 255, 0.05)
+                                visible: !p3RowDelegate.isSelected
+                            }
+
                             RowLayout {
                                 anchors.fill: parent
-                                anchors.leftMargin: 10
+                                anchors.leftMargin: 12
                                 anchors.rightMargin: 14
-                                spacing: 10
+                                spacing: 12
 
                                 // 1. Tanda Seru Biru "!" (Sesuai Screenshot Game P3R)
                                 Rectangle {
-                                    Layout.preferredWidth: 20
-                                    Layout.preferredHeight: 20
-                                    radius: 10
+                                    Layout.preferredWidth: 22
+                                    Layout.preferredHeight: 22
+                                    radius: 11
                                     color: "#00dbff"
+                                    antialiasing: true
 
                                     Text {
                                         anchors.centerIn: parent
@@ -1137,10 +1169,12 @@ Variants {
 
                                 // 2. Bingkai Avatar / Ikon Aplikasi
                                 Rectangle {
-                                    Layout.preferredWidth: 38
-                                    Layout.preferredHeight: 38
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 40
                                     radius: 4
-                                    color: p3RowDelegate.avatarBg
+                                    // Saat selected, berikan kontras merah cerah khas Mitsuru atau biru kobalt
+                                    color: p3RowDelegate.isSelected ? (index % 2 === 0 ? "#e60039" : "#0055d4") : p3RowDelegate.avatarBg
+                                    antialiasing: true
                                     clip: true
 
                                     Image {
@@ -1149,6 +1183,7 @@ Variants {
                                         source: modelData.appIcon || ""
                                         fillMode: Image.PreserveAspectFit
                                         smooth: true
+                                        mipmap: true
                                         visible: modelData.appIcon !== "" && status === Image.Ready
                                     }
 
@@ -1156,7 +1191,7 @@ Variants {
                                         anchors.centerIn: parent
                                         name: modelData.iconName || "app"
                                         color: "#ffffff"
-                                        size: 20
+                                        size: 22
                                         visible: !modelData.appIcon || modelData.appIcon === ""
                                     }
                                 }
@@ -1170,7 +1205,7 @@ Variants {
                                         spacing: 6
                                         Text {
                                             text: "✉"
-                                            font.pixelSize: 13
+                                            font.pixelSize: 14
                                             color: p3RowDelegate.isSelected ? "#004bbd" : "#00dbff"
                                         }
                                         Text {
@@ -1178,9 +1213,10 @@ Variants {
                                             text: modelData.name
                                             color: p3RowDelegate.isSelected ? "#041238" : "#ffffff"
                                             font.family: "Rubik"
-                                            font.pixelSize: 14
+                                            font.pixelSize: 15
                                             font.weight: Font.Black
                                             elide: Text.ElideRight
+                                            renderType: Text.CurveRendering
                                         }
                                     }
 
@@ -1189,29 +1225,42 @@ Variants {
                                         text: modelData.desc
                                         color: p3RowDelegate.isSelected ? "#2b4674" : "#7fa2cc"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 10
+                                        font.pixelSize: 11
                                         font.bold: true
                                         elide: Text.ElideRight
+                                        renderType: Text.CurveRendering
                                     }
                                 }
 
-                                // 4. Lencana Aksi di Kanan
+                                // 4. Status Aksi di Kanan:
+                                // Bersih dan rapi; tombol OPEN hanya muncul saat kartu terpilih (Selected),
+                                // menghilangkan deretan tombol kaku bergerigi yang mengotori tampilan
                                 Rectangle {
-                                    Layout.preferredWidth: 54
-                                    Layout.preferredHeight: 20
+                                    visible: p3RowDelegate.isSelected
+                                    Layout.preferredWidth: 68
+                                    Layout.preferredHeight: 22
                                     radius: 3
-                                    color: p3RowDelegate.isSelected ? "#0038a8" : Qt.rgba(0/255, 219/255, 255/255, 0.15)
-                                    border.color: p3RowDelegate.isSelected ? "#0038a8" : "#00dbff"
-                                    border.width: 1
+                                    color: "#0038a8"
+                                    antialiasing: true
 
                                     Text {
                                         anchors.centerIn: parent
-                                        text: modelData.badge || "RUN"
+                                        text: "OPEN ↵"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 9
+                                        font.pixelSize: 10
                                         font.bold: true
-                                        color: p3RowDelegate.isSelected ? "#ffffff" : "#8df6ff"
+                                        color: "#ffffff"
                                     }
+                                }
+
+                                Text {
+                                    visible: !p3RowDelegate.isSelected
+                                    text: "NEW"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: Qt.rgba(0/255, 219/255, 255/255, 0.45)
+                                    Layout.rightMargin: 4
                                 }
                             }
 
@@ -1246,6 +1295,7 @@ Variants {
                             Rectangle {
                                 width: 22; height: 22; radius: 11
                                 color: "#00dbff"
+                                antialiasing: true
                                 Text {
                                     anchors.centerIn: parent
                                     text: "A"
@@ -1274,6 +1324,7 @@ Variants {
                             Rectangle {
                                 width: 22; height: 22; radius: 11
                                 color: "#ff3366"
+                                antialiasing: true
                                 Text {
                                     anchors.centerIn: parent
                                     text: "B"

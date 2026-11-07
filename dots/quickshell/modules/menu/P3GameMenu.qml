@@ -300,6 +300,10 @@ Scope {
                         height: isActive ? 122 : 98
                         x: isActive ? 12 : 0
 
+                        layer.enabled: true
+                        layer.smooth: true
+                        layer.samples: 4
+
                         Behavior on height { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
                         Behavior on x { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
 
@@ -307,6 +311,7 @@ Scope {
                         Canvas {
                             id: cardCanvas
                             anchors.fill: parent
+                            antialiasing: true
                             onPaint: {
                                 var ctx = getContext("2d")
                                 ctx.reset()
@@ -354,7 +359,9 @@ Scope {
                             color: cardWrap.isActive ? "#061230" : "#0a1848"
                             border.color: cardWrap.isActive ? "#000000" : "#00dbff"
                             border.width: 2
+                            radius: 2
                             rotation: -8
+                            antialiasing: true
 
                             Text {
                                 anchors.centerIn: parent
@@ -364,6 +371,7 @@ Scope {
                                 font.weight: Font.Black
                                 color: cardWrap.isActive ? "#00dbff" : "#d2fdff"
                                 rotation: 8
+                                renderType: Text.CurveRendering
                             }
                         }
 
