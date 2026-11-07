@@ -339,6 +339,11 @@ Scope {
             P3MusicCapsule {
                 visible: PhantomState.isP3
             }
+
+            // widget nomor workspace stensil kaca di background kiri atas khusus persona 3 reload
+            P3DesktopWorkspaces {
+                visible: PhantomState.isP3 && PhantomState.showWorkspaces
+            }
         }
     }
 }

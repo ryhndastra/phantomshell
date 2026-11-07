@@ -215,7 +215,8 @@ Scope {
                 // Indikator Workspace Minimalis & Elegan Khusus Persona 3 Reload (S.E.E.S. Sector Tracker)
                 Item {
                     id: p3WsContainer
-                    visible: PhantomState.showWorkspaces && PhantomState.isP3
+                    // Disembunyikan di bar karena sekarang menyatu di background kaca kiri atas sesuai arahan user
+                    visible: false
                     implicitWidth: p3WsRow.implicitWidth + 24
                     width: implicitWidth
                     height: 30
