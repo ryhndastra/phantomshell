@@ -55,6 +55,13 @@ Item {
         return 48
     }
 
+    Behavior on x {
+        NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
+    }
+    Behavior on y {
+        NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
+    }
+
     // gaya jam potongan poligon editorial dengan ikon cuaca
     Item {
         anchors.fill: parent

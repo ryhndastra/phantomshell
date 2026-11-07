@@ -525,7 +525,7 @@ Singleton {
     // konfigurasi widget jam desktop, visualizer cava, dan lirik
     property bool showDesktopClock: true
     property string desktopClockStyle: "p5-editorial"
-    property string desktopClockPosition: "top-left"
+    property string desktopClockPosition: "top-right"
     property int desktopClockScale: 100
     property bool desktopClockShowSeconds: false
     property bool desktopClockShowQuote: true
@@ -567,7 +567,7 @@ Singleton {
     }
 
     // sinkronisasi preset tema, wallpaper bawaan, dan warna border hyprland
-    function applyPreset(presetId) {
+    function applyPreset(presetId, skipSave) {
         if (presets[presetId]) {
             const p = presets[presetId]
             themeId = p.id
@@ -602,8 +602,10 @@ Singleton {
                 "hl.config({ general = { col = { active_border = 'rgba(" + cleanHex + "ff)' } } })"
             ])
             syncAppThemes(p)
-            saveState()
-            playSfx("select")
+            if (!skipSave && !root.isLoadingSettings) {
+                saveState()
+                playSfx("select")
+            }
         }
     }
 
@@ -649,7 +651,10 @@ Singleton {
         saveState()
     }
 
+    property bool isLoadingSettings: true
+
     function saveState() {
+        if (root.isLoadingSettings) return
         const settingsData = {
             theme: {
                 mode: root.darkMode ? "dark" : "light",
@@ -921,15 +926,19 @@ Singleton {
             onRead: data => {
                 console.log("[SETTINGS LOAD] read: " + data)
                 const line = String(data).trim()
-                if (!line) return
+                if (!line) {
+                    root.isLoadingSettings = false
+                    return
+                }
                 try {
                     const cfg = JSON.parse(line)
                     if (cfg && cfg.theme && cfg.theme.preset) {
-                        root.applyPreset(cfg.theme.preset)
+                        root.applyPreset(cfg.theme.preset, true)
                     }
                     if (cfg && cfg.desktop) {
                         if (cfg.desktop.desktopClockPosition !== undefined) root.desktopClockPosition = cfg.desktop.desktopClockPosition
                         if (cfg.desktop.showDesktopClock !== undefined) root.showDesktopClock = cfg.desktop.showDesktopClock
+                        if (cfg.desktop.desktopClockScale !== undefined) root.desktopClockScale = cfg.desktop.desktopClockScale
                         if (cfg.desktop.showDesktopCava !== undefined) root.showDesktopCava = cfg.desktop.showDesktopCava
                         if (cfg.desktop.cavaBarCount !== undefined) root.cavaBarCount = cfg.desktop.cavaBarCount
                         if (cfg.desktop.cavaMaxHeight !== undefined) root.cavaMaxHeight = cfg.desktop.cavaMaxHeight
@@ -940,12 +949,23 @@ Singleton {
                     if (cfg && cfg.bar) {
                         if (cfg.bar.position !== undefined) root.barPosition = cfg.bar.position
                         if (cfg.bar.showWeatherHud !== undefined) root.showWeatherHud = cfg.bar.showWeatherHud
+                        if (cfg.bar.showWorkspaces !== undefined) root.showWorkspaces = cfg.bar.showWorkspaces
+                        if (cfg.bar.workspaceCount !== undefined) root.workspaceCount = cfg.bar.workspaceCount
                     }
                     if (cfg && cfg.sfx) {
                         if (cfg.sfx.enabled !== undefined) root.sfxEnabled = cfg.sfx.enabled
                         if (cfg.sfx.volume !== undefined) root.sfxVolume = cfg.sfx.volume
                     }
+                    if (cfg && cfg.hyprland) {
+                        if (cfg.hyprland.gapsIn !== undefined) root.hyprGapsIn = cfg.hyprland.gapsIn
+                        if (cfg.hyprland.gapsOut !== undefined) root.hyprGapsOut = cfg.hyprland.gapsOut
+                        if (cfg.hyprland.borderSize !== undefined) root.hyprBorderSize = cfg.hyprland.borderSize
+                        if (cfg.hyprland.rounding !== undefined) root.hyprRounding = cfg.hyprland.rounding
+                        if (cfg.hyprland.blurEnabled !== undefined) root.hyprBlurEnabled = cfg.hyprland.blurEnabled
+                        if (cfg.hyprland.animationsEnabled !== undefined) root.hyprAnimationsEnabled = cfg.hyprland.animationsEnabled
+                    }
                 } catch(e) {}
+                root.isLoadingSettings = false
             }
         }
     }

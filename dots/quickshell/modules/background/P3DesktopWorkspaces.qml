@@ -13,14 +13,21 @@ import qs.config
 Item {
     id: root
 
-    // Posisi di pojok kiri atas wallpaper (pada bilah atap gerbong monorail)
+    // Deteksi jika jam berada di top-left, maka workspace otomatis meluncur ke top-right
+    readonly property bool isDockedRight: PhantomState.desktopClockPosition === "top-left"
+
     anchors.top: parent.top
     anchors.topMargin: 38
-    anchors.left: parent.left
-    anchors.leftMargin: 48
 
+    x: isDockedRight ? (parent.width - width - 48) : 48
+    width: wsRow.implicitWidth
+    height: 42
     implicitWidth: wsRow.implicitWidth
     implicitHeight: 46
+
+    Behavior on x {
+        NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
+    }
 
     z: 10
 
