@@ -83,6 +83,11 @@ ShellRoot {
             PhantomState.p3MenuCard = idx
         }
 
+        function setP3LauncherTab(tab: string): void {
+            PhantomState.p3LauncherTab = tab
+            PhantomState.launcherOpen = true
+        }
+
         function toggleSettings(): void {
             PhantomState.toggleSettings()
         }

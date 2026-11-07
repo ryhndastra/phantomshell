@@ -887,8 +887,7 @@ Variants {
 
             // =========================================================================
             // KONTAINER APLIKASI LAUNCHER KHUSUS PERSONA 3 RELOAD: S.E.E.S. MAIL MENU
-            // 1:1 Rekreasi Akurat Menu "MAIL" (Today's New Message) Persona 3 Reload
-            // Miring -5.5 derajat, Bayangan 3D Tebal, Avatar Diagonal Slash, Kartu Mitsuru Kirijo
+            // Dynamic Tabs: "APPS" (S.E.E.S. System Apps) & "MAIL" (TODAY'S New Message)
             // =========================================================================
             Item {
                 id: p3MailStage
@@ -899,6 +898,10 @@ Variants {
                 anchors.bottomMargin: 38
                 width: 590
                 height: Math.min(parent.height - 70, 700)
+
+                // State Tab Aktif: "apps" (Launcher Aplikasi) atau "mail" (Riwayat Notifikasi)
+                readonly property string activeTab: PhantomState.p3LauncherTab
+                property int selectedNotifIndex: 0
 
                 // Rotasi miring otentik Persona 3 Reload (-5.5 derajat) dengan layer multisample antialiasing
                 transformOrigin: Item.BottomLeft
@@ -965,7 +968,7 @@ Variants {
                 }
 
                 // ---------------------------------------------------------------------
-                // Konten Kartu Utama (Watermark, Ribbon, Search, Daftar Aplikasi & Prompts)
+                // Konten Kartu Utama (Watermark, Ribbon, Tab Switcher, Search, Daftar)
                 // ---------------------------------------------------------------------
                 Item {
                     id: p3CardArea
@@ -973,13 +976,13 @@ Variants {
                     anchors.margins: 8
                     clip: true
 
-                    // 1. Watermark Ikonik "MAIL" Besar di Kiri Atas
+                    // 1. Dynamic Watermark Kiri Atas: "APPS" saat Launcher, "MAIL" saat Notifikasi
                     Text {
                         anchors.left: parent.left
                         anchors.leftMargin: 16
                         anchors.top: parent.top
                         anchors.topMargin: 2
-                        text: "MAIL"
+                        text: p3MailStage.activeTab === "apps" ? "APPS" : "MAIL"
                         font.family: "Rubik"
                         font.pixelSize: 84
                         font.weight: Font.Black
@@ -988,7 +991,7 @@ Variants {
                         renderType: Text.CurveRendering
                     }
 
-                    // 2. Pita Miring Biru "TODAY'S New Message" di Kanan Atas
+                    // 2. Dynamic Ribbon Kanan Atas: "S.E.E.S. System Apps" vs "TODAY'S New Message"
                     Canvas {
                         id: p3RibbonCanvas
                         anchors.top: parent.top
@@ -1037,7 +1040,7 @@ Variants {
                             spacing: -4
 
                             Text {
-                                text: "TODAY'S"
+                                text: p3MailStage.activeTab === "apps" ? "S.E.E.S." : "TODAY'S"
                                 font.family: "Rubik"
                                 font.pixelSize: 20
                                 font.weight: Font.Black
@@ -1046,7 +1049,7 @@ Variants {
                                 renderType: Text.CurveRendering
                             }
                             Text {
-                                text: "New Message"
+                                text: p3MailStage.activeTab === "apps" ? "System Apps" : (PhantomState.imNotifications.count > 0 ? (PhantomState.imNotifications.count + " Messages") : "New Message")
                                 font.family: "Dancing Script"
                                 font.pixelSize: 19
                                 font.bold: true
@@ -1057,10 +1060,124 @@ Variants {
                         }
                     }
 
-                    // 3. Baris Input Pencarian Aplikasi (Diskrit & Selaras dengan UI P3R)
+                    // 3. Tab Switcher: [ APPS ] & [ MAIL (Count) ]
+                    Row {
+                        id: p3TabRow
+                        anchors.top: p3RibbonCanvas.bottom
+                        anchors.topMargin: 4
+                        anchors.left: parent.left
+                        anchors.leftMargin: 16
+                        spacing: 8
+
+                        // Tombol Tab APPS
+                        Rectangle {
+                            width: 86
+                            height: 26
+                            radius: 3
+                            color: p3MailStage.activeTab === "apps" ? "#0038a8" : "transparent"
+                            border.color: p3MailStage.activeTab === "apps" ? "#00d0ff" : "rgba(255, 255, 255, 0.18)"
+                            border.width: 1.5
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 6
+                                Text {
+                                    text: "⊞"
+                                    font.pixelSize: 11
+                                    color: p3MailStage.activeTab === "apps" ? "#ffffff" : "#6f8cb0"
+                                }
+                                Text {
+                                    text: "APPS"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Black
+                                    color: p3MailStage.activeTab === "apps" ? "#ffffff" : "#6f8cb0"
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (p3MailStage.activeTab !== "apps") {
+                                        PhantomState.p3LauncherTab = "apps"
+                                        PhantomState.playSfx("select")
+                                        p3SearchInput.forceActiveFocus()
+                                    }
+                                }
+                            }
+                        }
+
+                        // Tombol Tab MAIL
+                        Rectangle {
+                            width: 96
+                            height: 26
+                            radius: 3
+                            color: p3MailStage.activeTab === "mail" ? "#0038a8" : "transparent"
+                            border.color: p3MailStage.activeTab === "mail" ? "#00d0ff" : "rgba(255, 255, 255, 0.18)"
+                            border.width: 1.5
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 6
+                                Text {
+                                    text: "✉"
+                                    font.pixelSize: 11
+                                    color: p3MailStage.activeTab === "mail" ? "#ffffff" : "#6f8cb0"
+                                }
+                                Text {
+                                    text: "MAIL"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Black
+                                    color: p3MailStage.activeTab === "mail" ? "#ffffff" : "#6f8cb0"
+                                }
+                                // Badge Notifikasi Baru
+                                Rectangle {
+                                    visible: PhantomState.imNotifications.count > 0
+                                    width: 16
+                                    height: 16
+                                    radius: 8
+                                    color: "#e60039"
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: PhantomState.imNotifications.count
+                                        font.family: "Rubik"
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: "#ffffff"
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (p3MailStage.activeTab !== "mail") {
+                                        PhantomState.p3LauncherTab = "mail"
+                                        PhantomState.playSfx("select")
+                                        p3SearchInput.forceActiveFocus()
+                                    }
+                                }
+                            }
+                        }
+
+                        // Petunjuk Tombol Tab
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "[Tab] switch"
+                            font.family: "JetBrainsMono NFM"
+                            font.pixelSize: 10
+                            font.bold: true
+                            color: "#4e6a91"
+                        }
+                    }
+
+                    // 4. Baris Input Pencarian Aplikasi / Notifikasi
                     Rectangle {
                         id: p3SearchContainer
-                        anchors.top: p3RibbonCanvas.bottom
+                        anchors.top: p3TabRow.bottom
                         anchors.topMargin: 8
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -1080,8 +1197,8 @@ Variants {
                             spacing: 8
 
                             Text {
-                                text: "✉"
-                                font.pixelSize: 15
+                                text: p3MailStage.activeTab === "apps" ? "⊞" : "✉"
+                                font.pixelSize: 14
                                 color: p3SearchInput.activeFocus ? "#00e5ff" : "#4e6a91"
                             }
 
@@ -1097,33 +1214,66 @@ Variants {
                                 clip: true
 
                                 onTextChanged: {
-                                    launcherWin.query = text
-                                    launcherWin.selectedIndex = 0
+                                    if (p3MailStage.activeTab === "apps") {
+                                        launcherWin.query = text
+                                        launcherWin.selectedIndex = 0
+                                    } else {
+                                        p3MailStage.selectedNotifIndex = 0
+                                    }
                                 }
 
                                 Keys.onPressed: (event) => {
                                     if (event.key === Qt.Key_Escape) {
                                         PhantomState.launcherOpen = false
                                         event.accepted = true
-                                    } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
-                                        if (launcherWin.filteredItems.length > 0) {
-                                            launcherWin.selectedIndex = (launcherWin.selectedIndex + 1) % launcherWin.filteredItems.length
+                                    } else if (event.key === Qt.Key_Tab) {
+                                        // Tab berpindah antara APPS dan MAIL
+                                        PhantomState.p3LauncherTab = (p3MailStage.activeTab === "apps" ? "mail" : "apps")
+                                        PhantomState.playSfx("select")
+                                        event.accepted = true
+                                    } else if (event.key === Qt.Key_Down) {
+                                        if (p3MailStage.activeTab === "apps") {
+                                            if (launcherWin.filteredItems.length > 0) {
+                                                launcherWin.selectedIndex = (launcherWin.selectedIndex + 1) % launcherWin.filteredItems.length
+                                            }
+                                        } else {
+                                            if (PhantomState.imNotifications.count > 0) {
+                                                p3MailStage.selectedNotifIndex = (p3MailStage.selectedNotifIndex + 1) % PhantomState.imNotifications.count
+                                            }
                                         }
                                         event.accepted = true
                                     } else if (event.key === Qt.Key_Up) {
-                                        if (launcherWin.filteredItems.length > 0) {
-                                            launcherWin.selectedIndex = (launcherWin.selectedIndex - 1 + launcherWin.filteredItems.length) % launcherWin.filteredItems.length
+                                        if (p3MailStage.activeTab === "apps") {
+                                            if (launcherWin.filteredItems.length > 0) {
+                                                launcherWin.selectedIndex = (launcherWin.selectedIndex - 1 + launcherWin.filteredItems.length) % launcherWin.filteredItems.length
+                                            }
+                                        } else {
+                                            if (PhantomState.imNotifications.count > 0) {
+                                                p3MailStage.selectedNotifIndex = (p3MailStage.selectedNotifIndex - 1 + PhantomState.imNotifications.count) % PhantomState.imNotifications.count
+                                            }
                                         }
                                         event.accepted = true
                                     } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                        launcherWin.executeItem(launcherWin.selectedIndex)
+                                        if (p3MailStage.activeTab === "apps") {
+                                            launcherWin.executeItem(launcherWin.selectedIndex)
+                                        } else {
+                                            // Di mode MAIL: Enter menghapus notifikasi terpilih
+                                            if (PhantomState.imNotifications.count > 0) {
+                                                var idx = p3MailStage.selectedNotifIndex
+                                                PhantomState.imNotifications.remove(idx)
+                                                if (p3MailStage.selectedNotifIndex >= PhantomState.imNotifications.count && p3MailStage.selectedNotifIndex > 0) {
+                                                    p3MailStage.selectedNotifIndex--
+                                                }
+                                                PhantomState.playSfx("select")
+                                            }
+                                        }
                                         event.accepted = true
                                     }
                                 }
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "Search applications or >settings, >theme..."
+                                    text: p3MailStage.activeTab === "apps" ? "Search applications or >settings, >theme..." : "Filter notifications..."
                                     color: "#4e6a91"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 11
@@ -1134,21 +1284,59 @@ Variants {
                         }
                     }
 
-                    // 4. Daftar Baris Pesan Masuk / Aplikasi (ListView Otentik Persona 3 Reload)
+                    // 5. Pesan Kosong Jika Tidak Ada Notifikasi
+                    Item {
+                        anchors.centerIn: p3AppList
+                        visible: p3MailStage.activeTab === "mail" && PhantomState.imNotifications.count === 0
+                        width: 300
+                        height: 120
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 8
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: "✉"
+                                font.pixelSize: 36
+                                color: Qt.rgba(0/255, 219/255, 255/255, 0.25)
+                            }
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: "NO NEW MESSAGES"
+                                font.family: "Rubik"
+                                font.pixelSize: 15
+                                font.weight: Font.Black
+                                color: "#6b88b0"
+                            }
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: "Your inbox is clear today."
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 11
+                                font.bold: true
+                                color: "#3f5678"
+                            }
+                        }
+                    }
+
+                    // 6. Daftar Aplikasi / Notifikasi (ListView Bersih Tanpa Button A/B/X)
                     ListView {
                         id: p3AppList
                         anchors.top: p3SearchContainer.bottom
                         anchors.topMargin: 10
-                        anchors.bottom: p3BottomPrompts.top
-                        anchors.bottomMargin: 10
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 16
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.leftMargin: 12
                         anchors.rightMargin: 16
                         clip: true
                         spacing: 5
-                        model: launcherWin.filteredItems
-                        currentIndex: launcherWin.selectedIndex
+                        model: p3MailStage.activeTab === "apps" ? launcherWin.filteredItems : PhantomState.imNotifications
+                        currentIndex: p3MailStage.activeTab === "apps" ? launcherWin.selectedIndex : p3MailStage.selectedNotifIndex
 
                         onCurrentIndexChanged: {
                             positionViewAtIndex(currentIndex, ListView.Contain)
@@ -1156,10 +1344,18 @@ Variants {
 
                         delegate: Item {
                             id: p3RowDelegate
+                            readonly property bool isApps: p3MailStage.activeTab === "apps"
+                            readonly property bool isSelected: isApps ? (index === launcherWin.selectedIndex) : (index === p3MailStage.selectedNotifIndex)
+                            readonly property bool isHovered: p3RowMouse.containsMouse
+
                             width: p3AppList.width - (isSelected ? 0 : 8)
                             height: 54
-                            readonly property bool isSelected: index === launcherWin.selectedIndex
-                            readonly property bool isHovered: p3RowMouse.containsMouse
+
+                            // Data Helper tergantung tab (Safe untuk JS Array & ListModel)
+                            readonly property string itemName: isApps ? (modelData ? (modelData.name || "") : "") : (typeof senderName !== "undefined" ? senderName : (typeof sender !== "undefined" ? sender : (typeof model !== "undefined" && model ? (model.senderName || model.sender || "") : "")))
+                            readonly property string itemDesc: isApps ? (modelData ? (modelData.desc || "") : "") : (typeof msgBody !== "undefined" ? msgBody : (typeof message !== "undefined" ? message : (typeof model !== "undefined" && model ? (model.msgBody || model.message || "") : "")))
+                            readonly property string itemIcon: isApps ? (modelData ? (modelData.appIcon || "") : "") : (typeof msgIcon !== "undefined" ? msgIcon : (typeof appIcon !== "undefined" ? appIcon : (typeof model !== "undefined" && model ? (model.msgIcon || model.appIcon || "") : "")))
+                            readonly property string itemTime: !isApps ? (typeof msgTime !== "undefined" ? msgTime : (typeof time !== "undefined" ? time : (typeof model !== "undefined" && model ? (model.msgTime || model.time || "") : ""))) : ""
 
                             // Pergeseran taktil: baris aktif sedikit melompat ke kanan
                             x: isSelected ? 8 : (isHovered ? 4 : 0)
@@ -1222,26 +1418,26 @@ Variants {
                                     }
                                 }
 
-                                // Ikon Aplikasi di dalam Avatar Slashed
+                                // Ikon Aplikasi / Notifikasi di dalam Avatar Slashed
                                 Image {
                                     anchors.verticalCenter: parent.verticalCenter
                                     x: 6
                                     width: 32
                                     height: 32
-                                    source: modelData.appIcon || ""
+                                    source: p3RowDelegate.itemIcon
                                     fillMode: Image.PreserveAspectFit
                                     smooth: true
                                     mipmap: true
-                                    visible: modelData.appIcon !== "" && status === Image.Ready
+                                    visible: p3RowDelegate.itemIcon !== "" && status === Image.Ready
                                 }
 
                                 P5Icon {
                                     anchors.verticalCenter: parent.verticalCenter
                                     x: 10
-                                    name: modelData.iconName || "app"
+                                    name: p3RowDelegate.isApps ? (modelData ? (modelData.iconName || "app") : "app") : "chat"
                                     color: "#ffffff"
                                     size: 22
-                                    visible: !modelData.appIcon || modelData.appIcon === ""
+                                    visible: p3RowDelegate.itemIcon === "" || p3RowDelegate.itemIcon.length === 0
                                 }
                             }
 
@@ -1250,7 +1446,7 @@ Variants {
                                 id: messageCard
                                 x: 80
                                 y: 3
-                                width: p3RowDelegate.width - 80 + (p3RowDelegate.isSelected ? 8 : 0)
+                                width: p3RowDelegate.width - 80 + (p3RowDelegate.isSelected ? 10 : 0)
                                 height: 48
 
                                 Canvas {
@@ -1315,7 +1511,7 @@ Variants {
                                     }
                                 }
 
-                                // Konten Teks Nama Aplikasi & Deskripsi
+                                // Konten Teks Nama Aplikasi / Pengirim & Deskripsi
                                 Column {
                                     anchors.left: parent.left
                                     anchors.leftMargin: 24
@@ -1329,7 +1525,7 @@ Variants {
                                         spacing: 6
 
                                         Text {
-                                            text: "✉"
+                                            text: p3RowDelegate.isApps ? "✉" : "✉"
                                             font.pixelSize: 14
                                             color: p3RowDelegate.isSelected ? "#0048d0" : "#00dbff"
                                         }
@@ -1338,15 +1534,27 @@ Variants {
                                             Layout.fillWidth: true
                                             spacing: 1
 
-                                            Text {
+                                            RowLayout {
                                                 width: parent.width
-                                                text: modelData.name
-                                                color: p3RowDelegate.isSelected ? "#0038a8" : "#ffffff"
-                                                font.family: "Rubik"
-                                                font.pixelSize: 14
-                                                font.weight: p3RowDelegate.isSelected ? Font.Black : Font.Bold
-                                                elide: Text.ElideRight
-                                                renderType: Text.CurveRendering
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    text: p3RowDelegate.itemName
+                                                    color: p3RowDelegate.isSelected ? "#0038a8" : "#ffffff"
+                                                    font.family: "Rubik"
+                                                    font.pixelSize: 14
+                                                    font.weight: p3RowDelegate.isSelected ? Font.Black : Font.Bold
+                                                    elide: Text.ElideRight
+                                                    renderType: Text.CurveRendering
+                                                }
+
+                                                Text {
+                                                    visible: p3RowDelegate.itemTime !== ""
+                                                    text: p3RowDelegate.itemTime
+                                                    color: p3RowDelegate.isSelected ? "#0038a8" : "#6f8cb0"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 10
+                                                    font.bold: true
+                                                }
                                             }
 
                                             // Garis bawah biru otentik di bawah nama kontak terpilih
@@ -1361,7 +1569,7 @@ Variants {
 
                                     Text {
                                         width: parent.width
-                                        text: modelData.desc || ""
+                                        text: p3RowDelegate.itemDesc
                                         color: p3RowDelegate.isSelected ? "#060f22" : "#9fb4cc"
                                         font.family: "Rubik"
                                         font.pixelSize: 11
@@ -1379,129 +1587,24 @@ Variants {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onEntered: {
-                                    if (launcherWin.selectedIndex !== index) PhantomState.playSfx("select")
-                                    launcherWin.selectedIndex = index
+                                    if (p3RowDelegate.isApps) {
+                                        if (launcherWin.selectedIndex !== index) PhantomState.playSfx("select")
+                                        launcherWin.selectedIndex = index
+                                    } else {
+                                        if (p3MailStage.selectedNotifIndex !== index) PhantomState.playSfx("select")
+                                        p3MailStage.selectedNotifIndex = index
+                                    }
                                 }
                                 onClicked: {
-                                    launcherWin.selectedIndex = index
-                                    launcherWin.executeItem(index)
-                                }
-                            }
-                        }
-                    }
-
-                    // 5. Tombol Petunjuk Navigasi Konsol Game Otentik P3R di Bagian Bawah
-                    RowLayout {
-                        id: p3BottomPrompts
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.left
-                        anchors.leftMargin: 20
-                        anchors.bottomMargin: 14
-                        spacing: 20
-
-                        // (A) Launch
-                        Item {
-                            implicitWidth: btnARow.implicitWidth
-                            implicitHeight: btnARow.implicitHeight
-
-                            RowLayout {
-                                id: btnARow
-                                anchors.fill: parent
-                                spacing: 7
-                                Rectangle {
-                                    width: 22
-                                    height: 22
-                                    radius: 11
-                                    color: "#ffffff"
-                                    border.color: "#0a1120"
-                                    border.width: 1.5
-                                    antialiasing: true
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "A"
-                                        font.family: "Rubik"
-                                        font.pixelSize: 12
-                                        font.weight: Font.Black
-                                        color: "#0a1120"
+                                    if (p3RowDelegate.isApps) {
+                                        launcherWin.selectedIndex = index
+                                        launcherWin.executeItem(index)
+                                    } else {
+                                        // Klik notifikasi menghapusnya dari list
+                                        PhantomState.imNotifications.remove(index)
+                                        PhantomState.playSfx("select")
                                     }
                                 }
-                                Text {
-                                    text: "Launch"
-                                    color: "#ffffff"
-                                    font.family: "Rubik"
-                                    font.pixelSize: 13
-                                    font.bold: true
-                                    font.italic: true
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: launcherWin.executeItem(launcherWin.selectedIndex)
-                            }
-                        }
-
-                        // (B) Close
-                        Item {
-                            implicitWidth: btnBRow.implicitWidth
-                            implicitHeight: btnBRow.implicitHeight
-
-                            RowLayout {
-                                id: btnBRow
-                                anchors.fill: parent
-                                spacing: 7
-                                Rectangle {
-                                    width: 22
-                                    height: 22
-                                    radius: 11
-                                    color: "#ffffff"
-                                    border.color: "#0a1120"
-                                    border.width: 1.5
-                                    antialiasing: true
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "B"
-                                        font.family: "Rubik"
-                                        font.pixelSize: 12
-                                        font.weight: Font.Black
-                                        color: "#0a1120"
-                                    }
-                                }
-                                Text {
-                                    text: "Close"
-                                    color: "#ffffff"
-                                    font.family: "Rubik"
-                                    font.pixelSize: 13
-                                    font.bold: true
-                                    font.italic: true
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: PhantomState.launcherOpen = false
-                            }
-                        }
-
-                        // Petunjuk Navigasi Arah Panah
-                        RowLayout {
-                            spacing: 6
-                            Text {
-                                text: "↑/↓"
-                                color: "#00dbff"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 13
-                                font.bold: true
-                            }
-                            Text {
-                                text: "Select"
-                                color: "#8df6ff"
-                                font.family: "Rubik"
-                                font.pixelSize: 13
-                                font.bold: true
-                                font.italic: true
                             }
                         }
                     }
