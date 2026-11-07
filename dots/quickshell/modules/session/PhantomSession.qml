@@ -1386,11 +1386,11 @@ Scope {
                 }
             }
 
-            // Video Animasi Section Control Center (fuuka_ambient.mp4: Fuuka Yamagishi S.E.E.S. Tactical Navigator 60fps Loop)
+            // Video Animasi Section Control Center (makoto_train_ambient.mp4: Makoto Yuki Monorail Train 60fps Loop)
             Video {
                 id: p3ControlVideo
                 anchors.fill: parent
-                source: Qt.resolvedUrl("../../assets/themes/p3/videos/fuuka_ambient.mp4")
+                source: Qt.resolvedUrl("../../assets/themes/p3/videos/makoto_train_ambient.mp4")
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 volume: 0
@@ -2641,7 +2641,7 @@ Scope {
                                     label: "Clock Placement"
                                     badgeText: PhantomState.desktopClockPosition.toUpperCase()
                                     clickable: true
-                                    onClicked: { const p = ["top-right", "top-left", "bottom-right"]; const i = p.indexOf(PhantomState.desktopClockPosition); PhantomState.desktopClockPosition = p[(i + 1) % p.length]; PhantomState.saveState() }
+                                    onClicked: { const p = ["top-right", "bottom-right", "bottom-left", "top-left"]; const i = p.indexOf(PhantomState.desktopClockPosition); PhantomState.desktopClockPosition = p[(i + 1) % p.length]; PhantomState.saveState() }
                                 }
                                 P3StatRow {
                                     label: "P3 Music Capsule"
@@ -2875,7 +2875,7 @@ Scope {
                                 }
                             }
                             Text {
-                                text: "NAVIGATOR // FUUKA YAMAGISHI // RADAR ON"
+                                text: "S.E.E.S. LEADER // MAKOTO YUKI // MONORAIL LINK"
                                 font.family: "JetBrainsMono NFM"
                                 font.pixelSize: 12
                                 font.bold: true

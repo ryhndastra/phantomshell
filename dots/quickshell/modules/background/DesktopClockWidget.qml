@@ -25,7 +25,8 @@ Item {
 
     transformOrigin: {
         if (PhantomState.desktopClockPosition === "center") return Item.Center
-        if (PhantomState.desktopClockPosition === "top-right" || PhantomState.isP3) return Item.TopRight
+        if (PhantomState.desktopClockPosition === "top-right") return Item.TopRight
+        if (PhantomState.desktopClockPosition === "bottom-right") return Item.BottomRight
         if (PhantomState.desktopClockPosition === "bottom-left") return Item.BottomLeft
         return Item.TopLeft
     }
@@ -34,20 +35,23 @@ Item {
         if (PhantomState.isP3) {
             if (PhantomState.desktopClockPosition === "center") return (parent.width - width) / 2
             if (PhantomState.desktopClockPosition === "bottom-left") return 28
+            if (PhantomState.desktopClockPosition === "top-left") return 28
+            if (PhantomState.desktopClockPosition === "bottom-right") return parent.width - width - 28
             return parent.width - width
         }
         if (PhantomState.desktopClockPosition === "center") return (parent.width - width) / 2
         if (PhantomState.desktopClockPosition === "top-right") return parent.width - width - 38
+        if (PhantomState.desktopClockPosition === "bottom-right") return parent.width - width - 38
         return 28
     }
     y: {
         if (PhantomState.isP3) {
             if (PhantomState.desktopClockPosition === "center") return (parent.height - height) / 2 - 40
-            if (PhantomState.desktopClockPosition === "bottom-left") return parent.height - height - 155
+            if (PhantomState.desktopClockPosition === "bottom-left" || PhantomState.desktopClockPosition === "bottom-right") return parent.height - height - 40
             return 0
         }
         if (PhantomState.desktopClockPosition === "center") return (parent.height - height) / 2 - 40
-        if (PhantomState.desktopClockPosition === "bottom-left") return parent.height - height - 155
+        if (PhantomState.desktopClockPosition === "bottom-left" || PhantomState.desktopClockPosition === "bottom-right") return parent.height - height - 155
         return 48
     }
 

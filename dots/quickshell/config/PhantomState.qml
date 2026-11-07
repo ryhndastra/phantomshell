@@ -697,7 +697,9 @@ Singleton {
                 showDesktopLyrics: root.showDesktopLyrics,
                 lyricsShowCard: root.lyricsShowCard,
                 cavaBarCount: root.cavaBarCount,
-                cavaMaxHeight: root.cavaMaxHeight
+                cavaMaxHeight: root.cavaMaxHeight,
+                p3CapsuleForceOpen: root.p3CapsuleForceOpen,
+                p3WallpaperAutoPause: root.p3WallpaperAutoPause
             },
             widgets: {
                 statsStyle: root.statsStyle,
@@ -928,6 +930,11 @@ Singleton {
                     if (cfg && cfg.desktop) {
                         if (cfg.desktop.desktopClockPosition !== undefined) root.desktopClockPosition = cfg.desktop.desktopClockPosition
                         if (cfg.desktop.showDesktopClock !== undefined) root.showDesktopClock = cfg.desktop.showDesktopClock
+                        if (cfg.desktop.showDesktopCava !== undefined) root.showDesktopCava = cfg.desktop.showDesktopCava
+                        if (cfg.desktop.cavaBarCount !== undefined) root.cavaBarCount = cfg.desktop.cavaBarCount
+                        if (cfg.desktop.showDesktopLyrics !== undefined) root.showDesktopLyrics = cfg.desktop.showDesktopLyrics
+                        if (cfg.desktop.p3CapsuleForceOpen !== undefined) root.p3CapsuleForceOpen = cfg.desktop.p3CapsuleForceOpen
+                        if (cfg.desktop.p3WallpaperAutoPause !== undefined) root.p3WallpaperAutoPause = cfg.desktop.p3WallpaperAutoPause
                     }
                     if (cfg && cfg.bar) {
                         if (cfg.bar.position !== undefined) root.barPosition = cfg.bar.position

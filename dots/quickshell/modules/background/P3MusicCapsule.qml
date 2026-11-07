@@ -27,7 +27,7 @@ Item {
     readonly property url songArt: mpris ? (mpris.trackArtUrl || "") : ""
 
     property bool isManuallyOpened: false
-    readonly property bool isOpened: isPlaying || isManuallyOpened
+    readonly property bool isOpened: PhantomState.p3CapsuleForceOpen || isPlaying || isManuallyOpened
 
     // Animasi geser horizontal dengan Drag & Click
     x: isOpened ? 0 : -360

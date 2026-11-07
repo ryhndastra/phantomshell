@@ -133,19 +133,24 @@ Item {
         property int tick: bottomAudioBar.cavaTick
         property color cPrimary: PhantomState.primary
         property color cSecondary: PhantomState.secondary
+        property int barCountSetting: PhantomState.cavaBarCount
         onTickChanged: requestPaint()
         onCPrimaryChanged: requestPaint()
+        onBarCountSettingChanged: requestPaint()
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
 
         onPaint: {
             var ctx = getContext("2d")
             ctx.reset()
-            var bars = bottomAudioBar.leftBars
+            var rawBars = bottomAudioBar.leftBars
+            if (!rawBars || rawBars.length === 0 || width <= 0 || !bottomAudioBar.hasLiveAudio) return
+            var targetCount = Math.max(12, Math.min(32, Math.floor((PhantomState.cavaBarCount || 36) / 2)))
+            var bars = rawBars.slice(0, targetCount)
             var n = bars.length
-            if (n === 0 || width <= 0 || !bottomAudioBar.hasLiveAudio) return
-            var barW = 4
+            if (n === 0) return
             var step = width / n
+            var barW = Math.max(3, Math.min(16, step * 0.72))
             var maxH = height
             for (var i = 0; i < n; i++) {
                 var pct = (bars[i] || 0) / 100.0
@@ -173,19 +178,24 @@ Item {
         property int tick: bottomAudioBar.cavaTick
         property color cPrimary: PhantomState.primary
         property color cSecondary: PhantomState.secondary
+        property int barCountSetting: PhantomState.cavaBarCount
         onTickChanged: requestPaint()
         onCPrimaryChanged: requestPaint()
+        onBarCountSettingChanged: requestPaint()
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
 
         onPaint: {
             var ctx = getContext("2d")
             ctx.reset()
-            var bars = bottomAudioBar.rightBars
+            var rawBars = bottomAudioBar.rightBars
+            if (!rawBars || rawBars.length === 0 || width <= 0 || !bottomAudioBar.hasLiveAudio) return
+            var targetCount = Math.max(12, Math.min(32, Math.floor((PhantomState.cavaBarCount || 36) / 2)))
+            var bars = rawBars.slice(0, targetCount)
             var n = bars.length
-            if (n === 0 || width <= 0 || !bottomAudioBar.hasLiveAudio) return
-            var barW = 4
+            if (n === 0) return
             var step = width / n
+            var barW = Math.max(3, Math.min(16, step * 0.72))
             var maxH = height
             for (var i = 0; i < n; i++) {
                 var pct = (bars[i] || 0) / 100.0
