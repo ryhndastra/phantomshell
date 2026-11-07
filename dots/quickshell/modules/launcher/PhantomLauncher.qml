@@ -1614,7 +1614,7 @@ Variants {
                                     anchors.left: parent.left
                                     anchors.leftMargin: 24
                                     anchors.right: parent.right
-                                    anchors.rightMargin: p3RowDelegate.isApps ? 14 : 34
+                                    anchors.rightMargin: 14
                                     anchors.verticalCenter: parent.verticalCenter
                                     spacing: 2
 
@@ -1674,40 +1674,6 @@ Variants {
                                         font.bold: true
                                         elide: Text.ElideRight
                                         renderType: Text.CurveRendering
-                                    }
-                                }
-
-                                // Tombol Hapus Cepat "×" di Sisi Kanan Notifikasi
-                                Rectangle {
-                                    id: quickDismissBtn
-                                    visible: !p3RowDelegate.isApps && (p3RowDelegate.isHovered || p3RowDelegate.isSelected)
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: 8
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 22
-                                    height: 22
-                                    radius: 11
-                                    color: qDismissMouse.containsMouse ? "#e60039" : (p3RowDelegate.isSelected ? "#260038A8" : "#26FFFFFF")
-                                    z: 15
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "×"
-                                        font.family: "Rubik"
-                                        font.pixelSize: 13
-                                        font.bold: true
-                                        color: qDismissMouse.containsMouse ? "#ffffff" : (p3RowDelegate.isSelected ? "#0038a8" : "#ffffff")
-                                    }
-
-                                    MouseArea {
-                                        id: qDismissMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            PhantomState.imNotifications.remove(index)
-                                            PhantomState.playSfx("select")
-                                        }
                                     }
                                 }
                             }
