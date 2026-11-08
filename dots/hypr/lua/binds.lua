@@ -332,3 +332,12 @@ hl.define_submap("virtual-machine", function()
         end
     end, { submap_universal = true })
 end)
+
+-- muat pintasan kustom dinamis yang dikonfigurasi dari phantomshell settings gui
+local custom_binds = os.getenv("HOME") .. "/.config/hypr/lua/custom_binds.lua"
+local fb = io.open(custom_binds, "r")
+if fb then
+    fb:close()
+    pcall(dofile, custom_binds)
+end
+

@@ -5,74 +5,87 @@ import Quickshell.Wayland
 import qs.config
 import qs.components
 
-// modul overlay daftar pintasan keyboard taktis bergaya persona 5 (super + /)
+// =============================================================================
+// PERSONA 3 RELOAD: S.E.E.S. TACTICAL KEYBIND CHEATSHEET (SUPER + /)
+// Panduan Pintasan Keyboard Operasional S.E.E.S. & Hyprland Tanpa Skew P5
+// =============================================================================
 Scope {
     id: root
 
     property string searchQuery: ""
     property string activeCategory: "ALL"
 
-    readonly property var categories: ["ALL", "PANELS", "APPS", "UTILITIES", "WINDOWS", "WORKSPACES", "MEDIA"]
+    readonly property var categories: ["ALL", "S.E.E.S. HUD", "APPS", "UTILITIES", "WINDOWS", "WORKSPACES", "MEDIA"]
 
     readonly property var allBinds: [
-        { cat: "PANELS", key: "SUPER / SUPER + D", act: "Toggle P5 Command Launcher" },
-        { cat: "PANELS", key: "SUPER + Tab", act: "Toggle Workspace Overview (10 Workspaces)" },
-        { cat: "PANELS", key: "SUPER + V", act: "Open Clipboard History Compendium" },
-        { cat: "PANELS", key: "SUPER + .", act: "Open Emoji & Symbol Picker" },
-        { cat: "PANELS", key: "SUPER + /", act: "Toggle Tactics Keybind Cheatsheet" },
-        { cat: "PANELS", key: "SUPER + N / G", act: "Toggle Control Center & Pentagon Stats" },
-        { cat: "PANELS", key: "SUPER + A / B / O", act: "Toggle SNS Phone Notification Center" },
-        { cat: "PANELS", key: "SUPER + M", act: "Toggle Media Jukebox Popup" },
-        { cat: "PANELS", key: "SUPER + I", act: "Open Velvet Room Unified Settings" },
-        { cat: "PANELS", key: "SUPER + J", act: "Toggle Top Bar Auto-Hide" },
-        { cat: "PANELS", key: "CTRL + SUPER + T", act: "Open Wallpaper Gallery Selector" },
-        { cat: "PANELS", key: "CTRL + SUPER + ALT + T", act: "Cycle Next Wallpaper" },
-        { cat: "PANELS", key: "CTRL + SUPER + P", act: "Cycle 9 Persona Theme Palettes" },
-        { cat: "PANELS", key: "CTRL + SUPER + SHIFT + D", act: "Toggle Light / Dark Mode" },
-        { cat: "PANELS", key: "CTRL + SUPER + R", act: "Restart Quickshell" },
-        { cat: "PANELS", key: "SUPER + L", act: "Lock Screen (Calling Card Lock)" },
-        { cat: "PANELS", key: "SUPER + SHIFT + L", act: "Suspend / Sleep System" },
-        { cat: "PANELS", key: "SUPER + Esc / Ctrl+Alt+Del", act: "Open Calling Card Power Menu" },
+        // S.E.E.S. HUD & PANELS
+        { cat: "S.E.E.S. HUD", key: "SUPER / SUPER + D", act: "Open S.E.E.S. Command Launcher & Mail" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + Tab", act: "Open Tactical Town Map (Workspace Overview)" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + S", act: "Toggle The Velvet Room (Special Workspace)" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + L", act: "Lock Screen (S.E.E.S. Dark Hour Protocol)" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + Esc / Ctrl+Alt+Del", act: "Open S.E.E.S. Dispatch & Power Menu" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + /", act: "Toggle Tactical Keybind Cheatsheet" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + V", act: "Open Clipboard History Compendium" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + .", act: "Open Symbol & Emoji Picker" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + A / B / O", act: "Toggle S.E.E.S. Notification History" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + M", act: "Toggle Media Player Capsule" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + I", act: "Open Velvet Room Unified Settings" },
+        { cat: "S.E.E.S. HUD", key: "SUPER + J", act: "Toggle Top Bar Auto-Hide" },
+        { cat: "S.E.E.S. HUD", key: "CTRL + SUPER + T", act: "Open Wallpaper Gallery Selector" },
+        { cat: "S.E.E.S. HUD", key: "CTRL + SUPER + ALT + T", act: "Cycle Next Wallpaper" },
+        { cat: "S.E.E.S. HUD", key: "CTRL + SUPER + P", act: "Cycle Persona Theme Palette" },
+        { cat: "S.E.E.S. HUD", key: "CTRL + SUPER + SHIFT + D", act: "Toggle Light / Dark Mode" },
+        { cat: "S.E.E.S. HUD", key: "CTRL + SUPER + R", act: "Restart Quickshell Daemon" },
+
+        // APLIKASI
         { cat: "APPS", key: "SUPER + Return / T", act: "Launch Terminal (Kitty)" },
         { cat: "APPS", key: "CTRL + ALT + T", act: "Launch Terminal (Kitty)" },
         { cat: "APPS", key: "SUPER + E", act: "Launch File Manager" },
-        { cat: "APPS", key: "SUPER + W", act: "Launch Web Browser" },
-        { cat: "APPS", key: "SUPER + C", act: "Launch Code Editor" },
+        { cat: "APPS", key: "SUPER + W", act: "Launch Web Browser (Zen)" },
+        { cat: "APPS", key: "SUPER + C", act: "Launch Code Editor (VS Code / Neovim)" },
         { cat: "APPS", key: "SUPER + X", act: "Launch Text Editor" },
-        { cat: "APPS", key: "CTRL + SUPER + V", act: "Launch Volume Mixer (Pavucontrol)" },
+        { cat: "APPS", key: "CTRL + SUPER + V", act: "Launch Audio Volume Mixer (Pavucontrol)" },
         { cat: "APPS", key: "CTRL + SHIFT + Esc", act: "Launch System Task Manager" },
+
+        // UTILITAS & SCREENSHOT
         { cat: "UTILITIES", key: "SUPER + SHIFT + S", act: "Region Screenshot >> Clipboard & File" },
         { cat: "UTILITIES", key: "Print", act: "Fullscreen Screenshot >> Clipboard" },
         { cat: "UTILITIES", key: "CTRL + Print", act: "Fullscreen Screenshot >> Clipboard & File" },
-        { cat: "UTILITIES", key: "SUPER + SHIFT + X", act: "Region OCR Text Scan >> Clipboard" },
+        { cat: "UTILITIES", key: "SUPER + SHIFT + X", act: "Region OCR Text Recognition >> Clipboard" },
         { cat: "UTILITIES", key: "SUPER + SHIFT + C", act: "Pick Screen Color (#RRGGBB) >> Clipboard" },
         { cat: "UTILITIES", key: "SUPER + SHIFT + R", act: "Record Screen Region (Toggle Start/Stop)" },
-        { cat: "UTILITIES", key: "CTRL + ALT + R", act: "Record Fullscreen (No Audio)" },
-        { cat: "UTILITIES", key: "SUPER + SHIFT + ALT + R", act: "Record Fullscreen (With Audio)" },
+        { cat: "UTILITIES", key: "CTRL + ALT + R", act: "Record Fullscreen Video (No Audio)" },
+        { cat: "UTILITIES", key: "SUPER + SHIFT + ALT + R", act: "Record Fullscreen Video (With Audio)" },
         { cat: "UTILITIES", key: "SUPER + - / =", act: "Zoom Screen Out / In" },
         { cat: "UTILITIES", key: "SUPER + ALT + F1", act: "Toggle Virtual Machine Keybind Submap" },
+
+        // MANAJEMEN WINDOW
         { cat: "WINDOWS", key: "SUPER + Q", act: "Close Active Window" },
         { cat: "WINDOWS", key: "SUPER + SHIFT + ALT + Q", act: "Force Kill Window (hyprctl kill)" },
-        { cat: "WINDOWS", key: "SUPER + F", act: "Maximize Window (Keep Bar & Gaps)" },
-        { cat: "WINDOWS", key: "SUPER + SHIFT + F", act: "True Fullscreen Window" },
-        { cat: "WINDOWS", key: "SUPER + Space / ALT+Space", act: "Toggle Float / Tile Window" },
-        { cat: "WINDOWS", key: "SUPER + P", act: "Pin Floating Window Across Workspaces" },
-        { cat: "WINDOWS", key: "SUPER + ; / '", act: "Decrease / Increase Split Ratio" },
+        { cat: "WINDOWS", key: "SUPER + F", act: "Maximize Window (Keep Margins)" },
+        { cat: "WINDOWS", key: "SUPER + SHIFT + F", act: "Toggle True Fullscreen Window" },
+        { cat: "WINDOWS", key: "SUPER + Space", act: "Toggle Floating / Tiling Window" },
+        { cat: "WINDOWS", key: "SUPER + P", act: "Pin Floating Window to All Workspaces" },
+        { cat: "WINDOWS", key: "SUPER + ; / '", act: "Adjust Window Split Ratio" },
         { cat: "WINDOWS", key: "SUPER + ←/→/↑/↓", act: "Move Window Focus" },
         { cat: "WINDOWS", key: "SUPER + SHIFT + ←/→/↑/↓", act: "Move Window in Direction" },
-        { cat: "WINDOWS", key: "SUPER + LMB / RMB Drag", act: "Drag Move / Resize Window" },
-        { cat: "WORKSPACES", key: "SUPER + 1..9 / 0", act: "Switch to Workspace 1..10" },
-        { cat: "WORKSPACES", key: "SUPER + SHIFT + 1..9 / 0", act: "Move Window & Follow to Workspace 1..10" },
-        { cat: "WORKSPACES", key: "SUPER + ALT + 1..9 / 0", act: "Send Window Silently to Workspace 1..10" },
+        { cat: "WINDOWS", key: "SUPER + LMB Drag", act: "Interactive Window Move" },
+        { cat: "WINDOWS", key: "SUPER + RMB Drag", act: "Interactive Window Resize" },
+
+        // WORKSPACES
+        { cat: "WORKSPACES", key: "SUPER + 1..6", act: "Switch to Workspace 1..6" },
+        { cat: "WORKSPACES", key: "SUPER + SHIFT + 1..6", act: "Move Window & Follow to Workspace 1..6" },
+        { cat: "WORKSPACES", key: "SUPER + ALT + 1..6", act: "Send Window Silently to Workspace 1..6" },
         { cat: "WORKSPACES", key: "CTRL + SUPER + ← / →", act: "Switch to Previous / Next Workspace" },
         { cat: "WORKSPACES", key: "SUPER + PageUp / PageDown", act: "Switch to Previous / Next Workspace" },
         { cat: "WORKSPACES", key: "SUPER + Mouse Scroll", act: "Scroll Through Workspaces" },
-        { cat: "WORKSPACES", key: "SUPER + S", act: "Toggle Special Scratchpad Workspace" },
-        { cat: "WORKSPACES", key: "SUPER + ALT + S", act: "Send Window to Scratchpad" },
+        { cat: "WORKSPACES", key: "SUPER + ALT + S", act: "Send Active Window to Velvet Room" },
+
+        // KONTROL MEDIA & AUDIO
         { cat: "MEDIA", key: "SUPER + SHIFT + P", act: "Play / Pause Media (Spotify / MPRIS)" },
         { cat: "MEDIA", key: "SUPER + SHIFT + N / B", act: "Next / Previous Media Track" },
-        { cat: "MEDIA", key: "SUPER + SHIFT + M", act: "Toggle Speaker Audio Mute" },
-        { cat: "MEDIA", key: "SUPER + ALT + M", act: "Toggle Microphone Mute" }
+        { cat: "MEDIA", key: "SUPER + SHIFT + M", act: "Toggle Speaker Audio Output Mute" },
+        { cat: "MEDIA", key: "SUPER + ALT + M", act: "Toggle Microphone Input Mute" }
     ]
 
     readonly property var filteredBinds: {
@@ -114,10 +127,10 @@ Scope {
             }
         }
 
-        // latar belakang gelap klik untuk menutup
+        // Latar Gelap Semi-Transparan
         Rectangle {
             anchors.fill: parent
-            color: "#AA050508"
+            color: "#D0020716"
 
             MouseArea {
                 anchors.fill: parent
@@ -127,89 +140,116 @@ Scope {
 
         Item {
             id: sheetCard
-            width: Math.min(parent.width - 80, 920)
-            height: Math.min(parent.height - 90, 620)
+            width: Math.min(parent.width - 64, 1020)
+            height: Math.min(parent.height - 80, 640)
             anchors.centerIn: parent
 
             ParallelAnimation {
                 id: sheetAnim
-                NumberAnimation { target: sheetCard; property: "scale"; from: 0.88; to: 1.0; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.25 }
-                NumberAnimation { target: sheetCard; property: "opacity"; from: 0.0; to: 1.0; duration: 150; easing.type: Easing.OutCubic }
+                NumberAnimation { target: sheetCard; property: "scale"; from: 0.92; to: 1.0; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.15 }
+                NumberAnimation { target: sheetCard; property: "opacity"; from: 0.0; to: 1.0; duration: 160; easing.type: Easing.OutCubic }
             }
 
-            P5SkewedCard {
+            // Bingkai Kartu Taktikal S.E.E.S. Modern (Bebas Skew P5)
+            Rectangle {
                 anchors.fill: parent
-                fillColor: "#0B0B10"
-                borderColor: "#FFFFFF"
-                shadowColor: PhantomState.primary
-                borderWidth: 3
-                skewPx: 14
-                shadowOffsetX: 8
-                shadowOffsetY: 8
+                color: "#F203091C"
+                border.color: "#8000DBFF"
+                border.width: 1.8
+                radius: 8
+
+                // Aksen Garis Biru Taktikal di Sudut
+                Rectangle { anchors.top: parent.top; anchors.left: parent.left; width: 34; height: 3; color: "#00f0ff" }
+                Rectangle { anchors.top: parent.top; anchors.left: parent.left; width: 3; height: 34; color: "#00f0ff" }
+                Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: 34; height: 3; color: "#00f0ff" }
+                Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: 3; height: 34; color: "#00f0ff" }
             }
 
-            // cegah klik tembus ke backdrop
             MouseArea { anchors.fill: parent }
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 24
+                anchors.margins: 20
                 spacing: 12
 
-                // baris judul dan kotak pencarian
+                // -------------------------------------------------------------
+                // 1. BARIS HEADER & PENCARIAN
+                // -------------------------------------------------------------
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 12
 
-                    P5Star {
-                        Layout.preferredWidth: 28
-                        Layout.preferredHeight: 28
-                        spinning: true
+                    Rectangle {
+                        Layout.preferredWidth: 32
+                        Layout.preferredHeight: 32
+                        radius: 4
+                        color: "#0028e0"
+                        border.color: "#00f0ff"
+                        border.width: 1.4
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "S3"
+                            color: "#ffffff"
+                            font.family: "Rubik"
+                            font.pixelSize: 13
+                            font.weight: Font.Black
+                        }
                     }
 
                     ColumnLayout {
-                        spacing: 1
+                        spacing: 2
                         Text {
-                            text: "THIEF TACTICS // KEYBIND COMPENDIUM"
+                            text: "S.E.E.S. TACTICAL KEYBINDS // OPERATIONAL MANUAL"
                             color: "#FFFFFF"
-                            font.family: "JetBrainsMono NFM"
-                            font.pixelSize: 18
+                            font.family: "Rubik"
+                            font.pixelSize: 16
                             font.weight: Font.Black
-                            font.italic: true
+                            font.letterSpacing: 1.0
                         }
                         Text {
-                            text: root.filteredBinds.length + " SHORTCUTS ACTIVE • PRESS [ESC] TO DISMISS"
-                            color: PhantomState.secondary
+                            text: root.filteredBinds.length + " ACTIVE PROTOCOLS • PRESS [ESC] TO CLOSE"
+                            color: "#00dbff"
                             font.family: "JetBrainsMono NFM"
                             font.pixelSize: 9
-                            font.weight: Font.Black
+                            font.bold: true
                         }
                     }
 
                     Item { Layout.fillWidth: true }
 
-                    // kotak input filter pencarian
-                    Item {
+                    // Kotak Input Pencarian
+                    Rectangle {
                         Layout.preferredWidth: 260
-                        Layout.preferredHeight: 34
-
-                        P5SkewedCard {
-                            anchors.fill: parent
-                            fillColor: "#151520"
-                            borderColor: searchInput.activeFocus ? PhantomState.secondary : "#FFFFFF"
-                            shadowColor: PhantomState.primary
-                            borderWidth: 2
-                            skewPx: 6
-                            showShadowOffset: false
-                        }
+                        Layout.preferredHeight: 32
+                        radius: 4
+                        color: "#07122C"
+                        border.color: searchInput.activeFocus ? "#00f0ff" : "#4000DBFF"
+                        border.width: 1.4
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 12
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
                             spacing: 8
 
-                            P5Icon { name: "search"; size: 12; color: PhantomState.secondary }
+                            Canvas {
+                                Layout.preferredWidth: 14
+                                Layout.preferredHeight: 14
+                                onPaint: {
+                                    var ctx = getContext("2d")
+                                    ctx.clearRect(0, 0, width, height)
+                                    ctx.strokeStyle = "#00f0ff"
+                                    ctx.lineWidth = 1.6
+                                    ctx.beginPath()
+                                    ctx.arc(5.5, 5.5, 3.8, 0, Math.PI * 2)
+                                    ctx.stroke()
+                                    ctx.beginPath()
+                                    ctx.moveTo(8.5, 8.5)
+                                    ctx.lineTo(12.5, 12.5)
+                                    ctx.stroke()
+                                }
+                            }
 
                             TextInput {
                                 id: searchInput
@@ -217,37 +257,61 @@ Scope {
                                 color: "#FFFFFF"
                                 font.family: "JetBrainsMono NFM"
                                 font.pixelSize: 11
-                                font.weight: Font.Bold
+                                font.bold: true
                                 clip: true
+                                selectByMouse: true
                                 onTextChanged: root.searchQuery = text
+
                                 Keys.onEscapePressed: PhantomState.cheatsheetOpen = false
 
                                 Text {
                                     anchors.fill: parent
-                                    text: "Search key or action..."
-                                    color: PhantomState.muted
-                                    font: parent.font
-                                    visible: !parent.text
+                                    visible: !searchInput.text && !searchInput.activeFocus
+                                    text: "Filter shortcuts..."
+                                    color: "#4A6894"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 11
+                                }
+                            }
+
+                            // Tombol Bersihkan Pencarian
+                            Text {
+                                visible: searchInput.text.length > 0
+                                text: "✕"
+                                color: "#00f0ff"
+                                font.pixelSize: 11
+                                font.bold: true
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        searchInput.text = ""
+                                        root.searchQuery = ""
+                                    }
                                 }
                             }
                         }
                     }
 
-                    // tombol tutup
-                    Item {
-                        Layout.preferredWidth: 34
-                        Layout.preferredHeight: 34
-                        P5SkewedCard {
-                            anchors.fill: parent
-                            fillColor: closeSheetMouse.containsMouse ? PhantomState.primary : "#181824"
-                            borderColor: "#FFFFFF"
-                            borderWidth: 2
-                            skewPx: 5
-                            showShadowOffset: false
+                    // Tombol Tutup [ESC]
+                    Rectangle {
+                        Layout.preferredWidth: 32
+                        Layout.preferredHeight: 32
+                        radius: 4
+                        color: closeBtnMouse.containsMouse ? "#d60032" : "#0A183C"
+                        border.color: closeBtnMouse.containsMouse ? "#ffffff" : "#6000DBFF"
+                        border.width: 1.4
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "✕"
+                            color: "#ffffff"
+                            font.pixelSize: 13
+                            font.bold: true
                         }
-                        P5Icon { anchors.centerIn: parent; name: "close"; size: 12; color: "#FFFFFF" }
+
                         MouseArea {
-                            id: closeSheetMouse
+                            id: closeBtnMouse
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
@@ -256,38 +320,34 @@ Scope {
                     }
                 }
 
-                // deretan tab kategori
+                // -------------------------------------------------------------
+                // 2. BARIS TAB KATEGORI
+                // -------------------------------------------------------------
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 6
 
                     Repeater {
                         model: root.categories
-                        delegate: Item {
+
+                        delegate: Rectangle {
                             required property string modelData
-                            Layout.preferredWidth: catTxt.implicitWidth + 22
-                            Layout.preferredHeight: 26
-
                             readonly property bool isSel: root.activeCategory === modelData
-
-                            P5SkewedCard {
-                                anchors.fill: parent
-                                fillColor: parent.isSel ? PhantomState.primary : (catMouse.containsMouse ? "#1E1E2C" : "#12121A")
-                                borderColor: parent.isSel ? PhantomState.secondary : "#3A3A50"
-                                borderWidth: parent.isSel ? 2 : 1
-                                skewPx: 5
-                                showShadowOffset: false
-                            }
+                            height: 24
+                            width: catTxt.implicitWidth + 20
+                            radius: 3
+                            color: isSel ? "#0028e0" : (catMouse.containsMouse ? "#0C1F48" : "#06122E")
+                            border.color: isSel ? "#00f0ff" : (catMouse.containsMouse ? "#6000DBFF" : "#2000DBFF")
+                            border.width: isSel ? 1.4 : 1.0
 
                             Text {
                                 id: catTxt
                                 anchors.centerIn: parent
                                 text: parent.modelData
-                                color: "#FFFFFF"
-                                font.family: "JetBrainsMono NFM"
+                                color: parent.isSel ? "#ffffff" : (catMouse.containsMouse ? "#00f0ff" : "#8AA6CE")
+                                font.family: "Rubik"
                                 font.pixelSize: 10
-                                font.weight: Font.Black
-                                font.italic: parent.isSel
+                                font.weight: parent.isSel ? Font.Black : Font.Bold
                             }
 
                             MouseArea {
@@ -303,7 +363,9 @@ Scope {
                     Item { Layout.fillWidth: true }
                 }
 
-                // area daftar keybind 2 kolom
+                // -------------------------------------------------------------
+                // 3. DAFTAR KARTU SHORTCUT 2 KOLOM
+                // -------------------------------------------------------------
                 Flickable {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -322,63 +384,66 @@ Scope {
                         Repeater {
                             model: root.filteredBinds
 
-                            delegate: Item {
+                            delegate: Rectangle {
                                 required property var modelData
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 34
+                                radius: 4
+                                color: rowMouse.containsMouse ? "#0E2456" : "#071638"
+                                border.color: rowMouse.containsMouse ? "#00f0ff" : "#2800DBFF"
+                                border.width: rowMouse.containsMouse ? 1.4 : 1.0
 
-                                P5SkewedCard {
+                                RowLayout {
                                     anchors.fill: parent
-                                    fillColor: "#13131D"
-                                    borderColor: "#2C2C42"
-                                    shadowColor: PhantomState.primary
-                                    borderWidth: 1.2
-                                    skewPx: 5
-                                    showShadowOffset: false
+                                    anchors.leftMargin: 10
+                                    anchors.rightMargin: 10
+                                    spacing: 8
 
-                                    RowLayout {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: 10
-                                        anchors.rightMargin: 10
-                                        spacing: 8
-
-                                        Rectangle {
-                                            width: kTxt.implicitWidth + 14
-                                            height: 20
-                                            color: "#1F1F32"
-                                            border.color: PhantomState.secondary
-                                            border.width: 1
-                                            radius: 2
-
-                                            Text {
-                                                id: kTxt
-                                                anchors.centerIn: parent
-                                                text: modelData.key
-                                                color: PhantomState.secondary
-                                                font.family: "JetBrainsMono NFM"
-                                                font.pixelSize: 9
-                                                font.weight: Font.Black
-                                            }
-                                        }
+                                    // Lencana Tombol Keybind
+                                    Rectangle {
+                                        width: kTxt.implicitWidth + 14
+                                        height: 20
+                                        color: rowMouse.containsMouse ? "#0028e0" : "#020B1C"
+                                        border.color: rowMouse.containsMouse ? "#00f0ff" : "#00dbff"
+                                        border.width: 1
+                                        radius: 3
 
                                         Text {
-                                            Layout.fillWidth: true
-                                            text: modelData.act
-                                            color: "#FFFFFF"
+                                            id: kTxt
+                                            anchors.centerIn: parent
+                                            text: modelData.key
+                                            color: "#ffffff"
                                             font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 10
-                                            font.weight: Font.Bold
-                                            elide: Text.ElideRight
-                                        }
-
-                                        Text {
-                                            text: modelData.cat
-                                            color: PhantomState.muted
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 8
+                                            font.pixelSize: 9
                                             font.weight: Font.Black
                                         }
                                     }
+
+                                    // Deskripsi Aksi
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: modelData.act
+                                        color: rowMouse.containsMouse ? "#00f0ff" : "#ffffff"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Bold
+                                        elide: Text.ElideRight
+                                    }
+
+                                    // Kategori
+                                    Text {
+                                        text: modelData.cat
+                                        color: "#4A6E9E"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 8
+                                        font.weight: Font.Black
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: rowMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
                                 }
                             }
                         }

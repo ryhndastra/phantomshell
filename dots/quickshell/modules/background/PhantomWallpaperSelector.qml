@@ -9,7 +9,7 @@ import qs.components
 Scope {
     id: wpScope
 
-    property string activeCategory: "wallpapers" // "home" | "wallpapers" | "phantom"
+    property string activeCategory: PhantomState.isP3 ? "preinstalled" : "wallpapers" // "preinstalled" | "wallpapers" | "home" | "phantom"
     property string searchQuery: ""
     property var allFiles: []
 
@@ -44,15 +44,15 @@ Scope {
         command: [
             "bash", "-c",
             "CAT='" + wpScope.activeCategory + "'; " +
-            "if [ \"$CAT\" = 'home' ]; then " +
-            "  DIRS=\"$HOME/Pictures $HOME/Downloads $HOME\"; MAXD=1; " +
+            "if [ \"$CAT\" = 'preinstalled' ]; then " +
+            "  find /home/sho/Pictures/Wallpapers /mnt/data/Projects/rice/phantomshell/dots/quickshell/assets -maxdepth 2 -type f \\( -iname '*makoto*' -o -iname '*yuuki*' -o -iname '*p3*' -o -iname '*p4*' -o -iname '*p5*' -o -iname '*pshell*' -o -iname '*kasumi*' -o -iname '*akechi*' -o -iname '*futaba*' \\) 2>/dev/null | grep -E '\\.(png|jpe?g|webp)$' | grep -vE 'iconpack|menu/png|Depth masks|shaders' | awk '!seen[$0]++' | head -n 60; " +
+            "elif [ \"$CAT\" = 'home' ]; then " +
+            "  find $HOME/Pictures $HOME/Downloads $HOME -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \\) 2>/dev/null | awk '!seen[$0]++' | head -n 120; " +
             "elif [ \"$CAT\" = 'phantom' ]; then " +
-            "  DIRS=\"/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets $HOME/Pictures/Wallpapers\"; MAXD=2; " +
+            "  find /mnt/data/Projects/rice/phantomshell/dots/quickshell/assets $HOME/Pictures/Wallpapers -maxdepth 2 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \\) 2>/dev/null | awk '!seen[$0]++' | head -n 120; " +
             "else " +
-            "  DIRS=\"$HOME/Pictures/Wallpapers /mnt/data/Projects/rice/phantomshell/dots/quickshell/assets\"; MAXD=2; " +
-            "fi; " +
-            "find $DIRS -maxdepth $MAXD -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \\) 2>/dev/null " +
-            "| grep -vE '/pshell\\.png$|/pshell-(p3|p4|kasumi|akechi|futaba|monochrome|expressive|tonal)' | awk '!seen[$0]++' | head -n 120"
+            "  find $HOME/Pictures/Wallpapers /mnt/data/Projects/rice/phantomshell/dots/quickshell/assets -maxdepth 2 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \\) 2>/dev/null | awk '!seen[$0]++' | head -n 120; " +
+            "fi"
         ]
         stdout: SplitParser {
             splitMarker: ""
@@ -63,12 +63,6 @@ Scope {
                     const p = lines[i].trim()
                     if (!p) continue
                     const name = p.split("/").pop()
-                    if (wpScope.activeCategory === "phantom" && i > 0) {
-                        const low = name.toLowerCase()
-                        if (low.indexOf("pshell") === -1 && low.indexOf("p5") === -1 && low.indexOf("persona") === -1 && items.length >= 12) {
-                            continue
-                        }
-                    }
                     items.push({
                         path: p,
                         name: name
@@ -80,7 +74,7 @@ Scope {
     }
 
     Component.onCompleted: {
-        scanFolder("wallpapers")
+        scanFolder(activeCategory)
     }
 
     Variants {
@@ -284,9 +278,10 @@ Scope {
                                 // daftar tab sumber folder wallpaper
                                 Repeater {
                                     model: [
-                                        { id: "home",       label: "Home",       icon: "home" },
-                                        { id: "wallpapers", label: "Wallpapers", icon: "wallpaper" },
-                                        { id: "phantom",    label: "Phantom",    icon: "phantom" }
+                                        { id: "preinstalled", label: "Persona Preinstalled", icon: "sparkles" },
+                                        { id: "wallpapers",   label: "Wallpapers",           icon: "wallpaper" },
+                                        { id: "home",         label: "Home / Pics",          icon: "home" },
+                                        { id: "phantom",      label: "All Assets",           icon: "phantom" }
                                     ]
 
                                     delegate: Item {

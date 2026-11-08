@@ -133,7 +133,7 @@ Variants {
                 PhantomState.lockScreen()
             } else if (c === "__settings") {
                 PhantomState.launcherOpen = false
-                PhantomState.settingsOpen = true
+                PhantomState.toggleSettings()
             } else if (c === "__dashboard") {
                 PhantomState.launcherOpen = false
                 PhantomState.dashboardOpen = true

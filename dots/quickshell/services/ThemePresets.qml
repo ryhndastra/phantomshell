@@ -7,8 +7,10 @@ QtObject {
     readonly property string defaultWallpaperPath: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png"
 
     readonly property var availableWallpapers: [
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png",
+        "/home/sho/Pictures/Wallpapers/makoto.png",
+        "/home/sho/Pictures/Wallpapers/yuuki.jpeg",
         "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p3-reload.png",
+        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png",
         "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p4-golden.png",
         "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-kasumi-violet.png",
         "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-akechi-crow.png",

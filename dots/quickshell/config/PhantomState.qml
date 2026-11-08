@@ -51,6 +51,8 @@ Singleton {
     property bool launcherOpen: false
     property bool dashboardOpen: false
     property bool settingsOpen: false
+    property int settingsTabIdx: 0
+    property real settingsScrollY: 0
     property bool notificationsOpen: false
     property bool calendarOpen: false
     property bool sessionOpen: false
@@ -209,10 +211,21 @@ Singleton {
     }
 
     function toggleSettings() {
-        const next = !settingsOpen
-        if (next) closeAllModals()
-        settingsOpen = next
-        playSfx(next ? "open" : "close")
+        if (sessionOpen && p3SessionSection === "config") {
+            sessionOpen = false
+            settingsOpen = false
+            playSfx("close")
+        } else {
+            if (!sessionOpen) {
+                closeAllModals()
+                p3SessionSection = "config"
+                sessionOpen = true
+            } else {
+                p3SessionSection = "config"
+            }
+            settingsOpen = true
+            playSfx("open")
+        }
     }
 
     function toggleNotifications() {
@@ -595,6 +608,126 @@ Singleton {
     property int hyprBlurPasses: 2
     property bool hyprAnimationsEnabled: true
 
+    // kontrol atmosfer dinamis persona 3 reload & manajemen kustom aturan jendela dan pintasan
+    property string p3TimePhaseOverride: "auto" // "auto" | "morning" | "afterschool" | "evening" | "night" | "darkhour"
+    property var customWindowRules: []
+    property var customKeybinds: []
+
+    function setP3TimePhaseOverride(phase) {
+        p3TimePhaseOverride = phase
+        saveState()
+    }
+
+    function syncWindowRulesToHypr() {
+        let lines = [
+            "-- custom window rules dikonfigurasi melalui phantomshell settings gui",
+            "-- berkas ini otomatis digenerate oleh phantomshell",
+            ""
+        ]
+        const rules = customWindowRules || []
+        for (let i = 0; i < rules.length; i++) {
+            const r = rules[i]
+            if (!r || !r.appClass) continue
+            const escaped = "^(" + r.appClass.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")$"
+            let parts = ["match = { class = \"" + escaped + "\" }"]
+            if (r.workspace && r.workspace !== "none" && r.workspace !== "") {
+                if (r.workspace === "special" || r.workspace === "velvet") {
+                    parts.push("workspace = \"special:special\"")
+                } else {
+                    parts.push("workspace = " + r.workspace)
+                }
+            }
+            if (r.float) parts.push("float = true")
+            if (r.center) parts.push("center = true")
+            lines.push("hl.window_rule({ " + parts.join(", ") + " })")
+        }
+        const content = lines.join("\n") + "\n"
+        Quickshell.execDetached([
+            "bash", "-c",
+            "mkdir -p \"$HOME/.config/hypr/lua\" \"/mnt/data/Projects/rice/phantomshell/dots/hypr/lua\" 2>/dev/null; " +
+            "cat << 'EOF' > \"$HOME/.config/hypr/lua/custom_rules.lua\"\n" + content + "EOF\n" +
+            "cat << 'EOF' > \"/mnt/data/Projects/rice/phantomshell/dots/hypr/lua/custom_rules.lua\"\n" + content + "EOF\n" +
+            "hyprctl reload 2>/dev/null || true"
+        ])
+    }
+
+    function addWindowRule(appClass, ws, isFloat, isCenter) {
+        if (!appClass || !appClass.trim()) return
+        const cleaned = appClass.trim()
+        const rules = (customWindowRules || []).slice()
+        const filtered = rules.filter(r => r.appClass !== cleaned)
+        filtered.push({
+            appClass: cleaned,
+            workspace: (ws !== undefined ? ws : "none"),
+            float: !!isFloat,
+            center: !!isCenter
+        })
+        customWindowRules = filtered
+        syncWindowRulesToHypr()
+        saveState()
+        playSfx("select")
+    }
+
+    function removeWindowRule(idx) {
+        if (idx < 0 || idx >= customWindowRules.length) return
+        const rules = customWindowRules.slice()
+        rules.splice(idx, 1)
+        customWindowRules = rules
+        syncWindowRulesToHypr()
+        saveState()
+        playSfx("select")
+    }
+
+    function syncKeybindsToHypr() {
+        let lines = [
+            "-- custom keybinds dikonfigurasi melalui phantomshell settings gui",
+            "-- berkas ini otomatis digenerate oleh phantomshell",
+            ""
+        ]
+        const binds = customKeybinds || []
+        for (let i = 0; i < binds.length; i++) {
+            const b = binds[i]
+            if (!b || !b.key || !b.cmd) continue
+            const k = b.key.trim()
+            const c = b.cmd.trim()
+            const d = b.desc ? b.desc.trim() : "Custom Keybind"
+            lines.push("hl.bind(\"" + k + "\", hl.dsp.exec_cmd(\"" + c + "\"), { description = \"" + d + "\" })")
+        }
+        const content = lines.join("\n") + "\n"
+        Quickshell.execDetached([
+            "bash", "-c",
+            "mkdir -p \"$HOME/.config/hypr/lua\" \"/mnt/data/Projects/rice/phantomshell/dots/hypr/lua\" 2>/dev/null; " +
+            "cat << 'EOF' > \"$HOME/.config/hypr/lua/custom_binds.lua\"\n" + content + "EOF\n" +
+            "cat << 'EOF' > \"/mnt/data/Projects/rice/phantomshell/dots/hypr/lua/custom_binds.lua\"\n" + content + "EOF\n" +
+            "hyprctl reload 2>/dev/null || true"
+        ])
+    }
+
+    function addKeybind(keyStr, cmdStr, descStr) {
+        if (!keyStr || !cmdStr) return
+        const binds = (customKeybinds || []).slice()
+        binds.push({
+            key: keyStr.trim(),
+            cmd: cmdStr.trim(),
+            desc: descStr ? descStr.trim() : "Custom Keybind"
+        })
+        customKeybinds = binds
+        syncKeybindsToHypr()
+        saveState()
+        playSfx("select")
+    }
+
+    function removeKeybind(idx) {
+        if (idx < 0 || idx >= customKeybinds.length) return
+        const binds = customKeybinds.slice()
+        binds.splice(idx, 1)
+        customKeybinds = binds
+        syncKeybindsToHypr()
+        saveState()
+        playSfx("select")
+    }
+
+
     // sinkronisasi warna tema aktif ke vesktop, spotify (spicetify), dan kitty
     function syncAppThemes(pal) {
         const c = pal || root
@@ -746,7 +879,8 @@ Singleton {
                 cavaBarCount: root.cavaBarCount,
                 cavaMaxHeight: root.cavaMaxHeight,
                 p3CapsuleForceOpen: root.p3CapsuleForceOpen,
-                p3WallpaperAutoPause: root.p3WallpaperAutoPause
+                p3WallpaperAutoPause: root.p3WallpaperAutoPause,
+                p3TimePhaseOverride: root.p3TimePhaseOverride
             },
             widgets: {
                 statsStyle: root.statsStyle,
@@ -760,7 +894,9 @@ Singleton {
                 blurEnabled: root.hyprBlurEnabled,
                 blurSize: root.hyprBlurSize,
                 blurPasses: root.hyprBlurPasses,
-                animationsEnabled: root.hyprAnimationsEnabled
+                animationsEnabled: root.hyprAnimationsEnabled,
+                customWindowRules: root.customWindowRules,
+                customKeybinds: root.customKeybinds
             },
             sfx: {
                 enabled: root.sfxEnabled,
@@ -988,6 +1124,7 @@ Singleton {
                         if (cfg.desktop.showDesktopLyrics !== undefined) root.showDesktopLyrics = cfg.desktop.showDesktopLyrics
                         if (cfg.desktop.p3CapsuleForceOpen !== undefined) root.p3CapsuleForceOpen = cfg.desktop.p3CapsuleForceOpen
                         if (cfg.desktop.p3WallpaperAutoPause !== undefined) root.p3WallpaperAutoPause = cfg.desktop.p3WallpaperAutoPause
+                        if (cfg.desktop.p3TimePhaseOverride !== undefined) root.p3TimePhaseOverride = cfg.desktop.p3TimePhaseOverride
                     }
                     if (cfg && cfg.bar) {
                         if (cfg.bar.position !== undefined) root.barPosition = cfg.bar.position
@@ -1006,6 +1143,14 @@ Singleton {
                         if (cfg.hyprland.rounding !== undefined) root.hyprRounding = cfg.hyprland.rounding
                         if (cfg.hyprland.blurEnabled !== undefined) root.hyprBlurEnabled = cfg.hyprland.blurEnabled
                         if (cfg.hyprland.animationsEnabled !== undefined) root.hyprAnimationsEnabled = cfg.hyprland.animationsEnabled
+                        if (cfg.hyprland.customWindowRules !== undefined) {
+                            root.customWindowRules = cfg.hyprland.customWindowRules
+                            root.syncWindowRulesToHypr()
+                        }
+                        if (cfg.hyprland.customKeybinds !== undefined) {
+                            root.customKeybinds = cfg.hyprland.customKeybinds
+                            root.syncKeybindsToHypr()
+                        }
                     }
                 } catch(e) {}
                 root.isLoadingSettings = false

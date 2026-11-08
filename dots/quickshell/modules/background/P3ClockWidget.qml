@@ -45,6 +45,9 @@ Item {
 
     // Penentuan Periode Waktu Persona 3 Reload
     readonly property string periodId: {
+        if (PhantomState.p3TimePhaseOverride && PhantomState.p3TimePhaseOverride !== "auto") {
+            return PhantomState.p3TimePhaseOverride
+        }
         const h = currentHour
         if (h >= 0 && h < 1) return "darkhour"     // 00:00 - 01:00 Dark Hour
         if (h >= 1 && h < 6) return "latenight"    // 01:00 - 06:00 Late Night

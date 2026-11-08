@@ -16,3 +16,12 @@ hl.layer_rule({
     match = { namespace = "phantomshell-.*" },
     no_anim = true
 })
+
+-- muat aturan kustom dinamis yang dikonfigurasi dari phantomshell settings gui
+local custom_rules = os.getenv("HOME") .. "/.config/hypr/lua/custom_rules.lua"
+local f = io.open(custom_rules, "r")
+if f then
+    f:close()
+    pcall(dofile, custom_rules)
+end
+

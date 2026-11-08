@@ -15,7 +15,6 @@ import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.osd
 import qs.modules.dashboard
-import qs.modules.settings
 import qs.modules.session
 import qs.modules.lock
 import qs.modules.overlays
@@ -45,8 +44,6 @@ ShellRoot {
     // modul pusat kontrol dan grafik statistik sistem
     PhantomDashboard {}
 
-    // modul jendela pengaturan sistem
-    PhantomSettings {}
 
     // modul menu daya dan sesi pengguna
     PhantomSession {}
@@ -97,6 +94,29 @@ ShellRoot {
 
         function toggleSettings(): void {
             PhantomState.toggleSettings()
+        }
+
+        function setSettingsTab(idx: int): void {
+            PhantomState.p3ConfigTab = idx
+            if (!PhantomState.sessionOpen) {
+                PhantomState.closeAllModals()
+                PhantomState.p3SessionSection = "config"
+                PhantomState.sessionOpen = true
+            } else {
+                PhantomState.p3SessionSection = "config"
+            }
+        }
+
+        function setSettingsScroll(y: real): void {
+            PhantomState.settingsScrollY = y
+        }
+
+        function addWindowRule(cls: string, ws: string, flt: bool, ctr: bool): void {
+            PhantomState.addWindowRule(cls, ws, flt, ctr)
+        }
+
+        function addKeybind(k: string, c: string, d: string): void {
+            PhantomState.addKeybind(k, c, d)
         }
 
         function toggleWallpaperSelector(): void {

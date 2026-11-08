@@ -1890,7 +1890,7 @@ Scope {
                                             ctx.fillStyle = cardWrap.isActive ? "#8df6ff" : (cardWrap.isHovered ? "rgba(18, 48, 125, 0.96)" : "rgba(8, 24, 75, 0.88)");
                                             ctx.fill();
                                             if (!cardWrap.isActive) {
-                                                ctx.strokeStyle = cardWrap.isHovered ? "#00ffff" : "rgba(0, 219, 255, 0.4)";
+                                                ctx.strokeStyle = cardWrap.isHovered ? "#00ffff" : "#6600dbff";
                                                 ctx.lineWidth = cardWrap.isHovered ? 2.5 : 1.5;
                                                 ctx.stroke();
                                             }
@@ -2336,19 +2336,22 @@ Scope {
                     }
                 }
 
-                // ── LEVEL 1: SUB-MENU SYSTEM CONFIG (Bar & Desktop, Sound Engine, Hyprland FX) ──
+                // ── LEVEL 1: SUB-MENU SYSTEM CONFIG (Bar & Desktop, Sound Engine, Hyprland FX, Rules, Binds, Monitors) ──
                 Item {
                     id: p3ConfigSubMenu
                     visible: p3Overlay.currentSection === "config"
                     anchors.fill: parent
 
                     readonly property var configCategories: [
-                        { badge: "I",   title: "Desktop HUD & Widgets", subtitle: "P3 Moon Clock, Music Capsule & CAVA", rank: "MAX" },
-                        { badge: "II",  title: "Sound Engine",          subtitle: "Master Output, SFX & CAVA Visualizer", rank: "VI" },
-                        { badge: "III", title: "Hyprland Compositor",   subtitle: "Dual Blur, Gaps & Workspaces", rank: "VIII" }
+                        { badge: "I",   title: "Desktop & Atmosphere",  subtitle: "P3 Moon Clock, Ambient Lighting & CAVA", rank: "MAX" },
+                        { badge: "II",  title: "Sound Engine",           subtitle: "Master Output, SFX & PipeWire Audio",    rank: "VI" },
+                        { badge: "III", title: "Hyprland Compositor",    subtitle: "Dual Blur, Gaps, Rounding & Workspaces", rank: "VIII" },
+                        { badge: "IV",  title: "Window Rules Dispatch",  subtitle: "App Class Rules, Float & Presets",       rank: "IV" },
+                        { badge: "V",   title: "Custom Keybinds",        subtitle: "Custom Shortcuts & Shell Execution",     rank: "V" },
+                        { badge: "VI",  title: "Displays & Monitors",    subtitle: "Resolutions, InFocus Mirror & Scaling",  rank: "III" }
                     ]
 
-                    // Kolom Kiri: Judul "CONFIG", 3 Kartu Slanted P3, dan Tombol Kembali
+                    // Kolom Kiri: Judul "CONFIG", 6 Kartu Slanted P3, dan Tombol Kembali
                     Item {
                         anchors.left: parent.left
                         anchors.leftMargin: 60
@@ -2359,14 +2362,16 @@ Scope {
                         Column {
                             anchors.top: parent.top
                             anchors.left: parent.left
-                            spacing: 12
+                            spacing: 6
 
                             Text {
                                 text: "CONFIG"
                                 font.family: "Bebas Neue"
-                                font.pixelSize: 52
+                                font.pixelSize: 50
                                 font.bold: true
-                                color: "#f6fbff"
+                                color: "#04143a"
+                                style: Text.Outline
+                                styleColor: "#8df6ff"
                                 leftPadding: 8
                             }
 
@@ -2377,13 +2382,13 @@ Scope {
                                     required property var modelData
                                     required property int index
                                     width: 560
-                                    height: isActive ? 84 : 70
+                                    height: isActive ? 66 : 52
                                     x: isActive ? 12 : (isHovered ? 8 : 0)
                                     readonly property bool isActive: p3Overlay.configTab === index
                                     readonly property bool isHovered: cfgCardMouse.containsMouse
 
-                                    Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-                                    Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                                    Behavior on height { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+                                    Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
 
                                     Canvas {
                                         id: cfgCardCanvas
@@ -2400,7 +2405,7 @@ Scope {
                                             ctx.fillStyle = cfgCardWrap.isActive ? "#8df6ff" : (cfgCardWrap.isHovered ? "rgba(18, 48, 125, 0.96)" : "rgba(8, 24, 75, 0.88)");
                                             ctx.fill();
                                             if (!cfgCardWrap.isActive) {
-                                                ctx.strokeStyle = cfgCardWrap.isHovered ? "#00ffff" : "rgba(0, 219, 255, 0.4)";
+                                                ctx.strokeStyle = cfgCardWrap.isHovered ? "#00ffff" : "#6600dbff";
                                                 ctx.lineWidth = cfgCardWrap.isHovered ? 2.5 : 1.5;
                                                 ctx.stroke();
                                             }
@@ -2423,14 +2428,14 @@ Scope {
                                         }
                                     }
 
-                                    // Badge Angka Romawi Miring (I, II, III)
+                                    // Badge Angka Romawi Miring (I, II, III, IV, V, VI)
                                     Item {
                                         anchors.left: parent.left
                                         anchors.leftMargin: 12
                                         anchors.top: parent.top
-                                        anchors.topMargin: 8
-                                        width: 32
-                                        height: 38
+                                        anchors.topMargin: cfgCardWrap.isActive ? 7 : 5
+                                        width: 28
+                                        height: 30
 
                                         Canvas {
                                             id: cfgBadgeCanvas
@@ -2461,7 +2466,7 @@ Scope {
                                             anchors.centerIn: parent
                                             text: cfgCardWrap.modelData.badge
                                             font.family: "Bebas Neue"
-                                            font.pixelSize: 19
+                                            font.pixelSize: 16
                                             font.bold: true
                                             color: cfgCardWrap.isActive ? "#ffffff" : (cfgCardWrap.isHovered ? "#ffffff" : "#d2fdff")
                                             rotation: 6
@@ -2471,12 +2476,12 @@ Scope {
                                     // Judul Kategori
                                     Text {
                                         anchors.left: parent.left
-                                        anchors.leftMargin: 52
+                                        anchors.leftMargin: 48
                                         anchors.top: parent.top
-                                        anchors.topMargin: 6
+                                        anchors.topMargin: cfgCardWrap.isActive ? 5 : 4
                                         text: cfgCardWrap.modelData.title
                                         font.family: "Rubik"
-                                        font.pixelSize: 22
+                                        font.pixelSize: 18
                                         font.weight: Font.Black
                                         color: cfgCardWrap.isActive ? "#041238" : (cfgCardWrap.isHovered ? "#ffffff" : "#8df6ff")
                                     }
@@ -2484,24 +2489,24 @@ Scope {
                                     // Badge Rank di Kanan Atas
                                     Row {
                                         anchors.right: parent.right
-                                        anchors.rightMargin: 18
+                                        anchors.rightMargin: 16
                                         anchors.top: parent.top
-                                        anchors.topMargin: 4
+                                        anchors.topMargin: 3
                                         spacing: 4
 
                                         Text {
                                             text: "RANK"
                                             font.family: "Bebas Neue"
-                                            font.pixelSize: 13
+                                            font.pixelSize: 11
                                             font.bold: true
                                             color: cfgCardWrap.isActive ? "#041238" : (cfgCardWrap.isHovered ? "#00ffff" : "#8df6ff")
                                             anchors.bottom: parent.bottom
-                                            bottomPadding: 3
+                                            bottomPadding: 2
                                         }
                                         Text {
                                             text: cfgCardWrap.modelData.rank
                                             font.family: "Bebas Neue"
-                                            font.pixelSize: 28
+                                            font.pixelSize: 22
                                             font.bold: true
                                             color: cfgCardWrap.isActive ? "#041238" : (cfgCardWrap.isHovered ? "#ffffff" : "#8df6ff")
                                         }
@@ -2511,12 +2516,12 @@ Scope {
                                     Canvas {
                                         id: cfgSubtitleCanvas
                                         anchors.left: parent.left
-                                        anchors.leftMargin: 50
+                                        anchors.leftMargin: 48
                                         anchors.right: parent.right
                                         anchors.rightMargin: 16
                                         anchors.bottom: parent.bottom
-                                        anchors.bottomMargin: 6
-                                        height: 20
+                                        anchors.bottomMargin: 5
+                                        height: 16
                                         onPaint: {
                                             var ctx = getContext("2d");
                                             ctx.clearRect(0, 0, width, height);
@@ -2538,7 +2543,7 @@ Scope {
 
                                         Text {
                                             anchors.fill: parent
-                                            anchors.leftMargin: 8
+                                            anchors.leftMargin: 6
                                             text: cfgCardWrap.modelData.subtitle
                                             font.family: "JetBrainsMono NFM"
                                             font.pixelSize: 9
@@ -2588,7 +2593,9 @@ Scope {
                                     font.pixelSize: 16
                                     font.weight: Font.Black
                                     font.italic: true
-                                    color: cfgReturnMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                                    color: cfgReturnMouse.containsMouse ? "#ffffff" : "#04143a"
+                                    style: Text.Outline
+                                    styleColor: "#8df6ff"
                                 }
                                 Text {
                                     text: "RETURN TO MENU"
@@ -2596,7 +2603,9 @@ Scope {
                                     font.pixelSize: 18
                                     font.weight: Font.Black
                                     font.italic: true
-                                    color: cfgReturnMouse.containsMouse ? "#ffffff" : "#65e7ff"
+                                    color: cfgReturnMouse.containsMouse ? "#ffffff" : "#04143a"
+                                    style: Text.Outline
+                                    styleColor: "#8df6ff"
                                 }
                             }
 
@@ -2620,13 +2629,59 @@ Scope {
                         anchors.right: parent.right
                         anchors.rightMargin: 70
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 470
-                        height: 560
-                        color: Qt.rgba(5 / 255, 14 / 255, 40 / 255, 0.92)
+                        width: 530
+                        height: 600
+                        color: Qt.rgba(5 / 255, 14 / 255, 40 / 255, 0.94)
                         radius: 4
                         border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.35)
                         border.width: 1
                         clip: true
+
+                        // Form states untuk Window Rules & Keybinds
+                        property string newRuleClass: ""
+                        property string newRuleWs: "1"
+                        property bool newRuleFloat: false
+                        property bool newRuleCenter: false
+                        property string newBindKey: ""
+                        property string newBindCmd: ""
+                        property string newBindDesc: ""
+                        property var monitorList: []
+
+                        Process {
+                            id: detectActiveAppProc
+                            running: false
+                            command: ["hyprctl", "activewindow", "-j"]
+                            stdout: SplitParser {
+                                onRead: data => {
+                                    try {
+                                        const info = JSON.parse(data)
+                                        if (info && info.class) {
+                                            cfgDetailPanel.newRuleClass = info.class
+                                        }
+                                    } catch(e) {}
+                                }
+                            }
+                        }
+
+                        Process {
+                            id: detectMonitorsProc
+                            running: false
+                            command: ["hyprctl", "monitors", "-j"]
+                            stdout: SplitParser {
+                                onRead: data => {
+                                    try {
+                                        const info = JSON.parse(data)
+                                        if (Array.isArray(info)) {
+                                            cfgDetailPanel.monitorList = info
+                                        }
+                                    } catch(e) {}
+                                }
+                            }
+                        }
+
+                        Component.onCompleted: {
+                            detectMonitorsProc.running = true
+                        }
 
                         // Banner Header Detail Slanted Cyan
                         Canvas {
@@ -2634,7 +2689,7 @@ Scope {
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            height: 52
+                            height: 48
                             onPaint: {
                                 var ctx = getContext("2d")
                                 ctx.reset()
@@ -2659,187 +2714,1133 @@ Scope {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: (p3Overlay.configTab === 0 ? "01 Desktop HUD & Widgets" : (p3Overlay.configTab === 1 ? "02 Sound Engine" : "03 Hyprland Compositor"))
+                                    text: {
+                                        const titles = [
+                                            "01 Desktop & Atmosphere",
+                                            "02 Sound Engine",
+                                            "03 Hyprland Compositor",
+                                            "04 Window Rules Dispatch",
+                                            "05 Custom Keybinds",
+                                            "06 Displays & Monitors"
+                                        ]
+                                        return titles[p3Overlay.configTab] || "01 Desktop & Atmosphere"
+                                    }
                                     font.family: "Rubik"
-                                    font.pixelSize: 22
+                                    font.pixelSize: 20
                                     font.weight: Font.Black
                                     color: "#030e28"
                                 }
                             }
                         }
 
-                        // Isi Pengaturan Tiap Tab
-                        Item {
+                        // Isi Pengaturan Tiap Tab dengan Flickable scroll
+                        Flickable {
+                            id: cfgFlickable
                             anchors.top: cfgDetailHeaderCanvas.bottom
                             anchors.bottom: parent.bottom
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.margins: 10
+                            contentWidth: width
+                            contentHeight: cfgInnerCol.implicitHeight + 20
+                            clip: true
+                            boundsBehavior: Flickable.StopAtBounds
 
-                            // ── TAB 0: DESKTOP HUD & WIDGETS ──
-                            Column {
-                                anchors.fill: parent
-                                visible: p3Overlay.configTab === 0
-
-                                P3StatRow {
-                                    label: "P3 Moon Clock"
-                                    badgeText: PhantomState.showDesktopClock ? "ENABLED" : "DISABLED"
-                                    clickable: true
-                                    onClicked: { PhantomState.showDesktopClock = !PhantomState.showDesktopClock; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Clock Placement"
-                                    badgeText: PhantomState.desktopClockPosition.toUpperCase()
-                                    clickable: true
-                                    onClicked: { const p = ["top-right", "bottom-right", "bottom-left", "top-left"]; const i = p.indexOf(PhantomState.desktopClockPosition); PhantomState.desktopClockPosition = p[(i + 1) % p.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "P3 Music Capsule"
-                                    badgeText: PhantomState.p3CapsuleForceOpen ? "ALWAYS OPEN" : "AUTO (HOVER)"
-                                    clickable: true
-                                    onClicked: { PhantomState.p3CapsuleForceOpen = !PhantomState.p3CapsuleForceOpen; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "CAVA Visualizer"
-                                    badgeText: PhantomState.showDesktopCava ? "ENABLED" : "DISABLED"
-                                    clickable: true
-                                    onClicked: { PhantomState.showDesktopCava = !PhantomState.showDesktopCava; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "CAVA Bar Count"
-                                    badgeText: PhantomState.cavaBarCount + " BARS"
-                                    clickable: true
-                                    onClicked: { const b = [24, 36, 48, 64]; const i = b.indexOf(PhantomState.cavaBarCount); PhantomState.cavaBarCount = b[(i + 1) % b.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "CAVA Bar Height"
-                                    badgeText: PhantomState.cavaMaxHeight + " PX"
-                                    clickable: true
-                                    onClicked: { const h = [60, 80, 110, 140]; const i = h.indexOf(PhantomState.cavaMaxHeight); PhantomState.cavaMaxHeight = h[(i + 1) % h.length]; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Floating Lyrics"
-                                    badgeText: PhantomState.showDesktopLyrics ? "SHOWN" : "OFF"
-                                    clickable: true
-                                    onClicked: { PhantomState.showDesktopLyrics = !PhantomState.showDesktopLyrics; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "3D Water Shaders"
-                                    badgeText: PhantomState.p3WallpaperAutoPause ? "POWER-SAVE" : "ACTIVE 60FPS"
-                                    clickable: true
-                                    onClicked: { PhantomState.p3WallpaperAutoPause = !PhantomState.p3WallpaperAutoPause; PhantomState.saveState() }
-                                    showDivider: false
-                                }
+                            Rectangle {
+                                id: cfgScrollThumb
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.topMargin: cfgFlickable.visibleArea.yPosition * cfgFlickable.height
+                                width: 4
+                                height: Math.max(20, cfgFlickable.visibleArea.heightRatio * cfgFlickable.height)
+                                radius: 2
+                                color: "#00dbff"
+                                visible: cfgFlickable.contentHeight > cfgFlickable.height
                             }
 
-                            // ── TAB 1: SOUND ENGINE ──
                             Column {
-                                anchors.fill: parent
-                                visible: p3Overlay.configTab === 1
+                                id: cfgInnerCol
+                                width: cfgFlickable.width - (cfgFlickable.contentHeight > cfgFlickable.height ? 10 : 0)
+                                spacing: 4
 
-                                P3StatRow {
-                                    label: "Master Output"
-                                    badgeText: Math.round(Number(PhantomState.volumePct) || 0) + "%"
-                                    clickable: true
-                                    onClicked: {
-                                        const cur = Math.round(Number(PhantomState.volumePct) || 0)
-                                        const next = (cur >= 100 ? 20 : Math.min(100, Math.floor(cur / 10) * 10 + 15))
-                                        PhantomState.setSystemVolume(next)
+                                // ── TAB 0: DESKTOP & ATMOSPHERE ──
+                                Column {
+                                    width: parent.width
+                                    visible: p3Overlay.configTab === 0
+                                    spacing: 2
+
+                                    P3StatRow {
+                                        label: "P3 Moon Clock"
+                                        badgeText: PhantomState.showDesktopClock ? "ENABLED" : "DISABLED"
+                                        clickable: true
+                                        onClicked: { PhantomState.showDesktopClock = !PhantomState.showDesktopClock; PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "Clock Placement"
+                                        badgeText: PhantomState.desktopClockPosition.toUpperCase()
+                                        clickable: true
+                                        onClicked: { const p = ["top-right", "bottom-right", "bottom-left", "top-left"]; const i = p.indexOf(PhantomState.desktopClockPosition); PhantomState.desktopClockPosition = p[(i + 1) % p.length]; PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "Ambient Atmosphere"
+                                        badgeText: (PhantomState.p3TimePhaseOverride || "auto").toUpperCase()
+                                        clickable: true
+                                        onClicked: {
+                                            const phases = ["auto", "morning", "day", "evening", "latenight", "darkhour"]
+                                            const i = phases.indexOf(PhantomState.p3TimePhaseOverride || "auto")
+                                            PhantomState.p3TimePhaseOverride = phases[(i + 1) % phases.length]
+                                            PhantomState.saveState()
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
+                                    P3StatRow {
+                                        label: "P3 Music Capsule"
+                                        badgeText: PhantomState.p3CapsuleForceOpen ? "ALWAYS OPEN" : "AUTO (HOVER)"
+                                        clickable: true
+                                        onClicked: { PhantomState.p3CapsuleForceOpen = !PhantomState.p3CapsuleForceOpen; PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "CAVA Visualizer"
+                                        badgeText: PhantomState.showDesktopCava ? "ENABLED" : "DISABLED"
+                                        clickable: true
+                                        onClicked: { PhantomState.showDesktopCava = !PhantomState.showDesktopCava; PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "CAVA Bar Count"
+                                        badgeText: PhantomState.cavaBarCount + " BARS"
+                                        clickable: true
+                                        onClicked: { const b = [24, 36, 48, 64]; const i = b.indexOf(PhantomState.cavaBarCount); PhantomState.cavaBarCount = b[(i + 1) % b.length]; PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "CAVA Bar Height"
+                                        badgeText: PhantomState.cavaMaxHeight + " PX"
+                                        clickable: true
+                                        onClicked: { const h = [60, 80, 110, 140]; const i = h.indexOf(PhantomState.cavaMaxHeight); PhantomState.cavaMaxHeight = h[(i + 1) % h.length]; PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "Floating Lyrics"
+                                        badgeText: PhantomState.showDesktopLyrics ? "SHOWN" : "OFF"
+                                        clickable: true
+                                        onClicked: { PhantomState.showDesktopLyrics = !PhantomState.showDesktopLyrics; PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "3D Water Shaders"
+                                        badgeText: PhantomState.p3WallpaperAutoPause ? "POWER-SAVE" : "ACTIVE 60FPS"
+                                        clickable: true
+                                        showDivider: false
+                                        onClicked: { PhantomState.p3WallpaperAutoPause = !PhantomState.p3WallpaperAutoPause; PhantomState.saveState() }
                                     }
                                 }
-                                P3StatRow {
-                                    label: "Mute Output"
-                                    badgeText: PhantomState.volumeMuted ? "MUTED" : "ACTIVE"
-                                    clickable: true
-                                    onClicked: PhantomState.toggleSystemMute()
-                                }
-                                P3StatRow {
-                                    label: "Sound Effects (SFX)"
-                                    badgeText: PhantomState.sfxEnabled ? "ENABLED" : "MUTED"
-                                    clickable: true
-                                    onClicked: { PhantomState.sfxEnabled = !PhantomState.sfxEnabled; PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "SFX Volume"
-                                    badgeText: Math.round(PhantomState.sfxVolume * 100) + "%"
-                                    clickable: true
-                                    onClicked: { PhantomState.sfxVolume = (PhantomState.sfxVolume >= 1.0 ? 0.2 : PhantomState.sfxVolume + 0.15); PhantomState.saveState() }
-                                }
-                                P3StatRow {
-                                    label: "Audio Backend"
-                                    badgeText: "PipeWire / WirePlumber"
-                                }
-                                P3StatRow {
-                                    label: "Visualizer Source"
-                                    badgeText: "CAVA FIFO Engine"
-                                    showDivider: false
-                                }
-                            }
 
-                            // ── TAB 2: HYPRLAND COMPOSITOR ──
-                            Column {
-                                anchors.fill: parent
-                                visible: p3Overlay.configTab === 2
+                                // ── TAB 1: SOUND ENGINE ──
+                                Column {
+                                    width: parent.width
+                                    visible: p3Overlay.configTab === 1
+                                    spacing: 2
 
-                                P3StatRow {
-                                    label: "Dual Blur FX"
-                                    badgeText: PhantomState.hyprBlurEnabled ? "ENABLED" : "DISABLED"
-                                    clickable: true
-                                    onClicked: { PhantomState.hyprBlurEnabled = !PhantomState.hyprBlurEnabled; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Window Animations"
-                                    badgeText: PhantomState.hyprAnimationsEnabled ? "ENABLED" : "DISABLED"
-                                    clickable: true
-                                    onClicked: { PhantomState.hyprAnimationsEnabled = !PhantomState.hyprAnimationsEnabled; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Inner Gaps"
-                                    badgeText: PhantomState.hyprGapsIn + " px"
-                                    clickable: true
-                                    onClicked: { const g = [0, 5, 10, 15]; const i = g.indexOf(PhantomState.hyprGapsIn); PhantomState.hyprGapsIn = g[(i + 1) % g.length]; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Outer Gaps"
-                                    badgeText: PhantomState.hyprGapsOut + " px"
-                                    clickable: true
-                                    onClicked: { const g = [0, 8, 14, 20]; const i = g.indexOf(PhantomState.hyprGapsOut); PhantomState.hyprGapsOut = g[(i + 1) % g.length]; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Window Rounding"
-                                    badgeText: PhantomState.hyprRounding + " px"
-                                    clickable: true
-                                    onClicked: { const r = [0, 8, 14, 20]; const i = r.indexOf(PhantomState.hyprRounding); PhantomState.hyprRounding = r[(i + 1) % r.length]; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Border Width"
-                                    badgeText: PhantomState.hyprBorderSize + " px"
-                                    clickable: true
-                                    onClicked: { const b = [1, 2, 3]; const i = b.indexOf(PhantomState.hyprBorderSize); PhantomState.hyprBorderSize = b[(i + 1) % b.length]; PhantomState.syncHyprland() }
-                                }
-                                P3StatRow {
-                                    label: "Base Workspaces"
-                                    badgeText: PhantomState.workspaceCount + " SLOTS"
-                                    clickable: true
-                                    onClicked: {
-                                        const counts = [4, 5, 6, 8, 10]
-                                        const i = counts.indexOf(PhantomState.workspaceCount)
-                                        PhantomState.workspaceCount = counts[(i + 1) % counts.length]
-                                        PhantomState.saveState()
-                                        PhantomState.playSfx("select")
+                                    P3StatRow {
+                                        label: "Master Output"
+                                        badgeText: Math.round(Number(PhantomState.volumePct) || 0) + "%"
+                                        clickable: true
+                                        onClicked: {
+                                            const cur = Math.round(Number(PhantomState.volumePct) || 0)
+                                            const next = (cur >= 100 ? 20 : Math.min(100, Math.floor(cur / 10) * 10 + 15))
+                                            PhantomState.setSystemVolume(next)
+                                        }
+                                    }
+                                    P3StatRow {
+                                        label: "Mute Output"
+                                        badgeText: PhantomState.volumeMuted ? "MUTED" : "ACTIVE"
+                                        clickable: true
+                                        onClicked: PhantomState.toggleSystemMute()
+                                    }
+                                    P3StatRow {
+                                        label: "Sound Effects (SFX)"
+                                        badgeText: PhantomState.sfxEnabled ? "ENABLED" : "MUTED"
+                                        clickable: true
+                                        onClicked: { PhantomState.sfxEnabled = !PhantomState.sfxEnabled; PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "SFX Volume"
+                                        badgeText: Math.round(PhantomState.sfxVolume * 100) + "%"
+                                        clickable: true
+                                        onClicked: { PhantomState.sfxVolume = (PhantomState.sfxVolume >= 1.0 ? 0.2 : PhantomState.sfxVolume + 0.15); PhantomState.saveState() }
+                                    }
+                                    P3StatRow {
+                                        label: "Audio Backend"
+                                        badgeText: "PipeWire / WirePlumber"
+                                    }
+                                    P3StatRow {
+                                        label: "Visualizer Source"
+                                        badgeText: "CAVA FIFO Engine"
+                                        showDivider: false
                                     }
                                 }
-                                P3StatRow {
-                                    label: "Workspace Placement"
-                                    badgeText: (PhantomState.desktopWorkspacesPosition || "auto").toUpperCase()
-                                    clickable: true
-                                    showDivider: false
-                                    onClicked: {
-                                        const pos = ["auto", "top-left", "top-right", "bottom-left", "bottom-right"]
-                                        const i = pos.indexOf(PhantomState.desktopWorkspacesPosition)
-                                        PhantomState.desktopWorkspacesPosition = pos[(i + 1) % pos.length]
-                                        PhantomState.saveState()
-                                        PhantomState.playSfx("select")
+
+                                // ── TAB 2: HYPRLAND COMPOSITOR ──
+                                Column {
+                                    width: parent.width
+                                    visible: p3Overlay.configTab === 2
+                                    spacing: 2
+
+                                    P3StatRow {
+                                        label: "Dual Blur FX"
+                                        badgeText: PhantomState.hyprBlurEnabled ? "ENABLED" : "DISABLED"
+                                        clickable: true
+                                        onClicked: { PhantomState.hyprBlurEnabled = !PhantomState.hyprBlurEnabled; PhantomState.syncHyprland() }
+                                    }
+                                    P3StatRow {
+                                        label: "Window Animations"
+                                        badgeText: PhantomState.hyprAnimationsEnabled ? "ENABLED" : "DISABLED"
+                                        clickable: true
+                                        onClicked: { PhantomState.hyprAnimationsEnabled = !PhantomState.hyprAnimationsEnabled; PhantomState.syncHyprland() }
+                                    }
+                                    P3StatRow {
+                                        label: "Inner Gaps"
+                                        badgeText: PhantomState.hyprGapsIn + " px"
+                                        clickable: true
+                                        onClicked: { const g = [0, 5, 10, 15]; const i = g.indexOf(PhantomState.hyprGapsIn); PhantomState.hyprGapsIn = g[(i + 1) % g.length]; PhantomState.syncHyprland() }
+                                    }
+                                    P3StatRow {
+                                        label: "Outer Gaps"
+                                        badgeText: PhantomState.hyprGapsOut + " px"
+                                        clickable: true
+                                        onClicked: { const g = [0, 8, 14, 20]; const i = g.indexOf(PhantomState.hyprGapsOut); PhantomState.hyprGapsOut = g[(i + 1) % g.length]; PhantomState.syncHyprland() }
+                                    }
+                                    P3StatRow {
+                                        label: "Window Rounding"
+                                        badgeText: PhantomState.hyprRounding + " px"
+                                        clickable: true
+                                        onClicked: { const r = [0, 8, 14, 20]; const i = r.indexOf(PhantomState.hyprRounding); PhantomState.hyprRounding = r[(i + 1) % r.length]; PhantomState.syncHyprland() }
+                                    }
+                                    P3StatRow {
+                                        label: "Border Width"
+                                        badgeText: PhantomState.hyprBorderSize + " px"
+                                        clickable: true
+                                        onClicked: { const b = [1, 2, 3]; const i = b.indexOf(PhantomState.hyprBorderSize); PhantomState.hyprBorderSize = b[(i + 1) % b.length]; PhantomState.syncHyprland() }
+                                    }
+                                    P3StatRow {
+                                        label: "Base Workspaces"
+                                        badgeText: PhantomState.workspaceCount + " SLOTS"
+                                        clickable: true
+                                        onClicked: {
+                                            const counts = [4, 5, 6, 8, 10]
+                                            const i = counts.indexOf(PhantomState.workspaceCount)
+                                            PhantomState.workspaceCount = counts[(i + 1) % counts.length]
+                                            PhantomState.saveState()
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
+                                    P3StatRow {
+                                        label: "Workspace Placement"
+                                        badgeText: (PhantomState.desktopWorkspacesPosition || "auto").toUpperCase()
+                                        clickable: true
+                                        onClicked: {
+                                            const pos = ["auto", "top-left", "top-right", "bottom-left", "bottom-right"]
+                                            const i = pos.indexOf(PhantomState.desktopWorkspacesPosition)
+                                            PhantomState.desktopWorkspacesPosition = pos[(i + 1) % pos.length]
+                                            PhantomState.saveState()
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
+                                    P3StatRow {
+                                        label: "Edit hyprland.lua File"
+                                        badgeText: "OPEN IN NVIM"
+                                        clickable: true
+                                        showDivider: false
+                                        onClicked: {
+                                            Quickshell.execDetached(["sh", "-c", "ghostty -e nvim /mnt/data/Projects/rice/phantomshell/dots/hypr/hyprland.lua || kitty -e nvim /mnt/data/Projects/rice/phantomshell/dots/hypr/hyprland.lua || xdg-open /mnt/data/Projects/rice/phantomshell/dots/hypr/hyprland.lua"])
+                                        }
+                                    }
+                                }
+
+                                // ── TAB 3: WINDOW RULES DISPATCH ──
+                                Column {
+                                    width: parent.width
+                                    visible: p3Overlay.configTab === 3
+                                    spacing: 8
+
+                                    // Form Input Rule
+                                    Rectangle {
+                                        width: parent.width
+                                        height: ruleFormCol.implicitHeight + 18
+                                        radius: 4
+                                        color: Qt.rgba(4 / 255, 14 / 255, 42 / 255, 0.85)
+                                        border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.4)
+                                        border.width: 1
+
+                                        Column {
+                                            id: ruleFormCol
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            anchors.margins: 10
+                                            spacing: 8
+
+                                            Text {
+                                                text: "DISPATCH WINDOW RULE TO HYPRLAND"
+                                                color: "#8df6ff"
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 10
+                                                font.weight: Font.Black
+                                            }
+
+                                            // Row Input App Class + Tombol Detect
+                                            Row {
+                                                width: parent.width
+                                                spacing: 8
+
+                                                Rectangle {
+                                                    width: parent.width - 130
+                                                    height: 30
+                                                    radius: 3
+                                                    color: "#030a1a"
+                                                    border.color: ruleClassInput.activeFocus ? "#00f0ff" : "#4d00dbff"
+                                                    border.width: 1
+
+                                                    TextInput {
+                                                        id: ruleClassInput
+                                                        anchors.fill: parent
+                                                        anchors.leftMargin: 8
+                                                        anchors.rightMargin: 8
+                                                        verticalAlignment: TextInput.AlignVCenter
+                                                        color: "#ffffff"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 11
+                                                        clip: true
+                                                        selectByMouse: true
+                                                        text: cfgDetailPanel.newRuleClass
+                                                        onTextChanged: cfgDetailPanel.newRuleClass = text
+
+                                                        Text {
+                                                            anchors.fill: parent
+                                                            visible: !ruleClassInput.text && !ruleClassInput.activeFocus
+                                                            text: "App Class (e.g. zen-beta)"
+                                                            color: "#3a5682"
+                                                            font.family: "JetBrainsMono NFM"
+                                                            font.pixelSize: 10
+                                                            verticalAlignment: Text.AlignVCenter
+                                                        }
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    width: 122
+                                                    height: 30
+                                                    radius: 3
+                                                    color: detMouse.containsMouse ? "#00c3ff" : "#08204d"
+                                                    border.color: "#00dbff"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "DETECT ACTIVE"
+                                                        color: detMouse.containsMouse ? "#010817" : "#8df6ff"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 9
+                                                        font.weight: Font.Black
+                                                    }
+
+                                                    MouseArea {
+                                                        id: detMouse
+                                                        anchors.fill: parent
+                                                        hoverEnabled: true
+                                                        cursorShape: Qt.PointingHandCursor
+                                                        onClicked: {
+                                                            detectActiveAppProc.running = true
+                                                            PhantomState.playSfx("select")
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            // Row Target Workspace Selector
+                                            Row {
+                                                spacing: 6
+                                                Text {
+                                                    text: "TARGET WS:"
+                                                    color: "#8df6ff"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 10
+                                                    font.weight: Font.Bold
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                }
+
+                                                Repeater {
+                                                    model: ["1", "2", "3", "4", "5", "6", "velvet", "none"]
+                                                    delegate: Rectangle {
+                                                        required property string modelData
+                                                        height: 22
+                                                        width: wsPillTxt.implicitWidth + 14
+                                                        radius: 3
+                                                        color: cfgDetailPanel.newRuleWs === modelData ? "#00dbff" : (wsPillMouse.containsMouse ? "#0d2b63" : "#05132d")
+                                                        border.color: cfgDetailPanel.newRuleWs === modelData ? "#ffffff" : "#4d00dbff"
+                                                        border.width: 1
+
+                                                        Text {
+                                                            id: wsPillTxt
+                                                            anchors.centerIn: parent
+                                                            text: parent.modelData.toUpperCase()
+                                                            color: cfgDetailPanel.newRuleWs === parent.modelData ? "#010817" : "#8df6ff"
+                                                            font.family: "JetBrainsMono NFM"
+                                                            font.pixelSize: 9
+                                                            font.weight: Font.Black
+                                                        }
+
+                                                        MouseArea {
+                                                            id: wsPillMouse
+                                                            anchors.fill: parent
+                                                            hoverEnabled: true
+                                                            cursorShape: Qt.PointingHandCursor
+                                                            onClicked: {
+                                                                cfgDetailPanel.newRuleWs = parent.modelData
+                                                                PhantomState.playSfx("select")
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            // Row Flags: Float & Center & Add Rule
+                                            Row {
+                                                width: parent.width
+                                                spacing: 8
+
+                                                Rectangle {
+                                                    height: 24
+                                                    width: 100
+                                                    radius: 3
+                                                    color: cfgDetailPanel.newRuleFloat ? "#ff9000" : "#05132d"
+                                                    border.color: cfgDetailPanel.newRuleFloat ? "#ffffff" : "#66ff9000"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "FLOAT: " + (cfgDetailPanel.newRuleFloat ? "YES" : "NO")
+                                                        color: cfgDetailPanel.newRuleFloat ? "#010817" : "#ffb040"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 9
+                                                        font.weight: Font.Black
+                                                    }
+
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        cursorShape: Qt.PointingHandCursor
+                                                        onClicked: {
+                                                            cfgDetailPanel.newRuleFloat = !cfgDetailPanel.newRuleFloat
+                                                            PhantomState.playSfx("select")
+                                                        }
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    height: 24
+                                                    width: 100
+                                                    radius: 3
+                                                    color: cfgDetailPanel.newRuleCenter ? "#d600aa" : "#05132d"
+                                                    border.color: cfgDetailPanel.newRuleCenter ? "#ffffff" : "#66d600aa"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "CENTER: " + (cfgDetailPanel.newRuleCenter ? "YES" : "NO")
+                                                        color: cfgDetailPanel.newRuleCenter ? "#ffffff" : "#ea44c7"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 9
+                                                        font.weight: Font.Black
+                                                    }
+
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        cursorShape: Qt.PointingHandCursor
+                                                        onClicked: {
+                                                            cfgDetailPanel.newRuleCenter = !cfgDetailPanel.newRuleCenter
+                                                            PhantomState.playSfx("select")
+                                                        }
+                                                    }
+                                                }
+
+                                                Item { width: 10; height: 1 }
+
+                                                Rectangle {
+                                                    height: 26
+                                                    width: 120
+                                                    radius: 3
+                                                    color: addRuleP3Mouse.containsMouse ? "#ffffff" : "#00dbff"
+                                                    border.color: "#00dbff"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "+ ADD RULE"
+                                                        color: "#010817"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 10
+                                                        font.weight: Font.Black
+                                                    }
+
+                                                    MouseArea {
+                                                        id: addRuleP3Mouse
+                                                        anchors.fill: parent
+                                                        hoverEnabled: true
+                                                        cursorShape: Qt.PointingHandCursor
+                                                        onClicked: {
+                                                            if (cfgDetailPanel.newRuleClass.trim().length > 0) {
+                                                                PhantomState.addWindowRule(cfgDetailPanel.newRuleClass.trim(), cfgDetailPanel.newRuleWs, cfgDetailPanel.newRuleFloat, cfgDetailPanel.newRuleCenter)
+                                                                cfgDetailPanel.newRuleClass = ""
+                                                                PhantomState.playSfx("confirm")
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            // Quick Presets
+                                            Row {
+                                                spacing: 6
+                                                Text {
+                                                    text: "PRESETS:"
+                                                    color: "#3a5682"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 9
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                }
+
+                                                Repeater {
+                                                    model: [
+                                                        { cls: "zen-beta", ws: "1", label: "+ Zen -> WS 1" },
+                                                        { cls: "code", ws: "2", label: "+ Code -> WS 2" },
+                                                        { cls: "discord", ws: "3", label: "+ Discord -> WS 3" },
+                                                        { cls: "steam", ws: "4", label: "+ Steam -> WS 4" }
+                                                    ]
+
+                                                    delegate: Rectangle {
+                                                        required property var modelData
+                                                        height: 20
+                                                        width: qpTxt.implicitWidth + 10
+                                                        radius: 2
+                                                        color: qpMouse.containsMouse ? "#00c3ff" : "#041026"
+                                                        border.color: "#4d00dbff"
+                                                        border.width: 1
+
+                                                        Text {
+                                                            id: qpTxt
+                                                            anchors.centerIn: parent
+                                                            text: parent.modelData.label
+                                                            color: qpMouse.containsMouse ? "#010817" : "#8df6ff"
+                                                            font.family: "JetBrainsMono NFM"
+                                                            font.pixelSize: 9
+                                                            font.weight: Font.Bold
+                                                        }
+
+                                                        MouseArea {
+                                                            id: qpMouse
+                                                            anchors.fill: parent
+                                                            hoverEnabled: true
+                                                            cursorShape: Qt.PointingHandCursor
+                                                            onClicked: {
+                                                                PhantomState.addWindowRule(parent.modelData.cls, parent.modelData.ws, false, false)
+                                                                PhantomState.playSfx("confirm")
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Header Daftar Rules Aktif
+                                    Text {
+                                        text: "ACTIVE CONFIGURED RULES (" + (PhantomState.customWindowRules ? PhantomState.customWindowRules.length : 0) + ")"
+                                        color: "#00dbff"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Black
+                                        topPadding: 4
+                                    }
+
+                                    // List Active Rules
+                                    Repeater {
+                                        model: PhantomState.customWindowRules
+                                        delegate: Rectangle {
+                                            required property var modelData
+                                            required property int index
+                                            width: parent.width
+                                            height: 32
+                                            radius: 3
+                                            color: rDelP3Mouse.containsMouse ? "#102654" : "#05132d"
+                                            border.color: "#4d00dbff"
+                                            border.width: 1
+
+                                            Row {
+                                                anchors.fill: parent
+                                                anchors.leftMargin: 10
+                                                anchors.rightMargin: 10
+                                                spacing: 8
+
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: modelData.appClass
+                                                    color: "#ffffff"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 11
+                                                    font.weight: Font.Black
+                                                }
+
+                                                Rectangle {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    visible: modelData.workspace && modelData.workspace !== "none"
+                                                    height: 18
+                                                    width: wsTagP3Txt.implicitWidth + 8
+                                                    radius: 2
+                                                    color: "#08204d"
+                                                    border.color: "#00dbff"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        id: wsTagP3Txt
+                                                        anchors.centerIn: parent
+                                                        text: "WS: " + modelData.workspace
+                                                        color: "#8df6ff"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 8
+                                                        font.weight: Font.Black
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    visible: !!modelData.float
+                                                    height: 18
+                                                    width: 44
+                                                    radius: 2
+                                                    color: "#2a1500"
+                                                    border.color: "#ffaa00"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "FLOAT"
+                                                        color: "#ffaa00"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 8
+                                                        font.weight: Font.Black
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    visible: !!modelData.center
+                                                    height: 18
+                                                    width: 48
+                                                    radius: 2
+                                                    color: "#1c0028"
+                                                    border.color: "#ff00dd"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "CENTER"
+                                                        color: "#ff00dd"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 8
+                                                        font.weight: Font.Black
+                                                    }
+                                                }
+
+                                                Item {
+                                                    width: Math.max(10, parent.width - 250)
+                                                    height: 1
+                                                }
+
+                                                Rectangle {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    width: 20
+                                                    height: 20
+                                                    radius: 2
+                                                    color: rDelP3Mouse.containsMouse ? "#d60032" : "#1a0814"
+                                                    border.color: rDelP3Mouse.containsMouse ? "#ffffff" : "#ff3366"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "✕"
+                                                        color: "#ffffff"
+                                                        font.pixelSize: 10
+                                                        font.bold: true
+                                                    }
+
+                                                    MouseArea {
+                                                        id: rDelP3Mouse
+                                                        anchors.fill: parent
+                                                        hoverEnabled: true
+                                                        cursorShape: Qt.PointingHandCursor
+                                                        onClicked: {
+                                                            PhantomState.removeWindowRule(index)
+                                                            PhantomState.playSfx("close")
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    P3StatRow {
+                                        label: "Edit rules.lua File"
+                                        badgeText: "OPEN IN NVIM"
+                                        clickable: true
+                                        showDivider: false
+                                        onClicked: {
+                                            Quickshell.execDetached(["sh", "-c", "ghostty -e nvim /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/rules.lua || kitty -e nvim /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/rules.lua || xdg-open /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/rules.lua"])
+                                        }
+                                    }
+                                }
+
+                                // ── TAB 4: CUSTOM KEYBINDS ──
+                                Column {
+                                    width: parent.width
+                                    visible: p3Overlay.configTab === 4
+                                    spacing: 8
+
+                                    // Form Input Keybind
+                                    Rectangle {
+                                        width: parent.width
+                                        height: bindFormCol.implicitHeight + 18
+                                        radius: 4
+                                        color: Qt.rgba(4 / 255, 14 / 255, 42 / 255, 0.85)
+                                        border.color: Qt.rgba(0 / 255, 219 / 255, 255 / 255, 0.4)
+                                        border.width: 1
+
+                                        Column {
+                                            id: bindFormCol
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            anchors.margins: 10
+                                            spacing: 8
+
+                                            Text {
+                                                text: "REGISTER CUSTOM KEYBOARD SHORTCUT"
+                                                color: "#8df6ff"
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 10
+                                                font.weight: Font.Black
+                                            }
+
+                                            // Row Input Key Combo
+                                            Row {
+                                                width: parent.width
+                                                spacing: 8
+
+                                                Text {
+                                                    text: "KEY COMBO:"
+                                                    color: "#8df6ff"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 10
+                                                    font.weight: Font.Bold
+                                                    width: 80
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                }
+
+                                                Rectangle {
+                                                    width: parent.width - 90
+                                                    height: 28
+                                                    radius: 3
+                                                    color: "#030a1a"
+                                                    border.color: keyP3Input.activeFocus ? "#00f0ff" : "#4d00dbff"
+                                                    border.width: 1
+
+                                                    TextInput {
+                                                        id: keyP3Input
+                                                        anchors.fill: parent
+                                                        anchors.leftMargin: 8
+                                                        anchors.rightMargin: 8
+                                                        verticalAlignment: TextInput.AlignVCenter
+                                                        color: "#ffffff"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 11
+                                                        clip: true
+                                                        selectByMouse: true
+                                                        text: cfgDetailPanel.newBindKey
+                                                        onTextChanged: cfgDetailPanel.newBindKey = text
+
+                                                        Text {
+                                                            anchors.fill: parent
+                                                            visible: !keyP3Input.text && !keyP3Input.activeFocus
+                                                            text: "e.g. SUPER + SHIFT + B or CTRL + ALT + T"
+                                                            color: "#3a5682"
+                                                            font.family: "JetBrainsMono NFM"
+                                                            font.pixelSize: 10
+                                                            verticalAlignment: Text.AlignVCenter
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            // Row Input Command
+                                            Row {
+                                                width: parent.width
+                                                spacing: 8
+
+                                                Text {
+                                                    text: "COMMAND:"
+                                                    color: "#8df6ff"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 10
+                                                    font.weight: Font.Bold
+                                                    width: 80
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                }
+
+                                                Rectangle {
+                                                    width: parent.width - 90
+                                                    height: 28
+                                                    radius: 3
+                                                    color: "#030a1a"
+                                                    border.color: cmdP3Input.activeFocus ? "#00f0ff" : "#4d00dbff"
+                                                    border.width: 1
+
+                                                    TextInput {
+                                                        id: cmdP3Input
+                                                        anchors.fill: parent
+                                                        anchors.leftMargin: 8
+                                                        anchors.rightMargin: 8
+                                                        verticalAlignment: TextInput.AlignVCenter
+                                                        color: "#ffffff"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 11
+                                                        clip: true
+                                                        selectByMouse: true
+                                                        text: cfgDetailPanel.newBindCmd
+                                                        onTextChanged: cfgDetailPanel.newBindCmd = text
+
+                                                        Text {
+                                                            anchors.fill: parent
+                                                            visible: !cmdP3Input.text && !cmdP3Input.activeFocus
+                                                            text: "e.g. zen-browser or kitty -e btop"
+                                                            color: "#3a5682"
+                                                            font.family: "JetBrainsMono NFM"
+                                                            font.pixelSize: 10
+                                                            verticalAlignment: Text.AlignVCenter
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            // Row Input Description + Add Button
+                                            Row {
+                                                width: parent.width
+                                                spacing: 8
+
+                                                Text {
+                                                    text: "DESC:"
+                                                    color: "#8df6ff"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 10
+                                                    font.weight: Font.Bold
+                                                    width: 80
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                }
+
+                                                Rectangle {
+                                                    width: parent.width - 200
+                                                    height: 28
+                                                    radius: 3
+                                                    color: "#030a1a"
+                                                    border.color: descP3Input.activeFocus ? "#00f0ff" : "#4d00dbff"
+                                                    border.width: 1
+
+                                                    TextInput {
+                                                        id: descP3Input
+                                                        anchors.fill: parent
+                                                        anchors.leftMargin: 8
+                                                        anchors.rightMargin: 8
+                                                        verticalAlignment: TextInput.AlignVCenter
+                                                        color: "#ffffff"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 11
+                                                        clip: true
+                                                        selectByMouse: true
+                                                        text: cfgDetailPanel.newBindDesc
+                                                        onTextChanged: cfgDetailPanel.newBindDesc = text
+
+                                                        Text {
+                                                            anchors.fill: parent
+                                                            visible: !descP3Input.text && !descP3Input.activeFocus
+                                                            text: "e.g. Launch Web Browser"
+                                                            color: "#3a5682"
+                                                            font.family: "JetBrainsMono NFM"
+                                                            font.pixelSize: 10
+                                                            verticalAlignment: Text.AlignVCenter
+                                                        }
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    height: 28
+                                                    width: 100
+                                                    radius: 3
+                                                    color: addBindP3Mouse.containsMouse ? "#ffffff" : "#00dbff"
+                                                    border.color: "#00dbff"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "+ BIND KEY"
+                                                        color: "#010817"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 10
+                                                        font.weight: Font.Black
+                                                    }
+
+                                                    MouseArea {
+                                                        id: addBindP3Mouse
+                                                        anchors.fill: parent
+                                                        hoverEnabled: true
+                                                        cursorShape: Qt.PointingHandCursor
+                                                        onClicked: {
+                                                            if (cfgDetailPanel.newBindKey.trim().length > 0 && cfgDetailPanel.newBindCmd.trim().length > 0) {
+                                                                PhantomState.addKeybind(cfgDetailPanel.newBindKey.trim(), cfgDetailPanel.newBindCmd.trim(), cfgDetailPanel.newBindDesc.trim())
+                                                                cfgDetailPanel.newBindKey = ""
+                                                                cfgDetailPanel.newBindCmd = ""
+                                                                cfgDetailPanel.newBindDesc = ""
+                                                                PhantomState.playSfx("confirm")
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Header Daftar Keybinds Aktif
+                                    Text {
+                                        text: "ACTIVE CONFIGURED KEYBINDS (" + (PhantomState.customKeybinds ? PhantomState.customKeybinds.length : 0) + ")"
+                                        color: "#00dbff"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Black
+                                        topPadding: 4
+                                    }
+
+                                    // List Active Keybinds
+                                    Repeater {
+                                        model: PhantomState.customKeybinds
+                                        delegate: Rectangle {
+                                            required property var modelData
+                                            required property int index
+                                            width: parent.width
+                                            height: 32
+                                            radius: 3
+                                            color: bDelP3Mouse.containsMouse ? "#102654" : "#05132d"
+                                            border.color: "#4d00dbff"
+                                            border.width: 1
+
+                                            Row {
+                                                anchors.fill: parent
+                                                anchors.leftMargin: 10
+                                                anchors.rightMargin: 10
+                                                spacing: 8
+
+                                                Rectangle {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    height: 20
+                                                    width: kbTagP3Txt.implicitWidth + 10
+                                                    radius: 2
+                                                    color: "#08204d"
+                                                    border.color: "#00dbff"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        id: kbTagP3Txt
+                                                        anchors.centerIn: parent
+                                                        text: modelData.key
+                                                        color: "#8df6ff"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 9
+                                                        font.weight: Font.Black
+                                                    }
+                                                }
+
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: modelData.cmd
+                                                    color: "#00dbff"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 11
+                                                    font.weight: Font.Bold
+                                                }
+
+                                                Text {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    visible: !!modelData.desc
+                                                    text: "— " + modelData.desc
+                                                    color: "#5b7da8"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 10
+                                                    elide: Text.ElideRight
+                                                }
+
+                                                Item {
+                                                    width: Math.max(10, parent.width - 250)
+                                                    height: 1
+                                                }
+
+                                                Rectangle {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    width: 20
+                                                    height: 20
+                                                    radius: 2
+                                                    color: bDelP3Mouse.containsMouse ? "#d60032" : "#1a0814"
+                                                    border.color: bDelP3Mouse.containsMouse ? "#ffffff" : "#ff3366"
+                                                    border.width: 1
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "✕"
+                                                        color: "#ffffff"
+                                                        font.pixelSize: 10
+                                                        font.bold: true
+                                                    }
+
+                                                    MouseArea {
+                                                        id: bDelP3Mouse
+                                                        anchors.fill: parent
+                                                        hoverEnabled: true
+                                                        cursorShape: Qt.PointingHandCursor
+                                                        onClicked: {
+                                                            PhantomState.removeKeybind(index)
+                                                            PhantomState.playSfx("close")
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    P3StatRow {
+                                        label: "Edit binds.lua File"
+                                        badgeText: "OPEN IN NVIM"
+                                        clickable: true
+                                        showDivider: false
+                                        onClicked: {
+                                            Quickshell.execDetached(["sh", "-c", "ghostty -e nvim /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/binds.lua || kitty -e nvim /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/binds.lua || xdg-open /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/binds.lua"])
+                                        }
+                                    }
+                                }
+
+                                // ── TAB 5: DISPLAYS & MONITORS ──
+                                Column {
+                                    width: parent.width
+                                    visible: p3Overlay.configTab === 5
+                                    spacing: 6
+
+                                    Text {
+                                        text: "CONNECTED MONITORS & MODES"
+                                        color: "#00dbff"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Black
+                                        topPadding: 2
+                                    }
+
+                                    Repeater {
+                                        model: cfgDetailPanel.monitorList.length > 0 ? cfgDetailPanel.monitorList : [{ name: "eDP-1", description: "Internal Display", width: 1920, height: 1080, refreshRate: 144, scale: 1.0, activeWorkspace: { name: "1" } }]
+                                        delegate: Rectangle {
+                                            required property var modelData
+                                            required property int index
+                                            width: parent.width
+                                            height: 52
+                                            radius: 3
+                                            color: "#05132d"
+                                            border.color: "#6600dbff"
+                                            border.width: 1
+
+                                            Row {
+                                                anchors.fill: parent
+                                                anchors.margins: 8
+                                                spacing: 12
+
+                                                Rectangle {
+                                                    width: 32
+                                                    height: 32
+                                                    radius: 2
+                                                    color: "#08204d"
+                                                    border.color: "#00dbff"
+                                                    border.width: 1
+                                                    anchors.verticalCenter: parent.verticalCenter
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "DP"
+                                                        color: "#8df6ff"
+                                                        font.family: "Bebas Neue"
+                                                        font.pixelSize: 16
+                                                    }
+                                                }
+
+                                                Column {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    spacing: 2
+
+                                                    Row {
+                                                        spacing: 6
+                                                        Text {
+                                                            text: modelData.name + (modelData.focused ? " [FOCUSED]" : "")
+                                                            color: "#ffffff"
+                                                            font.family: "Rubik"
+                                                            font.pixelSize: 13
+                                                            font.bold: true
+                                                        }
+                                                        Text {
+                                                            text: "• WS " + (modelData.activeWorkspace ? modelData.activeWorkspace.name : "1")
+                                                            color: "#00dbff"
+                                                            font.family: "JetBrainsMono NFM"
+                                                            font.pixelSize: 10
+                                                        }
+                                                    }
+
+                                                    Text {
+                                                        text: modelData.width + "x" + modelData.height + " @ " + Math.round(Number(modelData.refreshRate) || 60) + "Hz  (" + (modelData.description || "Display Output") + ")"
+                                                        color: "#5b7da8"
+                                                        font.family: "JetBrainsMono NFM"
+                                                        font.pixelSize: 9
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    P3StatRow {
+                                        label: "InFocus Projector Mirror"
+                                        badgeText: "DISABLED"
+                                        clickable: true
+                                    }
+
+                                    P3StatRow {
+                                        label: "Display Scaling Mode"
+                                        badgeText: "100% (1.0x)"
+                                        clickable: true
+                                    }
+
+                                    P3StatRow {
+                                        label: "Re-scan Displays"
+                                        badgeText: "SCAN NOW"
+                                        clickable: true
+                                        onClicked: {
+                                            detectMonitorsProc.running = true
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
+
+                                    P3StatRow {
+                                        label: "Edit monitors.lua File"
+                                        badgeText: "OPEN IN NVIM"
+                                        clickable: true
+                                        showDivider: false
+                                        onClicked: {
+                                            Quickshell.execDetached(["sh", "-c", "ghostty -e nvim /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/monitors.lua || kitty -e nvim /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/monitors.lua || xdg-open /mnt/data/Projects/rice/phantomshell/dots/hypr/lua/monitors.lua"])
+                                        }
                                     }
                                 }
                             }
