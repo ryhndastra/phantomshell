@@ -100,8 +100,8 @@ PanelWindow {
         right: true
     }
     margins {
-        top: calPopupWin.isBottom ? 0 : 38
-        bottom: calPopupWin.isBottom ? 38 : 0
+        top: PhantomState.isP3 ? 0 : (calPopupWin.isBottom ? 0 : 38)
+        bottom: PhantomState.isP3 ? 0 : (calPopupWin.isBottom ? 38 : 0)
     }
 
     color: "transparent"
@@ -109,18 +109,32 @@ PanelWindow {
     onVisibleChanged: {
         if (visible) {
             resetToToday()
-            calEntryAnim.restart()
+            if (PhantomState.isP3 && p3CalendarScreen) {
+                p3CalendarScreen.forceActiveFocus()
+            } else {
+                calEntryAnim.restart()
+            }
         }
+    }
+
+    // Layar transisi kalender otentik Persona 3 Reload
+    P3CalendarScreen {
+        id: p3CalendarScreen
+        anchors.fill: parent
+        visible: PhantomState.isP3
+        active: calPopupWin.visible && visible
     }
 
     // area klik luar untuk menutup kalender saat klik di tempat kosong
     MouseArea {
         anchors.fill: parent
+        enabled: !PhantomState.isP3
         onClicked: PhantomState.calendarOpen = false
     }
 
     Item {
         id: calCard
+        visible: !PhantomState.isP3
         width: 640
         height: 390
         anchors.top: !calPopupWin.isBottom ? parent.top : undefined

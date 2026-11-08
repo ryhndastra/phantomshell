@@ -411,4 +411,12 @@ Item {
             }
         }
     }
+
+    // Klik pada area jam/HUD untuk membuka layar transisi kalender Persona 3 Reload
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: true
+        onClicked: PhantomState.toggleCalendar()
+    }
 }

@@ -147,6 +147,10 @@ ShellRoot {
             PhantomState.toggleCalendar()
         }
 
+        function advanceCalendarDay(delta: int): void {
+            PhantomState.calendarDayOffset += delta
+        }
+
         function toggleSession(): void {
             PhantomState.toggleSession()
         }

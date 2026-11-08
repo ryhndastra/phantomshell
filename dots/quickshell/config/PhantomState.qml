@@ -55,6 +55,7 @@ Singleton {
     property real settingsScrollY: 0
     property bool notificationsOpen: false
     property bool calendarOpen: false
+    property int calendarDayOffset: 0
     property bool sessionOpen: false
     property string p3SessionSection: "main"
     property int p3StatsTab: 0
@@ -265,7 +266,10 @@ Singleton {
 
     function toggleCalendar() {
         const next = !calendarOpen
-        if (next) closeAllModals()
+        if (next) {
+            closeAllModals()
+            calendarDayOffset = 0
+        }
         calendarOpen = next
         playSfx(next ? "open" : "close")
     }
