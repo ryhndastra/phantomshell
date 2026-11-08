@@ -7,8 +7,8 @@ import qs.config
 import qs.components
 
 // =============================================================================
-// PERSONA 3 RELOAD: AUTHENTIC TATSUMI PORT ISLAND TOWN MAP OVERVIEW
-// Tampilan ikhtisar workspace 100% presisi visual P3R Town Map (Sesuai Foto 1)
+// PERSONA 3 RELOAD: S.E.E.S. TACTICAL TOWN MAP OVERVIEW (NO PNG, NO CLOCK)
+// Ikhtisar Workspace Vektor Presisi Berdasarkan Peta Distrik Tatsumi Port Island
 // =============================================================================
 Scope {
     id: root
@@ -16,14 +16,13 @@ Scope {
     readonly property int activeWsId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
     property int selectedDistrictIdx: 0
 
-    // Data 6 Sektor Distrik Utama Tatsumi Port Island & Koordinat pada Peta 3D (Foto 1)
+    // Data 6 Sektor Distrik Utama Tatsumi Port Island & Posisi pada Peta Vektor
     readonly property var districts: [
         {
             num: 1,
             name: "Gekkoukan High School",
             code: "GEKKOUKAN HIGH",
             sub: "Classrooms & Rooftop",
-            // Kanan Tengah (Gedung Sekolah & Lapangan)
             mapX: 0.68,
             mapY: 0.50,
             cardSide: "left"
@@ -33,9 +32,8 @@ Scope {
             name: "Iwatodai Station Strip Mall",
             code: "IWATODAI STRIP",
             sub: "Dormitory & Station",
-            // Kiri Atas (Stasiun & Asrama Mahasiswa)
-            mapX: 0.36,
-            mapY: 0.28,
+            mapX: 0.34,
+            mapY: 0.32,
             cardSide: "right"
         },
         {
@@ -43,19 +41,17 @@ Scope {
             name: "Paulownia Mall",
             code: "PAULOWNIA MALL",
             sub: "Arcade & Police Dept",
-            // Kanan Atas Tengah (Plaza & Bianglala)
             mapX: 0.63,
-            mapY: 0.32,
+            mapY: 0.34,
             cardSide: "left"
         },
         {
             num: 4,
             name: "Port Island Station",
             code: "PORT ISLAND STN",
-            sub: "Outskirts & Square",
-            // Bawah Tengah (Terminal Kereta)
-            mapX: 0.52,
-            mapY: 0.62,
+            sub: "Outskirts & Terminal",
+            mapX: 0.50,
+            mapY: 0.64,
             cardSide: "right"
         },
         {
@@ -63,9 +59,8 @@ Scope {
             name: "Naganaki Shrine",
             code: "NAGANAKI SHRINE",
             sub: "Shrine Grounds",
-            // Atas Tengah (Gerbang Torii & Hutan)
             mapX: 0.48,
-            mapY: 0.21,
+            mapY: 0.20,
             cardSide: "bottom"
         },
         {
@@ -73,9 +68,8 @@ Scope {
             name: "Tartarus Gate & Bridge",
             code: "TARTARUS GATE",
             sub: "Monorail & Moonlight Bridge",
-            // Kiri Atas Pesisir (Jembatan Monorel)
-            mapX: 0.22,
-            mapY: 0.25,
+            mapX: 0.20,
+            mapY: 0.38,
             cardSide: "right"
         }
     ]
@@ -117,42 +111,46 @@ Scope {
         onVisibleChanged: {
             if (visible) {
                 PhantomState.refreshWorkspaces()
-                // Set seleksi awal ke workspace aktif saat ini
-                for (var i = 0; i < root.districts.length; i++) {
-                    if (root.districts[i].num === root.activeWsId) {
-                        root.selectedDistrictIdx = i
+                // Set seleksi awal ke workspace aktif saat ini jika dalam range 1-6
+                const actId = root.activeWsId
+                let found = -1
+                for (let i = 0; i < root.districts.length; ++i) {
+                    if (root.districts[i].num === actId) {
+                        found = i
                         break
                     }
                 }
-                ovKeyCatcher.forceActiveFocus()
+                root.selectedDistrictIdx = (found >= 0) ? found : 0
+                tacticalMapCanvas.requestPaint()
+                ovKeyHandler.forceActiveFocus()
             }
         }
 
-        // Penanganan Tombol Keyboard Sesuai Navigasi Game P3R
+        // Tangani Navigasi Keyboard Otentik (1-6, Panah, WASD, Enter, Esc)
         Item {
-            id: ovKeyCatcher
-            focus: true
+            id: ovKeyHandler
             anchors.fill: parent
+            focus: true
 
-            Keys.onEscapePressed: PhantomState.overviewOpen = false
-
-            // Navigasi Angka 1-6 Langsung Fast Travel
-            Keys.onPressed: (event) => {
-                if (event.key >= Qt.Key_1 && event.key <= Qt.Key_6) {
-                    var targetWs = event.key - Qt.Key_0
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Escape || event.key === Qt.Key_C) {
+                    PhantomState.overviewOpen = false
+                    event.accepted = true
+                } else if (event.key >= Qt.Key_1 && event.key <= Qt.Key_6) {
+                    const targetWs = event.key - Qt.Key_0
                     root.fastTravelTo(targetWs)
                     event.accepted = true
-                } else if (event.key === Qt.Key_Tab || event.key === Qt.Key_D || event.key === Qt.Key_Right) {
+                } else if (event.key === Qt.Key_Tab || event.key === Qt.Key_Right || event.key === Qt.Key_D) {
                     root.selectedDistrictIdx = (root.selectedDistrictIdx + 1) % root.districts.length
                     event.accepted = true
-                } else if (event.key === Qt.Key_A || event.key === Qt.Key_Left) {
+                } else if (event.key === Qt.Key_Left || event.key === Qt.Key_A) {
                     root.selectedDistrictIdx = (root.selectedDistrictIdx - 1 + root.districts.length) % root.districts.length
                     event.accepted = true
                 } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
-                    var d = root.districts[root.selectedDistrictIdx]
+                    const d = root.districts[root.selectedDistrictIdx]
                     if (d) root.fastTravelTo(d.num)
                     event.accepted = true
-                } else if (event.key === Qt.Key_S) {
+                } else if (event.key === Qt.Key_V) {
                     PhantomState.overviewOpen = false
                     PhantomState.toggleVelvetRoom()
                     event.accepted = true
@@ -160,181 +158,306 @@ Scope {
             }
         }
 
-        // 1. Gambar Panorama Peta Tatsumi Port Island (Foto 1)
-        Item {
+        // =====================================================================
+        // 1. PETA TAKTIKAL VEKTOR TATSUMI PORT ISLAND (BEBAS GAMBAR PNG)
+        // Dibuat murni dengan Canvas 2D: sonar radar, kontur pulau, monorail & teluk
+        // =====================================================================
+        Canvas {
+            id: tacticalMapCanvas
             anchors.fill: parent
+            antialiasing: true
 
-            Image {
-                id: mapBgImage
-                anchors.fill: parent
-                source: "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/themes/p3/bg/p3r_town_map.png"
-                fillMode: Image.PreserveAspectCrop
-                smooth: true
-            }
+            onPaint: {
+                var ctx = getContext("2d")
+                ctx.reset()
+                var w = width
+                var h = height
 
-            // Lapisan Vignette Gelap di Tepian Peta untuk Kedalaman Sinematik
-            Canvas {
-                anchors.fill: parent
-                antialiasing: true
-                onPaint: {
-                    var ctx = getContext("2d")
-                    ctx.reset()
-                    var w = width
-                    var h = height
-                    var grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.72)
-                    grad.addColorStop(0.0, "transparent")
-                    grad.addColorStop(1.0, "rgba(2, 6, 18, 0.75)")
-                    ctx.fillStyle = grad
-                    ctx.fillRect(0, 0, w, h)
+                // A. Latar Belakang Gradien Samudera Gelap
+                var bgGrad = ctx.createRadialGradient(w * 0.52, h * 0.48, Math.min(w, h) * 0.12, w * 0.50, h * 0.50, Math.max(w, h) * 0.75)
+                bgGrad.addColorStop(0.0, "#061b4a")
+                bgGrad.addColorStop(0.4, "#030f2d")
+                bgGrad.addColorStop(0.85, "#010718")
+                bgGrad.addColorStop(1.0, "#00030a")
+                ctx.fillStyle = bgGrad
+                ctx.fillRect(0, 0, w, h)
+
+                // B. Grid Taktikal Halus di Permukaan Air
+                ctx.strokeStyle = "rgba(0, 219, 255, 0.04)"
+                ctx.lineWidth = 1.0
+                for (var y = 60; y < h; y += 48) {
+                    ctx.beginPath()
+                    ctx.moveTo(0, y)
+                    ctx.lineTo(w, y)
+                    ctx.stroke()
                 }
-            }
+                for (var x = 60; x < w; x += 64) {
+                    ctx.beginPath()
+                    ctx.moveTo(x, 0)
+                    ctx.lineTo(x, h)
+                    ctx.stroke()
+                }
 
-            Rectangle {
-                anchors.fill: parent
-                color: "#18040b24"
+                // C. Lingkaran Sonar / Radar Taktikal S.E.E.S.
+                var cx = w * 0.52
+                var cy = h * 0.46
+                var radii = [h * 0.16, h * 0.30, h * 0.46, h * 0.62]
+
+                ctx.strokeStyle = "rgba(0, 219, 255, 0.10)"
+                ctx.lineWidth = 1.2
+                ctx.setLineDash([4, 6])
+                for (var i = 0; i < radii.length; i++) {
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, radii[i], 0, Math.PI * 2)
+                    ctx.stroke()
+                }
+                ctx.setLineDash([])
+
+                // Crosshairs Radar Sumbu Tengah
+                ctx.strokeStyle = "rgba(0, 219, 255, 0.16)"
+                ctx.lineWidth = 1.0
+                ctx.beginPath()
+                ctx.moveTo(cx - radii[3], cy); ctx.lineTo(cx + radii[3], cy)
+                ctx.moveTo(cx, cy - radii[3]); ctx.lineTo(cx, cy + radii[3])
+                ctx.stroke()
+
+                // D. Kontur Teluk & Kedalaman Air (Bathymetry Waves)
+                ctx.strokeStyle = "rgba(0, 180, 255, 0.08)"
+                ctx.lineWidth = 1.5
+                ctx.beginPath()
+                ctx.moveTo(w * 0.15, h * 0.58)
+                ctx.quadraticCurveTo(w * 0.35, h * 0.52, w * 0.48, h * 0.78)
+                ctx.stroke()
+
+                ctx.beginPath()
+                ctx.moveTo(w * 0.25, h * 0.32)
+                ctx.quadraticCurveTo(w * 0.48, h * 0.38, w * 0.82, h * 0.32)
+                ctx.stroke()
+
+                // Layer Gelombang Luar Pulau (Reef/Shallows)
+                ctx.strokeStyle = "rgba(0, 219, 255, 0.14)"
+                ctx.lineWidth = 1.0
+                ctx.beginPath()
+                ctx.moveTo(w * 0.40, h * 0.53)
+                ctx.lineTo(w * 0.42, h * 0.74)
+                ctx.lineTo(w * 0.60, h * 0.77)
+                ctx.lineTo(w * 0.77, h * 0.66)
+                ctx.lineTo(w * 0.81, h * 0.44)
+                ctx.lineTo(w * 0.74, h * 0.25)
+                ctx.lineTo(w * 0.54, h * 0.25)
+                ctx.lineTo(w * 0.41, h * 0.38)
+                ctx.closePath()
+                ctx.stroke()
+
+                // E. Daratan Pesisir Utara / Mainland (Iwatodai & Naganaki Shrine)
+                ctx.beginPath()
+                ctx.moveTo(0, 0)
+                ctx.lineTo(w, 0)
+                ctx.lineTo(w, h * 0.18)
+                ctx.quadraticCurveTo(w * 0.72, h * 0.18, w * 0.58, h * 0.15)
+                ctx.quadraticCurveTo(w * 0.48, h * 0.25, w * 0.40, h * 0.23)
+                ctx.quadraticCurveTo(w * 0.34, h * 0.37, w * 0.26, h * 0.35)
+                ctx.quadraticCurveTo(w * 0.18, h * 0.44, w * 0.12, h * 0.42)
+                ctx.quadraticCurveTo(w * 0.05, h * 0.40, 0, h * 0.44)
+                ctx.closePath()
+
+                var landGrad = ctx.createLinearGradient(0, 0, 0, h * 0.45)
+                landGrad.addColorStop(0.0, "rgba(8, 28, 76, 0.85)")
+                landGrad.addColorStop(1.0, "rgba(4, 16, 48, 0.90)")
+                ctx.fillStyle = landGrad
+                ctx.fill()
+
+                ctx.strokeStyle = "rgba(0, 200, 255, 0.55)"
+                ctx.lineWidth = 1.8
+                ctx.stroke()
+
+                // F. Daratan Pulau Buatan Tatsumi Port Island (Center-Right)
+                ctx.beginPath()
+                ctx.moveTo(w * 0.42, h * 0.54) // Western Bridgehead
+                ctx.lineTo(w * 0.44, h * 0.72) // Port Island Station South Docks
+                ctx.lineTo(w * 0.58, h * 0.74) // South Pier Breakwater
+                ctx.lineTo(w * 0.74, h * 0.64) // Gekkoukan Athletics Bay
+                ctx.lineTo(w * 0.78, h * 0.44) // Eastern Peninsula
+                ctx.lineTo(w * 0.72, h * 0.28) // Paulownia Plaza North Coast
+                ctx.lineTo(w * 0.56, h * 0.28) // North Harbor
+                ctx.lineTo(w * 0.44, h * 0.40) // Inner Channel
+                ctx.closePath()
+
+                var islandGrad = ctx.createLinearGradient(w * 0.44, h * 0.28, w * 0.74, h * 0.74)
+                islandGrad.addColorStop(0.0, "rgba(12, 38, 102, 0.90)")
+                islandGrad.addColorStop(1.0, "rgba(5, 18, 56, 0.95)")
+                ctx.fillStyle = islandGrad
+                ctx.fill()
+
+                ctx.strokeStyle = "#00e5ff"
+                ctx.lineWidth = 2.2
+                ctx.stroke()
+
+                // Garis Jalan / Blok Distrik Internal di Port Island
+                ctx.strokeStyle = "rgba(0, 219, 255, 0.14)"
+                ctx.lineWidth = 1.0
+                ctx.beginPath()
+                ctx.moveTo(w * 0.56, h * 0.30); ctx.lineTo(w * 0.52, h * 0.64); ctx.stroke()
+                ctx.beginPath()
+                ctx.moveTo(w * 0.46, h * 0.54); ctx.lineTo(w * 0.74, h * 0.46); ctx.stroke()
+                ctx.beginPath()
+                ctx.moveTo(w * 0.62, h * 0.36); ctx.lineTo(w * 0.68, h * 0.52); ctx.stroke()
+
+                // G. Moonlight Bridge (Tartarus Gate ke Port Island)
+                ctx.beginPath()
+                ctx.moveTo(w * 0.20, h * 0.40)
+                ctx.lineTo(w * 0.42, h * 0.54)
+                ctx.strokeStyle = "rgba(0, 240, 255, 0.7)"
+                ctx.lineWidth = 3.0
+                ctx.stroke()
+
+                ctx.beginPath()
+                ctx.moveTo(w * 0.20, h * 0.42)
+                ctx.lineTo(w * 0.42, h * 0.56)
+                ctx.strokeStyle = "rgba(0, 160, 255, 0.4)"
+                ctx.lineWidth = 1.5
+                ctx.stroke()
+
+                // H. Jalur Transit Monorel Tatsumi Port Island (Menghubungkan 6 Distrik)
+                ctx.setLineDash([8, 6])
+                ctx.beginPath()
+                ctx.moveTo(w * 0.20, h * 0.38) // Tartarus Gate
+                ctx.lineTo(w * 0.34, h * 0.32) // Iwatodai Strip
+                ctx.lineTo(w * 0.48, h * 0.20) // Naganaki Shrine
+                ctx.lineTo(w * 0.63, h * 0.34) // Paulownia Mall
+                ctx.lineTo(w * 0.68, h * 0.50) // Gekkoukan High
+                ctx.lineTo(w * 0.50, h * 0.64) // Port Island Station
+                ctx.strokeStyle = "#00ffcc"
+                ctx.lineWidth = 2.0
+                ctx.stroke()
+                ctx.setLineDash([])
+
+                // I. Teks Koordinat Taktikal S.E.E.S.
+                ctx.fillStyle = "rgba(0, 219, 255, 0.32)"
+                ctx.font = "bold 9px 'JetBrainsMono NFM', monospace"
+                ctx.fillText("TATSUMI BAY // SOUNDING: 42M", w * 0.36, h * 0.48)
+                ctx.fillText("MONORAIL LOOP LINE", w * 0.52, h * 0.38)
+                ctx.fillText("GRID: LAT 35°38'N / LONG 139°45'E", w * 0.08, h * 0.88)
+                ctx.fillText("S.E.E.S. SATELLITE TACTICAL LINK", w * 0.08, h * 0.90)
+
+                // J. Vignette Bayangan Tepian Layar
+                var vig = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.40, w / 2, h / 2, Math.max(w, h) * 0.72)
+                vig.addColorStop(0.0, "transparent")
+                vig.addColorStop(1.0, "rgba(2, 6, 18, 0.82)")
+                ctx.fillStyle = vig
+                ctx.fillRect(0, 0, w, h)
             }
         }
 
-        // 2. HUD Kalender dan Fase Bulan Kanan Atas (Sesuai Foto 1)
+        // =====================================================================
+        // 2. HEADER S.E.E.S. DI KIRI ATAS (TANPA JAM / TANGGAL)
+        // =====================================================================
         Item {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.topMargin: 24
+            anchors.leftMargin: 28
+            width: 440
+            height: 52
+            z: 20
+
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 2
+
+                RowLayout {
+                    spacing: 8
+                    Rectangle {
+                        width: 8
+                        height: 20
+                        color: "#00dbff"
+                    }
+                    Text {
+                        text: "TATSUMI PORT ISLAND // TACTICAL TOWN MAP"
+                        color: "#ffffff"
+                        font.family: "Rubik"
+                        font.pixelSize: 16
+                        font.weight: Font.Black
+                        font.letterSpacing: 1.2
+                    }
+                }
+
+                Text {
+                    text: "S.E.E.S. RADAR NET • SELECT DISTRICT TO DISPATCH HYPRLAND WORKSPACE"
+                    color: "#00dbff"
+                    font.family: "JetBrainsMono NFM"
+                    font.pixelSize: 9
+                    font.bold: true
+                    font.letterSpacing: 0.5
+                }
+            }
+        }
+
+        // =====================================================================
+        // 3. TOMBOL TUTUP [ESC] DI KANAN ATAS
+        // =====================================================================
+        Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.topMargin: 24
-            anchors.rightMargin: 32
-            width: 320
-            height: 90
+            anchors.rightMargin: 28
+            height: 34
+            width: closeLayout.implicitWidth + 24
+            radius: 4
+            color: closeMouse.containsMouse ? "#d60032" : "#F0040C26"
+            border.color: closeMouse.containsMouse ? "#ffffff" : "#9900DBFF"
+            border.width: 1.2
             z: 20
 
-            // Latar Pita Biru Miring Tanggal & Waktu P3R
-            Canvas {
-                anchors.fill: parent
-                antialiasing: true
-                onPaint: {
-                    var ctx = getContext("2d")
-                    ctx.reset()
-                    var w = width
-                    var h = height
+            RowLayout {
+                id: closeLayout
+                anchors.centerIn: parent
+                spacing: 8
 
-                    ctx.beginPath()
-                    ctx.moveTo(36, 0)
-                    ctx.lineTo(w, 0)
-                    ctx.lineTo(w, h)
-                    ctx.lineTo(0, h)
-                    ctx.closePath()
+                Rectangle {
+                    width: 32
+                    height: 18
+                    radius: 2
+                    color: closeMouse.containsMouse ? "#ffffff" : "#0028e0"
+                    Text {
+                        anchors.centerIn: parent
+                        text: "ESC"
+                        color: closeMouse.containsMouse ? "#d60032" : "#ffffff"
+                        font.family: "Rubik"
+                        font.pixelSize: 9
+                        font.bold: true
+                    }
+                }
 
-                    var grad = ctx.createLinearGradient(0, 0, w, h)
-                    grad.addColorStop(0.0, "#0028e0")
-                    grad.addColorStop(1.0, "#001460")
-                    ctx.fillStyle = grad
-                    ctx.fill()
-
-                    ctx.strokeStyle = "#00f0ff"
-                    ctx.lineWidth = 1.8
-                    ctx.stroke()
+                Text {
+                    text: "CLOSE MAP"
+                    color: "#ffffff"
+                    font.family: "Rubik"
+                    font.pixelSize: 11
+                    font.weight: Font.Black
+                    font.letterSpacing: 0.8
                 }
             }
 
-            RowLayout {
+            MouseArea {
+                id: closeMouse
                 anchors.fill: parent
-                anchors.leftMargin: 46
-                anchors.rightMargin: 18
-                spacing: 14
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    RowLayout {
-                        spacing: 8
-                        Text {
-                            text: {
-                                const now = new Date()
-                                const m = (now.getMonth() + 1)
-                                const d = now.getDate()
-                                const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-                                return (m < 10 ? "0" + m : m) + "/" + (d < 10 ? "0" + d : d) + " " + days[now.getDay()]
-                            }
-                            color: "#ffffff"
-                            font.family: "Rubik"
-                            font.pixelSize: 22
-                            font.weight: Font.Black
-                        }
-                    }
-
-                    Text {
-                        text: {
-                            const hr = new Date().getHours()
-                            if (hr >= 0 && hr < 1) return "Dark Hour"
-                            if (hr >= 1 && hr < 6) return "Late Night"
-                            if (hr >= 6 && hr < 12) return "Morning"
-                            if (hr >= 12 && hr < 16) return "After School"
-                            if (hr >= 16 && hr < 19) return "Evening"
-                            return "Night"
-                        }
-                        color: "#00f0ff"
-                        font.family: "Rubik"
-                        font.pixelSize: 13
-                        font.weight: Font.Black
-                        font.italic: true
-                    }
-                }
-
-                // Fase Bulan (Moon Phase Indicator P3R)
-                ColumnLayout {
-                    spacing: 2
-                    Text {
-                        text: "LIMIT"
-                        color: "#ffffff"
-                        font.family: "JetBrainsMono NFM"
-                        font.pixelSize: 8
-                        font.bold: true
-                    }
-                    RowLayout {
-                        spacing: 4
-                        Text {
-                            text: "13"
-                            color: "#ffffff"
-                            font.family: "Rubik"
-                            font.pixelSize: 18
-                            font.weight: Font.Black
-                        }
-                        // Lingkaran Bulan Kuning Sabit
-                        Canvas {
-                            Layout.preferredWidth: 22
-                            Layout.preferredHeight: 22
-                            antialiasing: true
-                            onPaint: {
-                                var ctx = getContext("2d")
-                                ctx.reset()
-                                ctx.beginPath()
-                                ctx.arc(11, 11, 10, 0, Math.PI * 2)
-                                ctx.fillStyle = "#020818"
-                                ctx.fill()
-                                ctx.strokeStyle = "#ffd700"
-                                ctx.lineWidth = 1.5
-                                ctx.stroke()
-
-                                // Sabit Kuning
-                                ctx.beginPath()
-                                ctx.arc(11, 11, 9, -Math.PI / 2, Math.PI / 2, false)
-                                ctx.fillStyle = "#ffd700"
-                                ctx.fill()
-                            }
-                        }
-                    }
-                }
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: PhantomState.overviewOpen = false
             }
         }
 
-        // 3. Judul Raksasa "TOWNMAP" di Pojok Kiri Bawah (Sesuai Foto 1)
+        // =====================================================================
+        // 4. STENSIL TOWNMAP DI KIRI BAWAH
+        // =====================================================================
         Item {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             width: 320
             height: 90
-            z: 20
+            z: 15
 
-            // Poligon Segitiga Miring Biru di Kiri Bawah
             Canvas {
                 anchors.fill: parent
                 antialiasing: true
@@ -345,11 +468,11 @@ Scope {
                     var h = height
 
                     ctx.beginPath()
-                    ctx.moveTo(0, h * 0.4)
+                    ctx.moveTo(0, h * 0.45)
                     ctx.lineTo(w, h)
                     ctx.lineTo(0, h)
                     ctx.closePath()
-                    ctx.fillStyle = "#0028e0"
+                    ctx.fillStyle = "rgba(0, 40, 224, 0.4)"
                     ctx.fill()
                 }
             }
@@ -357,11 +480,11 @@ Scope {
             Text {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
-                anchors.leftMargin: 16
-                anchors.bottomMargin: 6
+                anchors.leftMargin: 18
+                anchors.bottomMargin: 8
                 text: "TOWNMAP"
                 font.family: "Rubik"
-                font.pixelSize: 42
+                font.pixelSize: 44
                 font.weight: Font.Black
                 font.italic: true
                 color: "#030e38"
@@ -369,11 +492,13 @@ Scope {
             }
         }
 
-        // 4. Baris Kontrol Navigasi & Key Legend di Pojok Kanan Bawah (Sesuai Foto 1)
+        // =====================================================================
+        // 5. BARIS KONTROL NAVIGASI KEYBOARD DI KANAN BAWAH
+        // =====================================================================
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
-            anchors.bottomMargin: 18
+            anchors.bottomMargin: 24
             anchors.rightMargin: 28
             height: 38
             width: legendLayout.implicitWidth + 32
@@ -426,7 +551,9 @@ Scope {
             }
         }
 
-        // 5. Pin-Pin Lokasi Distrik di Atas Peta 3D (Foto 1)
+        // =====================================================================
+        // 6. PIN DISTRIK INTERAKTIF DI ATAS PETA
+        // =====================================================================
         Item {
             anchors.fill: parent
             z: 10
@@ -447,14 +574,13 @@ Scope {
                     width: 48
                     height: 48
 
-                    // A. Glowing Target Reticle Cyan (Pulsing Radar Circle Khas Foto 1)
+                    // A. Glowing Target Reticle Cyan
                     Item {
                         anchors.centerIn: parent
                         width: 84
                         height: 84
                         visible: pinItem.isSelected
 
-                        // Animasi Radar Berdenyut
                         SequentialAnimation on scale {
                             loops: Animation.Infinite
                             running: pinItem.isSelected
@@ -478,30 +604,26 @@ Scope {
                                 ctx.lineWidth = 2.2
                                 ctx.stroke()
 
-                                // Lingkaran Dalam Halus
+                                // Lingkaran Dalam
                                 ctx.beginPath()
                                 ctx.arc(cx, cy, 28, 0, Math.PI * 2)
                                 ctx.strokeStyle = "rgba(0, 240, 255, 0.45)"
                                 ctx.lineWidth = 1.0
                                 ctx.stroke()
 
-                                // Crosshairs / Notches
+                                // Notches Crosshair
                                 var notch = 8
                                 ctx.strokeStyle = "#00f0ff"
                                 ctx.lineWidth = 2.0
-                                // Top
                                 ctx.beginPath(); ctx.moveTo(cx, cy - 36); ctx.lineTo(cx, cy - 36 + notch); ctx.stroke()
-                                // Bottom
                                 ctx.beginPath(); ctx.moveTo(cx, cy + 36); ctx.lineTo(cx, cy + 36 - notch); ctx.stroke()
-                                // Left
                                 ctx.beginPath(); ctx.moveTo(cx - 36, cy); ctx.lineTo(cx - 36 + notch, cy); ctx.stroke()
-                                // Right
                                 ctx.beginPath(); ctx.moveTo(cx + 36, cy); ctx.lineTo(cx + 36 - notch, cy); ctx.stroke()
                             }
                         }
                     }
 
-                    // B. Pin Teardrop Biru Otentik Persona 3 Reload (Foto 1)
+                    // B. Pin Teardrop Biru Otentik Persona 3 Reload
                     Canvas {
                         id: pinCanvas
                         anchors.fill: parent
@@ -546,7 +668,7 @@ Scope {
                         color: pinItem.isActiveWs ? "#020818" : "#ffffff"
                     }
 
-                    // C. Label Nama Distrik Miring di Samping Pin (Foto 1: "Gekkoukan High School")
+                    // C. Label Nama Distrik di Samping Pin (Hanya muncul jika pin tidak sedang aktif dipilih)
                     Rectangle {
                         anchors.left: parent.right
                         anchors.leftMargin: 8
@@ -555,8 +677,9 @@ Scope {
                         height: 26
                         width: pinLabelText.implicitWidth + 20
                         radius: 3
-                        color: pinItem.isSelected ? "#0028e0" : "#E6040C26"
-                        border.color: pinItem.isSelected ? "#00f0ff" : "#4DFFFFFF"
+                        visible: !pinItem.isSelected
+                        color: "#E6040C26"
+                        border.color: "#4DFFFFFF"
                         border.width: 1.2
 
                         Text {
@@ -570,7 +693,7 @@ Scope {
                         }
                     }
 
-                    // D. Kartu Detail Workspace Sesuai Bentuk Foto 2 (Saat Dipilih / Hovered)
+                    // D. Kartu Detail Workspace Berbentuk Balon Dialog Foto 2
                     Item {
                         id: detailHoverCard
                         visible: pinItem.isSelected
@@ -578,11 +701,9 @@ Scope {
                         height: Math.max(140, appListCol.implicitHeight + 64)
                         z: 50
 
-                        // Penempatan kartu agar tidak keluar layar
                         x: pinItem.modelData.cardSide === "left" ? -350 : 60
                         y: -30
 
-                        // Bentuk Dialog P3R Otentik (Sesuai Foto 2)
                         Canvas {
                             anchors.fill: parent
                             antialiasing: true
@@ -732,28 +853,33 @@ Scope {
                                     model: pinItem.apps.slice(0, 4)
                                     delegate: Rectangle {
                                         Layout.fillWidth: true
-                                        height: 24
+                                        height: 26
                                         radius: 3
                                         color: "#071638"
                                         border.color: "#4000DBFF"
                                         border.width: 1
+                                        clip: true
 
                                         RowLayout {
                                             anchors.fill: parent
-                                            anchors.leftMargin: 6
-                                            anchors.rightMargin: 6
+                                            anchors.leftMargin: 8
+                                            anchors.rightMargin: 8
                                             spacing: 6
 
                                             Image {
-                                                width: 14; height: 14
-                                                source: PhantomState.resolveAppIconUrl(modelData.class || modelData.title)
+                                                Layout.preferredWidth: 16
+                                                Layout.preferredHeight: 16
+                                                sourceSize.width: 16
+                                                sourceSize.height: 16
+                                                source: modelData.iconUrl || PhantomState.resolveAppIconUrl(modelData.cls || modelData.title)
                                                 fillMode: Image.PreserveAspectFit
                                                 smooth: true
+                                                clip: true
                                             }
 
                                             Text {
                                                 Layout.fillWidth: true
-                                                text: modelData.title || modelData.class || "App"
+                                                text: modelData.title || modelData.cls || "App"
                                                 color: "#ffffff"
                                                 font.family: "JetBrainsMono NFM"
                                                 font.pixelSize: 9
@@ -816,39 +942,40 @@ Scope {
             }
         }
 
-        // 6. The Velvet Room (Elevator of the Soul) Scratchpad Pin di Bawah Kiri
+        // =====================================================================
+        // 7. THE VELVET ROOM (ELEVATOR OF THE SOUL) DI KIRI BAWAH
+        // =====================================================================
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.bottomMargin: 84
             anchors.leftMargin: 24
-            width: 280
-            height: 48
+            width: 290
+            height: 50
             radius: 4
             z: 25
 
-            // Gradien Beludru Safir Khas Velvet Room
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0.0; color: "#010718" }
                 GradientStop { position: 0.5; color: "#051848" }
                 GradientStop { position: 1.0; color: "#0d2d78" }
             }
-            border.color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#00dbff"
-            border.width: 1.6
+            border.color: PhantomState.specialWorkspaceActive ? "#ffd700" : (velvetMouse.containsMouse ? "#00f0ff" : "#0055c8")
+            border.width: 1.8
 
             RowLayout {
                 anchors.fill: parent
                 anchors.leftMargin: 14
                 anchors.rightMargin: 12
-                spacing: 10
+                spacing: 12
 
                 Image {
-                    Layout.preferredWidth: 20
-                    Layout.preferredHeight: 20
+                    Layout.preferredWidth: 22
+                    Layout.preferredHeight: 22
                     source: "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/elevator.svg"
-                    sourceSize.width: 20
-                    sourceSize.height: 20
+                    sourceSize.width: 22
+                    sourceSize.height: 22
                     fillMode: Image.PreserveAspectFit
                 }
 
@@ -856,15 +983,12 @@ Scope {
                     Layout.fillWidth: true
                     spacing: 1
 
-                    RowLayout {
-                        spacing: 6
-                        Text {
-                            text: "THE VELVET ROOM"
-                            color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#ffffff"
-                            font.family: "Rubik"
-                            font.pixelSize: 11
-                            font.weight: Font.Black
-                        }
+                    Text {
+                        text: "THE VELVET ROOM"
+                        color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#ffffff"
+                        font.family: "Rubik"
+                        font.pixelSize: 11
+                        font.weight: Font.Black
                     }
                     Text {
                         text: "ELEVATOR OF THE SOUL [SPECIAL]"
@@ -876,7 +1000,7 @@ Scope {
                 }
 
                 Rectangle {
-                    width: 60
+                    width: 62
                     height: 22
                     radius: 2
                     color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#0028e0"
@@ -892,7 +1016,9 @@ Scope {
             }
 
             MouseArea {
+                id: velvetMouse
                 anchors.fill: parent
+                hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     PhantomState.overviewOpen = false
