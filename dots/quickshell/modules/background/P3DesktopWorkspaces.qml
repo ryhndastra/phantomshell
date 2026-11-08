@@ -3,6 +3,8 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Services.SystemTray
+import Quickshell.Widgets
 import qs.config
 
 // Indikator Workspace Numerik Stensil Kaca Persona 3 Reload
@@ -10,8 +12,13 @@ import qs.config
 // Nomor samar/almost transparent menyatu dengan background.
 // Saat occupied, ikon aplikasi me-override nomor workspace.
 // Saat active, tampil putih/terang bersih tanpa underline.
+// Disertai tombol simbol "V" expander untuk baki aplikasi (tray) yang menyatu dinamis.
 Item {
     id: root
+
+    // Status ekspansi baki aplikasi (tray) di samping workspace
+    property bool trayExpanded: PhantomState.desktopTrayExpanded
+    readonly property int trayCount: SystemTray.items.values.length
 
     // Deteksi posisi sesuai setting desktopWorkspacesPosition atau auto berdasarkan posisi jam desktop
     readonly property string effectivePosition: {
@@ -34,6 +41,10 @@ Item {
     implicitWidth: wsRow.implicitWidth
     implicitHeight: 46
 
+    Behavior on width {
+        NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+    }
+
     Behavior on x {
         NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
     }
@@ -51,7 +62,7 @@ Item {
         }
     }
 
-    // Deretan Slot Workspace
+    // Deretan Slot Workspace + Tray Expander
     Row {
         id: wsRow
         spacing: 24
@@ -164,6 +175,188 @@ Item {
                     onClicked: {
                         PhantomState.playSfx("select")
                         Hyprland.dispatch("hl.dsp.focus({ workspace = " + String(wsItem.wsId) + " })")
+                    }
+                }
+            }
+        }
+
+        // Bagian Baki Aplikasi (Tray) Terintegrasi di Desktop Workspace
+        // Terhubung langsung di container yang sama sehingga otomatis bergeser jika workspace bertambah (mis. WS 7)
+        Row {
+            id: traySection
+            spacing: 12
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.trayCount > 0
+
+            // Garis pemisah stensil tipis
+            Rectangle {
+                width: 1
+                height: 20
+                anchors.verticalCenter: parent.verticalCenter
+                color: "#64aff0"
+                opacity: 0.25
+            }
+
+            // Tombol Simbol "V" / Toggle Tray Expander
+            Item {
+                id: vBtn
+                width: 30
+                height: 42
+                anchors.verticalCenter: parent.verticalCenter
+
+                Text {
+                    id: vText
+                    anchors.centerIn: parent
+                    text: "V"
+                    font.family: "Bebas Neue"
+                    font.pixelSize: root.trayExpanded ? 40 : 36
+                    font.bold: true
+                    font.italic: true
+                    color: root.trayExpanded ? "#ffffff" : (vMouse.containsMouse ? "#ffffff" : "#64aff0")
+
+                    // Rotasi halus saat di-expand: V berputar 180° menjadi chevron ke atas (^)
+                    rotation: root.trayExpanded ? 180 : 0
+                    transformOrigin: Item.Center
+
+                    Behavior on rotation {
+                        NumberAnimation { duration: 250; easing.type: Easing.OutBack }
+                    }
+                    Behavior on font.pixelSize {
+                        NumberAnimation { duration: 160 }
+                    }
+                }
+
+                // Opacity & scale interaktif
+                opacity: root.trayExpanded ? 1.0 : (vMouse.containsMouse ? 0.90 : 0.35)
+                scale: vMouse.containsMouse ? 1.14 : (root.trayExpanded ? 1.06 : 1.0)
+                Behavior on opacity { NumberAnimation { duration: 180 } }
+                Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+
+                MouseArea {
+                    id: vMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onEntered: PhantomState.playSfx("select")
+                    onClicked: {
+                        PhantomState.playSfx("select")
+                        PhantomState.toggleDesktopTray()
+                    }
+                }
+            }
+
+            // Ikon-ikon aplikasi tray yang muncul saat expand
+            Item {
+                id: trayIconsClip
+                height: 42
+                anchors.verticalCenter: parent.verticalCenter
+                clip: true
+
+                // Lebar menganimasi otomatis saat expand/collapse
+                width: root.trayExpanded ? trayIconsRow.implicitWidth : 0
+                opacity: root.trayExpanded ? 1.0 : 0.0
+
+                Behavior on width {
+                    NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+                }
+                Behavior on opacity {
+                    NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                }
+
+                Row {
+                    id: trayIconsRow
+                    spacing: 10
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Repeater {
+                        model: SystemTray.items
+
+                        delegate: Item {
+                            id: trayAppItem
+                            required property SystemTrayItem modelData
+                            required property int index
+
+                            width: 32
+                            height: 32
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            // Hover scale & opacity
+                            scale: trayAppMouse.containsMouse ? 1.15 : 1.0
+                            opacity: trayAppMouse.containsMouse ? 1.0 : 0.85
+                            Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                            Behavior on opacity { NumberAnimation { duration: 140 } }
+
+                            // Frame stensil halus saat hover
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 4
+                                color: trayAppMouse.containsMouse ? Qt.rgba(0, 0.85, 1, 0.20) : Qt.rgba(0, 0, 0, 0.25)
+                                border.color: trayAppMouse.containsMouse ? "#00f0ff" : Qt.rgba(0, 0.85, 1, 0.18)
+                                border.width: 1
+                            }
+
+                            // Ikon aplikasi dari StatusNotifierItem
+                            IconImage {
+                                anchors.centerIn: parent
+                                width: 22
+                                height: 22
+                                source: trayAppItem.modelData.icon
+                                asynchronous: true
+                            }
+
+                            MouseArea {
+                                id: trayAppMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onEntered: PhantomState.playSfx("select")
+                                onClicked: mouse => {
+                                    PhantomState.playSfx("select")
+                                    if (mouse.button === Qt.LeftButton) {
+                                        PhantomState.activateTrayItem(trayAppItem.modelData)
+                                    } else if (mouse.button === Qt.RightButton) {
+                                        PhantomState.toggleTrayPopup()
+                                    }
+                                }
+                                onWheel: wheel => {
+                                    trayAppItem.modelData.scroll(wheel.angleDelta.y, false)
+                                }
+                            }
+
+                            // Tooltip nama aplikasi saat di-hover
+                            Item {
+                                visible: trayAppMouse.containsMouse
+                                anchors.bottom: parent.top
+                                anchors.bottomMargin: 8
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: tipTxt.implicitWidth + 14
+                                height: 22
+                                z: 100
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 3
+                                    color: "#020718"
+                                    border.color: "#00dbff"
+                                    border.width: 1
+                                }
+
+                                Text {
+                                    id: tipTxt
+                                    anchors.centerIn: parent
+                                    text: {
+                                        const t = trayAppItem.modelData.title || trayAppItem.modelData.tooltipTitle || trayAppItem.modelData.id || "APP"
+                                        return String(t).replace(/^_/, "").toUpperCase()
+                                    }
+                                    color: "#00dbff"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                }
+                            }
+                        }
                     }
                 }
             }

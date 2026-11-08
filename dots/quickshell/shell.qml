@@ -221,6 +221,14 @@ ShellRoot {
             PhantomState.toggleVelvetRoom()
         }
 
+        function toggleDesktopTray(): void {
+            PhantomState.toggleDesktopTray()
+        }
+
+        function toggleTrayPopup(): void {
+            PhantomState.toggleTrayPopup()
+        }
+
         function toggleLock(): void {
             if (PhantomState.lockOpen) {
                 PhantomState.unlockScreen()

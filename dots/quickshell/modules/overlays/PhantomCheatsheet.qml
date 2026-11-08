@@ -5,10 +5,6 @@ import Quickshell.Wayland
 import qs.config
 import qs.components
 
-// =============================================================================
-// PERSONA 3 RELOAD: S.E.E.S. TACTICAL KEYBIND CHEATSHEET (SUPER + /)
-// Panduan Pintasan Keyboard Operasional S.E.E.S. & Hyprland Tanpa Skew P5
-// =============================================================================
 Scope {
     id: root
 

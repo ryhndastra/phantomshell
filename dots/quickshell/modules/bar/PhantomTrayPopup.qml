@@ -93,16 +93,16 @@ PanelWindow {
 
         P5SkewedCard {
             anchors.fill: parent
-            fillColor: PhantomState.surface
-            borderColor: PhantomState.borderLight
-            shadowColor: PhantomState.primary
-            borderWidth: 2.5
-            skewPx: PhantomState.polygonMode ? 8 : 0
-            shadowOffsetX: 5
-            shadowOffsetY: 5
+            fillColor: PhantomState.isP3 ? "#020718" : PhantomState.surface
+            borderColor: PhantomState.isP3 ? "#00dbff" : PhantomState.borderLight
+            shadowColor: PhantomState.isP3 ? Qt.rgba(0, 0.85, 1, 0.25) : PhantomState.primary
+            borderWidth: PhantomState.isP3 ? 1.5 : 2.5
+            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 8 : 0)
+            shadowOffsetX: PhantomState.isP3 ? 0 : 5
+            shadowOffsetY: PhantomState.isP3 ? 0 : 5
         }
 
-        // pita tajuk atas bergaya persona 5
+        // pita tajuk atas bergaya Persona 3 Reload / Persona 5
         Item {
             id: headerBar
             anchors.top: parent.top
@@ -115,11 +115,11 @@ PanelWindow {
 
             P5SkewedCard {
                 anchors.fill: parent
-                fillColor: PhantomState.primary
-                borderColor: PhantomState.borderLight
+                fillColor: PhantomState.isP3 ? "#06152d" : PhantomState.primary
+                borderColor: PhantomState.isP3 ? "#00dbff" : PhantomState.borderLight
                 showShadowOffset: false
                 borderWidth: 1.5
-                skewPx: PhantomState.polygonMode ? 5 : 0
+                skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
             }
 
             Row {
@@ -128,7 +128,17 @@ PanelWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 6
 
+                Rectangle {
+                    visible: PhantomState.isP3
+                    width: 6
+                    height: 6
+                    color: "#00dbff"
+                    transform: Rotation { angle: 45 }
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
                 P5Star {
+                    visible: !PhantomState.isP3
                     width: 14
                     height: 14
                     anchors.verticalCenter: parent.verticalCenter
@@ -136,11 +146,12 @@ PanelWindow {
                 }
 
                 Text {
-                    text: "ACTIVE BACKSTAGE APPS"
+                    text: PhantomState.isP3 ? "S.E.E.S. BACKGROUND COMM" : "ACTIVE BACKSTAGE APPS"
                     color: PhantomState.foreground
                     font.pixelSize: 10
                     font.weight: Font.Black
-                    font.italic: true
+                    font.letterSpacing: PhantomState.isP3 ? 1.2 : 0
+                    font.italic: !PhantomState.isP3
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -151,15 +162,15 @@ PanelWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 width: countBadgeTxt.implicitWidth + 10
                 height: 16
-                color: PhantomState.background
-                border.color: PhantomState.borderLight
+                color: PhantomState.isP3 ? "#020718" : PhantomState.background
+                border.color: PhantomState.isP3 ? "#00dbff" : PhantomState.borderLight
                 border.width: 1
 
                 Text {
                     id: countBadgeTxt
                     anchors.centerIn: parent
                     text: String(SystemTray.items.values.length)
-                    color: PhantomState.secondary
+                    color: PhantomState.isP3 ? "#00dbff" : PhantomState.secondary
                     font.pixelSize: 9
                     font.weight: Font.Black
                 }
@@ -226,20 +237,24 @@ PanelWindow {
 
                         P5SkewedCard {
                             anchors.fill: parent
-                            fillColor: entryMouse.containsMouse || trayEntry.isMenuExpanded ? PhantomState.primary : PhantomState.surfaceAlt
-                            borderColor: entryMouse.containsMouse || trayEntry.isMenuExpanded ? PhantomState.borderLight : "transparent"
-                            shadowColor: PhantomState.secondary
+                            fillColor: (entryMouse.containsMouse || trayEntry.isMenuExpanded)
+                                ? (PhantomState.isP3 ? "#00dbff" : PhantomState.primary)
+                                : (PhantomState.isP3 ? "#06152b" : PhantomState.surfaceAlt)
+                            borderColor: (entryMouse.containsMouse || trayEntry.isMenuExpanded)
+                                ? (PhantomState.isP3 ? "#ffffff" : PhantomState.borderLight)
+                                : (PhantomState.isP3 ? Qt.rgba(0, 0.85, 1, 0.25) : "transparent")
+                            shadowColor: PhantomState.isP3 ? Qt.rgba(0, 0.85, 1, 0.3) : PhantomState.secondary
                             showShadowOffset: entryMouse.containsMouse || trayEntry.isMenuExpanded
-                            shadowOffsetX: 2
-                            shadowOffsetY: 2
-                            borderWidth: entryMouse.containsMouse || trayEntry.isMenuExpanded ? 1.5 : 1
-                            skewPx: PhantomState.polygonMode ? 5 : 0
+                            shadowOffsetX: PhantomState.isP3 ? 0 : 2
+                            shadowOffsetY: PhantomState.isP3 ? 0 : 2
+                            borderWidth: PhantomState.isP3 ? 1 : 1.5
+                            skewPx: PhantomState.isP3 ? 0 : (PhantomState.polygonMode ? 5 : 0)
                         }
 
                         Row {
                             anchors.left: parent.left
                             anchors.leftMargin: 12
-                            anchors.right: menuBadge.left
+                            anchors.right: killBadge.left
                             anchors.rightMargin: 6
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 10
@@ -256,7 +271,9 @@ PanelWindow {
                                 width: Math.max(40, parent.width - 30)
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: trayEntry.displayTitle.toUpperCase()
-                                color: PhantomState.foreground
+                                color: (entryMouse.containsMouse || trayEntry.isMenuExpanded) && PhantomState.isP3
+                                    ? "#020718"
+                                    : PhantomState.foreground
                                 font.pixelSize: 11
                                 font.weight: Font.Bold
                                 elide: Text.ElideRight
@@ -281,6 +298,50 @@ PanelWindow {
                             }
                         }
 
+                        // tombol kill paksa background daemon
+                        Rectangle {
+                            id: killBadge
+                            anchors.right: (menuBadge.visible ? menuBadge.left : parent.right)
+                            anchors.rightMargin: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 20
+                            height: 20
+                            radius: 2
+                            color: killBadgeMouse.containsMouse
+                                ? "#ff2244"
+                                : (PhantomState.isP3 ? Qt.rgba(1, 0.15, 0.25, 0.15) : Qt.rgba(0, 0, 0, 0.35))
+                            border.color: killBadgeMouse.containsMouse
+                                ? "#ffffff"
+                                : (PhantomState.isP3 ? Qt.rgba(1, 0.15, 0.25, 0.5) : PhantomState.borderLight)
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "×"
+                                color: killBadgeMouse.containsMouse ? "#ffffff" : "#ff4466"
+                                font.pixelSize: 13
+                                font.weight: Font.Black
+                            }
+
+                            MouseArea {
+                                id: killBadgeMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    const t = trayEntry.displayTitle.toLowerCase().trim()
+                                    if (t.length > 0) {
+                                        Quickshell.execDetached(["pkill", "-9", "-f", t])
+                                        PhantomState.trayPopupOpen = false
+                                        Quickshell.execDetached([
+                                            "notify-send", "-a", "S.E.E.S. Protocol", "-i", "process-stop",
+                                            "EXECUTION: TERMINATED", "Background daemon " + trayEntry.displayTitle + " dimatikan paksa."
+                                        ])
+                                    }
+                                }
+                            }
+                        }
+
                         // tombol indikator klik kanan / ekspansi menu konteks
                         Rectangle {
                             id: menuBadge
@@ -292,23 +353,21 @@ PanelWindow {
                             height: 20
                             radius: 2
                             color: menuBadgeMouse.containsMouse || trayEntry.isMenuExpanded
-                                ? PhantomState.secondary
-                                : Qt.rgba(0, 0, 0, 0.35)
-                            border.color: menuBadgeMouse.containsMouse || trayEntry.isMenuExpanded
-                                ? PhantomState.background
-                                : PhantomState.borderLight
+                                ? (PhantomState.isP3 ? "#ffffff" : PhantomState.secondary)
+                                : (PhantomState.isP3 ? "#040e1e" : Qt.rgba(0, 0, 0, 0.35))
+                            border.color: PhantomState.isP3 ? "#00dbff" : PhantomState.borderLight
                             border.width: 1
 
                             Text {
                                 id: menuBadgeTxt
                                 anchors.centerIn: parent
                                 text: trayEntry.isMenuExpanded ? "MENU ▴" : "MENU ▾"
-                                color: menuBadgeMouse.containsMouse || trayEntry.isMenuExpanded
-                                    ? PhantomState.background
-                                    : PhantomState.foreground
+                                color: (menuBadgeMouse.containsMouse || trayEntry.isMenuExpanded) && PhantomState.isP3
+                                    ? "#020718"
+                                    : (PhantomState.isP3 ? "#00dbff" : (menuBadgeMouse.containsMouse || trayEntry.isMenuExpanded ? PhantomState.background : PhantomState.foreground))
                                 font.pixelSize: 8
                                 font.weight: Font.Black
-                                font.italic: true
+                                font.italic: !PhantomState.isP3
                             }
 
                             MouseArea {
@@ -321,7 +380,7 @@ PanelWindow {
                         }
                     }
 
-                    // daftar menu konteks (klik kanan) bergaya persona 5
+                    // daftar menu konteks (klik kanan)
                     Column {
                         id: inlineMenuCol
                         visible: trayEntry.isMenuExpanded
@@ -353,7 +412,7 @@ PanelWindow {
                                     width: parent.width - 8
                                     height: 1
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    color: Qt.rgba(1, 1, 1, 0.14)
+                                    color: PhantomState.isP3 ? Qt.rgba(0, 0.85, 1, 0.2) : Qt.rgba(1, 1, 1, 0.14)
                                 }
 
                                 // item aksi menu
@@ -364,8 +423,12 @@ PanelWindow {
                                     height: 26
                                     color: !menuEntryWrap.modelData.enabled
                                         ? Qt.rgba(0, 0, 0, 0.25)
-                                        : (menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded ? PhantomState.secondary : PhantomState.background)
-                                    border.color: menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded ? PhantomState.primary : Qt.rgba(1, 1, 1, 0.08)
+                                        : (menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded
+                                            ? (PhantomState.isP3 ? "#00dbff" : PhantomState.secondary)
+                                            : (PhantomState.isP3 ? "#040d1c" : PhantomState.background))
+                                    border.color: (menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded)
+                                        ? (PhantomState.isP3 ? "#ffffff" : PhantomState.primary)
+                                        : (PhantomState.isP3 ? Qt.rgba(0, 0.85, 1, 0.15) : Qt.rgba(1, 1, 1, 0.08))
                                     border.width: 1
 
                                     Row {
@@ -380,7 +443,9 @@ PanelWindow {
                                             visible: menuEntryWrap.modelData.buttonType !== QsMenuButtonType.None
                                             anchors.verticalCenter: parent.verticalCenter
                                             text: menuEntryWrap.modelData.checkState === Qt.Checked ? "◆" : "◇"
-                                            color: menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded ? PhantomState.background : PhantomState.primary
+                                            color: menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded
+                                                ? (PhantomState.isP3 ? "#020718" : PhantomState.background)
+                                                : (PhantomState.isP3 ? "#00dbff" : PhantomState.primary)
                                             font.pixelSize: 9
                                             font.weight: Font.Black
                                         }
@@ -391,7 +456,9 @@ PanelWindow {
                                             text: menuEntryWrap.cleanLabel.toUpperCase()
                                             color: !menuEntryWrap.modelData.enabled
                                                 ? PhantomState.muted
-                                                : (menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded ? PhantomState.background : PhantomState.foreground)
+                                                : ((menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded)
+                                                    ? (PhantomState.isP3 ? "#020718" : PhantomState.background)
+                                                    : (PhantomState.isP3 ? "#d8efff" : PhantomState.foreground))
                                             font.pixelSize: 9
                                             font.weight: Font.Black
                                             elide: Text.ElideRight
@@ -404,7 +471,9 @@ PanelWindow {
                                         anchors.rightMargin: 8
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: menuEntryWrap.modelData.hasChildren ? (menuEntryWrap.isSubExpanded ? "▴" : "▸") : ""
-                                        color: menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded ? PhantomState.background : PhantomState.muted
+                                        color: (menuItemMouse.containsMouse || menuEntryWrap.isSubExpanded)
+                                            ? (PhantomState.isP3 ? "#020718" : PhantomState.background)
+                                            : (PhantomState.isP3 ? "#00dbff" : PhantomState.muted)
                                         font.pixelSize: 9
                                         font.weight: Font.Black
                                     }
@@ -454,8 +523,12 @@ PanelWindow {
                                             visible: !modelData.isSeparator && subCleanLabel.length > 0
                                             width: nestedSubCol.width
                                             height: 24
-                                            color: subItemMouse.containsMouse ? PhantomState.primary : PhantomState.surfaceAlt
-                                            border.color: subItemMouse.containsMouse ? PhantomState.borderLight : Qt.rgba(1, 1, 1, 0.08)
+                                            color: subItemMouse.containsMouse
+                                                ? (PhantomState.isP3 ? "#00dbff" : PhantomState.primary)
+                                                : (PhantomState.isP3 ? "#061326" : PhantomState.surfaceAlt)
+                                            border.color: subItemMouse.containsMouse
+                                                ? (PhantomState.isP3 ? "#ffffff" : PhantomState.borderLight)
+                                                : (PhantomState.isP3 ? Qt.rgba(0, 0.85, 1, 0.2) : Qt.rgba(1, 1, 1, 0.08))
                                             border.width: 1
 
                                             Text {
@@ -465,7 +538,11 @@ PanelWindow {
                                                 anchors.rightMargin: 8
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 text: subItemRect.subCleanLabel.toUpperCase()
-                                                color: !subItemRect.modelData.enabled ? PhantomState.muted : PhantomState.foreground
+                                                color: !subItemRect.modelData.enabled
+                                                    ? PhantomState.muted
+                                                    : (subItemMouse.containsMouse && PhantomState.isP3
+                                                        ? "#020718"
+                                                        : (PhantomState.isP3 ? "#d8efff" : PhantomState.foreground))
                                                 font.pixelSize: 9
                                                 font.weight: Font.Bold
                                                 elide: Text.ElideRight

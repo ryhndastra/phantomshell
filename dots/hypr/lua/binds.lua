@@ -192,6 +192,9 @@ end, { non_consuming = true })
 hl.bind(mod .. " + Q", hl.dsp.window.close(), {
     description = "Window: Close Active Window"
 })
+hl.bind(mod .. " + SHIFT + Q", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/force-kill.sh"), {
+    description = "Window: Force Kill Active Window & Process (SIGKILL)"
+})
 hl.bind(mod .. " + SHIFT + ALT + Q", hl.dsp.exec_cmd("hyprctl kill"), {
     description = "Window: Force Kill Window (hyprctl kill)"
 })

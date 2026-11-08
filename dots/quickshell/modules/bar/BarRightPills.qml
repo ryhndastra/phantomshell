@@ -351,12 +351,12 @@ Row {
         }
     }
 
-    // pill baki aplikasi latar belakang (maks 2 ikon langsung, selebihnya tombol dropdown persona 5)
+    // pill baki aplikasi latar belakang (khusus mode Persona 5; di P3R terintegrasi di desktop workspace container)
     Item {
         id: sysTrayPill
         readonly property int trayCount: SystemTray.items.values.length
         readonly property bool isDropdownMode: trayCount > 2
-        visible: trayCount > 0
+        visible: !PhantomState.isP3 && trayCount > 0
         width: isDropdownMode ? (trayDropdownRow.implicitWidth + 22) : (trayRow.implicitWidth + 18)
         height: 30
 

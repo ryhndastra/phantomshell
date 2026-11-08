@@ -73,6 +73,7 @@ Singleton {
     property int wallpaperSelectorTab: 0
     property bool mediaPopupOpen: false
     property bool trayPopupOpen: false
+    property bool desktopTrayExpanded: false
     property bool cheatsheetOpen: false
     property bool clipboardOpen: false
     property bool emojiOpen: false
@@ -295,6 +296,10 @@ Singleton {
         const next = !trayPopupOpen
         if (next) closeAllModals()
         trayPopupOpen = next
+    }
+
+    function toggleDesktopTray() {
+        desktopTrayExpanded = !desktopTrayExpanded
     }
 
     // aktifkan atau fokuskan aplikasi dari system tray termasuk yang berada di velvet room
