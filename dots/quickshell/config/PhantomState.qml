@@ -904,7 +904,28 @@ Singleton {
             }
         }
         const statePath = Quickshell.shellPath("../phantomshell/settings.json")
-        Quickshell.execDetached(["bash", "-c", "cat << 'EOF' > '" + statePath + "'\n" + JSON.stringify(settingsData, null, 2) + "\nEOF"])
+        const colorsPath = Quickshell.shellPath("../phantomshell/colors.json")
+        const colorsData = {
+            name: root.themeName || "P3 Reload S.E.E.S. Blue",
+            id: root.themeId || "p3-reload",
+            primary: String(root.primary || "#00B4D8"),
+            secondary: String(root.secondary || "#90E0EF"),
+            accent: String(root.accent || "#00F0FF"),
+            background: String(root.background || "#070C18"),
+            surface: String(root.surface || "#0E172C"),
+            surfaceAlt: String(root.surfaceAlt || "#182544"),
+            foreground: String(root.foreground || "#F8FBFF"),
+            muted: String(root.muted || "#8DA4C4"),
+            borderLight: String(root.borderLight || "#E0F7FF"),
+            borderDark: String(root.borderDark || "#040811"),
+            urgent: String(root.urgent || "#FF2A6D"),
+            success: String(root.success || "#05FFA1")
+        }
+        Quickshell.execDetached([
+            "bash", "-c",
+            "cat << 'EOF' > '" + statePath + "'\n" + JSON.stringify(settingsData, null, 2) + "\nEOF\n" +
+            "cat << 'EOF' > '" + colorsPath + "'\n" + JSON.stringify(colorsData, null, 2) + "\nEOF"
+        ])
     }
 
     function applyDefaultCursor() {
