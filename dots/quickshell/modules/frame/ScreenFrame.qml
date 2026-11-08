@@ -1,3 +1,4 @@
+import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -331,6 +332,216 @@ Scope {
                 frameWin.p3AmbushActive = true
                 PhantomState.playSfx("into_game")
                 p3AmbushAnim.restart()
+            }
+
+            // ==========================================
+            // P3 RELOAD SHADOW DEATH / APP CLOSE EFFECT
+            // ==========================================
+            property bool p3DeathActive: false
+            property real deathX: 50
+            property real deathY: 50
+            property real deathW: 800
+            property real deathH: 600
+            property real deathProg: 0.0     // 0.0 to 1.0 (burst & scatter)
+            property real deathCracks: 0.0   // 0.0 to 1.0 (freeze & fracture lines)
+            property real deathFlash: 0.0    // 0.0 to 1.0 (cyan flash)
+            property real deathPuddle: 0.0   // 0.0 to 1.0 (bottom puddle melting & evaporation)
+
+            property real lastWinX: 50
+            property real lastWinY: 50
+            property real lastWinW: 800
+            property real lastWinH: 600
+            property var windowMap: ({})
+
+            Process {
+                id: getClientsProc
+                running: false
+                command: ["sh", "-c", "hyprctl clients -j | jq -c . 2>/dev/null || true"]
+                stdout: SplitParser {
+                    onRead: data => {
+                        const line = String(data).trim()
+                        if (!line || line.indexOf("[") !== 0) return
+                        try {
+                            const list = JSON.parse(line)
+                            if (Array.isArray(list)) {
+                                for (var i = 0; i < list.length; i++) {
+                                    var c = list[i]
+                                    if (c.address && c.at && c.size && c.size[0] > 40 && c.size[1] > 40) {
+                                        var cleanKey = String(c.address).replace(/^0x/, "").toLowerCase()
+                                        frameWin.windowMap[cleanKey] = {
+                                            x: c.at[0],
+                                            y: c.at[1],
+                                            width: c.size[0],
+                                            height: c.size[1]
+                                        }
+                                        if (c.focusHistoryID === 0) {
+                                            frameWin.lastWinX = c.at[0]
+                                            frameWin.lastWinY = c.at[1]
+                                            frameWin.lastWinW = c.size[0]
+                                            frameWin.lastWinH = c.size[1]
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e) {}
+                    }
+                }
+            }
+
+            Timer {
+                id: winPollTimer
+                interval: 1500
+                running: true
+                repeat: true
+                onTriggered: {
+                    if (!getClientsProc.running) getClientsProc.running = true
+                }
+            }
+
+            Timer {
+                id: closePollTimer
+                interval: 60
+                repeat: false
+                onTriggered: {
+                    if (!getClientsProc.running) getClientsProc.running = true
+                }
+            }
+
+            SequentialAnimation {
+                id: p3ShadowDeathAnim
+
+                // Tahap 1: Pembekuan Siluet Jendela & Retakan Cahaya Cyan/Gold (120ms)
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: frameWin
+                        property: "deathCracks"
+                        from: 0.0
+                        to: 1.0
+                        duration: 120
+                        easing.type: Easing.OutQuad
+                    }
+                    SequentialAnimation {
+                        NumberAnimation {
+                            target: frameWin
+                            property: "deathFlash"
+                            from: 0.0
+                            to: 0.85
+                            duration: 50
+                            easing.type: Easing.OutQuad
+                        }
+                        NumberAnimation {
+                            target: frameWin
+                            property: "deathFlash"
+                            from: 0.85
+                            to: 0.20
+                            duration: 70
+                            easing.type: Easing.OutQuad
+                        }
+                    }
+                }
+
+                // Titik Pecah / Shatter
+                ScriptAction {
+                    script: {
+                        PhantomState.playSfx("into_game")
+                    }
+                }
+
+                // Tahap 2: Ledakan Pecahan Kristal, Cipratan Cairan Hitam, & Penguapan Genangan (~520ms)
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: frameWin
+                        property: "deathProg"
+                        from: 0.0
+                        to: 1.0
+                        duration: 520
+                        easing.type: Easing.OutCubic
+                    }
+                    NumberAnimation {
+                        target: frameWin
+                        property: "deathCracks"
+                        from: 1.0
+                        to: 0.0
+                        duration: 160
+                        easing.type: Easing.OutQuad
+                    }
+                    NumberAnimation {
+                        target: frameWin
+                        property: "deathFlash"
+                        from: 0.20
+                        to: 0.0
+                        duration: 180
+                        easing.type: Easing.OutQuad
+                    }
+                    NumberAnimation {
+                        target: frameWin
+                        property: "deathPuddle"
+                        from: 0.0
+                        to: 1.0
+                        duration: 520
+                        easing.type: Easing.OutQuad
+                    }
+                }
+
+                // Selesai
+                ScriptAction {
+                    script: {
+                        frameWin.p3DeathActive = false
+                        frameWin.deathProg = 0.0
+                        frameWin.deathCracks = 0.0
+                        frameWin.deathFlash = 0.0
+                        frameWin.deathPuddle = 0.0
+                    }
+                }
+            }
+
+            function triggerP3ShadowDeath(wx, wy, ww, wh) {
+                var scrX = frameWin.modelData ? (frameWin.modelData.x || 0) : 0
+                var scrY = frameWin.modelData ? (frameWin.modelData.y || 0) : 0
+                var scrW = frameWin.modelData ? (frameWin.modelData.width || 1920) : 1920
+                var scrH = frameWin.modelData ? (frameWin.modelData.height || 1080) : 1080
+
+                var relX = wx - scrX
+                var relY = wy - scrY
+                if (relX + ww <= 0 || relX >= scrW || relY + wh <= 0 || relY >= scrH) return
+
+                frameWin.deathX = Math.max(0, relX)
+                frameWin.deathY = Math.max(0, relY)
+                frameWin.deathW = Math.min(ww, scrW - frameWin.deathX)
+                frameWin.deathH = Math.min(wh, scrH - frameWin.deathY)
+
+                p3ShadowDeathAnim.stop()
+                frameWin.deathProg = 0.0
+                frameWin.deathCracks = 0.0
+                frameWin.deathFlash = 0.0
+                frameWin.deathPuddle = 0.0
+                frameWin.p3DeathActive = true
+                deathCanvas.requestPaint()
+                p3ShadowDeathAnim.restart()
+            }
+
+            Connections {
+                target: Hyprland
+                function onRawEvent(event) {
+                    const evName = String(event.name || "")
+                    if (evName === "activewindow" || evName === "activewindowv2" || evName === "movewindow" || evName === "movewindowv2" || evName === "openwindow") {
+                        if (!getClientsProc.running) {
+                            getClientsProc.running = true
+                        }
+                    } else if (evName === "closewindow") {
+                        if (PhantomState.isP3) {
+                            const rawAddr = String(event.data || "").trim().replace(/^0x/, "").toLowerCase()
+                            var targetGeom = frameWin.windowMap[rawAddr]
+                            if (targetGeom) {
+                                frameWin.triggerP3ShadowDeath(targetGeom.x, targetGeom.y, targetGeom.width, targetGeom.height)
+                                delete frameWin.windowMap[rawAddr]
+                            } else {
+                                frameWin.triggerP3ShadowDeath(frameWin.lastWinX, frameWin.lastWinY, frameWin.lastWinW, frameWin.lastWinH)
+                            }
+                        }
+                        closePollTimer.restart()
+                    }
+                }
             }
 
             Connections {
@@ -1349,6 +1560,221 @@ Scope {
                                 }
                             }
                         }
+                    }
+                }
+            }
+// ==========================================
+            // OVERLAY P3R SHADOW DEATH / WINDOW CLOSE DISSOLVE
+            // ==========================================
+            Item {
+                id: p3ShadowDeathOverlay
+                x: frameWin.deathX
+                y: frameWin.deathY
+                width: frameWin.deathW
+                height: frameWin.deathH
+                visible: frameWin.p3DeathActive
+                z: 120
+
+                // 1. Siluet Pembekuan Shadow & Flash
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 8
+                    color: "#020814"
+                    opacity: Math.max(0.0, (1.0 - frameWin.deathProg) * 0.40)
+                    border.color: "#00F0FF"
+                    border.width: Math.max(1, 3 * (1.0 - frameWin.deathProg))
+                }
+
+                // Kilatan Flash Putih-Cyan Sesaat
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 8
+                    color: "#FFFFFF"
+                    opacity: frameWin.deathFlash * 0.45
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 8
+                    color: "#00F0FF"
+                    opacity: frameWin.deathFlash * 0.35
+                }
+
+                // 2. Retakan Kristal Es & Cahaya Kuning Roh (Luminous Fracture Lines)
+                Canvas {
+                    id: deathCanvas
+                    anchors.fill: parent
+                    antialiasing: true
+
+                    Connections {
+                        target: frameWin
+                        function onDeathCracksChanged() { deathCanvas.requestPaint() }
+                        function onDeathProgChanged() { deathCanvas.requestPaint() }
+                    }
+
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
+                        ctx.clearRect(0, 0, width, height)
+
+                        var cracks = frameWin.deathCracks
+                        if (cracks <= 0.01) return
+
+                        var prog = frameWin.deathProg
+                        var alpha = Math.max(0.0, (cracks - prog * 1.5))
+                        if (alpha <= 0.01) return
+
+                        var cx = width * 0.5
+                        var cy = height * 0.5
+
+                        ctx.lineCap = "round"
+                        ctx.lineJoin = "round"
+
+                        // Outer Cyan Glow
+                        ctx.strokeStyle = "rgba(0, 240, 255, " + (alpha * 0.75).toFixed(2) + ")"
+                        ctx.lineWidth = 4
+                        drawCracks(ctx, cx, cy, width, height, cracks)
+                        ctx.stroke()
+
+                        // Core White Crack
+                        ctx.strokeStyle = "rgba(255, 255, 255, " + (alpha * 0.95).toFixed(2) + ")"
+                        ctx.lineWidth = 1.8
+                        drawCracks(ctx, cx, cy, width, height, cracks)
+                        ctx.stroke()
+                    }
+
+                    function drawCracks(ctx, cx, cy, w, h, p) {
+                        // 8 cabang retakan radial tajam
+                        var branches = [
+                            [-w * 0.48 * p, -h * 0.46 * p, -w * 0.2, -h * 0.1],
+                            [w * 0.46 * p, -h * 0.44 * p, w * 0.18, -h * 0.22],
+                            [w * 0.48 * p, h * 0.45 * p, w * 0.24, h * 0.14],
+                            [-w * 0.45 * p, h * 0.46 * p, -w * 0.15, h * 0.2],
+                            [0, -h * 0.48 * p, w * 0.05, -h * 0.25],
+                            [0, h * 0.48 * p, -w * 0.04, h * 0.22],
+                            [-w * 0.48 * p, 0, -w * 0.22, -h * 0.05],
+                            [w * 0.48 * p, 0, w * 0.20, h * 0.06]
+                        ]
+                        for (var i = 0; i < branches.length; i++) {
+                            var b = branches[i]
+                            ctx.beginPath()
+                            ctx.moveTo(cx, cy)
+                            ctx.lineTo(cx + b[2] * p, cy + b[3] * p)
+                            ctx.lineTo(cx + b[0], cy + b[1])
+                            ctx.stroke()
+                        }
+                    }
+                }
+
+                // 3. Serpihan Kristal & Tetesan Cairan Hitam (32 Shards & Tar Pellets)
+                Item {
+                    id: deathShardsContainer
+                    anchors.fill: parent
+                    visible: frameWin.deathProg > 0.001
+
+                    Repeater {
+                        model: 32
+                        delegate: Item {
+                            required property int index
+
+                            readonly property real ratio: index / 32.0
+                            readonly property real cx: parent.width * 0.5
+                            readonly property real cy: parent.height * 0.5
+
+                            readonly property real angle: (((index * 137.5) % 360) * Math.PI) / 180.0
+                            readonly property real speed: 180 + ((index * 83) % 480)
+                            readonly property real distance: speed * frameWin.deathProg
+                            readonly property real gravity: frameWin.deathProg * frameWin.deathProg * 160
+
+                            x: cx + Math.cos(angle) * distance
+                            y: cy + Math.sin(angle) * distance + gravity
+                            rotation: (index * 45) + (frameWin.deathProg * ((index % 2 === 0 ? 1 : -1) * 220))
+                            scale: Math.max(0.1, (1.0 - frameWin.deathProg * 0.5) * (0.8 + ((index % 4) * 0.3)))
+                            opacity: Math.max(0.0, 1.0 - Math.pow(frameWin.deathProg, 1.4))
+
+                            // 50% Kristal Cyan-Putih, 50% Tetesan Hitam Tar
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: (index % 2 === 0) ? (6 + (index % 8)) : (10 + (index % 10))
+                                height: (index % 2 === 0) ? (16 + (index % 14)) : width
+                                radius: (index % 2 === 0) ? 0 : (width / 2)
+                                rotation: (index % 2 === 0) ? 35 : 0
+                                color: (index % 2 === 0) ? "#CC00B4D8" : "#020814"
+                                border.color: (index % 2 === 0) ? "#FFFFFF" : "#00F0FF"
+                                border.width: 1.5
+
+                                Rectangle {
+                                    visible: index % 2 === 0
+                                    width: parent.width * 0.4
+                                    height: parent.height * 0.4
+                                    x: 1; y: 1
+                                    color: "#FFFFFF"
+                                    opacity: 0.8
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 4. Partikel Kabut Roh / Plume of Dusk (20 Soul Sparks Naik ke Atas)
+                Item {
+                    id: deathSparksContainer
+                    anchors.fill: parent
+                    visible: frameWin.deathProg > 0.001
+
+                    Repeater {
+                        model: 20
+                        delegate: Item {
+                            required property int index
+
+                            readonly property real ox: parent.width * (0.15 + 0.7 * ((index * 29) % 100) / 100.0)
+                            readonly property real oy: parent.height * (0.3 + 0.5 * ((index * 47) % 100) / 100.0)
+
+                            x: ox + Math.sin(frameWin.deathProg * 6 + index) * 25
+                            y: oy - (frameWin.deathProg * (120 + ((index * 37) % 100)))
+                            opacity: Math.max(0.0, (1.0 - frameWin.deathProg) * 0.9)
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 5 + ((index * 7) % 8)
+                                height: width
+                                radius: width / 2
+                                color: (index % 3 === 0) ? "#FFD700" : "#00F0FF"
+                                border.color: "#FFFFFF"
+                                border.width: 1
+
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: parent.width * 0.4
+                                    height: width
+                                    radius: width / 2
+                                    color: "#FFFFFF"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 5. Genangan Hitam Meleleh & Menguap di Bagian Bawah Jendela (P3R Puddle Melt)
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width * (0.35 + frameWin.deathPuddle * 0.30)
+                    height: 18 * (1.0 - frameWin.deathPuddle * 0.7)
+                    radius: height / 2
+                    color: "#010611"
+                    border.color: "#00F0FF"
+                    border.width: Math.max(1, 2 * (1.0 - frameWin.deathPuddle))
+                    opacity: Math.sin(Math.min(1.0, frameWin.deathPuddle) * Math.PI) * 0.85
+
+                    // Riak dalam genangan
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: parent.width * 0.65
+                        height: parent.height * 0.5
+                        radius: height / 2
+                        color: "transparent"
+                        border.color: "#3300F0FF"
+                        border.width: 1
                     }
                 }
             }

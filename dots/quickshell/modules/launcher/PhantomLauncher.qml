@@ -111,11 +111,24 @@ Variants {
                     Quickshell.execDetached(termArgs)
                 } else {
                     var appCmdList = item.entryObj.command || []
+                    var cleanArgs = [
+                        "env",
+                        "-u", "QT_PLUGIN_PATH",
+                        "-u", "QML2_IMPORT_PATH",
+                        "-u", "QML_IMPORT_PATH",
+                        "-u", "NIXPKGS_QT6_QML_IMPORT_PATH",
+                        "-u", "ELECTRON_RUN_AS_NODE",
+                        "-u", "ELECTRON_NO_ATTACH_CONSOLE"
+                    ]
                     if (appCmdList.length > 0) {
-                        var cleanArgs = ["env", "-u", "QT_PLUGIN_PATH", "-u", "QML2_IMPORT_PATH", "-u", "QML_IMPORT_PATH", "-u", "NIXPKGS_QT6_QML_IMPORT_PATH"]
                         for (var m = 0; m < appCmdList.length; m++) {
-                            cleanArgs.push(String(appCmdList[m]))
+                            var arg = String(appCmdList[m])
+                            if (arg.match(/^%[a-zA-Z]$/)) continue
+                            cleanArgs.push(arg)
                         }
+                        Quickshell.execDetached(cleanArgs)
+                    } else if (item.cmd && item.cmd !== "") {
+                        cleanArgs.push("sh", "-c", item.cmd.replace(/%[a-zA-Z]/g, "").trim())
                         Quickshell.execDetached(cleanArgs)
                     } else {
                         item.entryObj.execute()
