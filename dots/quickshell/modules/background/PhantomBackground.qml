@@ -257,12 +257,12 @@ Scope {
             // lapisan gambar wallpaper sebelumnya untuk transisi crossfade
             Image {
                 id: wpPrevImg
-                visible: PhantomState.showWallpaperLayer && PhantomState.previousWallpaperPath !== "" && bgWin.wpCrossfade < 0.99
+                visible: PhantomState.showWallpaperLayer && PhantomState.previousWallpaperPath.startsWith("/") && bgWin.wpCrossfade < 0.99
                 width: parent.width * bgWin.zoomFactor
                 height: parent.height * bgWin.zoomFactor
                 x: (parent.width - width) / 2 + bgWin.parallaxOffsetX
                 y: (parent.height - height) / 2
-                source: PhantomState.previousWallpaperPath !== "" ? ("file://" + PhantomState.previousWallpaperPath) : ""
+                source: PhantomState.previousWallpaperPath.startsWith("/") ? ("file://" + PhantomState.previousWallpaperPath) : ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: true
@@ -292,21 +292,38 @@ Scope {
                 forceDarkHour: PhantomState.p3LiveScene === "tartarus"
             }
 
-            // lapisan pemutar video wallpaper ambient persona 3 reload (1080p 60fps loop hening)
-            Video {
-                id: liveVideoBg
+            // pemutar video wallpaper ambient persona 3 reload (1080p 60fps loop hening tanpa audio sink)
+            MediaPlayer {
+                id: liveVideoPlayer
+                source: PhantomState.p3VideoPath !== "" ? (PhantomState.p3VideoPath.startsWith("/") ? ("file://" + PhantomState.p3VideoPath) : PhantomState.p3VideoPath) : ""
+                loops: MediaPlayer.Infinite
+                audioOutput: null
+                videoOutput: liveVideoOutput
+
+                onSourceChanged: {
+                    if (source != "" && bgWin.isLiveVideoScene) {
+                        play()
+                    }
+                }
+
+                onErrorOccurred: (error, errorString) => {
+                    console.warn("[LIVE BG VIDEO ERROR]", error, errorString)
+                }
+            }
+
+            VideoOutput {
+                id: liveVideoOutput
                 anchors.fill: parent
                 visible: PhantomState.showWallpaperLayer && bgWin.isLiveVideoScene
-                source: PhantomState.p3VideoPath !== "" ? (PhantomState.p3VideoPath.startsWith("/") ? ("file://" + PhantomState.p3VideoPath) : PhantomState.p3VideoPath) : ""
                 fillMode: VideoOutput.PreserveAspectCrop
-                loops: MediaPlayer.Infinite
-                volume: 0
 
                 onVisibleChanged: {
                     if (visible) {
-                        if (playbackState !== MediaPlayer.PlayingState) play()
+                        if (liveVideoPlayer.playbackState !== MediaPlayer.PlayingState) {
+                            liveVideoPlayer.play()
+                        }
                     } else {
-                        stop()
+                        liveVideoPlayer.stop()
                     }
                 }
             }
@@ -314,14 +331,14 @@ Scope {
             // lapisan gambar wallpaper kustom jika memilih gambar statis
             Image {
                 id: wpImg
-                visible: PhantomState.showWallpaperLayer && !bgWin.isShaderScene && !bgWin.isLiveVideoScene && PhantomState.wallpaperPath !== ""
+                visible: PhantomState.showWallpaperLayer && !bgWin.isShaderScene && !bgWin.isLiveVideoScene && PhantomState.wallpaperPath.startsWith("/")
                 width: parent.width * bgWin.zoomFactor
                 height: parent.height * bgWin.zoomFactor
                 x: (parent.width - width) / 2 + bgWin.parallaxOffsetX + bgWin.wpSlideX
                 y: (parent.height - height) / 2
                 scale: bgWin.wpPunchScale
                 opacity: bgWin.wpCrossfade
-                source: PhantomState.wallpaperPath !== "" ? (PhantomState.wallpaperPath.startsWith("/") ? ("file://" + PhantomState.wallpaperPath) : ("file://" + PhantomState.wallpaperPath)) : ""
+                source: (!bgWin.isShaderScene && !bgWin.isLiveVideoScene && PhantomState.wallpaperPath.startsWith("/")) ? ("file://" + PhantomState.wallpaperPath) : ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: true
