@@ -32,69 +32,81 @@ Scope {
             mask: Region {}
 
             property bool p3SplashActive: false
-            property int p3SplashFrame: 0
+            property real p3SplashProg: 0.0
+            property int p3SplashFrame: Math.min(11, Math.floor(p3SplashProg))
             property real p3SplashOpacity: 1.0
             property real p3OceanCoverage: 0.0
-
-            Timer {
-                id: p3SplashTimer
-                interval: 36
-                repeat: true
-                running: false
-                onTriggered: {
-                    if (frameWin.p3SplashFrame < 11) {
-                        frameWin.p3SplashFrame++
-                        // Cakupan samudra naik cepat di awal sehingga pada frame 4-8 layar tertutup 100%
-                        if (frameWin.p3SplashFrame === 1) frameWin.p3OceanCoverage = 0.5
-                        else if (frameWin.p3SplashFrame === 2) frameWin.p3OceanCoverage = 0.8
-                        else if (frameWin.p3SplashFrame === 3) frameWin.p3OceanCoverage = 0.96
-                        else if (frameWin.p3SplashFrame >= 4) frameWin.p3OceanCoverage = 1.0
-                    } else {
-                        p3SplashTimer.stop()
-                        p3SplashFadeAnim.restart()
-                    }
-                }
-            }
+            property real p3SplashFoamY: 0.0
 
             SequentialAnimation {
-                id: p3SplashFadeAnim
-                PauseAnimation { duration: 180 }
+                id: p3SplashSequence
+                // Tahap 1: Terjun bebas air & samudra menutup layar penuh (Frame 0 -> 6.5, ~240ms)
+                NumberAnimation {
+                    target: frameWin
+                    property: "p3SplashProg"
+                    from: 0.0
+                    to: 6.5
+                    duration: 240
+                    easing.type: Easing.Linear
+                }
+                // Tahap 2: Ombak membentur bawah sambil MENCURAH dan melarut sehalus sutra (~650ms, tanpa pause, tanpa blink!)
                 ParallelAnimation {
+                    // Selesaikan frame 6.5 -> 11.99
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3SplashProg"
+                        from: 6.5
+                        to: 11.99
+                        duration: 380
+                        easing.type: Easing.Linear
+                    }
+                    // Buih dan percikan air terus meluncur deras turun melewati batas bawah layar
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3SplashFoamY"
+                        from: 0.0
+                        to: 280.0
+                        duration: 650
+                        easing.type: Easing.InQuad
+                    }
+                    // Opasitas melarut lembut dan gradual dengan kurva InOutSine
                     NumberAnimation {
                         target: frameWin
                         property: "p3SplashOpacity"
                         from: 1.0
                         to: 0.0
-                        duration: 380
-                        easing.type: Easing.OutCubic
-                    }
-                    NumberAnimation {
-                        target: frameWin
-                        property: "p3OceanCoverage"
-                        from: 1.0
-                        to: 0.0
-                        duration: 380
-                        easing.type: Easing.OutCubic
+                        duration: 650
+                        easing.type: Easing.InOutSine
                     }
                 }
                 ScriptAction {
                     script: {
                         frameWin.p3SplashActive = false
-                        frameWin.p3SplashFrame = 0
+                        frameWin.p3SplashProg = 0.0
+                        frameWin.p3SplashOpacity = 1.0
                         frameWin.p3OceanCoverage = 0.0
+                        frameWin.p3SplashFoamY = 0.0
                     }
                 }
             }
 
+            onP3SplashProgChanged: {
+                if (p3SplashActive) {
+                    if (p3SplashProg < 1.0) p3OceanCoverage = 0.35 + p3SplashProg * 0.35
+                    else if (p3SplashProg < 3.0) p3OceanCoverage = 0.70 + (p3SplashProg - 1.0) * 0.15
+                    else p3OceanCoverage = 1.0
+                }
+            }
+
             function triggerP3Splash() {
-                p3SplashTimer.stop()
-                p3SplashFadeAnim.stop()
-                frameWin.p3SplashFrame = 0
-                frameWin.p3OceanCoverage = 0.25
+                p3SplashSequence.stop()
+                frameWin.p3SplashProg = 0.0
                 frameWin.p3SplashOpacity = 1.0
+                frameWin.p3OceanCoverage = 0.35
+                frameWin.p3SplashFoamY = 0.0
                 frameWin.p3SplashActive = true
                 PhantomState.playSfx("splash")
-                p3SplashTimer.restart()
+                p3SplashSequence.restart()
             }
 
             property real slashProg: 1.0
@@ -840,7 +852,7 @@ Scope {
                         readonly property real speed: 0.75 + ((index * 13) % 10) / 10.0
                         readonly property real bSize: 8 + ((index * 11) % 22)
                         readonly property real wobble: Math.sin(frameWin.p3SplashFrame * 0.8 + index) * (12 + (index % 4) * 6)
-                        readonly property real currentY: startY - (parent.height * 0.85 * (frameWin.p3SplashFrame / 11.0) * speed)
+                        readonly property real currentY: startY - (parent.height * 0.85 * (frameWin.p3SplashProg / 11.0) * speed)
                         x: baseX + wobble
                         y: currentY
                         width: bSize
@@ -872,6 +884,7 @@ Scope {
                 Item {
                     anchors.fill: parent
                     scale: 1.22
+                    y: frameWin.p3SplashFoamY
                     transformOrigin: Item.Center
 
                     Repeater {
@@ -893,6 +906,7 @@ Scope {
                     anchors.fill: parent
                     scale: 1.18
                     opacity: 0.7
+                    y: frameWin.p3SplashFoamY * 1.15
                     transformOrigin: Item.Center
 
                     Repeater {

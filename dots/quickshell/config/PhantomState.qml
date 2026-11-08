@@ -824,9 +824,9 @@ Singleton {
         transitionTick++
 
         // Waktu tunggu commit tema di balik tirai transisi (saat layar tertutup penuh):
-        // P3 Reload: semburan air dan samudra menutup 100% pada frame 6 (~220ms)
+        // P3 Reload: semburan air dan samudra menutup 100% pada frame 5-6 (~200ms)
         // P5 Crimson / tema lain: tebasan diagonal menutup tengah pada ~180ms
-        presetCommitTimer.interval = (presetId === "p3-reload") ? 220 : 180
+        presetCommitTimer.interval = (presetId === "p3-reload") ? 200 : 180
         presetCommitTimer.restart()
     }
 
