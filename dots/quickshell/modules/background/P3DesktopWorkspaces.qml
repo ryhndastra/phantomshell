@@ -214,8 +214,8 @@ Item {
                     font.italic: true
                     color: root.trayExpanded ? "#ffffff" : (vMouse.containsMouse ? "#ffffff" : "#64aff0")
 
-                    // Rotasi halus saat di-expand: V berputar 180° menjadi chevron ke atas (^)
-                    rotation: root.trayExpanded ? 180 : 0
+                    // Rotasi halus saat di-expand: V berputar -90° menghadap ke kanan (>)
+                    rotation: root.trayExpanded ? -90 : 0
                     transformOrigin: Item.Center
 
                     Behavior on rotation {
