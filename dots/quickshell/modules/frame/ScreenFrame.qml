@@ -419,7 +419,7 @@ Scope {
                         from: 0.0
                         to: 1.0
                         duration: 380
-                        easing.type: Easing.OutQuad
+                        easing.type: Easing.InOutQuad
                     }
                     // Efek bara api dan desis langsung memudar dari 1.0 ke 0.0
                     NumberAnimation {

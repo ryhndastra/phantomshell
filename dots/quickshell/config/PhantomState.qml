@@ -932,6 +932,7 @@ Singleton {
             "hl.config({ general = { col = { active_border = 'rgba(" + cleanHex + "ff)' } } })"
         ])
         syncAppThemes(p)
+        syncHyprlandAnimations()
         if (!skipSave && !root.isLoadingSettings) {
             saveState()
             playSfx("select")
@@ -977,7 +978,16 @@ Singleton {
             + "} "
             + "})"
         Quickshell.execDetached(["hyprctl", "eval", luaExpr])
+        syncHyprlandAnimations()
         saveState()
+    }
+
+    function syncHyprlandAnimations() {
+        if (root.isP3) {
+            Quickshell.execDetached(["hyprctl", "eval", "hl.animation({ leaf = 'windowsOut', enabled = false })"])
+        } else {
+            Quickshell.execDetached(["hyprctl", "eval", "hl.animation({ leaf = 'windowsOut', enabled = true, speed = 2.4, bezier = 'p5Exit', style = 'popin 88%' })"])
+        }
     }
 
     property bool isLoadingSettings: true
@@ -1349,5 +1359,6 @@ Singleton {
         refreshWorkspaces()
         refreshMedia()
         updaterService.refreshGitStatus()
+        syncHyprlandAnimations()
     }
 }
