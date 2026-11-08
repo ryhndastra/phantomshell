@@ -25,12 +25,6 @@ Item {
         ? SystemTray.items.values[root.activeMenuIndex]
         : null
 
-    // Pembuka menu native DBus dari tray item aktif
-    QsMenuOpener {
-        id: activeMenuOpener
-        menu: root.activeTrayItem && root.activeTrayItem.hasMenu ? root.activeTrayItem.menu : null
-    }
-
     // Deteksi posisi sesuai setting desktopWorkspacesPosition atau auto berdasarkan posisi jam desktop
     readonly property string effectivePosition: {
         const customPos = PhantomState.desktopWorkspacesPosition || "auto"
@@ -338,78 +332,46 @@ Item {
         }
     }
 
-    // Menu Konteks Klik Kanan S.E.E.S. Desktop (Bebas dari clipping, mengambang di bawah icon)
+    // Menu Konteks Teks Stensil Persona 3 Reload (Pure Text, No Background, Blend Selaras Kaca Desktop)
     Item {
         id: contextMenuCard
         visible: root.activeMenuIndex >= 0 && root.trayExpanded && root.activeTrayItem !== null
         anchors.top: wsRow.bottom
-        anchors.topMargin: 10
-        x: Math.max(0, traySection.x + trayIconsClip.x + (root.activeMenuIndex * 44))
-        width: 146
-        height: menuContentCol.implicitHeight + 16
+        anchors.topMargin: 4
+        x: Math.max(0, traySection.x + trayIconsClip.x + (root.activeMenuIndex * 44) - 6)
+        width: actionsRow.implicitWidth
+        height: actionsRow.implicitHeight
         z: 1000
 
-        Rectangle {
-            anchors.fill: parent
-            radius: 4
-            color: "#020718"
-            border.color: "#00dbff"
-            border.width: 1
-        }
+        Row {
+            id: actionsRow
+            spacing: 12
+            anchors.verticalCenter: parent.verticalCenter
 
-        Column {
-            id: menuContentCol
-            anchors.top: parent.top
-            anchors.topMargin: 8
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width - 16
-            spacing: 4
-
-            // Header: Judul Aplikasi
+            // Opsi 1: OPEN (Buka / Fokus)
             Text {
-                text: {
-                    if (!root.activeTrayItem) return "APPLICATION"
-                    const t = root.activeTrayItem.title || root.activeTrayItem.tooltipTitle || root.activeTrayItem.id || "APP"
-                    return String(t).replace(/^_/, "").toUpperCase()
-                }
-                color: "#00dbff"
-                font.family: "JetBrainsMono NFM"
-                font.pixelSize: 9
+                id: openText
+                text: "OPEN"
+                font.family: "Bebas Neue"
+                font.pixelSize: 26
                 font.bold: true
-                elide: Text.ElideRight
-                width: parent.width
-            }
+                font.italic: true
+                color: openMouse.containsMouse ? "#ffffff" : "#64aff0"
+                opacity: openMouse.containsMouse ? 1.0 : 0.40
+                scale: openMouse.containsMouse ? 1.10 : 1.0
 
-            Rectangle {
-                width: parent.width
-                height: 1
-                color: Qt.rgba(0, 0.85, 1, 0.25)
-            }
-
-            // Opsi 1: Buka / Fokus
-            Rectangle {
-                width: parent.width
-                height: 22
-                radius: 2
-                color: openMouse.containsMouse ? "#00dbff" : "transparent"
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 6
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "▸ BUKA"
-                    color: openMouse.containsMouse ? "#020718" : "#ffffff"
-                    font.family: "JetBrainsMono NFM"
-                    font.pixelSize: 9
-                    font.bold: true
-                }
+                Behavior on color { ColorAnimation { duration: 140 } }
+                Behavior on opacity { NumberAnimation { duration: 140 } }
+                Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
                 MouseArea {
                     id: openMouse
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
+                    onEntered: PhantomState.playSfx("select")
                     onClicked: {
+                        PhantomState.playSfx("select")
                         if (root.activeTrayItem) {
                             PhantomState.activateTrayItem(root.activeTrayItem)
                         }
@@ -418,80 +380,42 @@ Item {
                 }
             }
 
-            // Opsi 2: Daftar Menu Asli DBus dari Aplikasi jika tersedia
-            Repeater {
-                model: activeMenuOpener.children
-
-                delegate: Rectangle {
-                    id: menuEntryItem
-                    required property QsMenuEntry modelData
-                    readonly property string cleanLabel: String(modelData.text || "").replace(/_/g, "").trim()
-                    visible: !modelData.isSeparator && cleanLabel.length > 0
-                    width: parent.width
-                    height: 22
-                    radius: 2
-                    color: menuEntryMouse.containsMouse ? "#00dbff" : "transparent"
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 6
-                        anchors.right: parent.right
-                        anchors.rightMargin: 6
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: menuEntryItem.cleanLabel.toUpperCase()
-                        color: !menuEntryItem.modelData.enabled
-                            ? "#506080"
-                            : (menuEntryMouse.containsMouse ? "#020718" : "#e0f0ff")
-                        font.family: "JetBrainsMono NFM"
-                        font.pixelSize: 9
-                        font.bold: true
-                        elide: Text.ElideRight
-                    }
-
-                    MouseArea {
-                        id: menuEntryMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        enabled: menuEntryItem.modelData.enabled
-                        cursorShape: menuEntryItem.modelData.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: {
-                            menuEntryItem.modelData.triggered()
-                            root.activeMenuIndex = -1
-                        }
-                    }
-                }
+            // Garis pemisah stensil samar
+            Text {
+                text: "/"
+                font.family: "Bebas Neue"
+                font.pixelSize: 22
+                font.bold: true
+                font.italic: true
+                color: "#64aff0"
+                opacity: 0.20
+                anchors.verticalCenter: parent.verticalCenter
             }
 
-            Rectangle {
-                width: parent.width
-                height: 1
-                color: Qt.rgba(0, 0, 0, 0.4)
-            }
+            // Opsi 2: KILL (Matikan Paksa)
+            Text {
+                id: killText
+                text: "KILL"
+                font.family: "Bebas Neue"
+                font.pixelSize: 26
+                font.bold: true
+                font.italic: true
+                color: killMouse.containsMouse ? "#ff2255" : "#ff7088"
+                opacity: killMouse.containsMouse ? 1.0 : 0.45
+                scale: killMouse.containsMouse ? 1.10 : 1.0
 
-            // Opsi 3: Matikan Paksa (Force Kill)
-            Rectangle {
-                width: parent.width
-                height: 22
-                radius: 2
-                color: killMouse.containsMouse ? "#ff2244" : "transparent"
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 6
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "× MATIKAN (KILL)"
-                    color: killMouse.containsMouse ? "#ffffff" : "#ff5577"
-                    font.family: "JetBrainsMono NFM"
-                    font.pixelSize: 9
-                    font.bold: true
-                }
+                Behavior on color { ColorAnimation { duration: 140 } }
+                Behavior on opacity { NumberAnimation { duration: 140 } }
+                Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
                 MouseArea {
                     id: killMouse
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
+                    onEntered: PhantomState.playSfx("select")
                     onClicked: {
+                        PhantomState.playSfx("select")
                         if (root.activeTrayItem) {
                             const t = String(root.activeTrayItem.title || root.activeTrayItem.id || "").toLowerCase().trim()
                             if (t.length > 0) {
