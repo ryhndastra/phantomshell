@@ -984,7 +984,7 @@ Singleton {
 
     function syncHyprlandAnimations() {
         if (root.isP3) {
-            Quickshell.execDetached(["hyprctl", "eval", "hl.animation({ leaf = 'windowsOut', enabled = false })"])
+            Quickshell.execDetached(["hyprctl", "eval", "hl.animation({ leaf = 'windowsOut', enabled = true, speed = 6.0, bezier = 'linear', style = 'popin 100%' })"])
         } else {
             Quickshell.execDetached(["hyprctl", "eval", "hl.animation({ leaf = 'windowsOut', enabled = true, speed = 2.4, bezier = 'p5Exit', style = 'popin 88%' })"])
         }
