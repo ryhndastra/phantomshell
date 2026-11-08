@@ -410,54 +410,35 @@ Scope {
             SequentialAnimation {
                 id: p3ShadowDeathAnim
 
-                // Tahap 1: Hangus terbakar seketika (Char & Sizzle windup, 60ms)
+                // Seketika meleleh runtuh ke bawah tanpa jeda (Zero-delay instant response)
                 ParallelAnimation {
-                    NumberAnimation {
-                        target: frameWin
-                        property: "deathBurn"
-                        from: 0.0
-                        to: 1.0
-                        duration: 60
-                        easing.type: Easing.OutQuad
-                    }
-                }
-
-                // Sfx desis hangus
-                ScriptAction {
-                    script: {
-                        PhantomState.playSfx("select")
-                    }
-                }
-
-                // Tahap 2: Meleleh runtuh ke bawah, tetesan cairan jatuh, asap hangus tipis mengepul (~500ms)
-                ParallelAnimation {
-                    // Tubuh jendela mencair dan runtuh ke bawah
+                    // Tubuh jendela mencair dan runtuh ke bawah seketika
                     NumberAnimation {
                         target: frameWin
                         property: "deathMelt"
                         from: 0.0
                         to: 1.0
-                        duration: 460
-                        easing.type: Easing.InQuad
+                        duration: 380
+                        easing.type: Easing.OutQuad
                     }
-                    // Efek bara api dan nyala desis perlahan mereda
+                    // Efek bara api dan desis langsung memudar dari 1.0 ke 0.0
                     NumberAnimation {
                         target: frameWin
                         property: "deathBurn"
                         from: 1.0
                         to: 0.0
-                        duration: 380
+                        duration: 320
                         easing.type: Easing.OutQuad
                     }
                     // Genangan cairan hitam di lantai memuai lalu mendidih & menguap
                     SequentialAnimation {
-                        PauseAnimation { duration: 80 }
+                        PauseAnimation { duration: 40 }
                         NumberAnimation {
                             target: frameWin
                             property: "deathPuddle"
                             from: 0.0
                             to: 1.0
-                            duration: 380
+                            duration: 340
                             easing.type: Easing.OutQuad
                         }
                     }
@@ -467,7 +448,7 @@ Scope {
                         property: "deathSmoke"
                         from: 0.0
                         to: 1.0
-                        duration: 500
+                        duration: 420
                         easing.type: Easing.OutQuad
                     }
                 }
@@ -501,10 +482,11 @@ Scope {
 
                 p3ShadowDeathAnim.stop()
                 frameWin.deathMelt = 0.0
-                frameWin.deathBurn = 0.0
+                frameWin.deathBurn = 1.0
                 frameWin.deathPuddle = 0.0
                 frameWin.deathSmoke = 0.0
                 frameWin.p3DeathActive = true
+                PhantomState.playSfx("select")
                 p3ShadowDeathAnim.restart()
             }
 
@@ -1777,7 +1759,7 @@ Scope {
 
                             x: segX + Math.sin(index + p * 4) * 5
                             y: Math.min(parent.height - 8, originY + gravityDist)
-                            visible: p > 0.05 && y < parent.height - 4
+                            visible: y < parent.height - 4
                             opacity: Math.max(0.0, (1.0 - p) * 0.95)
 
                             Rectangle {
