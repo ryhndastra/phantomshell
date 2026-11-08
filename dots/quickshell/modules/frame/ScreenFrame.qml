@@ -335,17 +335,16 @@ Scope {
             }
 
             // ==========================================
-            // P3 RELOAD SHADOW DEATH / APP CLOSE EFFECT
+            // P3 RELOAD SHADOW DEATH / APP CLOSE (MELELEH & HANGUS)
             // ==========================================
             property bool p3DeathActive: false
             property real deathX: 50
             property real deathY: 50
             property real deathW: 800
             property real deathH: 600
-            property real deathProg: 0.0     // 0.0 to 1.0 (burst & scatter)
-            property real deathCracks: 0.0   // 0.0 to 1.0 (freeze & fracture lines)
-            property real deathFlash: 0.0    // 0.0 to 1.0 (cyan flash)
-            property real deathPuddle: 0.0   // 0.0 to 1.0 (bottom puddle melting & evaporation)
+            property real deathMelt: 0.0     // 0.0 (intact charred) -> 1.0 (fully melted down)
+            property real deathBurn: 0.0     // 1.0 (searing burn) -> 0.0 (cools/evaporates)
+            property real deathPuddle: 0.0   // 0.0 -> 1.0 (puddle pool & evaporation)
 
             property real lastWinX: 50
             property real lastWinY: 50
@@ -410,76 +409,56 @@ Scope {
             SequentialAnimation {
                 id: p3ShadowDeathAnim
 
-                // Tahap 1: Pembekuan Siluet Jendela & Retakan Cahaya Cyan/Gold (120ms)
+                // Tahap 1: Hangus terbakar seketika (Char & Sizzle windup, 60ms)
                 ParallelAnimation {
                     NumberAnimation {
                         target: frameWin
-                        property: "deathCracks"
+                        property: "deathBurn"
                         from: 0.0
                         to: 1.0
-                        duration: 120
+                        duration: 60
                         easing.type: Easing.OutQuad
-                    }
-                    SequentialAnimation {
-                        NumberAnimation {
-                            target: frameWin
-                            property: "deathFlash"
-                            from: 0.0
-                            to: 0.85
-                            duration: 50
-                            easing.type: Easing.OutQuad
-                        }
-                        NumberAnimation {
-                            target: frameWin
-                            property: "deathFlash"
-                            from: 0.85
-                            to: 0.20
-                            duration: 70
-                            easing.type: Easing.OutQuad
-                        }
                     }
                 }
 
-                // Titik Pecah / Shatter
+                // Sfx desis hangus
                 ScriptAction {
                     script: {
-                        PhantomState.playSfx("into_game")
+                        PhantomState.playSfx("select")
                     }
                 }
 
-                // Tahap 2: Ledakan Pecahan Kristal, Cipratan Cairan Hitam, & Penguapan Genangan (~520ms)
+                // Tahap 2: Meleleh runtuh ke bawah, tetesan cairan jatuh, asap & abu membubung (~520ms)
                 ParallelAnimation {
+                    // Tubuh jendela mencair dan runtuh ke bawah
                     NumberAnimation {
                         target: frameWin
-                        property: "deathProg"
+                        property: "deathMelt"
                         from: 0.0
                         to: 1.0
                         duration: 520
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.InQuad
                     }
+                    // Efek bara api dan nyala desis perlahan mereda
                     NumberAnimation {
                         target: frameWin
-                        property: "deathCracks"
+                        property: "deathBurn"
                         from: 1.0
                         to: 0.0
-                        duration: 160
+                        duration: 480
                         easing.type: Easing.OutQuad
                     }
-                    NumberAnimation {
-                        target: frameWin
-                        property: "deathFlash"
-                        from: 0.20
-                        to: 0.0
-                        duration: 180
-                        easing.type: Easing.OutQuad
-                    }
-                    NumberAnimation {
-                        target: frameWin
-                        property: "deathPuddle"
-                        from: 0.0
-                        to: 1.0
-                        duration: 520
-                        easing.type: Easing.OutQuad
+                    // Genangan cairan hitam di lantai memuai lalu menguap
+                    SequentialAnimation {
+                        PauseAnimation { duration: 120 }
+                        NumberAnimation {
+                            target: frameWin
+                            property: "deathPuddle"
+                            from: 0.0
+                            to: 1.0
+                            duration: 400
+                            easing.type: Easing.OutQuad
+                        }
                     }
                 }
 
@@ -487,9 +466,8 @@ Scope {
                 ScriptAction {
                     script: {
                         frameWin.p3DeathActive = false
-                        frameWin.deathProg = 0.0
-                        frameWin.deathCracks = 0.0
-                        frameWin.deathFlash = 0.0
+                        frameWin.deathMelt = 0.0
+                        frameWin.deathBurn = 0.0
                         frameWin.deathPuddle = 0.0
                     }
                 }
@@ -511,12 +489,10 @@ Scope {
                 frameWin.deathH = Math.min(wh, scrH - frameWin.deathY)
 
                 p3ShadowDeathAnim.stop()
-                frameWin.deathProg = 0.0
-                frameWin.deathCracks = 0.0
-                frameWin.deathFlash = 0.0
+                frameWin.deathMelt = 0.0
+                frameWin.deathBurn = 0.0
                 frameWin.deathPuddle = 0.0
                 frameWin.p3DeathActive = true
-                deathCanvas.requestPaint()
                 p3ShadowDeathAnim.restart()
             }
 
@@ -1564,7 +1540,7 @@ Scope {
                 }
             }
 // ==========================================
-            // OVERLAY P3R SHADOW DEATH / WINDOW CLOSE DISSOLVE
+            // OVERLAY P3R SHADOW DEATH (MELELEH & HANGUS)
             // ==========================================
             Item {
                 id: p3ShadowDeathOverlay
@@ -1575,40 +1551,16 @@ Scope {
                 visible: frameWin.p3DeathActive
                 z: 120
 
-                // 1. Siluet Pembekuan Shadow & Flash
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 8
-                    color: "#020814"
-                    opacity: Math.max(0.0, (1.0 - frameWin.deathProg) * 0.40)
-                    border.color: "#00F0FF"
-                    border.width: Math.max(1, 3 * (1.0 - frameWin.deathProg))
-                }
-
-                // Kilatan Flash Putih-Cyan Sesaat
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 8
-                    color: "#FFFFFF"
-                    opacity: frameWin.deathFlash * 0.45
-                }
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 8
-                    color: "#00F0FF"
-                    opacity: frameWin.deathFlash * 0.35
-                }
-
-                // 2. Retakan Kristal Es & Cahaya Kuning Roh (Luminous Fracture Lines)
+                // 1. Kanvas Meleleh (Dripping Fluid Mass)
                 Canvas {
-                    id: deathCanvas
+                    id: meltCanvas
                     anchors.fill: parent
                     antialiasing: true
 
                     Connections {
                         target: frameWin
-                        function onDeathCracksChanged() { deathCanvas.requestPaint() }
-                        function onDeathProgChanged() { deathCanvas.requestPaint() }
+                        function onDeathMeltChanged() { meltCanvas.requestPaint() }
+                        function onDeathBurnChanged() { meltCanvas.requestPaint() }
                     }
 
                     onPaint: {
@@ -1616,97 +1568,101 @@ Scope {
                         ctx.reset()
                         ctx.clearRect(0, 0, width, height)
 
-                        var cracks = frameWin.deathCracks
-                        if (cracks <= 0.01) return
+                        var p = frameWin.deathMelt
+                        if (p >= 0.99) return
 
-                        var prog = frameWin.deathProg
-                        var alpha = Math.max(0.0, (cracks - prog * 1.5))
-                        if (alpha <= 0.01) return
+                        var burn = frameWin.deathBurn
+                        var topY = height * p
 
-                        var cx = width * 0.5
-                        var cy = height * 0.5
+                        // Tubuh bayangan hitam pekat yang hangus & mencair
+                        ctx.fillStyle = "#020712"
+                        // Sisi atas yang terbakar membara warna cyan/biru neon
+                        ctx.strokeStyle = "rgba(0, 240, 255, " + (Math.max(0.1, burn) * 0.95).toFixed(2) + ")"
+                        ctx.lineWidth = 3
 
-                        ctx.lineCap = "round"
-                        ctx.lineJoin = "round"
+                        ctx.beginPath()
+                        ctx.moveTo(0, height)
+                        ctx.lineTo(0, topY)
 
-                        // Outer Cyan Glow
-                        ctx.strokeStyle = "rgba(0, 240, 255, " + (alpha * 0.75).toFixed(2) + ")"
-                        ctx.lineWidth = 4
-                        drawCracks(ctx, cx, cy, width, height, cracks)
+                        // Gelombang lelehan cairan kental (viscous dripping waves)
+                        var dripsCount = 12
+                        var segW = width / dripsCount
+                        for (var i = 0; i < dripsCount; i++) {
+                            var x0 = i * segW
+                            var xMid = x0 + segW * 0.5
+                            var x1 = (i + 1) * segW
+
+                            // Panjang tetesan yang menggantung ke bawah saat mencair
+                            var droopFactor = ((i * 47) % 60) + 15
+                            var droopY = topY + droopFactor * Math.sin(p * Math.PI) * (1.0 - p * 0.6)
+
+                            ctx.bezierCurveTo(x0 + segW * 0.2, topY, xMid - segW * 0.2, droopY, xMid, droopY)
+                            ctx.bezierCurveTo(xMid + segW * 0.2, droopY, x1 - segW * 0.2, topY, x1, topY)
+                        }
+
+                        ctx.lineTo(width, height)
+                        ctx.closePath()
+                        ctx.fill()
                         ctx.stroke()
 
-                        // Core White Crack
-                        ctx.strokeStyle = "rgba(255, 255, 255, " + (alpha * 0.95).toFixed(2) + ")"
-                        ctx.lineWidth = 1.8
-                        drawCracks(ctx, cx, cy, width, height, cracks)
-                        ctx.stroke()
-                    }
-
-                    function drawCracks(ctx, cx, cy, w, h, p) {
-                        // 8 cabang retakan radial tajam
-                        var branches = [
-                            [-w * 0.48 * p, -h * 0.46 * p, -w * 0.2, -h * 0.1],
-                            [w * 0.46 * p, -h * 0.44 * p, w * 0.18, -h * 0.22],
-                            [w * 0.48 * p, h * 0.45 * p, w * 0.24, h * 0.14],
-                            [-w * 0.45 * p, h * 0.46 * p, -w * 0.15, h * 0.2],
-                            [0, -h * 0.48 * p, w * 0.05, -h * 0.25],
-                            [0, h * 0.48 * p, -w * 0.04, h * 0.22],
-                            [-w * 0.48 * p, 0, -w * 0.22, -h * 0.05],
-                            [w * 0.48 * p, 0, w * 0.20, h * 0.06]
-                        ]
-                        for (var i = 0; i < branches.length; i++) {
-                            var b = branches[i]
+                        // Lapisan bara panas di tepi lelehan
+                        if (burn > 0.05) {
+                            ctx.strokeStyle = "rgba(255, 255, 255, " + (burn * 0.85).toFixed(2) + ")"
+                            ctx.lineWidth = 1.2
                             ctx.beginPath()
-                            ctx.moveTo(cx, cy)
-                            ctx.lineTo(cx + b[2] * p, cy + b[3] * p)
-                            ctx.lineTo(cx + b[0], cy + b[1])
+                            ctx.moveTo(0, topY)
+                            for (var j = 0; j < dripsCount; j++) {
+                                var x0b = j * segW
+                                var xMidb = x0b + segW * 0.5
+                                var x1b = (j + 1) * segW
+                                var droopFactorB = ((j * 47) % 60) + 15
+                                var droopYB = topY + droopFactorB * Math.sin(p * Math.PI) * (1.0 - p * 0.6)
+                                ctx.bezierCurveTo(x0b + segW * 0.2, topY, xMidb - segW * 0.2, droopYB, xMidb, droopYB)
+                                ctx.bezierCurveTo(xMidb + segW * 0.2, droopYB, x1b - segW * 0.2, topY, x1b, topY)
+                            }
                             ctx.stroke()
                         }
                     }
                 }
 
-                // 3. Serpihan Kristal & Tetesan Cairan Hitam (32 Shards & Tar Pellets)
+                // 2. Tetesan Cairan Hitam Kental yang Jatuh ke Bawah (Dripping Fluid Droplets)
                 Item {
-                    id: deathShardsContainer
+                    id: dripsContainer
                     anchors.fill: parent
-                    visible: frameWin.deathProg > 0.001
 
                     Repeater {
-                        model: 32
+                        model: 24
                         delegate: Item {
                             required property int index
 
-                            readonly property real ratio: index / 32.0
-                            readonly property real cx: parent.width * 0.5
-                            readonly property real cy: parent.height * 0.5
+                            readonly property real p: frameWin.deathMelt
+                            readonly property real segX: parent.width * ((index + 0.5) / 24.0)
+                            // Awal jatuhnya tetesan mengikuti level lelehan saat ini
+                            readonly property real originY: parent.height * (0.15 + (index % 5) * 0.16)
+                            readonly property real fallSpeed: 180 + ((index * 53) % 260)
+                            readonly property real gravityDist: p * fallSpeed + (p * p * 350)
 
-                            readonly property real angle: (((index * 137.5) % 360) * Math.PI) / 180.0
-                            readonly property real speed: 180 + ((index * 83) % 480)
-                            readonly property real distance: speed * frameWin.deathProg
-                            readonly property real gravity: frameWin.deathProg * frameWin.deathProg * 160
+                            x: segX + Math.sin(index + p * 4) * 6
+                            y: Math.min(parent.height - 8, originY + gravityDist)
+                            visible: p > 0.05 && y < parent.height - 4
+                            opacity: Math.max(0.0, (1.0 - p) * 0.95)
 
-                            x: cx + Math.cos(angle) * distance
-                            y: cy + Math.sin(angle) * distance + gravity
-                            rotation: (index * 45) + (frameWin.deathProg * ((index % 2 === 0 ? 1 : -1) * 220))
-                            scale: Math.max(0.1, (1.0 - frameWin.deathProg * 0.5) * (0.8 + ((index % 4) * 0.3)))
-                            opacity: Math.max(0.0, 1.0 - Math.pow(frameWin.deathProg, 1.4))
-
-                            // 50% Kristal Cyan-Putih, 50% Tetesan Hitam Tar
+                            // Tetesan cairan kental (lonjong ke bawah saat jatuh)
                             Rectangle {
                                 anchors.centerIn: parent
-                                width: (index % 2 === 0) ? (6 + (index % 8)) : (10 + (index % 10))
-                                height: (index % 2 === 0) ? (16 + (index % 14)) : width
-                                radius: (index % 2 === 0) ? 0 : (width / 2)
-                                rotation: (index % 2 === 0) ? 35 : 0
-                                color: (index % 2 === 0) ? "#CC00B4D8" : "#020814"
-                                border.color: (index % 2 === 0) ? "#FFFFFF" : "#00F0FF"
-                                border.width: 1.5
+                                width: 5 + (index % 4)
+                                height: 10 + (index % 8)
+                                radius: width / 2
+                                color: "#020712"
+                                border.color: "#00F0FF"
+                                border.width: 1
 
                                 Rectangle {
-                                    visible: index % 2 === 0
-                                    width: parent.width * 0.4
-                                    height: parent.height * 0.4
-                                    x: 1; y: 1
+                                    width: Math.max(2, parent.width * 0.4)
+                                    height: width
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    y: 2
+                                    radius: width / 2
                                     color: "#FFFFFF"
                                     opacity: 0.8
                                 }
@@ -1715,38 +1671,69 @@ Scope {
                     }
                 }
 
-                // 4. Partikel Kabut Roh / Plume of Dusk (20 Soul Sparks Naik ke Atas)
+                // 3. Kepulan Asap & Abu Roh yang Membubung ke Atas (Hangus Berasap / Vapor Mist)
                 Item {
-                    id: deathSparksContainer
+                    id: smokeContainer
                     anchors.fill: parent
-                    visible: frameWin.deathProg > 0.001
 
                     Repeater {
-                        model: 20
+                        model: 24
                         delegate: Item {
                             required property int index
 
-                            readonly property real ox: parent.width * (0.15 + 0.7 * ((index * 29) % 100) / 100.0)
-                            readonly property real oy: parent.height * (0.3 + 0.5 * ((index * 47) % 100) / 100.0)
+                            readonly property real p: frameWin.deathMelt
+                            readonly property real ox: parent.width * ((index * 39) % 100) / 100.0
+                            // Asap muncul dari area yang sedang meleleh
+                            readonly property real oy: parent.height * (p * 0.85 + 0.1)
 
-                            x: ox + Math.sin(frameWin.deathProg * 6 + index) * 25
-                            y: oy - (frameWin.deathProg * (120 + ((index * 37) % 100)))
-                            opacity: Math.max(0.0, (1.0 - frameWin.deathProg) * 0.9)
+                            x: ox + Math.sin(p * 5 + index) * 30
+                            y: oy - (p * (100 + ((index * 43) % 120)))
+                            scale: 0.8 + p * 1.5
+                            opacity: Math.max(0.0, Math.sin(p * Math.PI) * 0.75)
+
+                            // Gumpalan asap bundar lembut & bara cyan
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 14 + ((index * 9) % 22)
+                                height: width
+                                radius: width / 2
+                                color: (index % 3 === 0) ? "#3300F0FF" : ((index % 3 === 1) ? "#55071830" : "#44020814")
+                                border.color: (index % 4 === 0) ? "#5500F0FF" : "transparent"
+                                border.width: 1
+                            }
+                        }
+                    }
+                }
+
+                // 4. Bara Api Hangus Sizzling Embers (Percikan Bara Kecil yang Menguap)
+                Item {
+                    id: embersContainer
+                    anchors.fill: parent
+
+                    Repeater {
+                        model: 18
+                        delegate: Item {
+                            required property int index
+
+                            readonly property real p: frameWin.deathMelt
+                            readonly property real ox: parent.width * ((index * 57) % 100) / 100.0
+                            readonly property real oy: parent.height * (p * 0.8 + 0.15)
+
+                            x: ox + Math.cos(index * 2 + p * 6) * 20
+                            y: oy - (p * (140 + ((index * 61) % 120)))
+                            opacity: Math.max(0.0, (1.0 - p) * 0.95)
 
                             Rectangle {
                                 anchors.centerIn: parent
-                                width: 5 + ((index * 7) % 8)
+                                width: 3 + (index % 3)
                                 height: width
                                 radius: width / 2
-                                color: (index % 3 === 0) ? "#FFD700" : "#00F0FF"
-                                border.color: "#FFFFFF"
-                                border.width: 1
+                                color: (index % 2 === 0) ? "#00F0FF" : "#FFD700"
 
                                 Rectangle {
                                     anchors.centerIn: parent
-                                    width: parent.width * 0.4
-                                    height: width
-                                    radius: width / 2
+                                    width: 1
+                                    height: 1
                                     color: "#FFFFFF"
                                 }
                             }
@@ -1754,26 +1741,26 @@ Scope {
                     }
                 }
 
-                // 5. Genangan Hitam Meleleh & Menguap di Bagian Bawah Jendela (P3R Puddle Melt)
+                // 5. Genangan Hitam di Bawah Tempat Lelehan Mengalir (Boiling & Evaporating Puddle)
                 Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width * (0.35 + frameWin.deathPuddle * 0.30)
-                    height: 18 * (1.0 - frameWin.deathPuddle * 0.7)
+                    width: parent.width * (0.3 + frameWin.deathMelt * 0.55)
+                    height: 20 * (1.0 - frameWin.deathPuddle * 0.75)
                     radius: height / 2
-                    color: "#010611"
+                    color: "#01050F"
                     border.color: "#00F0FF"
                     border.width: Math.max(1, 2 * (1.0 - frameWin.deathPuddle))
-                    opacity: Math.sin(Math.min(1.0, frameWin.deathPuddle) * Math.PI) * 0.85
+                    opacity: Math.sin(Math.min(1.0, frameWin.deathPuddle) * Math.PI) * 0.90
 
-                    // Riak dalam genangan
+                    // Gelembung desis cairan di genangan (sizzling bubble)
                     Rectangle {
                         anchors.centerIn: parent
-                        width: parent.width * 0.65
-                        height: parent.height * 0.5
+                        width: parent.width * 0.75
+                        height: parent.height * 0.55
                         radius: height / 2
                         color: "transparent"
-                        border.color: "#3300F0FF"
+                        border.color: "#4400F0FF"
                         border.width: 1
                     }
                 }
