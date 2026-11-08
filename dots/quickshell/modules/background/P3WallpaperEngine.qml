@@ -9,6 +9,7 @@ Item {
     anchors.fill: parent
 
     property bool animActive: true
+    property bool forceDarkHour: false
 
     readonly property bool effectiveAnimRunning: animActive && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows) && !PhantomState.sessionOpen
 
@@ -26,6 +27,7 @@ Item {
     }
 
     readonly property string timePhase: {
+        if (forceDarkHour) return "darkhour"
         if (PhantomState.p3TimePhaseOverride && PhantomState.p3TimePhaseOverride !== "auto") {
             return PhantomState.p3TimePhaseOverride
         }

@@ -4,35 +4,23 @@ import QtQuick
 QtObject {
     id: root
 
-    readonly property string defaultWallpaperPath: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png"
+    readonly property string defaultWallpaperPath: ""
 
     readonly property var availableWallpapers: [
-        "/home/sho/Pictures/Wallpapers/makoto.png",
-        "/home/sho/Pictures/Wallpapers/yuuki.jpeg",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p3-reload.png",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p4-golden.png",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-kasumi-violet.png",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-akechi-crow.png",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-futaba-matrix.png",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-monochrome.png",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-expressive.png",
-        "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-tonal-spot.png",
-        "/home/sho/Pictures/Wallpapers/goremagala_iceshard.jpg",
-        "/home/sho/Pictures/Wallpapers/1409986.png",
-        "/home/sho/Pictures/Wallpapers/wallhaven-0q3yqq.jpg",
-        "/home/sho/Pictures/Wallpapers/wallhaven-28z766.png",
-        "/home/sho/Pictures/Wallpapers/wallhaven-6d9o96.png",
-        "/home/sho/Pictures/Wallpapers/wallhaven-72m78v.png",
-        "/home/sho/Pictures/Wallpapers/wallhaven-l3g222.png",
-        "/home/sho/Pictures/Wallpapers/wallhaven-j3vvdw.png"
+        "train_shader",
+        "velvet",
+        "dorm",
+        "monorail",
+        "fuuka",
+        "train_loop",
+        "tartarus"
     ]
 
     readonly property var presets: ({
         "p5-crimson": {
             name: "P5 Phantom Crimson",
             id: "p5-crimson",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png",
+            wallpaper: "",
             primary: "#E60012",
             secondary: "#FFD700",
             accent: "#FF1E2E",
@@ -49,7 +37,7 @@ QtObject {
         "p3-reload": {
             name: "P3 Reload S.E.E.S. Blue",
             id: "p3-reload",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p3-reload.png",
+            wallpaper: "train_shader",
             primary: "#00B4D8",
             secondary: "#90E0EF",
             accent: "#00F0FF",
@@ -66,7 +54,7 @@ QtObject {
         "p4-golden": {
             name: "P4 Golden Midnight",
             id: "p4-golden",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-p4-golden.png",
+            wallpaper: "",
             primary: "#FFB703",
             secondary: "#FB8500",
             accent: "#FFE600",
@@ -83,7 +71,7 @@ QtObject {
         "kasumi-violet": {
             name: "Violet Kasumi",
             id: "kasumi-violet",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-kasumi-violet.png",
+            wallpaper: "",
             primary: "#B829FF",
             secondary: "#FF70A6",
             accent: "#D96BFF",
@@ -100,7 +88,7 @@ QtObject {
         "akechi-crow": {
             name: "Crow Royal Gold",
             id: "akechi-crow",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-akechi-crow.png",
+            wallpaper: "",
             primary: "#D4AF37",
             secondary: "#E60012",
             accent: "#FFF3B0",
@@ -117,7 +105,7 @@ QtObject {
         "futaba-matrix": {
             name: "Oracle Hacker Matrix",
             id: "futaba-matrix",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-futaba-matrix.png",
+            wallpaper: "",
             primary: "#39FF14",
             secondary: "#FF9F1C",
             accent: "#72FF57",
@@ -134,7 +122,7 @@ QtObject {
         "monochrome": {
             name: "Phantom Monochrome",
             id: "monochrome",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-monochrome.png",
+            wallpaper: "",
             primary: "#E2E2EC",
             secondary: "#A0A0B2",
             accent: "#FFFFFF",
@@ -151,7 +139,7 @@ QtObject {
         "expressive": {
             name: "Velvet Expressive",
             id: "expressive",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-expressive.png",
+            wallpaper: "",
             primary: "#7B61FF",
             secondary: "#00F5D4",
             accent: "#9D85FF",
@@ -168,7 +156,7 @@ QtObject {
         "tonal-spot": {
             name: "Gore Magala Ice",
             id: "tonal-spot",
-            wallpaper: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper-tonal-spot.png",
+            wallpaper: "",
             primary: "#8AB4F8",
             secondary: "#C58AF9",
             accent: "#A8C7FA",

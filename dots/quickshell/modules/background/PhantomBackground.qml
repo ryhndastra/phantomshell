@@ -1,4 +1,5 @@
 import QtQuick
+import QtMultimedia
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -268,24 +269,59 @@ Scope {
                 smooth: true
             }
 
+            readonly property bool isLiveVideoScene: PhantomState.isP3 && (
+                PhantomState.p3LiveScene === "velvet" ||
+                PhantomState.p3LiveScene === "dorm" ||
+                PhantomState.p3LiveScene === "monorail" ||
+                PhantomState.p3LiveScene === "fuuka" ||
+                PhantomState.p3LiveScene === "train_loop" ||
+                PhantomState.p3LiveScene === "video_custom"
+            )
+
+            readonly property bool isShaderScene: PhantomState.isP3 && (
+                PhantomState.p3LiveScene === "train_shader" ||
+                PhantomState.p3LiveScene === "tartarus" ||
+                PhantomState.p3LiveScene === ""
+            )
+
             // lapisan wallpaper dinamis persona 3 reload (riak air, makoto yuki, parallax 3d)
             P3WallpaperEngine {
                 anchors.fill: parent
-                visible: PhantomState.showWallpaperLayer && PhantomState.isP3
-                animActive: bgWin.visible
+                visible: PhantomState.showWallpaperLayer && bgWin.isShaderScene
+                animActive: bgWin.visible && bgWin.isShaderScene
+                forceDarkHour: PhantomState.p3LiveScene === "tartarus"
             }
 
-            // lapisan gambar wallpaper aktif dengan efek parallax dan transisi
+            // lapisan pemutar video wallpaper ambient persona 3 reload (1080p 60fps loop hening)
+            Video {
+                id: liveVideoBg
+                anchors.fill: parent
+                visible: PhantomState.showWallpaperLayer && bgWin.isLiveVideoScene
+                source: PhantomState.p3VideoPath !== "" ? (PhantomState.p3VideoPath.startsWith("/") ? ("file://" + PhantomState.p3VideoPath) : PhantomState.p3VideoPath) : ""
+                fillMode: VideoOutput.PreserveAspectCrop
+                loops: MediaPlayer.Infinite
+                volume: 0
+
+                onVisibleChanged: {
+                    if (visible) {
+                        if (playbackState !== MediaPlayer.PlayingState) play()
+                    } else {
+                        stop()
+                    }
+                }
+            }
+
+            // lapisan gambar wallpaper kustom jika memilih gambar statis
             Image {
                 id: wpImg
-                visible: PhantomState.showWallpaperLayer && PhantomState.wallpaperPath !== "" && !PhantomState.isP3
+                visible: PhantomState.showWallpaperLayer && !bgWin.isShaderScene && !bgWin.isLiveVideoScene && PhantomState.wallpaperPath !== ""
                 width: parent.width * bgWin.zoomFactor
                 height: parent.height * bgWin.zoomFactor
                 x: (parent.width - width) / 2 + bgWin.parallaxOffsetX + bgWin.wpSlideX
                 y: (parent.height - height) / 2
                 scale: bgWin.wpPunchScale
                 opacity: bgWin.wpCrossfade
-                source: PhantomState.wallpaperPath !== "" ? ("file://" + PhantomState.wallpaperPath) : ""
+                source: PhantomState.wallpaperPath !== "" ? (PhantomState.wallpaperPath.startsWith("/") ? ("file://" + PhantomState.wallpaperPath) : ("file://" + PhantomState.wallpaperPath)) : ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: true

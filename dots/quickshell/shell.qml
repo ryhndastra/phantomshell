@@ -123,6 +123,18 @@ ShellRoot {
             PhantomState.toggleWallpaperSelector()
         }
 
+        function openWallpaperSelector(): void {
+            if (!PhantomState.wallpaperSelectorOpen) PhantomState.toggleWallpaperSelector()
+        }
+
+        function closeWallpaperSelector(): void {
+            if (PhantomState.wallpaperSelectorOpen) PhantomState.toggleWallpaperSelector()
+        }
+
+        function setWallpaper(path: string): void {
+            PhantomState.setWallpaper(path)
+        }
+
         function toggleNotifications(): void {
             PhantomState.toggleNotifications()
         }

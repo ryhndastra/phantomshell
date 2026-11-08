@@ -552,15 +552,63 @@ Singleton {
     property bool showWallpaperLayer: true
     property bool wallpaperParallax: true
     property int wallpaperZoom: 104
-    property string wallpaperPath: "/mnt/data/Projects/rice/phantomshell/dots/quickshell/assets/pshell-wallpaper.png"
+    property string p3LiveScene: "train_shader" // "train_shader" | "velvet" | "dorm" | "monorail" | "fuuka" | "train_loop" | "tartarus" | "video_custom" | "image_custom"
+    property string p3VideoPath: ""
+    property string wallpaperPath: "train_shader"
+
+    function setLiveScene(sceneKey, videoPath, label) {
+        if (!sceneKey) return
+        wallpaperSelectorOpen = false
+        p3LiveScene = sceneKey
+        if (videoPath !== undefined) p3VideoPath = videoPath
+        wallpaperPath = sceneKey
+        transitionTitle = "LIVE AMBIENT SHIFT"
+        transitionSub = label ? label.toUpperCase() : sceneKey.toUpperCase()
+        transitionTick++
+        saveState()
+        playSfx("select")
+    }
 
     function setWallpaper(newPath) {
         if (!newPath) return
         wallpaperSelectorOpen = false
-        if (newPath !== wallpaperPath) {
-            previousWallpaperPath = wallpaperPath
-            wallpaperPath = newPath
+        const lower = String(newPath).toLowerCase()
+        if (newPath === "train_shader" || lower.indexOf("makoto_fg") !== -1 || lower.indexOf("bg.png") !== -1) {
+            setLiveScene("train_shader", "", "Gekkoukan Train // Aigis & Makoto")
+            return
         }
+        if (newPath === "velvet" || lower.indexOf("skills_ambient") !== -1) {
+            setLiveScene("velvet", Quickshell.shellPath("assets/themes/p3/videos/skills_ambient.mp4"), "Sea of Soul // Velvet Room")
+            return
+        }
+        if (newPath === "dorm" || lower.indexOf("dorm_ambient") !== -1) {
+            setLiveScene("dorm", Quickshell.shellPath("assets/themes/p3/videos/dorm_ambient.mp4"), "Iwatodai Dormitory // Lounge")
+            return
+        }
+        if (newPath === "monorail" || lower.indexOf("makoto_train_ambient") !== -1) {
+            setLiveScene("monorail", Quickshell.shellPath("assets/themes/p3/videos/makoto_train_ambient.mp4"), "Port Island Monorail // Commute")
+            return
+        }
+        if (newPath === "fuuka" || lower.indexOf("fuuka_ambient") !== -1) {
+            setLiveScene("fuuka", Quickshell.shellPath("assets/themes/p3/videos/fuuka_ambient.mp4"), "Gekkoukan Roof // Fuuka Yamagishi")
+            return
+        }
+        if (newPath === "train_loop" || lower.indexOf("train_ambient") !== -1) {
+            setLiveScene("train_loop", Quickshell.shellPath("assets/themes/p3/videos/train_ambient.mp4"), "Tatsumi Bay Loop // Night Monorail")
+            return
+        }
+        if (newPath === "tartarus") {
+            setLiveScene("tartarus", "", "Tartarus Abyss // The Dark Hour")
+            return
+        }
+        if (lower.endsWith(".mp4") || lower.endsWith(".webm") || lower.endsWith(".mkv") || lower.endsWith(".mov")) {
+            setLiveScene("video_custom", newPath, newPath.split("/").pop())
+            return
+        }
+        // Gambar kustom dari Pictures/Wallpapers
+        p3LiveScene = "image_custom"
+        previousWallpaperPath = wallpaperPath
+        wallpaperPath = newPath
         transitionTitle = "WALLPAPER SHIFT"
         transitionSub = newPath.split("/").pop().toUpperCase()
         transitionTick++
@@ -616,6 +664,9 @@ Singleton {
     function setP3TimePhaseOverride(phase) {
         p3TimePhaseOverride = phase
         saveState()
+    }
+    function setTimePhase(phase) {
+        setP3TimePhaseOverride(phase)
     }
 
     function syncWindowRulesToHypr() {
@@ -838,7 +889,9 @@ Singleton {
                 transparency: root.transparencyEnabled,
                 wallpaperPath: root.wallpaperPath,
                 wallpaperParallax: root.wallpaperParallax,
-                wallpaperZoom: root.wallpaperZoom
+                wallpaperZoom: root.wallpaperZoom,
+                p3LiveScene: root.p3LiveScene,
+                p3VideoPath: root.p3VideoPath
             },
             bar: {
                 position: root.barPosition,
@@ -1131,8 +1184,13 @@ Singleton {
                 }
                 try {
                     const cfg = JSON.parse(line)
-                    if (cfg && cfg.theme && cfg.theme.preset) {
-                        root.applyPreset(cfg.theme.preset, true)
+                    if (cfg && cfg.theme) {
+                        if (cfg.theme.preset) root.applyPreset(cfg.theme.preset, true)
+                        if (cfg.theme.p3LiveScene) root.p3LiveScene = cfg.theme.p3LiveScene
+                        if (cfg.theme.p3VideoPath) root.p3VideoPath = cfg.theme.p3VideoPath
+                        if (cfg.theme.wallpaperPath && !cfg.theme.wallpaperPath.includes("pshell-wallpaper")) {
+                            root.wallpaperPath = cfg.theme.wallpaperPath
+                        }
                     }
                     if (cfg && cfg.desktop) {
                         if (cfg.desktop.desktopClockPosition !== undefined) root.desktopClockPosition = cfg.desktop.desktopClockPosition

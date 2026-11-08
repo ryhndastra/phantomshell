@@ -33,8 +33,8 @@ hl.bind(mod .. " + Slash", hl.dsp.exec_cmd(qsCall .. "toggleCheatsheet"), {
 hl.bind(mod .. " + A", hl.dsp.exec_cmd(qsCall .. "toggleNotifications"), {
     description = "Phantomshell: Toggle SNS Notification Center"
 })
-hl.bind(mod .. " + B", hl.dsp.exec_cmd(cli .. " launch browser"), {
-    description = "App: Web Browser"
+hl.bind(mod .. " + B", hl.dsp.exec_cmd(qsCall .. "toggleNotifications"), {
+    description = "Phantomshell: Toggle SNS Notification Center"
 })
 hl.bind(mod .. " + O", hl.dsp.exec_cmd(qsCall .. "toggleNotifications"), {
     description = "Phantomshell: Toggle SNS Notification Center"
@@ -162,7 +162,8 @@ hl.bind(mod .. " + Return", hl.dsp.exec_cmd(cli .. " launch terminal"), { descri
 hl.bind(mod .. " + T",      hl.dsp.exec_cmd(cli .. " launch terminal"), { description = "App: Terminal (Kitty)" })
 hl.bind("CTRL + ALT + T",   hl.dsp.exec_cmd(cli .. " launch terminal"), { description = "App: Terminal (Kitty)" })
 hl.bind(mod .. " + E",      hl.dsp.exec_cmd(cli .. " launch files"),    { description = "App: File Manager" })
-hl.bind(mod .. " + W",      hl.dsp.exec_cmd(qsCall .. "toggleWallpaperSelector"), { description = "Phantomshell: Toggle Wallpaper Selector" })
+hl.bind(mod .. " + W",      hl.dsp.exec_cmd(cli .. " launch browser"),  { description = "App: Web Browser (Zen)" })
+hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd(qsCall .. "toggleWallpaperSelector"), { description = "Phantomshell: Toggle Live Wallpaper Selector" })
 hl.bind(mod .. " + C",      hl.dsp.exec_cmd(cli .. " launch code"),     { description = "App: Code Editor" })
 hl.bind(mod .. " + X",      hl.dsp.exec_cmd(cli .. " launch editor"),   { description = "App: Text Editor" })
 hl.bind("CTRL + " .. mod .. " + SHIFT + ALT + W", hl.dsp.exec_cmd(cli .. " launch office"), { description = "App: Office Suite" })
