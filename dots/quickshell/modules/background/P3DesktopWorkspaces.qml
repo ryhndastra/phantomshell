@@ -310,14 +310,21 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
                                 onEntered: PhantomState.playSfx("select")
                                 onClicked: mouse => {
                                     PhantomState.playSfx("select")
                                     if (mouse.button === Qt.LeftButton) {
                                         PhantomState.activateTrayItem(trayAppItem.modelData)
                                     } else if (mouse.button === Qt.RightButton) {
-                                        PhantomState.toggleTrayPopup()
+                                        if (trayAppItem.modelData.hasMenu && root.Window.window) {
+                                            const pos = trayAppItem.mapToItem(null, 0, trayAppItem.height + 6)
+                                            trayAppItem.modelData.display(root.Window.window, Math.max(8, pos.x), pos.y)
+                                        } else {
+                                            trayAppItem.modelData.secondaryActivate()
+                                        }
+                                    } else if (mouse.button === Qt.MiddleButton) {
+                                        trayAppItem.modelData.secondaryActivate()
                                     }
                                 }
                                 onWheel: wheel => {

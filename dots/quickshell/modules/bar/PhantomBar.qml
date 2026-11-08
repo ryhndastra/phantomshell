@@ -686,7 +686,4 @@ Scope {
 
     // jendela popup media player mpris
     PhantomMediaPopup {}
-
-    // jendela popup daftar aplikasi system tray jika lebih dari 2 aplikasi
-    PhantomTrayPopup {}
 }

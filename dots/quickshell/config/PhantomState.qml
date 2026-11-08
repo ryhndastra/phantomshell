@@ -293,9 +293,7 @@ Singleton {
     }
 
     function toggleTrayPopup() {
-        const next = !trayPopupOpen
-        if (next) closeAllModals()
-        trayPopupOpen = next
+        // popup lama dinonaktifkan
     }
 
     function toggleDesktopTray() {
