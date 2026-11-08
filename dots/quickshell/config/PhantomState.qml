@@ -574,14 +574,66 @@ Singleton {
     property string p3VideoPath: ""
     property string wallpaperPath: "train_shader"
 
+    // state transisi wallpaper (ambush / katana slash kristal air di P3 Reload)
+    property int wallpaperTransitionTick: 0
+    property string pendingWpSceneKey: ""
+    property string pendingWpVideoPath: ""
+    property string pendingWpCustomPath: ""
+    property string pendingWpLabel: ""
+
+    Timer {
+        id: wpCommitFallbackTimer
+        interval: 500
+        repeat: false
+        running: false
+        onTriggered: {
+            commitPendingWallpaper()
+        }
+    }
+
+    function commitPendingWallpaper() {
+        wpCommitFallbackTimer.stop()
+        if (pendingWpSceneKey !== "") {
+            p3LiveScene = pendingWpSceneKey
+            p3VideoPath = pendingWpVideoPath
+            previousWallpaperPath = wallpaperPath
+            wallpaperPath = pendingWpSceneKey
+            pendingWpSceneKey = ""
+            pendingWpVideoPath = ""
+            saveState()
+        } else if (pendingWpCustomPath !== "") {
+            const isVid = pendingWpCustomPath.endsWith(".mp4") || pendingWpCustomPath.endsWith(".webm") || pendingWpCustomPath.endsWith(".mkv") || pendingWpCustomPath.endsWith(".mov")
+            p3LiveScene = isVid ? "video_custom" : "image_custom"
+            if (isVid) {
+                p3VideoPath = pendingWpCustomPath
+            }
+            previousWallpaperPath = wallpaperPath
+            wallpaperPath = pendingWpCustomPath
+            Quickshell.execDetached(["sh", "-c", "swww img '" + pendingWpCustomPath + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
+            pendingWpCustomPath = ""
+            saveState()
+        }
+    }
+
     function setLiveScene(sceneKey, videoPath, label) {
         if (!sceneKey) return
         wallpaperSelectorOpen = false
-        p3LiveScene = sceneKey
-        if (videoPath !== undefined) p3VideoPath = videoPath
-        wallpaperPath = sceneKey
-        saveState()
-        playSfx("select")
+        if (root.isP3) {
+            pendingWpSceneKey = sceneKey
+            pendingWpVideoPath = (videoPath !== undefined ? videoPath : "")
+            pendingWpCustomPath = ""
+            pendingWpLabel = label || sceneKey
+            wallpaperTransitionTick++
+            wpCommitFallbackTimer.restart()
+            playSfx("into_game")
+        } else {
+            p3LiveScene = sceneKey
+            if (videoPath !== undefined) p3VideoPath = videoPath
+            previousWallpaperPath = wallpaperPath
+            wallpaperPath = sceneKey
+            saveState()
+            playSfx("select")
+        }
     }
 
     function setWallpaper(newPath) {
@@ -621,12 +673,22 @@ Singleton {
             return
         }
         // Gambar kustom dari Pictures/Wallpapers
-        p3LiveScene = "image_custom"
-        previousWallpaperPath = wallpaperPath
-        wallpaperPath = newPath
-        Quickshell.execDetached(["sh", "-c", "swww img '" + newPath + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
-        saveState()
-        playSfx("select")
+        if (root.isP3) {
+            pendingWpSceneKey = ""
+            pendingWpVideoPath = ""
+            pendingWpCustomPath = newPath
+            pendingWpLabel = newPath.split("/").pop()
+            wallpaperTransitionTick++
+            wpCommitFallbackTimer.restart()
+            playSfx("into_game")
+        } else {
+            p3LiveScene = "image_custom"
+            previousWallpaperPath = wallpaperPath
+            wallpaperPath = newPath
+            Quickshell.execDetached(["sh", "-c", "swww img '" + newPath + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
+            saveState()
+            playSfx("select")
+        }
     }
 
     function cycleWallpaper() {

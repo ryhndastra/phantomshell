@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -190,6 +191,120 @@ Scope {
                 }
             }
 
+            // ==========================================
+            // P3 RELOAD AMBUSH / KATANA SLASH & WATER CRYSTAL SHATTER
+            // ==========================================
+            property bool p3AmbushActive: false
+            property real p3SlashTrail: 0.0
+            property real p3ShardProg: 0.0
+            property real p3FlashAlpha: 0.0
+            property real p3RippleScale: 0.0
+            property real p3AmbushProg: 0.0
+
+            SequentialAnimation {
+                id: p3AmbushAnim
+
+                // 1. Blade Slash: Tebasan katana melintang super cepat membelah layar (~110ms)
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3SlashTrail"
+                        from: 0.0
+                        to: 1.0
+                        duration: 110
+                        easing.type: Easing.InCubic
+                    }
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3AmbushProg"
+                        from: 0.0
+                        to: 0.25
+                        duration: 110
+                        easing.type: Easing.InCubic
+                    }
+                }
+
+                // 2. Impact Point: Kilatan benturan, riak kejut, dan ganti wallpaper di balik belahan tebasan!
+                ScriptAction {
+                    script: {
+                        frameWin.p3FlashAlpha = 0.65
+                        PhantomState.commitPendingWallpaper()
+                    }
+                }
+
+                // 3. Ledakan Serpihan Kristal Kaca Biru, Buih Air, dan Riak Kejut (~380ms)
+                ParallelAnimation {
+                    // Flash cahaya putih-cyan memudar
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3FlashAlpha"
+                        from: 0.65
+                        to: 0.0
+                        duration: 180
+                        easing.type: Easing.OutQuad
+                    }
+                    // Serpihan kristal air berhamburan meledak ke segala arah
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3ShardProg"
+                        from: 0.0
+                        to: 1.0
+                        duration: 380
+                        easing.type: Easing.OutCubic
+                    }
+                    // Riak air meluas menyapu layar
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3RippleScale"
+                        from: 0.0
+                        to: 1.0
+                        duration: 360
+                        easing.type: Easing.OutQuad
+                    }
+                    // Trail tebasan melesat keluar
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3SlashTrail"
+                        from: 1.0
+                        to: 1.35
+                        duration: 340
+                        easing.type: Easing.OutQuad
+                    }
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3AmbushProg"
+                        from: 0.25
+                        to: 1.0
+                        duration: 380
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                // 4. Selesai
+                ScriptAction {
+                    script: {
+                        frameWin.p3AmbushActive = false
+                        frameWin.p3SlashTrail = 0.0
+                        frameWin.p3ShardProg = 0.0
+                        frameWin.p3FlashAlpha = 0.0
+                        frameWin.p3RippleScale = 0.0
+                        frameWin.p3AmbushProg = 0.0
+                    }
+                }
+            }
+
+            function triggerP3AmbushSlash() {
+                p3AmbushAnim.stop()
+                frameWin.p3SlashTrail = 0.0
+                frameWin.p3ShardProg = 0.0
+                frameWin.p3FlashAlpha = 0.0
+                frameWin.p3RippleScale = 0.0
+                frameWin.p3AmbushProg = 0.0
+                frameWin.p3AmbushActive = true
+                PhantomState.playSfx("into_game")
+                p3AmbushAnim.restart()
+            }
+
             Connections {
                 target: PhantomState
                 function onPrimaryChanged() { frameCanvas.requestPaint() }
@@ -209,6 +324,11 @@ Scope {
                 }
                 function onVelvetTransitionTickChanged() {
                     velvetTransitionAnim.restart()
+                }
+                function onWallpaperTransitionTickChanged() {
+                    if (PhantomState.isP3) {
+                        frameWin.triggerP3AmbushSlash()
+                    }
                 }
             }
 
@@ -890,6 +1010,292 @@ Scope {
                             asynchronous: false
                             cache: true
                             source: Qt.resolvedUrl("../../assets/themes/p3/menu/png/pngseq" + (index < 10 ? "0" + index : "" + index) + ".png")
+                        }
+                    }
+                }
+            }
+
+            // ==========================================
+            // OVERLAY AMBUSH KATANA SLASH & KRISTAL AIR PERSONA 3 RELOAD
+            // ==========================================
+            Item {
+                id: p3AmbushOverlay
+                anchors.fill: parent
+                visible: frameWin.p3AmbushActive
+                z: 110
+
+                // 1. Kilatan Cahaya Cyan-Putih Saat Benturan
+                Rectangle {
+                    anchors.fill: parent
+                    color: "#FFFFFF"
+                    opacity: frameWin.p3FlashAlpha * 0.4
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    color: "#00F0FF"
+                    opacity: frameWin.p3FlashAlpha * 0.3
+                }
+
+                // 2. Riak Gelombang Kejut Air Melingkar (Radial Ripple Shockwave)
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: parent.width * 1.6 * frameWin.p3RippleScale
+                    height: parent.height * 1.3 * frameWin.p3RippleScale
+                    radius: width / 2
+                    color: "transparent"
+                    border.color: "#00F0FF"
+                    border.width: Math.max(1.0, 4.0 * (1.0 - frameWin.p3RippleScale))
+                    opacity: Math.max(0.0, (1.0 - frameWin.p3RippleScale) * 0.85)
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 14
+                        radius: width / 2
+                        color: "transparent"
+                        border.color: "#FFFFFF"
+                        border.width: Math.max(1.0, 2.0 * (1.0 - frameWin.p3RippleScale))
+                        opacity: 0.6
+                    }
+                }
+
+                // 3. Garis Busur Tebasan Katana (Slash Arc)
+                Canvas {
+                    id: slashCanvas
+                    anchors.fill: parent
+                    antialiasing: true
+
+                    Connections {
+                        target: frameWin
+                        function onP3SlashTrailChanged() { slashCanvas.requestPaint() }
+                    }
+
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
+                        ctx.clearRect(0, 0, width, height)
+
+                        var trail = frameWin.p3SlashTrail
+                        if (trail <= 0.001 || trail >= 1.29) return
+
+                        var x0 = -60
+                        var y0 = height * 0.18
+                        var cx = width * 0.46
+                        var cy = height * 0.48
+                        var x1 = width + 80
+                        var y1 = height * 0.86
+
+                        var t = Math.min(1.0, trail)
+                        var tStart = Math.max(0.0, trail - 0.75)
+
+                        ctx.lineCap = "round"
+                        ctx.lineJoin = "round"
+
+                        // Outer Cyan Glow
+                        ctx.strokeStyle = "rgba(0, 240, 255, " + (Math.max(0.0, 1.0 - (trail - 1.0) * 3.3) * 0.7).toFixed(2) + ")"
+                        ctx.lineWidth = 26 * (1.0 - tStart * 0.6)
+                        ctx.beginPath()
+                        for (var s1 = tStart; s1 <= t; s1 += 0.04) {
+                            var px = (1 - s1) * (1 - s1) * x0 + 2 * (1 - s1) * s1 * cx + s1 * s1 * x1
+                            var py = (1 - s1) * (1 - s1) * y0 + 2 * (1 - s1) * s1 * cy + s1 * s1 * y1
+                            if (s1 === tStart) ctx.moveTo(px, py)
+                            else ctx.lineTo(px, py)
+                        }
+                        ctx.stroke()
+
+                        // Mid Cyan Blue Blade
+                        ctx.strokeStyle = "rgba(0, 180, 216, " + (Math.max(0.0, 1.0 - (trail - 1.0) * 3.3) * 0.9).toFixed(2) + ")"
+                        ctx.lineWidth = 14 * (1.0 - tStart * 0.6)
+                        ctx.beginPath()
+                        for (var s2 = tStart; s2 <= t; s2 += 0.04) {
+                            var px2 = (1 - s2) * (1 - s2) * x0 + 2 * (1 - s2) * s2 * cx + s2 * s2 * x1
+                            var py2 = (1 - s2) * (1 - s2) * y0 + 2 * (1 - s2) * s2 * cy + s2 * s2 * y1
+                            if (s2 === tStart) ctx.moveTo(px2, py2)
+                            else ctx.lineTo(px2, py2)
+                        }
+                        ctx.stroke()
+
+                        // Core White Katana Edge
+                        ctx.strokeStyle = "rgba(255, 255, 255, " + (Math.max(0.0, 1.0 - (trail - 1.0) * 3.3)).toFixed(2) + ")"
+                        ctx.lineWidth = 6 * (1.0 - tStart * 0.5)
+                        ctx.beginPath()
+                        for (var s3 = tStart; s3 <= t; s3 += 0.04) {
+                            var px3 = (1 - s3) * (1 - s3) * x0 + 2 * (1 - s3) * s3 * cx + s3 * s3 * x1
+                            var py3 = (1 - s3) * (1 - s3) * y0 + 2 * (1 - s3) * s3 * cy + s3 * s3 * y1
+                            if (s3 === tStart) ctx.moveTo(px3, py3)
+                            else ctx.lineTo(px3, py3)
+                        }
+                        ctx.stroke()
+                    }
+                }
+
+                // 4. Serpihan Kristal Kaca & Es Biru Laut (36 Crystalline Shards dengan Bentuk Kristal Variatif)
+                Repeater {
+                    model: 36
+                    delegate: Item {
+                        required property int index
+
+                        readonly property real ratio: index / 36.0
+                        readonly property real originX: ratio * parent.width
+                        readonly property real originY: (parent.height * 0.18) + ratio * (parent.height * 0.68)
+
+                        // Arah ledakan berlawanan tegak lurus dari garis tebasan (+ variance)
+                        readonly property real angleBase: (index % 2 === 0 ? -1.15 : 0.95) * (Math.PI / 2)
+                        readonly property real angleSpread: (((index * 67) % 64) - 32) * (Math.PI / 180)
+                        readonly property real angle: angleBase + angleSpread
+
+                        // Kecepatan dan jarak terbang partikel
+                        readonly property real speed: 200 + ((index * 89) % 520)
+                        readonly property real distance: speed * frameWin.p3ShardProg
+                        readonly property real gravity: frameWin.p3ShardProg * frameWin.p3ShardProg * 110
+
+                        x: originX + Math.cos(angle) * distance
+                        y: originY + Math.sin(angle) * distance + gravity
+                        rotation: (index * 42) + (frameWin.p3ShardProg * ((index % 2 === 0 ? 1 : -1) * (180 + (index % 5) * 50)))
+                        scale: Math.max(0.15, (1.0 - frameWin.p3ShardProg * 0.4) * (0.8 + ((index % 4) * 0.3)))
+                        opacity: Math.max(0.0, 1.0 - Math.pow(frameWin.p3ShardProg, 1.5))
+
+                        // Bentuk Kristal: Needle sliver (0), Diamond facet (1), Sharp wedge (2), Crystal chip (3)
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: (index % 4 === 0) ? (5 + (index % 5)) : ((index % 4 === 1) ? (16 + (index % 10)) : ((index % 4 === 2) ? (12 + (index % 8)) : (8 + (index % 6))))
+                            height: (index % 4 === 0) ? (36 + (index % 24)) : ((index % 4 === 1) ? (16 + (index % 10)) : ((index % 4 === 2) ? (24 + (index % 14)) : (14 + (index % 8))))
+                            radius: (index % 4 === 3) ? 2 : 0
+                            rotation: (index % 4 === 1) ? 45 : ((index % 4 === 2) ? -28 : 0)
+                            color: (index % 3 === 0) ? "#E6011A42" : ((index % 3 === 1) ? "#D9003A75" : "#CC0077B6")
+                            border.color: (index % 2 === 0) ? "#00F0FF" : "#FFFFFF"
+                            border.width: 1.4
+
+                            // Facet spekular kristal es
+                            Rectangle {
+                                width: Math.max(2, parent.width * 0.45)
+                                height: Math.max(2, parent.height * 0.45)
+                                x: 1
+                                y: 1
+                                color: "#FFFFFF"
+                                opacity: 0.8
+                            }
+                        }
+                    }
+                }
+
+                // 5. Gelembung & Cipratan Air (24 Specular Bubbles)
+                Repeater {
+                    model: 24
+                    delegate: Item {
+                        required property int index
+
+                        readonly property real ratio: index / 24.0
+                        readonly property real originX: ratio * parent.width
+                        readonly property real originY: (parent.height * 0.2) + ratio * (parent.height * 0.65)
+
+                        readonly property real angle: (((index * 137.5) % 360) * Math.PI) / 180.0
+                        readonly property real speed: 120 + ((index * 59) % 360)
+                        readonly property real distance: speed * frameWin.p3ShardProg
+
+                        x: originX + Math.cos(angle) * distance
+                        y: originY + Math.sin(angle) * distance - (frameWin.p3ShardProg * 40)
+                        opacity: Math.max(0.0, (1.0 - frameWin.p3ShardProg) * 0.9)
+
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: 6 + ((index * 9) % 18)
+                            height: width
+                            radius: width / 2
+                            color: "#3300F0FF"
+                            border.color: "#E6FFFFFF"
+                            border.width: 1.2
+
+                            Rectangle {
+                                width: Math.max(2, parent.width * 0.28)
+                                height: width
+                                x: parent.width * 0.22
+                                y: parent.height * 0.22
+                                radius: width / 2
+                                color: "#FFFFFF"
+                                opacity: 0.95
+                            }
+                        }
+                    }
+                }
+
+                // 6. Slanted Ribbon Banner Otentik P3R (CHANCE // LIVE AMBIENT ENGAGED)
+                Item {
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width * 0.68, 680)
+                    height: 52
+                    rotation: 18.5
+                    opacity: Math.max(0.0, Math.sin(Math.min(1.0, frameWin.p3AmbushProg) * Math.PI) * 1.0)
+                    scale: 0.94 + frameWin.p3AmbushProg * 0.08
+                    visible: opacity > 0.01
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: "#FA030814"
+                        border.color: "#00F0FF"
+                        border.width: 1.5
+
+                        Rectangle {
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: 2
+                            color: "#00F0FF"
+                        }
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: 2
+                            color: "#00F0FF"
+                        }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 20
+                            anchors.rightMargin: 20
+                            spacing: 14
+
+                            Rectangle {
+                                Layout.preferredWidth: 84
+                                Layout.preferredHeight: 30
+                                radius: 3
+                                color: "#00F0FF"
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "CHANCE"
+                                    color: "#040A1A"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                }
+                            }
+
+                            Column {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: 2
+
+                                Text {
+                                    text: "LIVE AMBIENT SHIFT // " + (PhantomState.pendingWpLabel !== "" ? PhantomState.pendingWpLabel.toUpperCase() : "S.E.E.S. TACTICAL")
+                                    color: "#FFFFFF"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Black
+                                    font.italic: true
+                                    elide: Text.ElideRight
+                                }
+
+                                Text {
+                                    text: "TACTICAL METAVERSE SYNCHRONIZATION"
+                                    color: "#00B4D8"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 9
+                                    font.weight: Font.Bold
+                                    font.italic: true
+                                }
+                            }
                         }
                     }
                 }
