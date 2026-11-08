@@ -123,6 +123,10 @@ ShellRoot {
             PhantomState.toggleWallpaperSelector()
         }
 
+        function setWallpaperSelectorTab(tab: int): void {
+            PhantomState.wallpaperSelectorTab = tab
+        }
+
         function openWallpaperSelector(): void {
             if (!PhantomState.wallpaperSelectorOpen) PhantomState.toggleWallpaperSelector()
         }

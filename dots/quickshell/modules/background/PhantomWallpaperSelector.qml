@@ -9,7 +9,7 @@ import qs.config
 Scope {
     id: wpScope
 
-    property int activeTab: 0 // 0: Live Ambients, 1: Custom Storage
+    property int activeTab: PhantomState.wallpaperSelectorTab
     property string searchQuery: ""
     property var localFiles: []
 
@@ -60,7 +60,7 @@ Scope {
         id: localScanProc
         command: [
             "bash", "-c",
-            "find $HOME/Pictures/Wallpapers $HOME/Pictures -maxdepth 2 -type f \\( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \\) 2>/dev/null | grep -vE 'pshell-wallpaper|thumbnails|menu/png|Depth masks|shaders' | awk '!seen[$0]++' | head -n 120"
+            "find $HOME/Pictures/Wallpapers -maxdepth 2 -type f \\( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \\) 2>/dev/null | grep -vE 'pshell-wallpaper|thumbnails|menu/png|Depth masks|shaders' | awk '!seen[$0]++' | head -n 120"
         ]
         stdout: SplitParser {
             splitMarker: ""
@@ -229,7 +229,7 @@ Scope {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        wpScope.activeTab = 0
+                                        PhantomState.wallpaperSelectorTab = 0
                                         PhantomState.playSfx("select")
                                     }
                                 }
@@ -246,7 +246,7 @@ Scope {
                                 Text {
                                     id: tab1Txt
                                     anchors.centerIn: parent
-                                    text: "CUSTOM STORAGE"
+                                    text: "WALLPAPERS"
                                     color: wpScope.activeTab === 1 ? "#040A1A" : "#F8FBFF"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 10
@@ -259,7 +259,7 @@ Scope {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        wpScope.activeTab = 1
+                                        PhantomState.wallpaperSelectorTab = 1
                                         wpScope.scanLocalWallpapers()
                                         PhantomState.playSfx("select")
                                     }
@@ -294,7 +294,7 @@ Scope {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "Cari berkas..."
+                                    text: "Search wallpapers..."
                                     color: "#546882"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 10
@@ -451,62 +451,63 @@ Scope {
                                     radius: 6
                                     color: "#030712"
                                     border.color: localCardDelegate.isEquipped ? "#05FFA1" : (localCardDelegate.isHov ? "#00F0FF" : "#1A2C4C")
-                                    border.width: localCardDelegate.isEquipped ? 2 : 1
+                                    border.width: localCardDelegate.isEquipped ? 2.5 : (localCardDelegate.isHov ? 1.5 : 1)
                                     clip: true
 
-                                    ColumnLayout {
+                                    Image {
                                         anchors.fill: parent
-                                        anchors.margins: 4
-                                        spacing: 4
+                                        source: "file://" + modelData.path
+                                        sourceSize.width: 320
+                                        sourceSize.height: 180
+                                        fillMode: Image.PreserveAspectCrop
+                                        asynchronous: true
+                                        cache: true
+                                        smooth: true
+                                        scale: localCardDelegate.isHov ? 1.03 : 1.0
+                                        Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                    }
 
-                                        Rectangle {
-                                            Layout.fillWidth: true
-                                            Layout.fillHeight: true
-                                            radius: 4
-                                            color: "#030712"
-                                            clip: true
-
-                                            Image {
-                                                anchors.fill: parent
-                                                source: "file://" + modelData.path
-                                                sourceSize.width: 320
-                                                sourceSize.height: 180
-                                                fillMode: Image.PreserveAspectCrop
-                                                asynchronous: true
-                                                cache: true
-                                                smooth: true
-                                            }
-
-                                            Rectangle {
-                                                visible: localCardDelegate.isEquipped
-                                                anchors.top: parent.top
-                                                anchors.right: parent.right
-                                                anchors.margins: 6
-                                                height: 18
-                                                width: 58
-                                                radius: 3
-                                                color: "#05FFA1"
-
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    text: "ACTIVE"
-                                                    color: "#040A1A"
-                                                    font.family: "JetBrainsMono NFM"
-                                                    font.pixelSize: 8
-                                                    font.weight: Font.Black
-                                                }
-                                            }
-                                        }
+                                    // Indikator Format Video
+                                    Rectangle {
+                                        visible: modelData.isVideo
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
+                                        anchors.margins: 8
+                                        height: 18
+                                        width: 48
+                                        radius: 3
+                                        color: "#B2001D4A"
+                                        border.color: "#00F0FF"
+                                        border.width: 1
 
                                         Text {
-                                            Layout.fillWidth: true
-                                            horizontalAlignment: Text.AlignHCenter
-                                            text: modelData.name
-                                            color: localCardDelegate.isEquipped ? "#05FFA1" : "#8DA4C4"
+                                            anchors.centerIn: parent
+                                            text: "VIDEO"
+                                            color: "#00F0FF"
+                                            font.family: "JetBrainsMono NFM"
+                                            font.pixelSize: 8
+                                            font.weight: Font.Black
+                                        }
+                                    }
+
+                                    // Lencana ACTIVE Minimalis di Sudut Kanan Atas
+                                    Rectangle {
+                                        visible: localCardDelegate.isEquipped
+                                        anchors.top: parent.top
+                                        anchors.right: parent.right
+                                        anchors.margins: 8
+                                        height: 20
+                                        width: 58
+                                        radius: 3
+                                        color: "#05FFA1"
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "ACTIVE"
+                                            color: "#040A1A"
                                             font.family: "JetBrainsMono NFM"
                                             font.pixelSize: 9
-                                            font.weight: Font.Bold
-                                            elide: Text.ElideMiddle
+                                            font.weight: Font.Black
                                         }
                                     }
 
@@ -545,7 +546,7 @@ Scope {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "FASE WAKTU:"
+                                    text: "TIME PHASE:"
                                     color: "#8DA4C4"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 9
@@ -555,10 +556,10 @@ Scope {
                                 Repeater {
                                     model: [
                                         { id: "auto", label: "AUTO" },
-                                        { id: "morning", label: "PAGI" },
-                                        { id: "afterschool", label: "SIANG" },
-                                        { id: "evening", label: "SENJA" },
-                                        { id: "night", label: "MALAM" },
+                                        { id: "morning", label: "MORNING" },
+                                        { id: "afterschool", label: "AFTER SCHOOL" },
+                                        { id: "evening", label: "EVENING" },
+                                        { id: "night", label: "NIGHT" },
                                         { id: "darkhour", label: "DARK HOUR" }
                                     ]
 
@@ -610,7 +611,7 @@ Scope {
 
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: "HEMAT GPU:"
+                                    text: "GPU OPTIMIZATION:"
                                     color: "#8DA4C4"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 9
@@ -628,7 +629,7 @@ Scope {
                                     Text {
                                         id: pauseText
                                         anchors.centerIn: parent
-                                        text: PhantomState.p3WallpaperAutoPause ? "JEDA AKTIF" : "SELALU JALAN"
+                                        text: PhantomState.p3WallpaperAutoPause ? "AUTO-PAUSE" : "ALWAYS ACTIVE"
                                         color: PhantomState.p3WallpaperAutoPause ? "#05FFA1" : "#8DA4C4"
                                         font.family: "JetBrainsMono NFM"
                                         font.pixelSize: 9

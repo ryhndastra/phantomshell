@@ -70,6 +70,7 @@ Singleton {
     }
     property bool lockOpen: false
     property bool wallpaperSelectorOpen: false
+    property int wallpaperSelectorTab: 0
     property bool mediaPopupOpen: false
     property bool trayPopupOpen: false
     property bool cheatsheetOpen: false
@@ -88,6 +89,7 @@ Singleton {
     property string transitionTitle: "METAVERSE SHIFT"
     property string transitionSub: "PALETTE SYNCHRONIZED"
     property string previousWallpaperPath: ""
+    property string previousThemeId: "p3-reload"
 
     function setSpecialWorkspaceActive(active) {
         if (root.specialWorkspaceActive === active) return
@@ -562,9 +564,6 @@ Singleton {
         p3LiveScene = sceneKey
         if (videoPath !== undefined) p3VideoPath = videoPath
         wallpaperPath = sceneKey
-        transitionTitle = "LIVE AMBIENT SHIFT"
-        transitionSub = label ? label.toUpperCase() : sceneKey.toUpperCase()
-        transitionTick++
         saveState()
         playSfx("select")
     }
@@ -609,9 +608,6 @@ Singleton {
         p3LiveScene = "image_custom"
         previousWallpaperPath = wallpaperPath
         wallpaperPath = newPath
-        transitionTitle = "WALLPAPER SHIFT"
-        transitionSub = newPath.split("/").pop().toUpperCase()
-        transitionTick++
         Quickshell.execDetached(["sh", "-c", "swww img '" + newPath + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
         saveState()
         playSfx("select")
@@ -795,6 +791,7 @@ Singleton {
     function applyPreset(presetId, skipSave) {
         if (presets[presetId]) {
             const p = presets[presetId]
+            previousThemeId = themeId
             themeId = p.id
             themeName = p.name
             primary = p.primary
