@@ -3,37 +3,95 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
-import Quickshell.Widgets
 import qs.config
 import qs.components
 
 // =============================================================================
-// PERSONA 3 RELOAD: TATSUMI PORT ISLAND TOWN MAP & AREA SELECT
-// Ikhtisar Workspace (Super + Tab) bertema P3R Town Map & Velvet Room Elevator
+// PERSONA 3 RELOAD: AUTHENTIC TATSUMI PORT ISLAND TOWN MAP OVERVIEW
+// Tampilan ikhtisar workspace 100% presisi visual P3R Town Map (Sesuai Foto 1)
 // =============================================================================
 Scope {
     id: root
 
     readonly property int activeWsId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
+    property int selectedDistrictIdx: 0
 
-    readonly property var districtNames: [
-        { num: 1, name: "GEKKOUKAN HIGH",  sub: "Classrooms & Rooftop" },
-        { num: 2, name: "IWATODAI STRIP",  sub: "Dormitory & Station" },
-        { num: 3, name: "PAULOWNIA MALL",  sub: "Arcade & Police Dept" },
-        { num: 4, name: "PORT ISLAND STN", sub: "Outskirts & Square" },
-        { num: 5, name: "NAGANAKI SHRINE", sub: "Shrine Grounds" },
-        { num: 6, name: "TARTARUS GATE",   sub: "Monorail & Bridge" },
-        { num: 7, name: "SHIRAKAWA BLVD",  sub: "Commercial Outskirts" },
-        { num: 8, name: "CLUB ESCAPADE",   sub: "Underground Lounge" },
-        { num: 9, name: "TATSUMI HOSPITAL",sub: "Memorial Ward" },
-        { num: 10, name: "COASTAL PIER",   sub: "Ocean Outskirts" }
+    // Data 6 Sektor Distrik Utama Tatsumi Port Island & Koordinat pada Peta 3D (Foto 1)
+    readonly property var districts: [
+        {
+            num: 1,
+            name: "Gekkoukan High School",
+            code: "GEKKOUKAN HIGH",
+            sub: "Classrooms & Rooftop",
+            // Kanan Tengah (Gedung Sekolah & Lapangan)
+            mapX: 0.68,
+            mapY: 0.50,
+            cardSide: "left"
+        },
+        {
+            num: 2,
+            name: "Iwatodai Station Strip Mall",
+            code: "IWATODAI STRIP",
+            sub: "Dormitory & Station",
+            // Kiri Atas (Stasiun & Asrama Mahasiswa)
+            mapX: 0.36,
+            mapY: 0.28,
+            cardSide: "right"
+        },
+        {
+            num: 3,
+            name: "Paulownia Mall",
+            code: "PAULOWNIA MALL",
+            sub: "Arcade & Police Dept",
+            // Kanan Atas Tengah (Plaza & Bianglala)
+            mapX: 0.63,
+            mapY: 0.32,
+            cardSide: "left"
+        },
+        {
+            num: 4,
+            name: "Port Island Station",
+            code: "PORT ISLAND STN",
+            sub: "Outskirts & Square",
+            // Bawah Tengah (Terminal Kereta)
+            mapX: 0.52,
+            mapY: 0.62,
+            cardSide: "right"
+        },
+        {
+            num: 5,
+            name: "Naganaki Shrine",
+            code: "NAGANAKI SHRINE",
+            sub: "Shrine Grounds",
+            // Atas Tengah (Gerbang Torii & Hutan)
+            mapX: 0.48,
+            mapY: 0.21,
+            cardSide: "bottom"
+        },
+        {
+            num: 6,
+            name: "Tartarus Gate & Bridge",
+            code: "TARTARUS GATE",
+            sub: "Monorail & Moonlight Bridge",
+            // Kiri Atas Pesisir (Jembatan Monorel)
+            mapX: 0.22,
+            mapY: 0.25,
+            cardSide: "right"
+        }
     ]
 
-    function getDistrict(id) {
-        for (var i = 0; i < districtNames.length; i++) {
-            if (districtNames[i].num === id) return districtNames[i]
-        }
-        return { num: id, name: "SECTOR " + (id < 10 ? "0" + id : id), sub: "Tatsumi Ward" }
+    function getDistrictApps(num) {
+        if (!PhantomState.workspaceApps) return []
+        const key = String(num)
+        return PhantomState.workspaceApps[key] || []
+    }
+
+    function fastTravelTo(wsNum) {
+        Quickshell.execDetached([
+            "hyprctl", "eval",
+            "hl.dispatch(hl.dsp.focus({ workspace = " + wsNum + " }))"
+        ])
+        PhantomState.overviewOpen = false
     }
 
     PanelWindow {
@@ -42,6 +100,7 @@ Scope {
 
         WlrLayershell.namespace: "phantomshell-overview"
         WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.exclusionMode: ExclusionMode.Ignore
         WlrLayershell.keyboardFocus: PhantomState.overviewOpen
             ? (PhantomState.modalForceExclusive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand)
             : WlrKeyboardFocus.None
@@ -58,717 +117,786 @@ Scope {
         onVisibleChanged: {
             if (visible) {
                 PhantomState.refreshWorkspaces()
-                ovAnim.restart()
+                // Set seleksi awal ke workspace aktif saat ini
+                for (var i = 0; i < root.districts.length; i++) {
+                    if (root.districts[i].num === root.activeWsId) {
+                        root.selectedDistrictIdx = i
+                        break
+                    }
+                }
                 ovKeyCatcher.forceActiveFocus()
             }
         }
 
-        // Backdrop Dim Gelap Khas P3R
-        Rectangle {
-            anchors.fill: parent
-            color: "#CC030818"
-            MouseArea {
-                anchors.fill: parent
-                onClicked: PhantomState.overviewOpen = false
-            }
-        }
-
+        // Penanganan Tombol Keyboard Sesuai Navigasi Game P3R
         Item {
             id: ovKeyCatcher
             focus: true
+            anchors.fill: parent
+
             Keys.onEscapePressed: PhantomState.overviewOpen = false
-            Keys.onTabPressed: (event) => {
-                if (event.modifiers & Qt.ShiftModifier) {
-                    Hyprland.dispatch("hl.dsp.focus({ workspace = 'r-1' })")
-                } else {
-                    Hyprland.dispatch("hl.dsp.focus({ workspace = 'r+1' })")
+
+            // Navigasi Angka 1-6 Langsung Fast Travel
+            Keys.onPressed: (event) => {
+                if (event.key >= Qt.Key_1 && event.key <= Qt.Key_6) {
+                    var targetWs = event.key - Qt.Key_0
+                    root.fastTravelTo(targetWs)
+                    event.accepted = true
+                } else if (event.key === Qt.Key_Tab || event.key === Qt.Key_D || event.key === Qt.Key_Right) {
+                    root.selectedDistrictIdx = (root.selectedDistrictIdx + 1) % root.districts.length
+                    event.accepted = true
+                } else if (event.key === Qt.Key_A || event.key === Qt.Key_Left) {
+                    root.selectedDistrictIdx = (root.selectedDistrictIdx - 1 + root.districts.length) % root.districts.length
+                    event.accepted = true
+                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                    var d = root.districts[root.selectedDistrictIdx]
+                    if (d) root.fastTravelTo(d.num)
+                    event.accepted = true
+                } else if (event.key === Qt.Key_S) {
+                    PhantomState.overviewOpen = false
+                    PhantomState.toggleVelvetRoom()
+                    event.accepted = true
                 }
-                event.accepted = true
             }
         }
 
-        // Kontainer Utama Town Map Persona 3 Reload
+        // 1. Gambar Panorama Peta Tatsumi Port Island (Foto 1)
         Item {
-            id: ovCard
-            width: Math.min(parent.width - 60, 1060)
-            height: Math.min(parent.height - 70, 710)
-            anchors.centerIn: parent
+            anchors.fill: parent
 
-            readonly property var specialApps: (PhantomState.workspaceApps && PhantomState.workspaceApps["special"])
-                ? PhantomState.workspaceApps["special"]
-                : []
-
-            ParallelAnimation {
-                id: ovAnim
-                NumberAnimation { target: ovCard; property: "scale"; from: 0.92; to: 1.0; duration: 200; easing.type: Easing.OutBack; easing.overshoot: 1.15 }
-                NumberAnimation { target: ovCard; property: "opacity"; from: 0.0; to: 1.0; duration: 150; easing.type: Easing.OutCubic }
+            Image {
+                id: mapBgImage
+                anchors.fill: parent
+                source: "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/themes/p3/bg/p3r_town_map.png"
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
             }
 
-            // Kartu Latar Belakang 3D Slanted Khas P3R
+            // Lapisan Vignette Gelap di Tepian Peta untuk Kedalaman Sinematik
             Canvas {
-                id: bgCanvas
                 anchors.fill: parent
+                antialiasing: true
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    var w = width
+                    var h = height
+                    var grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.72)
+                    grad.addColorStop(0.0, "transparent")
+                    grad.addColorStop(1.0, "rgba(2, 6, 18, 0.75)")
+                    ctx.fillStyle = grad
+                    ctx.fillRect(0, 0, w, h)
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: "#18040b24"
+            }
+        }
+
+        // 2. HUD Kalender dan Fase Bulan Kanan Atas (Sesuai Foto 1)
+        Item {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 24
+            anchors.rightMargin: 32
+            width: 320
+            height: 90
+            z: 20
+
+            // Latar Pita Biru Miring Tanggal & Waktu P3R
+            Canvas {
+                anchors.fill: parent
+                antialiasing: true
                 onPaint: {
                     var ctx = getContext("2d")
                     ctx.reset()
                     var w = width
                     var h = height
 
-                    // Bayangan 3D Tebal
                     ctx.beginPath()
-                    ctx.moveTo(14, 10)
-                    ctx.lineTo(w, 10)
-                    ctx.lineTo(w, h + 10)
-                    ctx.lineTo(0, h + 10)
-                    ctx.closePath()
-                    ctx.fillStyle = "#01040d"
-                    ctx.fill()
-
-                    // Panel Utama Kaca Deep Ocean
-                    ctx.beginPath()
-                    ctx.moveTo(14, 0)
+                    ctx.moveTo(36, 0)
                     ctx.lineTo(w, 0)
                     ctx.lineTo(w, h)
                     ctx.lineTo(0, h)
                     ctx.closePath()
-                    ctx.fillStyle = "rgba(4, 13, 36, 0.96)"
+
+                    var grad = ctx.createLinearGradient(0, 0, w, h)
+                    grad.addColorStop(0.0, "#0028e0")
+                    grad.addColorStop(1.0, "#001460")
+                    ctx.fillStyle = grad
                     ctx.fill()
 
-                    // Border Luar Cyan Elektrik P3R
-                    ctx.lineWidth = 2.5
-                    ctx.strokeStyle = "#00dbff"
+                    ctx.strokeStyle = "#00f0ff"
+                    ctx.lineWidth = 1.8
                     ctx.stroke()
                 }
             }
 
-            MouseArea { anchors.fill: parent }
-
-            ColumnLayout {
+            RowLayout {
                 anchors.fill: parent
-                anchors.margins: 20
+                anchors.leftMargin: 46
+                anchors.rightMargin: 18
                 spacing: 14
 
-                // ── HEADER: TATSUMI PORT ISLAND // AREA SELECT ──
-                RowLayout {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 12
+                    spacing: 0
 
-                    // Badge Ikon Slanted P3R
-                    Item {
-                        Layout.preferredWidth: 42
-                        Layout.preferredHeight: 38
+                    RowLayout {
+                        spacing: 8
+                        Text {
+                            text: {
+                                const now = new Date()
+                                const m = (now.getMonth() + 1)
+                                const d = now.getDate()
+                                const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                                return (m < 10 ? "0" + m : m) + "/" + (d < 10 ? "0" + d : d) + " " + days[now.getDay()]
+                            }
+                            color: "#ffffff"
+                            font.family: "Rubik"
+                            font.pixelSize: 22
+                            font.weight: Font.Black
+                        }
+                    }
 
+                    Text {
+                        text: {
+                            const hr = new Date().getHours()
+                            if (hr >= 0 && hr < 1) return "Dark Hour"
+                            if (hr >= 1 && hr < 6) return "Late Night"
+                            if (hr >= 6 && hr < 12) return "Morning"
+                            if (hr >= 12 && hr < 16) return "After School"
+                            if (hr >= 16 && hr < 19) return "Evening"
+                            return "Night"
+                        }
+                        color: "#00f0ff"
+                        font.family: "Rubik"
+                        font.pixelSize: 13
+                        font.weight: Font.Black
+                        font.italic: true
+                    }
+                }
+
+                // Fase Bulan (Moon Phase Indicator P3R)
+                ColumnLayout {
+                    spacing: 2
+                    Text {
+                        text: "LIMIT"
+                        color: "#ffffff"
+                        font.family: "JetBrainsMono NFM"
+                        font.pixelSize: 8
+                        font.bold: true
+                    }
+                    RowLayout {
+                        spacing: 4
+                        Text {
+                            text: "13"
+                            color: "#ffffff"
+                            font.family: "Rubik"
+                            font.pixelSize: 18
+                            font.weight: Font.Black
+                        }
+                        // Lingkaran Bulan Kuning Sabit
                         Canvas {
-                            anchors.fill: parent
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            antialiasing: true
                             onPaint: {
                                 var ctx = getContext("2d")
                                 ctx.reset()
                                 ctx.beginPath()
-                                ctx.moveTo(10, 0)
-                                ctx.lineTo(width, 0)
-                                ctx.lineTo(width - 10, height)
-                                ctx.lineTo(0, height)
-                                ctx.closePath()
-                                ctx.fillStyle = "#00d0ff"
+                                ctx.arc(11, 11, 10, 0, Math.PI * 2)
+                                ctx.fillStyle = "#020818"
+                                ctx.fill()
+                                ctx.strokeStyle = "#ffd700"
+                                ctx.lineWidth = 1.5
+                                ctx.stroke()
+
+                                // Sabit Kuning
+                                ctx.beginPath()
+                                ctx.arc(11, 11, 9, -Math.PI / 2, Math.PI / 2, false)
+                                ctx.fillStyle = "#ffd700"
                                 ctx.fill()
                             }
                         }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "🗺"
-                            font.pixelSize: 18
-                        }
                     }
+                }
+            }
+        }
 
-                    ColumnLayout {
-                        spacing: 2
-                        RowLayout {
-                            spacing: 8
-                            Text {
-                                text: "TATSUMI PORT ISLAND"
-                                color: "#8df6ff"
-                                font.family: "Rubik"
-                                font.pixelSize: 20
-                                font.weight: Font.Black
-                                font.italic: true
-                            }
-                            Text {
-                                text: "// AREA SELECT & DISPATCH"
-                                color: "#ffffff"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 14
-                                font.bold: true
-                            }
-                        }
-                        Text {
-                            text: "L-CLICK: FAST TRAVEL • R-CLICK: SEND ACTIVE WIN • R-CLICK APP: TO VELVET ROOM • M-CLICK: CLOSE"
-                            color: "#5b8bb8"
-                            font.family: "JetBrainsMono NFM"
-                            font.pixelSize: 10
-                            font.bold: true
-                        }
+        // 3. Judul Raksasa "TOWNMAP" di Pojok Kiri Bawah (Sesuai Foto 1)
+        Item {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            width: 320
+            height: 90
+            z: 20
+
+            // Poligon Segitiga Miring Biru di Kiri Bawah
+            Canvas {
+                anchors.fill: parent
+                antialiasing: true
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    var w = width
+                    var h = height
+
+                    ctx.beginPath()
+                    ctx.moveTo(0, h * 0.4)
+                    ctx.lineTo(w, h)
+                    ctx.lineTo(0, h)
+                    ctx.closePath()
+                    ctx.fillStyle = "#0028e0"
+                    ctx.fill()
+                }
+            }
+
+            Text {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.leftMargin: 16
+                anchors.bottomMargin: 6
+                text: "TOWNMAP"
+                font.family: "Rubik"
+                font.pixelSize: 42
+                font.weight: Font.Black
+                font.italic: true
+                color: "#030e38"
+                renderType: Text.CurveRendering
+            }
+        }
+
+        // 4. Baris Kontrol Navigasi & Key Legend di Pojok Kanan Bawah (Sesuai Foto 1)
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.bottomMargin: 18
+            anchors.rightMargin: 28
+            height: 38
+            width: legendLayout.implicitWidth + 32
+            radius: 4
+            color: "#F0040C26"
+            border.color: "#9900DBFF"
+            border.width: 1.2
+            z: 20
+
+            RowLayout {
+                id: legendLayout
+                anchors.centerIn: parent
+                spacing: 16
+
+                RowLayout {
+                    spacing: 6
+                    Rectangle {
+                        width: 44; height: 20; radius: 2; color: "#0028e0"
+                        Text { anchors.centerIn: parent; text: "1 - 6"; color: "#ffffff"; font.family: "Rubik"; font.pixelSize: 10; font.bold: true }
                     }
+                    Text { text: "Travel"; color: "#ffffff"; font.family: "Rubik"; font.pixelSize: 11; font.bold: true }
+                }
 
-                    Item { Layout.fillWidth: true }
+                RowLayout {
+                    spacing: 6
+                    Rectangle {
+                        width: 38; height: 20; radius: 2; color: "#0028e0"
+                        Text { anchors.centerIn: parent; text: "TAB"; color: "#ffffff"; font.family: "Rubik"; font.pixelSize: 9; font.bold: true }
+                    }
+                    Text { text: "Select"; color: "#ffffff"; font.family: "Rubik"; font.pixelSize: 11; font.bold: true }
+                }
 
-                    // Tombol Buka / Tutup Velvet Room Elevator
+                RowLayout {
+                    spacing: 6
+                    Rectangle {
+                        width: 52; height: 20; radius: 2; color: "#0028e0"
+                        Text { anchors.centerIn: parent; text: "SPACE"; color: "#ffffff"; font.family: "Rubik"; font.pixelSize: 9; font.bold: true }
+                    }
+                    Text { text: "Confirm"; color: "#ffffff"; font.family: "Rubik"; font.pixelSize: 11; font.bold: true }
+                }
+
+                RowLayout {
+                    spacing: 6
+                    Rectangle {
+                        width: 32; height: 20; radius: 2; color: "#d60032"
+                        Text { anchors.centerIn: parent; text: "ESC"; color: "#ffffff"; font.family: "Rubik"; font.pixelSize: 9; font.bold: true }
+                    }
+                    Text { text: "Close"; color: "#ffffff"; font.family: "Rubik"; font.pixelSize: 11; font.bold: true }
+                }
+            }
+        }
+
+        // 5. Pin-Pin Lokasi Distrik di Atas Peta 3D (Foto 1)
+        Item {
+            anchors.fill: parent
+            z: 10
+
+            Repeater {
+                model: root.districts
+                delegate: Item {
+                    id: pinItem
+                    required property var modelData
+                    required property int index
+
+                    readonly property bool isSelected: index === root.selectedDistrictIdx
+                    readonly property bool isActiveWs: modelData.num === root.activeWsId
+                    readonly property var apps: root.getDistrictApps(modelData.num)
+
+                    x: Math.round(ovWin.width * modelData.mapX) - 24
+                    y: Math.round(ovWin.height * modelData.mapY) - 36
+                    width: 48
+                    height: 48
+
+                    // A. Glowing Target Reticle Cyan (Pulsing Radar Circle Khas Foto 1)
                     Item {
-                        Layout.preferredWidth: velvetBtnRow.implicitWidth + 24
-                        Layout.preferredHeight: 34
+                        anchors.centerIn: parent
+                        width: 84
+                        height: 84
+                        visible: pinItem.isSelected
 
-                        Rectangle {
+                        // Animasi Radar Berdenyut
+                        SequentialAnimation on scale {
+                            loops: Animation.Infinite
+                            running: pinItem.isSelected
+                            NumberAnimation { from: 0.94; to: 1.08; duration: 900; easing.type: Easing.InOutSine }
+                            NumberAnimation { from: 1.08; to: 0.94; duration: 900; easing.type: Easing.InOutSine }
+                        }
+
+                        Canvas {
                             anchors.fill: parent
-                            radius: 3
-                            color: velvetBtnMouse.containsMouse
-                                ? "#0055d4"
-                                : (PhantomState.specialWorkspaceActive ? "#0038a8" : "#07173e")
-                            border.color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#00d0ff"
-                            border.width: 1.5
                             antialiasing: true
-                        }
+                            onPaint: {
+                                var ctx = getContext("2d")
+                                ctx.reset()
+                                var cx = width / 2
+                                var cy = height / 2
 
-                        RowLayout {
-                            id: velvetBtnRow
-                            anchors.centerIn: parent
-                            spacing: 6
-                            Text {
-                                text: "🛗"
-                                font.pixelSize: 13
-                            }
-                            Text {
-                                text: PhantomState.specialWorkspaceActive ? "EXIT VELVET ELEVATOR" : "ENTER VELVET ELEVATOR"
-                                color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#ffffff"
-                                font.family: "Rubik"
-                                font.pixelSize: 11
-                                font.weight: Font.Black
-                            }
-                        }
+                                // Lingkaran Luar Berpendar
+                                ctx.beginPath()
+                                ctx.arc(cx, cy, 36, 0, Math.PI * 2)
+                                ctx.strokeStyle = "#00f0ff"
+                                ctx.lineWidth = 2.2
+                                ctx.stroke()
 
-                        MouseArea {
-                            id: velvetBtnMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                PhantomState.overviewOpen = false
-                                PhantomState.toggleVelvetRoom()
+                                // Lingkaran Dalam Halus
+                                ctx.beginPath()
+                                ctx.arc(cx, cy, 28, 0, Math.PI * 2)
+                                ctx.strokeStyle = "rgba(0, 240, 255, 0.45)"
+                                ctx.lineWidth = 1.0
+                                ctx.stroke()
+
+                                // Crosshairs / Notches
+                                var notch = 8
+                                ctx.strokeStyle = "#00f0ff"
+                                ctx.lineWidth = 2.0
+                                // Top
+                                ctx.beginPath(); ctx.moveTo(cx, cy - 36); ctx.lineTo(cx, cy - 36 + notch); ctx.stroke()
+                                // Bottom
+                                ctx.beginPath(); ctx.moveTo(cx, cy + 36); ctx.lineTo(cx, cy + 36 - notch); ctx.stroke()
+                                // Left
+                                ctx.beginPath(); ctx.moveTo(cx - 36, cy); ctx.lineTo(cx - 36 + notch, cy); ctx.stroke()
+                                // Right
+                                ctx.beginPath(); ctx.moveTo(cx + 36, cy); ctx.lineTo(cx + 36 - notch, cy); ctx.stroke()
                             }
                         }
                     }
 
-                    // Tombol Tutup (ESC)
-                    Item {
-                        Layout.preferredWidth: 34
-                        Layout.preferredHeight: 34
+                    // B. Pin Teardrop Biru Otentik Persona 3 Reload (Foto 1)
+                    Canvas {
+                        id: pinCanvas
+                        anchors.fill: parent
+                        antialiasing: true
 
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: 3
-                            color: closeBtnMouse.containsMouse ? "#c2002f" : "#091738"
-                            border.color: closeBtnMouse.containsMouse ? "#ff4060" : "#00dbff"
-                            border.width: 1.5
-                            antialiasing: true
+                        onPaint: {
+                            var ctx = getContext("2d")
+                            ctx.reset()
+                            var cx = width / 2
+                            var cy = 18
+                            var r = 16
+
+                            // Bayangan Pin
+                            ctx.beginPath()
+                            ctx.ellipse(cx, height - 4, 12, 4, 0, 0, Math.PI * 2)
+                            ctx.fillStyle = "rgba(0, 0, 0, 0.6)"
+                            ctx.fill()
+
+                            // Tubuh Pin Teardrop
+                            ctx.beginPath()
+                            ctx.arc(cx, cy, r, Math.PI * 0.8, Math.PI * 0.2, false)
+                            ctx.lineTo(cx, height - 4)
+                            ctx.closePath()
+
+                            ctx.fillStyle = pinItem.isActiveWs ? "#00e5ff" : (pinItem.isSelected ? "#0055ff" : "#0038c8")
+                            ctx.fill()
+
+                            ctx.strokeStyle = "#ffffff"
+                            ctx.lineWidth = 2.0
+                            ctx.stroke()
                         }
+                    }
+
+                    // Nomor Workspace di Dalam Pin
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        y: 8
+                        text: pinItem.modelData.num < 10 ? ("0" + pinItem.modelData.num) : pinItem.modelData.num
+                        font.family: "Rubik"
+                        font.pixelSize: 13
+                        font.weight: Font.Black
+                        color: pinItem.isActiveWs ? "#020818" : "#ffffff"
+                    }
+
+                    // C. Label Nama Distrik Miring di Samping Pin (Foto 1: "Gekkoukan High School")
+                    Rectangle {
+                        anchors.left: parent.right
+                        anchors.leftMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenterOffset: -8
+                        height: 26
+                        width: pinLabelText.implicitWidth + 20
+                        radius: 3
+                        color: pinItem.isSelected ? "#0028e0" : "#E6040C26"
+                        border.color: pinItem.isSelected ? "#00f0ff" : "#4DFFFFFF"
+                        border.width: 1.2
 
                         Text {
+                            id: pinLabelText
                             anchors.centerIn: parent
-                            text: "✕"
+                            text: pinItem.modelData.name
                             font.family: "Rubik"
-                            font.pixelSize: 14
-                            font.bold: true
+                            font.pixelSize: 11
+                            font.weight: Font.Black
                             color: "#ffffff"
                         }
+                    }
 
-                        MouseArea {
-                            id: closeBtnMouse
+                    // D. Kartu Detail Workspace Sesuai Bentuk Foto 2 (Saat Dipilih / Hovered)
+                    Item {
+                        id: detailHoverCard
+                        visible: pinItem.isSelected
+                        width: 340
+                        height: Math.max(140, appListCol.implicitHeight + 64)
+                        z: 50
+
+                        // Penempatan kartu agar tidak keluar layar
+                        x: pinItem.modelData.cardSide === "left" ? -350 : 60
+                        y: -30
+
+                        // Bentuk Dialog P3R Otentik (Sesuai Foto 2)
+                        Canvas {
                             anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: PhantomState.overviewOpen = false
+                            antialiasing: true
+                            onPaint: {
+                                var ctx = getContext("2d")
+                                ctx.reset()
+                                var w = width
+                                var h = height
+
+                                // Shard Aksen Biru Muda di Kanan
+                                ctx.fillStyle = "rgba(0, 160, 255, 0.28)"
+                                ctx.beginPath()
+                                ctx.moveTo(w - 60, -2)
+                                ctx.lineTo(w + 4, -2)
+                                ctx.lineTo(w - 6, h + 2)
+                                ctx.lineTo(w - 70, h + 2)
+                                ctx.closePath()
+                                ctx.fill()
+
+                                // Badan Dialog Navy
+                                var bx = 12
+                                var by = 8
+                                var bw = w - 24
+                                var bh = h - 12
+                                var r = 6
+
+                                ctx.beginPath()
+                                ctx.moveTo(bx + r, by)
+                                ctx.lineTo(bx + bw - r, by)
+                                ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r)
+                                ctx.lineTo(bx + bw, by + bh - r)
+                                ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh)
+                                ctx.lineTo(bx + r, by + bh)
+                                ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r)
+                                ctx.lineTo(bx, by + r)
+                                ctx.quadraticCurveTo(bx, by, bx + r, by)
+                                ctx.closePath()
+
+                                ctx.fillStyle = "rgba(4, 12, 38, 0.96)"
+                                ctx.fill()
+
+                                ctx.strokeStyle = "#00dbff"
+                                ctx.lineWidth = 1.6
+                                ctx.stroke()
+
+                                // Wedge Segitiga Kiri Atas P3R (Foto 2)
+                                ctx.beginPath()
+                                ctx.moveTo(-2, 18)
+                                ctx.lineTo(140, -2)
+                                ctx.lineTo(152, 20)
+                                ctx.lineTo(32, 30)
+                                ctx.closePath()
+
+                                ctx.fillStyle = "#0028e0"
+                                ctx.fill()
+                                ctx.strokeStyle = "#00f0ff"
+                                ctx.lineWidth = 1.2
+                                ctx.stroke()
+                            }
                         }
-                    }
-                }
 
-                // ── GRID AREA DISTRICT SECTORS (WORKSPACES 1..N) ──
-                GridLayout {
-                    id: districtsGrid
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    columns: {
-                        const count = PhantomState.visibleWorkspaces.length
-                        if (count <= 4) return 2
-                        if (count <= 6) return 3
-                        if (count <= 8) return 4
-                        return 5
-                    }
-                    rowSpacing: 10
-                    columnSpacing: 10
-
-                    Repeater {
-                        model: PhantomState.visibleWorkspaces
-
-                        delegate: Item {
-                            id: wsDelegateItem
-                            required property int index
-                            required property var modelData
-                            readonly property int wsNum: (typeof modelData === "number" ? modelData : (index + 1))
-                            readonly property bool isCurrent: !PhantomState.specialWorkspaceActive && (root.activeWsId === wsNum)
-                            readonly property var apps: (PhantomState.workspaceApps && PhantomState.workspaceApps[String(wsNum)]) ? PhantomState.workspaceApps[String(wsNum)] : []
-                            readonly property var districtInfo: root.getDistrict(wsNum)
-
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-
-                            // Kotak Kartu District Persona 3 Reload
-                            Rectangle {
-                                id: cardBackdrop
-                                anchors.fill: parent
-                                radius: 4
-                                color: wsDelegateItem.isCurrent
-                                    ? Qt.rgba(0/255, 120/255, 230/255, 0.28)
-                                    : (wsCardMouse.containsMouse ? Qt.rgba(0/255, 180/255, 255/255, 0.12) : Qt.rgba(6/255, 18/255, 48/255, 0.85))
-                                border.color: wsDelegateItem.isCurrent
-                                    ? "#00f0ff"
-                                    : (wsDelegateItem.apps.length > 0 ? "#00a0dc" : "#1a3258")
-                                border.width: wsDelegateItem.isCurrent ? 2 : 1
-                                antialiasing: true
-
-                                Behavior on color { ColorAnimation { duration: 120 } }
-                            }
-
-                            // Glow Aksen Sudut saat Aktif
-                            Rectangle {
-                                anchors.top: parent.top
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                height: 3
-                                color: "#00f0ff"
-                                visible: wsDelegateItem.isCurrent
-                            }
-
-                            MouseArea {
-                                id: wsCardMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: mouse => {
-                                    if (mouse.button === Qt.RightButton) {
-                                        Hyprland.dispatch("hl.dsp.window.move({ workspace = " + wsDelegateItem.wsNum + ", follow = false })")
-                                        PhantomState.refreshWorkspaces()
-                                    } else {
-                                        PhantomState.overviewOpen = false
-                                        Hyprland.dispatch("hl.dsp.focus({ workspace = " + wsDelegateItem.wsNum + " })")
-                                    }
-                                }
-                            }
+                        // Teks Header Wedge Segitiga
+                        Item {
+                            x: 6
+                            y: -2
+                            width: 140
+                            height: 28
+                            z: 10
 
                             ColumnLayout {
                                 anchors.fill: parent
-                                anchors.margins: 10
-                                spacing: 6
-
-                                // Baris Header District
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 8
-
-                                    // Badge Nomor Sektor (Slanted P3)
-                                    Rectangle {
-                                        width: 32
-                                        height: 22
-                                        radius: 2
-                                        color: wsDelegateItem.isCurrent ? "#00e0ff" : "#0d285a"
-                                        border.color: wsDelegateItem.isCurrent ? "#ffffff" : "#0090d0"
-                                        border.width: 1
-                                        antialiasing: true
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: (wsDelegateItem.wsNum < 10 ? "0" : "") + wsDelegateItem.wsNum
-                                            color: wsDelegateItem.isCurrent ? "#02091c" : "#ffffff"
-                                            font.family: "Rubik"
-                                            font.pixelSize: 11
-                                            font.weight: Font.Black
-                                        }
-                                    }
-
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 0
-                                        Text {
-                                            Layout.fillWidth: true
-                                            text: wsDelegateItem.districtInfo.name
-                                            font.family: "Rubik"
-                                            font.pixelSize: 11
-                                            font.weight: Font.Black
-                                            color: wsDelegateItem.isCurrent ? "#ffffff" : "#8df6ff"
-                                            elide: Text.ElideRight
-                                        }
-                                        Text {
-                                            Layout.fillWidth: true
-                                            text: wsDelegateItem.districtInfo.sub
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 8
-                                            font.bold: true
-                                            color: "#5b8bb8"
-                                            elide: Text.ElideRight
-                                        }
-                                    }
-
-                                    // Status Tag
-                                    Rectangle {
-                                        height: 16
-                                        width: statusTagText.implicitWidth + 8
-                                        radius: 2
-                                        color: wsDelegateItem.isCurrent ? "#00c853" : (wsDelegateItem.apps.length > 0 ? "#0070ba" : "transparent")
-                                        border.color: wsDelegateItem.isCurrent ? "#69f0ae" : (wsDelegateItem.apps.length > 0 ? "#00b0ff" : "#1a3258")
-                                        border.width: 1
-
-                                        Text {
-                                            id: statusTagText
-                                            anchors.centerIn: parent
-                                            text: wsDelegateItem.isCurrent ? "ACTIVE" : (wsDelegateItem.apps.length > 0 ? (wsDelegateItem.apps.length + " WIN") : "VACANT")
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 8
-                                            font.weight: Font.Black
-                                            color: "#ffffff"
-                                        }
-                                    }
-                                }
-
-                                // Pemisah Garis
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    height: 1
-                                    color: Qt.rgba(0/255, 219/255, 255/255, 0.2)
-                                }
-
-                                // Daftar Jendela Aktif dalam District
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    spacing: 3
-
-                                    Repeater {
-                                        model: Math.min(wsDelegateItem.apps.length, 3)
-
-                                        delegate: Item {
-                                            id: appRowItem
-                                            required property int index
-                                            readonly property var appData: wsDelegateItem.apps[index]
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 22
-
-                                            Rectangle {
-                                                anchors.fill: parent
-                                                color: appRowMouse.containsMouse ? Qt.rgba(0/255, 219/255, 255/255, 0.2) : "transparent"
-                                                radius: 2
-                                            }
-
-                                            RowLayout {
-                                                anchors.fill: parent
-                                                anchors.leftMargin: 4
-                                                anchors.rightMargin: 4
-                                                spacing: 6
-
-                                                Image {
-                                                    id: rowAppImg
-                                                    Layout.preferredWidth: 16
-                                                    Layout.preferredHeight: 16
-                                                    source: appRowItem.appData ? (appRowItem.appData.iconUrl || "") : ""
-                                                    fillMode: Image.PreserveAspectFit
-                                                    visible: source !== "" && status === Image.Ready
-                                                    smooth: true
-                                                    mipmap: true
-                                                }
-
-                                                Text {
-                                                    visible: !rowAppImg.visible
-                                                    text: appRowItem.appData ? (appRowItem.appData.glyph || "•") : "•"
-                                                    color: "#00dbff"
-                                                    font.family: "JetBrainsMono NFM"
-                                                    font.pixelSize: 11
-                                                }
-
-                                                Text {
-                                                    Layout.fillWidth: true
-                                                    text: appRowItem.appData ? (appRowItem.appData.title || appRowItem.appData.cls || "Window") : "Window"
-                                                    color: appRowMouse.containsMouse ? "#ffffff" : "#c0dcf8"
-                                                    font.family: "JetBrainsMono NFM"
-                                                    font.pixelSize: 9
-                                                    font.bold: true
-                                                    elide: Text.ElideRight
-                                                }
-                                            }
-
-                                            MouseArea {
-                                                id: appRowMouse
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: mouse => {
-                                                    const addr = String(appRowItem.appData.addr || "")
-                                                    if (mouse.button === Qt.RightButton && addr !== "") {
-                                                        Quickshell.execDetached([
-                                                            "hyprctl", "eval",
-                                                            "hl.dispatch(hl.dsp.window.move({ workspace = 'special:special', window = 'address:" + addr + "', follow = false }))"
-                                                        ])
-                                                        PhantomState.refreshWorkspaces()
-                                                    } else if (mouse.button === Qt.MiddleButton && addr !== "") {
-                                                        Quickshell.execDetached([
-                                                            "hyprctl", "eval",
-                                                            "hl.dispatch(hl.dsp.window.close({ window = 'address:" + addr + "' }))"
-                                                        ])
-                                                        PhantomState.refreshWorkspaces()
-                                                    } else {
-                                                        PhantomState.overviewOpen = false
-                                                        Hyprland.dispatch("hl.dsp.focus({ workspace = " + wsDelegateItem.wsNum + " })")
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // Teks jika kosong
-                                    Item {
-                                        Layout.fillWidth: true
-                                        Layout.fillHeight: true
-                                        visible: wsDelegateItem.apps.length === 0
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "NO ACTIVE SIGNALS"
-                                            color: "#304870"
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 8
-                                            font.bold: true
-                                            font.letterSpacing: 1
-                                        }
-                                    }
-
-                                    Item { Layout.fillHeight: true }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ── THE VELVET ROOM // ELEVATOR OF THE SOUL (SPECIAL WORKSPACE SCRATCHPAD) ──
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 84
-
-                    Rectangle {
-                        id: velvetBox
-                        anchors.fill: parent
-                        radius: 4
-                        // Gradien Beludru Safir Khas Velvet Room P3R
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0.0; color: PhantomState.specialWorkspaceActive ? "#06184a" : "#020a22" }
-                            GradientStop { position: 0.5; color: PhantomState.specialWorkspaceActive ? "#0d2d78" : "#051336" }
-                            GradientStop { position: 1.0; color: PhantomState.specialWorkspaceActive ? "#06184a" : "#020a22" }
-                        }
-                        border.color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#00a8e8"
-                        border.width: PhantomState.specialWorkspaceActive ? 2 : 1.5
-                        antialiasing: true
-                    }
-
-                    MouseArea {
-                        id: velvetDockMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: mouse => {
-                            if (mouse.button === Qt.RightButton) {
-                                Quickshell.execDetached([
-                                    "hyprctl", "eval",
-                                    "hl.dispatch(hl.dsp.window.move({ workspace = 'special:special', follow = false }))"
-                                ])
-                                PhantomState.refreshWorkspaces()
-                            } else {
-                                PhantomState.overviewOpen = false
-                                PhantomState.toggleVelvetRoom()
-                            }
-                        }
-                    }
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 6
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 10
-
-                            // Ikon Jam / Elevator Velvet Room
-                            Text {
-                                text: "🛗"
-                                font.pixelSize: 16
-                            }
-
-                            ColumnLayout {
+                                anchors.leftMargin: 18
+                                anchors.topMargin: 2
                                 spacing: 0
-                                RowLayout {
-                                    spacing: 8
-                                    Text {
-                                        text: "THE VELVET ROOM"
-                                        color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#ffffff"
-                                        font.family: "Rubik"
-                                        font.pixelSize: 12
-                                        font.weight: Font.Black
-                                        font.letterSpacing: 1
-                                    }
-                                    Text {
-                                        text: "// ELEVATOR OF THE SOUL [SPECIAL SCRATCHPAD]"
-                                        color: "#8df6ff"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 10
-                                        font.bold: true
-                                    }
+
+                                Text {
+                                    text: pinItem.modelData.code
+                                    color: "#ffffff"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 10
+                                    font.weight: Font.Black
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
                                 }
                                 Text {
-                                    text: "L-CLICK: TOGGLE ELEVATOR (SUPER + S) • R-CLICK BAR: SEND FOCUSED WINDOW HERE"
-                                    color: "#5b8bb8"
+                                    text: "SECTOR 0" + pinItem.modelData.num
+                                    color: "#00f0ff"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 8
                                     font.bold: true
                                 }
                             }
-
-                            Item { Layout.fillWidth: true }
-
-                            Rectangle {
-                                height: 18
-                                width: velvetStateTxt.implicitWidth + 10
-                                radius: 2
-                                color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#082054"
-                                border.color: PhantomState.specialWorkspaceActive ? "#ffffff" : "#00a0dc"
-                                border.width: 1
-
-                                Text {
-                                    id: velvetStateTxt
-                                    anchors.centerIn: parent
-                                    text: PhantomState.specialWorkspaceActive ? "ELEVATOR ACTIVE" : (ovCard.specialApps.length > 0 ? (ovCard.specialApps.length + " APPS DOCKED") : "ELEVATOR STANDBY")
-                                    color: PhantomState.specialWorkspaceActive ? "#040b20" : "#8df6ff"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 8
-                                    font.weight: Font.Black
-                                }
-                            }
                         }
 
-                        // Jendela-Jendela yang Sedang Parkir di Velvet Room
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-                            visible: ovCard.specialApps.length > 0
+                        // Konten Daftar Window Aplikasi di Workspace Ini
+                        ColumnLayout {
+                            id: appListCol
+                            anchors.fill: parent
+                            anchors.leftMargin: 22
+                            anchors.rightMargin: 20
+                            anchors.topMargin: 26
+                            anchors.bottomMargin: 10
+                            spacing: 6
+                            z: 5
 
-                            Repeater {
-                                model: ovCard.specialApps
-
-                                delegate: Item {
-                                    id: velvetAppChip
-                                    required property var modelData
-                                    Layout.preferredWidth: Math.min(180, chipRow.implicitWidth + 16)
-                                    Layout.preferredHeight: 26
-
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        radius: 3
-                                        color: chipMouse.containsMouse ? "#0a3690" : "#061a48"
-                                        border.color: chipMouse.containsMouse ? "#ffd700" : "#00b4f0"
-                                        border.width: 1
-                                        antialiasing: true
-                                    }
-
-                                    RowLayout {
-                                        id: chipRow
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text {
+                                    text: pinItem.modelData.sub
+                                    color: "#7fa8d8"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                }
+                                Item { Layout.fillWidth: true }
+                                Rectangle {
+                                    height: 18
+                                    width: statusBadgeText.implicitWidth + 12
+                                    radius: 2
+                                    color: pinItem.isActiveWs ? "#00e5ff" : (pinItem.apps.length > 0 ? "#0038a8" : "#1a2c4e")
+                                    Text {
+                                        id: statusBadgeText
                                         anchors.centerIn: parent
-                                        spacing: 6
-
-                                        Image {
-                                            id: chipIcon
-                                            Layout.preferredWidth: 14
-                                            Layout.preferredHeight: 14
-                                            source: velvetAppChip.modelData ? (velvetAppChip.modelData.iconUrl || "") : ""
-                                            fillMode: Image.PreserveAspectFit
-                                            visible: source !== "" && status === Image.Ready
-                                            smooth: true
-                                            mipmap: true
-                                        }
-
-                                        Text {
-                                            visible: !chipIcon.visible
-                                            text: velvetAppChip.modelData ? (velvetAppChip.modelData.glyph || "•") : "•"
-                                            color: "#ffd700"
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 10
-                                        }
-
-                                        Text {
-                                            Layout.preferredWidth: Math.min(120, implicitWidth)
-                                            text: velvetAppChip.modelData ? (velvetAppChip.modelData.title || velvetAppChip.modelData.cls || "App") : "App"
-                                            color: "#ffffff"
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 9
-                                            font.bold: true
-                                            elide: Text.ElideRight
-                                        }
+                                        text: pinItem.isActiveWs ? "ACTIVE" : (pinItem.apps.length > 0 ? (pinItem.apps.length + " WINS") : "VACANT")
+                                        color: pinItem.isActiveWs ? "#020818" : "#ffffff"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 9
+                                        font.weight: Font.Black
                                     }
+                                }
+                            }
 
-                                    MouseArea {
-                                        id: chipMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: mouse => {
-                                            const addr = String(velvetAppChip.modelData.addr || "")
-                                            if (mouse.button === Qt.RightButton && addr !== "") {
-                                                Quickshell.execDetached([
-                                                    "hyprctl", "eval",
-                                                    "hl.dispatch(hl.dsp.window.move({ workspace = " + root.activeWsId + ", window = 'address:" + addr + "', follow = false }))"
-                                                ])
-                                                PhantomState.refreshWorkspaces()
-                                            } else if (mouse.button === Qt.MiddleButton && addr !== "") {
-                                                Quickshell.execDetached([
-                                                    "hyprctl", "eval",
-                                                    "hl.dispatch(hl.dsp.window.close({ window = 'address:" + addr + "' }))"
-                                                ])
-                                                PhantomState.refreshWorkspaces()
-                                            } else {
-                                                PhantomState.overviewOpen = false
-                                                if (!PhantomState.specialWorkspaceActive) {
-                                                    PhantomState.toggleVelvetRoom()
-                                                }
+                            // Garis Pembatas
+                            Rectangle {
+                                Layout.fillWidth: true
+                                height: 1
+                                color: "#4D00DBFF"
+                            }
+
+                            // Daftar Window
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+                                visible: pinItem.apps.length > 0
+
+                                Repeater {
+                                    model: pinItem.apps.slice(0, 4)
+                                    delegate: Rectangle {
+                                        Layout.fillWidth: true
+                                        height: 24
+                                        radius: 3
+                                        color: "#071638"
+                                        border.color: "#4000DBFF"
+                                        border.width: 1
+
+                                        RowLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 6
+                                            anchors.rightMargin: 6
+                                            spacing: 6
+
+                                            Image {
+                                                width: 14; height: 14
+                                                source: PhantomState.resolveAppIconUrl(modelData.class || modelData.title)
+                                                fillMode: Image.PreserveAspectFit
+                                                smooth: true
+                                            }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: modelData.title || modelData.class || "App"
+                                                color: "#ffffff"
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.bold: true
+                                                elide: Text.ElideRight
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        // Pesan jika kosong
-                        Item {
-                            Layout.fillWidth: true
-                            visible: ovCard.specialApps.length === 0
-
+                            // Tampilan jika kosong
                             Text {
-                                text: "CHAMBER IS TRANQUIL • RIGHT-CLICK ANY WINDOW ABOVE TO SUMMON INTO THE VELVET ROOM ELEVATOR"
+                                visible: pinItem.apps.length === 0
+                                text: "NO ACTIVE SIGNALS IN THIS SECTOR"
                                 color: "#486a9a"
                                 font.family: "JetBrainsMono NFM"
                                 font.pixelSize: 9
                                 font.bold: true
                                 font.italic: true
                             }
+
+                            // Tombol Fast Travel
+                            Rectangle {
+                                Layout.fillWidth: true
+                                height: 26
+                                radius: 3
+                                color: ftBtnMouse.containsMouse ? "#00f0ff" : "#0028e0"
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "FAST TRAVEL ➔"
+                                    color: ftBtnMouse.containsMouse ? "#020818" : "#ffffff"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 10
+                                    font.weight: Font.Black
+                                    font.letterSpacing: 0.8
+                                }
+
+                                MouseArea {
+                                    id: ftBtnMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.fastTravelTo(pinItem.modelData.num)
+                                }
+                            }
                         }
                     }
+
+                    // Interaksi Klik Pin
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: root.selectedDistrictIdx = index
+                        onClicked: root.fastTravelTo(pinItem.modelData.num)
+                    }
+                }
+            }
+        }
+
+        // 6. The Velvet Room (Elevator of the Soul) Scratchpad Pin di Bawah Kiri
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.bottomMargin: 84
+            anchors.leftMargin: 24
+            width: 280
+            height: 48
+            radius: 4
+            z: 25
+
+            // Gradien Beludru Safir Khas Velvet Room
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0.0; color: "#010718" }
+                GradientStop { position: 0.5; color: "#051848" }
+                GradientStop { position: 1.0; color: "#0d2d78" }
+            }
+            border.color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#00dbff"
+            border.width: 1.6
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 14
+                anchors.rightMargin: 12
+                spacing: 10
+
+                Image {
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: 20
+                    source: "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/elevator.svg"
+                    sourceSize.width: 20
+                    sourceSize.height: 20
+                    fillMode: Image.PreserveAspectFit
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+
+                    RowLayout {
+                        spacing: 6
+                        Text {
+                            text: "THE VELVET ROOM"
+                            color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#ffffff"
+                            font.family: "Rubik"
+                            font.pixelSize: 11
+                            font.weight: Font.Black
+                        }
+                    }
+                    Text {
+                        text: "ELEVATOR OF THE SOUL [SPECIAL]"
+                        color: "#00dbff"
+                        font.family: "JetBrainsMono NFM"
+                        font.pixelSize: 8
+                        font.bold: true
+                    }
+                }
+
+                Rectangle {
+                    width: 60
+                    height: 22
+                    radius: 2
+                    color: PhantomState.specialWorkspaceActive ? "#ffd700" : "#0028e0"
+                    Text {
+                        anchors.centerIn: parent
+                        text: PhantomState.specialWorkspaceActive ? "ACTIVE" : "STANDBY"
+                        color: PhantomState.specialWorkspaceActive ? "#020818" : "#ffffff"
+                        font.family: "Rubik"
+                        font.pixelSize: 9
+                        font.bold: true
+                    }
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    PhantomState.overviewOpen = false
+                    PhantomState.toggleVelvetRoom()
                 }
             }
         }

@@ -6,8 +6,8 @@ import qs.config
 import qs.components
 
 // =============================================================================
-// PERSONA 3 RELOAD: S.E.E.S. TACTICAL HUD OSD (VOLUME & LUMINANCE)
-// Tampilan pop-up volume dan brightness bertema HUD Tactical Persona 3 Reload
+// PERSONA 3 RELOAD: S.E.E.S. DIALOGUE-STYLE HUD OSD (VOLUME & LUMINANCE)
+// Bentuk speech bubble otentik P3R (mirip dialog Akihiko Sanada) dengan ikon SVG
 // =============================================================================
 Scope {
     PanelWindow {
@@ -24,152 +24,186 @@ Scope {
         }
         margins.bottom: 68
 
-        implicitWidth: 420
-        implicitHeight: 90
+        implicitWidth: 460
+        implicitHeight: 96
         color: "transparent"
 
-        // Kontainer Utama HUD OSD Bergaya Persona 3 Reload
         Item {
             id: osdBody
             anchors.fill: parent
-            anchors.margins: 6
+            anchors.margins: 4
 
             readonly property bool isOpen: PhantomState.osdVisible
             readonly property bool isVolume: PhantomState.osdLabel === "VOLUME"
             readonly property bool isMuted: isVolume && (PhantomState.osdMuted || PhantomState.osdValue <= 0)
             readonly property real ratio: Math.max(0.0, Math.min(1.0, PhantomState.osdValue / 100.0))
 
+            // Pemilihan ikon SVG resmi (Bebas Emoji)
+            readonly property string resolvedIconUrl: {
+                const home = Quickshell.env("HOME") || "/home/sho"
+                if (!osdBody.isVolume) {
+                    return "file://" + home + "/.config/quickshell/assets/icons/brightness.svg"
+                }
+                if (osdBody.isMuted) {
+                    return "file://" + home + "/.config/quickshell/assets/icons/volume-muted.svg"
+                }
+                if (osdBody.ratio > 0.6) {
+                    return "file://" + home + "/.config/quickshell/assets/icons/volume-high.svg"
+                }
+                if (osdBody.ratio > 0.25) {
+                    return "file://" + home + "/.config/quickshell/assets/icons/volume-medium.svg"
+                }
+                return "file://" + home + "/.config/quickshell/assets/icons/volume-low.svg"
+            }
+
             opacity: isOpen ? 1.0 : 0.0
-            scale: isOpen ? 1.0 : 0.88
-            rotation: isOpen ? -2.0 : -5.0
+            scale: isOpen ? 1.0 : 0.92
 
             transform: Translate {
-                y: osdBody.isOpen ? 0 : 20
+                y: osdBody.isOpen ? 0 : 16
                 Behavior on y { NumberAnimation { duration: 180; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
             }
 
             Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
             Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            Behavior on rotation { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
             HoverHandler {
                 id: bodyHover
             }
 
-            // Kartu Latar Belakang Slanted Khas P3R
+            // 1. Kanvas Gambar Bentuk Speech Bubble Otentik Persona 3 Reload (Foto 2)
             Canvas {
-                id: bgCanvas
+                id: p3BubbleCanvas
                 anchors.fill: parent
                 antialiasing: true
+
                 onPaint: {
                     var ctx = getContext("2d")
                     ctx.reset()
                     var w = width
                     var h = height
-                    var sk = 16.0
 
-                    // Bayangan Luar Gelap Safir
+                    // A. Shard Aksen Biru Muda Transparan di Ujung Kanan (Right Accent Shard)
+                    ctx.fillStyle = "rgba(0, 160, 255, 0.32)"
                     ctx.beginPath()
-                    ctx.moveTo(sk + 4, 4)
-                    ctx.lineTo(w + 4, 4)
-                    ctx.lineTo(w - sk + 4, h + 4)
-                    ctx.lineTo(4, h + 4)
+                    ctx.moveTo(w - 75, -2)
+                    ctx.lineTo(w + 4, -2)
+                    ctx.lineTo(w - 8, h + 2)
+                    ctx.lineTo(w - 88, h + 2)
                     ctx.closePath()
-                    ctx.fillStyle = "rgba(0, 20, 60, 0.75)"
                     ctx.fill()
 
-                    // Dasar Kartu Navy Gelap
+                    // B. Badan Kotak Dialog Utama (Navy Gelap Transparan dengan Sudut Halus)
+                    var bx = 16
+                    var by = 8
+                    var bw = w - 34
+                    var bh = h - 14
+                    var r = 6
+
                     ctx.beginPath()
-                    ctx.moveTo(sk, 0)
-                    ctx.lineTo(w, 0)
-                    ctx.lineTo(w - sk, h)
-                    ctx.lineTo(0, h)
+                    ctx.moveTo(bx + r, by)
+                    ctx.lineTo(bx + bw - r, by)
+                    ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r)
+                    ctx.lineTo(bx + bw, by + bh - r)
+                    ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh)
+                    ctx.lineTo(bx + r, by + bh)
+                    ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r)
+                    ctx.lineTo(bx, by + r)
+                    ctx.quadraticCurveTo(bx, by, bx + r, by)
                     ctx.closePath()
-                    ctx.fillStyle = "#030818"
+
+                    ctx.fillStyle = "rgba(4, 12, 38, 0.95)"
                     ctx.fill()
 
-                    // Garis Tepi Neon Cyan Otentik P3R
-                    ctx.strokeStyle = osdBody.isMuted ? "#ff2a55" : "#00dbff"
-                    ctx.lineWidth = 2.0
+                    // Garis Tepi Cyan / Merah saat Mute
+                    ctx.strokeStyle = osdBody.isMuted ? "rgba(255, 42, 85, 0.85)" : "rgba(0, 219, 255, 0.75)"
+                    ctx.lineWidth = 1.6
                     ctx.stroke()
 
-                    // Aksen Garis Refleksi Interior P3R
+                    // C. Wedge Segitiga Menonjol di Kiri Atas (Top-Left Protruding Triangular Tag)
+                    // Bentuk segitiga runcing khas P3R dialogue header
                     ctx.beginPath()
-                    ctx.moveTo(sk + 12, 4)
-                    ctx.lineTo(w - 12, 4)
-                    ctx.strokeStyle = osdBody.isMuted ? "rgba(255, 42, 85, 0.4)" : "rgba(0, 219, 255, 0.4)"
-                    ctx.lineWidth = 1.0
+                    ctx.moveTo(-2, 18)           // Ujung runcing kiri
+                    ctx.lineTo(135, -2)          // Titik atas kanan
+                    ctx.lineTo(146, 20)          // Titik bawah kanan
+                    ctx.lineTo(34, 30)           // Titik bawah kiri
+                    ctx.closePath()
+
+                    ctx.fillStyle = osdBody.isMuted ? "#d60032" : "#0028e0"
+                    ctx.fill()
+                    ctx.strokeStyle = osdBody.isMuted ? "#ffffff" : "#00f0ff"
+                    ctx.lineWidth = 1.3
                     ctx.stroke()
                 }
 
                 Connections {
                     target: osdBody
-                    function onIsMutedChanged() { bgCanvas.requestPaint() }
+                    function onIsMutedChanged() { p3BubbleCanvas.requestPaint() }
                 }
             }
 
-            // Pita Header Slanted: S.E.E.S. TACTICAL HUD // AUDIO LEVEL
+            // 2. Teks Label pada Wedge Segitiga Kiri Atas
             Item {
-                x: 24
-                y: -10
-                width: 170
-                height: 22
-                rotation: -2.0
+                x: 8
+                y: -1
+                width: 130
+                height: 28
                 z: 10
 
-                Rectangle {
+                ColumnLayout {
                     anchors.fill: parent
-                    radius: 2
-                    color: osdBody.isMuted ? "#ff2a55" : "#0038a8"
-                    border.color: osdBody.isMuted ? "#ffffff" : "#00dbff"
-                    border.width: 1.5
+                    anchors.leftMargin: 20
+                    anchors.topMargin: 2
+                    spacing: 0
 
-                    RowLayout {
-                        anchors.centerIn: parent
-                        spacing: 6
+                    Text {
+                        text: osdBody.isVolume
+                            ? (osdBody.isMuted ? "MUTED" : "VOLUME")
+                            : "BRIGHTNESS"
+                        color: "#ffffff"
+                        font.family: "Rubik"
+                        font.pixelSize: 10
+                        font.weight: Font.Black
+                        font.letterSpacing: 0.8
+                    }
 
-                        Text {
-                            text: osdBody.isMuted ? "⚠" : (osdBody.isVolume ? "🔊" : "☀")
-                            font.pixelSize: 11
-                        }
-
-                        Text {
-                            text: osdBody.isVolume
-                                ? (osdBody.isMuted ? "MUTED // S.E.E.S." : "S.E.E.S. // AUDIO")
-                                : "S.E.E.S. // LUMINANCE"
-                            color: "#ffffff"
-                            font.family: "Rubik"
-                            font.pixelSize: 9
-                            font.weight: Font.Black
-                            font.letterSpacing: 0.8
-                        }
+                    Text {
+                        text: osdBody.isVolume ? "AUDIO LEVEL" : "DISPLAY LEVEL"
+                        color: "#00f0ff"
+                        font.family: "JetBrainsMono NFM"
+                        font.pixelSize: 8
+                        font.bold: true
+                        font.letterSpacing: 0.5
                     }
                 }
             }
 
-            // Baris Konten: Ikon, Baris Gauge Meter, dan Nilai Persentase
+            // 3. Konten Utama: Ikon SVG, Gauge Bar Segmen, dan Badge Angka
             RowLayout {
                 anchors.fill: parent
-                anchors.leftMargin: 20
-                anchors.rightMargin: 18
-                anchors.topMargin: 12
+                anchors.leftMargin: 28
+                anchors.rightMargin: 28
+                anchors.topMargin: 18
+                anchors.bottomMargin: 8
                 spacing: 12
+                z: 5
 
-                // Ikon Indikator
+                // Ikon SVG Resmi (Vector Image)
                 Rectangle {
-                    Layout.preferredWidth: 36
-                    Layout.preferredHeight: 36
-                    radius: 3
-                    color: "#07122a"
+                    Layout.preferredWidth: 38
+                    Layout.preferredHeight: 38
+                    radius: 4
+                    color: osdBody.isMuted ? "#2a0610" : "#061536"
                     border.color: osdBody.isMuted ? "#ff2a55" : "#00dbff"
-                    border.width: 1.5
+                    border.width: 1.2
 
-                    Text {
+                    Image {
                         anchors.centerIn: parent
-                        text: osdBody.isVolume
-                            ? (osdBody.isMuted ? "🔇" : (osdBody.ratio > 0.6 ? "🔊" : (osdBody.ratio > 0.25 ? "🔉" : "🔈")))
-                            : "☀"
-                        font.pixelSize: 16
+                        width: 22
+                        height: 22
+                        source: osdBody.resolvedIconUrl
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
                     }
 
                     MouseArea {
@@ -177,14 +211,12 @@ Scope {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (osdBody.isVolume) {
-                                PhantomState.toggleVolumeMute()
-                            }
+                            if (osdBody.isVolume) PhantomState.toggleVolumeMute()
                         }
                     }
                 }
 
-                // Bilah Meter Slanted Persona 3 Reload
+                // Gauge Bar Slanted P3R
                 Item {
                     id: trackArea
                     Layout.fillWidth: true
@@ -200,22 +232,22 @@ Scope {
                             ctx.reset()
                             var w = width
                             var h = height
-                            var sk = 8.0
+                            var sk = 7.0
 
-                            // 1. Lintasan Dasar (Track Background)
+                            // 1. Dasar Track Bar
                             ctx.beginPath()
                             ctx.moveTo(sk, 0)
                             ctx.lineTo(w, 0)
                             ctx.lineTo(w - sk, h)
                             ctx.lineTo(0, h)
                             ctx.closePath()
-                            ctx.fillStyle = "#07122a"
+                            ctx.fillStyle = "#06122c"
                             ctx.fill()
-                            ctx.strokeStyle = "rgba(0, 219, 255, 0.3)"
+                            ctx.strokeStyle = "rgba(0, 219, 255, 0.35)"
                             ctx.lineWidth = 1.0
                             ctx.stroke()
 
-                            // 2. Baris Isi Persentase (Fill Bar)
+                            // 2. Baris Isi Persentase
                             var fillW = Math.max(0, (w - sk) * osdBody.ratio)
                             if (fillW > 0) {
                                 ctx.beginPath()
@@ -229,24 +261,24 @@ Scope {
                                     ctx.fillStyle = "#ff2a55"
                                 } else {
                                     var grad = ctx.createLinearGradient(0, 0, w, 0)
-                                    grad.addColorStop(0.0, "#0038a8")
-                                    grad.addColorStop(0.5, "#0088ff")
-                                    grad.addColorStop(1.0, "#00f0ff")
+                                    grad.addColorStop(0.0, "#0028e0")
+                                    grad.addColorStop(0.5, "#0077ff")
+                                    grad.addColorStop(1.0, "#00e5ff")
                                     ctx.fillStyle = grad
                                 }
                                 ctx.fill()
 
-                                // Garis Pembatas Putih di Ujung Nilai (Slider Thumb Head)
+                                // Garis Pembatas Putih
                                 ctx.beginPath()
                                 ctx.moveTo(sk + fillW, 0)
                                 ctx.lineTo(fillW, h)
                                 ctx.strokeStyle = "#ffffff"
-                                ctx.lineWidth = 2.5
+                                ctx.lineWidth = 2.0
                                 ctx.stroke()
                             }
 
-                            // 3. Garis Segmen / Grid Taktikal (Tick Marks Khas Persona 3)
-                            ctx.strokeStyle = "rgba(3, 8, 24, 0.6)"
+                            // 3. Grid Tick Marks
+                            ctx.strokeStyle = "rgba(4, 12, 38, 0.65)"
                             ctx.lineWidth = 1.5
                             for (var step = 1; step <= 9; step++) {
                                 var tickX = (w - sk) * (step / 10.0)
@@ -264,7 +296,6 @@ Scope {
                         }
                     }
 
-                    // Interaksi Klik dan Drag
                     MouseArea {
                         id: trackMouse
                         anchors.fill: parent
@@ -295,21 +326,21 @@ Scope {
                     }
                 }
 
-                // Lencana Persentase Slanted Kanan
+                // Lencana Persentase
                 Rectangle {
-                    Layout.preferredWidth: 62
-                    Layout.preferredHeight: 36
+                    Layout.preferredWidth: 58
+                    Layout.preferredHeight: 34
                     radius: 3
-                    color: osdBody.isMuted ? "#ff2a55" : "#0038a8"
-                    border.color: osdBody.isMuted ? "#ffffff" : "#00dbff"
-                    border.width: 1.5
+                    color: osdBody.isMuted ? "#d60032" : "#0028e0"
+                    border.color: osdBody.isMuted ? "#ffffff" : "#00f0ff"
+                    border.width: 1.2
 
                     Text {
                         anchors.centerIn: parent
                         text: osdBody.isMuted ? "MUTED" : (PhantomState.osdValue + "%")
                         color: "#ffffff"
                         font.family: "Rubik"
-                        font.pixelSize: osdBody.isMuted ? 10 : 13
+                        font.pixelSize: osdBody.isMuted ? 10 : 12
                         font.weight: Font.Black
                         font.letterSpacing: 0.5
                     }

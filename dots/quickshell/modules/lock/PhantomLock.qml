@@ -9,7 +9,7 @@ import qs.components
 
 // =============================================================================
 // PERSONA 3 RELOAD: S.E.E.S. DARK HOUR PROTOCOL LOCK SCREEN
-// Layar Kunci Wayland Sesi Sistem bertema S.E.E.S. Evoker Authenticator P3R
+// Layar Kunci Wayland tanpa shape skew P5, menggunakan ikon SVG (Bebas Emoji)
 // =============================================================================
 Scope {
     id: lockScope
@@ -59,12 +59,10 @@ Scope {
                 lockScope.authError = false
                 lockScope.authSuccess = true
                 lockScope.statusText = "AUTHORIZATION GRANTED // PERSONA DISPATCHED"
-                PhantomState.playSfx("select")
                 PhantomState.unlockScreen()
             } else {
                 lockScope.authError = true
                 lockScope.statusText = "AUTHORIZATION REJECTED // SHADOW DETECTED"
-                PhantomState.playSfx("notif")
             }
         }
 
@@ -118,16 +116,16 @@ Scope {
                 property real bgOpacity: 0.0
                 property real clockSlideX: -140.0
                 property real clockOpacity: 0.0
-                property real cardScale: 0.82
+                property real cardScale: 0.85
                 property real cardOpacity: 0.0
 
                 // Animasi Masuk
                 ParallelAnimation {
                     id: lockEnterAnim
                     NumberAnimation { target: lockRoot; property: "bgOpacity"; from: 0.0; to: 1.0; duration: 280; easing.type: Easing.OutCubic }
-                    NumberAnimation { target: lockRoot; property: "clockSlideX"; from: -140.0; to: 0.0; duration: 380; easing.type: Easing.OutBack }
+                    NumberAnimation { target: lockRoot; property: "clockSlideX"; from: -140.0; to: 0.0; duration: 360; easing.type: Easing.OutBack }
                     NumberAnimation { target: lockRoot; property: "clockOpacity"; from: 0.0; to: 1.0; duration: 260; easing.type: Easing.OutCubic }
-                    NumberAnimation { target: lockRoot; property: "cardScale"; from: 0.82; to: 1.0; duration: 380; easing.type: Easing.OutBack; easing.overshoot: 1.15 }
+                    NumberAnimation { target: lockRoot; property: "cardScale"; from: 0.85; to: 1.0; duration: 360; easing.type: Easing.OutBack; easing.overshoot: 1.12 }
                     NumberAnimation { target: lockRoot; property: "cardOpacity"; from: 0.0; to: 1.0; duration: 240; easing.type: Easing.OutCubic }
                 }
 
@@ -135,11 +133,11 @@ Scope {
                 SequentialAnimation {
                     id: lockExitAnim
                     ParallelAnimation {
-                        NumberAnimation { target: lockRoot; property: "cardScale"; to: 1.08; duration: 120; easing.type: Easing.OutQuad }
-                        NumberAnimation { target: lockRoot; property: "cardOpacity"; to: 0.0; duration: 260; easing.type: Easing.InCubic }
-                        NumberAnimation { target: lockRoot; property: "clockSlideX"; to: -140.0; duration: 280; easing.type: Easing.InBack }
-                        NumberAnimation { target: lockRoot; property: "clockOpacity"; to: 0.0; duration: 220; easing.type: Easing.InCubic }
-                        NumberAnimation { target: lockRoot; property: "bgOpacity"; to: 0.0; duration: 300; easing.type: Easing.InCubic }
+                        NumberAnimation { target: lockRoot; property: "cardScale"; to: 1.06; duration: 120; easing.type: Easing.OutQuad }
+                        NumberAnimation { target: lockRoot; property: "cardOpacity"; to: 0.0; duration: 240; easing.type: Easing.InCubic }
+                        NumberAnimation { target: lockRoot; property: "clockSlideX"; to: -140.0; duration: 260; easing.type: Easing.InBack }
+                        NumberAnimation { target: lockRoot; property: "clockOpacity"; to: 0.0; duration: 200; easing.type: Easing.InCubic }
+                        NumberAnimation { target: lockRoot; property: "bgOpacity"; to: 0.0; duration: 280; easing.type: Easing.InCubic }
                     }
                     ScriptAction {
                         script: {
@@ -214,58 +212,24 @@ Scope {
                                 ctx.lineTo(w, y)
                                 ctx.stroke()
                             }
-
-                            // Garis Miring Diagonal Dark Hour
-                            ctx.strokeStyle = "rgba(0, 219, 255, 0.15)"
-                            ctx.lineWidth = 2.0
-                            ctx.beginPath()
-                            ctx.moveTo(0, h * 0.28)
-                            ctx.lineTo(w, h * 0.12)
-                            ctx.stroke()
-
-                            ctx.beginPath()
-                            ctx.moveTo(0, h * 0.88)
-                            ctx.lineTo(w, h * 0.72)
-                            ctx.stroke()
                         }
                     }
                 }
 
-                // 2. Kartu Jam Digital Dark Hour di Pojok Kiri Atas
-                Item {
+                // 2. Kartu Jam Digital Dark Hour di Pojok Kiri Atas (Tanpa Skew P5)
+                Rectangle {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.topMargin: 46
                     anchors.leftMargin: 56
-                    width: 380
-                    height: 160
+                    width: 360
+                    height: 150
+                    radius: 6
+                    color: "#040c26"
+                    border.color: "#00dbff"
+                    border.width: 1.8
                     opacity: lockRoot.clockOpacity
                     transform: Translate { x: lockRoot.clockSlideX }
-
-                    // Backplate Slanted Cyan
-                    Canvas {
-                        anchors.fill: parent
-                        antialiasing: true
-                        onPaint: {
-                            var ctx = getContext("2d")
-                            ctx.reset()
-                            var w = width
-                            var h = height
-                            var sk = 16.0
-
-                            ctx.beginPath()
-                            ctx.moveTo(sk, 0)
-                            ctx.lineTo(w, 0)
-                            ctx.lineTo(w - sk, h)
-                            ctx.lineTo(0, h)
-                            ctx.closePath()
-                            ctx.fillStyle = "#030a1c"
-                            ctx.fill()
-                            ctx.strokeStyle = "#00dbff"
-                            ctx.lineWidth = 2.0
-                            ctx.stroke()
-                        }
-                    }
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -275,7 +239,7 @@ Scope {
                         RowLayout {
                             spacing: 8
                             Rectangle {
-                                width: 108
+                                width: 98
                                 height: 22
                                 radius: 2
                                 color: "#0038a8"
@@ -296,7 +260,7 @@ Scope {
                                 text: "S.E.E.S. OPERATIONAL TIME"
                                 color: "#00dbff"
                                 font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 10
+                                font.pixelSize: 9
                                 font.bold: true
                                 font.letterSpacing: 1
                             }
@@ -306,7 +270,7 @@ Scope {
                             text: lockScope.currentTime
                             color: "#ffffff"
                             font.family: "Rubik"
-                            font.pixelSize: 64
+                            font.pixelSize: 58
                             font.weight: Font.Black
                             font.italic: true
                         }
@@ -321,11 +285,11 @@ Scope {
                     }
                 }
 
-                // 3. Kartu Autentikasi Utama S.E.E.S. di Tengah Layar
+                // 3. Kartu Autentikasi Utama S.E.E.S. di Tengah Layar (Bentuk Dialog P3R Tanpa Skew P5)
                 Item {
                     id: centerCard
                     width: 540
-                    height: 350
+                    height: 360
                     anchors.centerIn: parent
                     opacity: lockRoot.cardOpacity
                     scale: lockRoot.cardScale
@@ -349,41 +313,66 @@ Scope {
                         }
                     }
 
-                    // Backplate Slanted P3R dengan Garis Neon Cyan
+                    // Background Kartu Dialog P3R dengan Wedge Segitiga Kiri Atas (Foto 2)
                     Canvas {
                         id: centerCardCanvas
                         anchors.fill: parent
                         antialiasing: true
+
                         onPaint: {
                             var ctx = getContext("2d")
                             ctx.reset()
                             var w = width
                             var h = height
-                            var sk = 18.0
 
-                            // Bayangan Luar Safir
+                            // Shard Aksen Biru di Kanan
+                            ctx.fillStyle = "rgba(0, 160, 255, 0.28)"
                             ctx.beginPath()
-                            ctx.moveTo(sk + 5, 5)
-                            ctx.lineTo(w + 5, 5)
-                            ctx.lineTo(w - sk + 5, h + 5)
-                            ctx.lineTo(5, h + 5)
+                            ctx.moveTo(w - 85, -4)
+                            ctx.lineTo(w + 6, -4)
+                            ctx.lineTo(w - 10, h + 4)
+                            ctx.lineTo(w - 100, h + 4)
                             ctx.closePath()
-                            ctx.fillStyle = "rgba(0, 20, 60, 0.85)"
                             ctx.fill()
 
-                            // Dasar Kartu Navy
+                            // Badan Utama Kotak Dialog
+                            var bx = 16
+                            var by = 12
+                            var bw = w - 32
+                            var bh = h - 20
+                            var r = 8
+
                             ctx.beginPath()
-                            ctx.moveTo(sk, 0)
-                            ctx.lineTo(w, 0)
-                            ctx.lineTo(w - sk, h)
-                            ctx.lineTo(0, h)
+                            ctx.moveTo(bx + r, by)
+                            ctx.lineTo(bx + bw - r, by)
+                            ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r)
+                            ctx.lineTo(bx + bw, by + bh - r)
+                            ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh)
+                            ctx.lineTo(bx + r, by + bh)
+                            ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r)
+                            ctx.lineTo(bx, by + r)
+                            ctx.quadraticCurveTo(bx, by, bx + r, by)
                             ctx.closePath()
-                            ctx.fillStyle = "#030a1c"
+
+                            ctx.fillStyle = "rgba(4, 12, 38, 0.96)"
                             ctx.fill()
 
-                            // Garis Tepi Neon (Hijau/Cyan Sukses, Merah Error, Biru Normal)
-                            ctx.strokeStyle = lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ff2a55" : "#00dbff")
-                            ctx.lineWidth = 2.5
+                            ctx.strokeStyle = lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ff2a55" : "rgba(0, 219, 255, 0.75)")
+                            ctx.lineWidth = 1.8
+                            ctx.stroke()
+
+                            // Wedge Segitiga Kiri Atas P3R (Sesuai Foto 2)
+                            ctx.beginPath()
+                            ctx.moveTo(-2, 22)
+                            ctx.lineTo(165, -2)
+                            ctx.lineTo(178, 24)
+                            ctx.lineTo(38, 36)
+                            ctx.closePath()
+
+                            ctx.fillStyle = lockScope.authSuccess ? "#00a080" : (lockScope.authError ? "#d60032" : "#0028e0")
+                            ctx.fill()
+                            ctx.strokeStyle = lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ffffff" : "#00f0ff")
+                            ctx.lineWidth = 1.3
                             ctx.stroke()
                         }
 
@@ -394,9 +383,47 @@ Scope {
                         }
                     }
 
+                    // Teks Label pada Wedge Segitiga Kiri Atas
+                    Item {
+                        x: 8
+                        y: -1
+                        width: 160
+                        height: 32
+                        z: 10
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 22
+                            anchors.topMargin: 2
+                            spacing: 0
+
+                            Text {
+                                text: "S.E.E.S. AUTH"
+                                color: "#ffffff"
+                                font.family: "Rubik"
+                                font.pixelSize: 11
+                                font.weight: Font.Black
+                                font.letterSpacing: 1.0
+                            }
+
+                            Text {
+                                text: "DARK HOUR PROTOCOL"
+                                color: "#00f0ff"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 8
+                                font.bold: true
+                                font.letterSpacing: 0.5
+                            }
+                        }
+                    }
+
+                    // Konten Kartu Autentikasi
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 26
+                        anchors.leftMargin: 30
+                        anchors.rightMargin: 30
+                        anchors.topMargin: 38
+                        anchors.bottomMargin: 20
                         spacing: 16
 
                         // Profil Operatif S.E.E.S.
@@ -404,67 +431,44 @@ Scope {
                             Layout.fillWidth: true
                             spacing: 16
 
-                            // Foto Profil Karakter Persona 3 (Makoto Yuki)
-                            Item {
-                                Layout.preferredWidth: 80
-                                Layout.preferredHeight: 80
+                            // Foto Profil Makoto Yuki
+                            Rectangle {
+                                Layout.preferredWidth: 72
+                                Layout.preferredHeight: 72
+                                radius: 4
+                                color: "#071228"
+                                border.color: lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ff2a55" : "#00dbff")
+                                border.width: 1.5
+                                clip: true
 
-                                Rectangle {
+                                Image {
                                     anchors.fill: parent
-                                    radius: 4
-                                    color: "#071228"
-                                    border.color: lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ff2a55" : "#00dbff")
-                                    border.width: 2
-                                    clip: true
-
-                                    Image {
-                                        anchors.fill: parent
-                                        source: Qt.resolvedUrl("../../assets/themes/p3/ui/char_leader.png")
-                                        fillMode: Image.PreserveAspectCrop
-                                        smooth: true
-                                    }
+                                    source: Qt.resolvedUrl("../../assets/themes/p3/ui/char_leader.png")
+                                    fillMode: Image.PreserveAspectCrop
+                                    smooth: true
                                 }
                             }
 
-                            // Identitas dan Status Operatif
+                            // Identitas dan Status
                             ColumnLayout {
                                 Layout.fillWidth: true
-                                spacing: 3
-
-                                RowLayout {
-                                    spacing: 8
-                                    Rectangle {
-                                        width: 82
-                                        height: 20
-                                        radius: 2
-                                        color: lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ff2a55" : "#0038a8")
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "S.E.E.S."
-                                            color: lockScope.authSuccess ? "#030818" : "#ffffff"
-                                            font.family: "Rubik"
-                                            font.pixelSize: 10
-                                            font.weight: Font.Black
-                                            font.letterSpacing: 1.5
-                                        }
-                                    }
-
-                                    Text {
-                                        text: "// SPECIALIZED EXECUTION SQUAD"
-                                        color: "#00dbff"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 9
-                                        font.bold: true
-                                    }
-                                }
+                                spacing: 4
 
                                 Text {
                                     text: "OPERATIVE // " + String(PhantomState.sysHost).toUpperCase()
                                     color: "#ffffff"
                                     font.family: "Rubik"
-                                    font.pixelSize: 20
+                                    font.pixelSize: 18
                                     font.weight: Font.Black
-                                    font.letterSpacing: 1
+                                    font.letterSpacing: 0.8
+                                }
+
+                                Text {
+                                    text: "SPECIALIZED EXTRACURRICULAR EXECUTION SQUAD"
+                                    color: "#00dbff"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 9
+                                    font.bold: true
                                 }
 
                                 Text {
@@ -481,109 +485,109 @@ Scope {
                             }
                         }
 
-                        // Kotak Input Kata Sandi Slanted P3R
-                        Item {
+                        // Kotak Input Kata Sandi
+                        Rectangle {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 52
+                            Layout.preferredHeight: 48
+                            radius: 4
+                            color: "#06132a"
+                            border.color: pwInput.activeFocus ? "#00dbff" : "#1a2c4e"
+                            border.width: 1.6
 
-                            Rectangle {
+                            RowLayout {
                                 anchors.fill: parent
-                                radius: 4
-                                color: "#07132c"
-                                border.color: pwInput.activeFocus ? "#00dbff" : "#1a2c4e"
-                                border.width: 1.8
+                                anchors.leftMargin: 16
+                                anchors.rightMargin: 12
+                                spacing: 10
 
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 16
-                                    anchors.rightMargin: 12
-                                    spacing: 10
+                                // Ikon Kunci SVG Resmi (Bebas Emoji)
+                                Image {
+                                    width: 18
+                                    height: 18
+                                    source: "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/lock.svg"
+                                    fillMode: Image.PreserveAspectFit
+                                    smooth: true
+                                }
+
+                                TextInput {
+                                    id: pwInput
+                                    Layout.fillWidth: true
+                                    color: "#ffffff"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 15
+                                    font.weight: Font.Bold
+                                    echoMode: lockScope.showPassword ? TextInput.Normal : TextInput.Password
+                                    passwordCharacter: "●"
+                                    focus: true
+                                    clip: true
+                                    verticalAlignment: TextInput.AlignVCenter
+
+                                    Keys.onReturnPressed: {
+                                        lockScope.submitPassword(pwInput.text)
+                                        pwInput.text = ""
+                                    }
+                                    Keys.onEnterPressed: {
+                                        lockScope.submitPassword(pwInput.text)
+                                        pwInput.text = ""
+                                    }
+                                    Keys.onEscapePressed: {
+                                        pwInput.text = ""
+                                        lockScope.authError = false
+                                        lockScope.statusText = "DARK HOUR DETECTED // AUTHORIZE EVOKER"
+                                    }
 
                                     Text {
-                                        text: "🗝"
-                                        font.pixelSize: 15
-                                    }
-
-                                    TextInput {
-                                        id: pwInput
-                                        Layout.fillWidth: true
-                                        color: "#ffffff"
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "Enter Evoker Authorization Passcode..."
+                                        color: "#3f5c84"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 16
-                                        font.weight: Font.Bold
-                                        echoMode: lockScope.showPassword ? TextInput.Normal : TextInput.Password
-                                        passwordCharacter: "●"
-                                        focus: true
-                                        clip: true
-                                        verticalAlignment: TextInput.AlignVCenter
+                                        font.pixelSize: 11
+                                        font.bold: true
+                                        visible: pwInput.text.length === 0
+                                    }
+                                }
 
-                                        Keys.onReturnPressed: {
-                                            lockScope.submitPassword(pwInput.text)
-                                            pwInput.text = ""
-                                        }
-                                        Keys.onEnterPressed: {
-                                            lockScope.submitPassword(pwInput.text)
-                                            pwInput.text = ""
-                                        }
-                                        Keys.onEscapePressed: {
-                                            pwInput.text = ""
-                                            lockScope.authError = false
-                                            lockScope.statusText = "DARK HOUR DETECTED // AUTHORIZE EVOKER"
-                                        }
+                                // Tombol Show/Hide Passcode
+                                Rectangle {
+                                    width: 52
+                                    height: 26
+                                    radius: 3
+                                    color: showPwMouse.containsMouse ? "#0038a8" : "#0d1f42"
+                                    border.color: "#00dbff"
+                                    border.width: 1
 
-                                        Text {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            text: "Enter Evoker Authorization Passcode..."
-                                            color: "#3f5c84"
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 12
-                                            font.bold: true
-                                            visible: pwInput.text.length === 0
-                                        }
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: lockScope.showPassword ? "HIDE" : "SHOW"
+                                        color: "#ffffff"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 9
+                                        font.bold: true
                                     }
 
-                                    // Tombol Show/Hide Passcode
-                                    Rectangle {
-                                        width: 54
-                                        height: 26
-                                        radius: 3
-                                        color: showPwMouse.containsMouse ? "#0038a8" : "#0d1f42"
-                                        border.color: "#00dbff"
-                                        border.width: 1
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: lockScope.showPassword ? "HIDE" : "SHOW"
-                                            color: "#ffffff"
-                                            font.family: "Rubik"
-                                            font.pixelSize: 9
-                                            font.bold: true
-                                        }
-
-                                        MouseArea {
-                                            id: showPwMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                lockScope.showPassword = !lockScope.showPassword
-                                                pwInput.forceActiveFocus()
-                                            }
+                                    MouseArea {
+                                        id: showPwMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            lockScope.showPassword = !lockScope.showPassword
+                                            pwInput.forceActiveFocus()
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // Baris Informasi Baterai & Tombol Aksi
+                        // Baris Informasi Baterai (Ikon SVG Resmi - Bebas Emoji) & Tombol Aksi
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: 10
+                            spacing: 12
 
                             Rectangle {
-                                height: 36
+                                height: 38
                                 Layout.fillWidth: true
-                                radius: 3
+                                radius: 4
                                 color: "#061226"
                                 border.color: "#182a4c"
                                 border.width: 1
@@ -591,13 +595,24 @@ Scope {
                                 RowLayout {
                                     anchors.centerIn: parent
                                     spacing: 8
+
+                                    // Ikon Baterai SVG Resmi (Bebas Emoji)
+                                    Image {
+                                        width: 18
+                                        height: 18
+                                        source: "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/battery-bolt.svg"
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                    }
+
                                     Text {
-                                        text: "⚡ BAT " + PhantomState.batteryPct + "%"
+                                        text: "BATTERY " + PhantomState.batteryPct + "%"
                                         color: "#00dbff"
                                         font.family: "JetBrainsMono NFM"
                                         font.pixelSize: 11
                                         font.bold: true
                                     }
+
                                     Text {
                                         text: "• " + PhantomState.sysHost
                                         color: "#54749f"
@@ -609,21 +624,21 @@ Scope {
 
                             // Tombol DISPATCH / AUTHORIZE
                             Rectangle {
-                                height: 36
+                                height: 38
                                 Layout.preferredWidth: 150
-                                radius: 3
-                                color: submitMouse.containsMouse ? "#00e5ff" : "#0038a8"
+                                radius: 4
+                                color: submitMouse.containsMouse ? "#00e5ff" : "#0028e0"
                                 border.color: "#00dbff"
                                 border.width: 1.5
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: "DISPATCH ➔"
+                                    text: "DISPATCH"
                                     color: submitMouse.containsMouse ? "#030818" : "#ffffff"
                                     font.family: "Rubik"
                                     font.pixelSize: 11
                                     font.weight: Font.Black
-                                    font.letterSpacing: 1
+                                    font.letterSpacing: 1.2
                                 }
 
                                 MouseArea {
