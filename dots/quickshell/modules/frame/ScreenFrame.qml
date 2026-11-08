@@ -17,8 +17,8 @@ Scope {
             visible: true
 
             WlrLayershell.namespace: "phantomshell-frame"
-            WlrLayershell.layer: WlrLayer.Top
-            exclusionMode: ExclusionMode.Normal
+            WlrLayershell.layer: WlrLayer.Overlay
+            exclusionMode: ExclusionMode.Ignore
             exclusiveZone: 0
 
             anchors {
@@ -34,15 +34,21 @@ Scope {
             property bool p3SplashActive: false
             property int p3SplashFrame: 0
             property real p3SplashOpacity: 1.0
+            property real p3OceanCoverage: 0.0
 
             Timer {
                 id: p3SplashTimer
-                interval: 38
+                interval: 36
                 repeat: true
                 running: false
                 onTriggered: {
                     if (frameWin.p3SplashFrame < 11) {
                         frameWin.p3SplashFrame++
+                        // Cakupan samudra naik cepat di awal sehingga pada frame 4-8 layar tertutup 100%
+                        if (frameWin.p3SplashFrame === 1) frameWin.p3OceanCoverage = 0.5
+                        else if (frameWin.p3SplashFrame === 2) frameWin.p3OceanCoverage = 0.8
+                        else if (frameWin.p3SplashFrame === 3) frameWin.p3OceanCoverage = 0.96
+                        else if (frameWin.p3SplashFrame >= 4) frameWin.p3OceanCoverage = 1.0
                     } else {
                         p3SplashTimer.stop()
                         p3SplashFadeAnim.restart()
@@ -52,19 +58,30 @@ Scope {
 
             SequentialAnimation {
                 id: p3SplashFadeAnim
-                PauseAnimation { duration: 160 }
-                NumberAnimation {
-                    target: frameWin
-                    property: "p3SplashOpacity"
-                    from: 1.0
-                    to: 0.0
-                    duration: 320
-                    easing.type: Easing.OutCubic
+                PauseAnimation { duration: 180 }
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3SplashOpacity"
+                        from: 1.0
+                        to: 0.0
+                        duration: 380
+                        easing.type: Easing.OutCubic
+                    }
+                    NumberAnimation {
+                        target: frameWin
+                        property: "p3OceanCoverage"
+                        from: 1.0
+                        to: 0.0
+                        duration: 380
+                        easing.type: Easing.OutCubic
+                    }
                 }
                 ScriptAction {
                     script: {
                         frameWin.p3SplashActive = false
                         frameWin.p3SplashFrame = 0
+                        frameWin.p3OceanCoverage = 0.0
                     }
                 }
             }
@@ -73,6 +90,7 @@ Scope {
                 p3SplashTimer.stop()
                 p3SplashFadeAnim.stop()
                 frameWin.p3SplashFrame = 0
+                frameWin.p3OceanCoverage = 0.25
                 frameWin.p3SplashOpacity = 1.0
                 frameWin.p3SplashActive = true
                 PhantomState.playSfx("splash")
@@ -197,8 +215,8 @@ Scope {
                 function onScreenFrameChanged() { frameCanvas.requestPaint() }
                 function onSpecialWorkspaceActiveChanged() { frameCanvas.requestPaint() }
                 function onTransitionTickChanged() {
-                    console.log("[SCREEN FRAME] onTransitionTickChanged: themeId=" + PhantomState.themeId)
-                    if (PhantomState.themeId === "p3-reload") {
+                    console.log("[SCREEN FRAME] onTransitionTickChanged: targetThemeId=" + PhantomState.targetThemeId)
+                    if (PhantomState.targetThemeId === "p3-reload") {
                         frameWin.triggerP3Splash()
                     } else {
                         p5TransitionAnim.restart()
@@ -779,16 +797,116 @@ Scope {
                 opacity: frameWin.p3SplashOpacity
                 z: 100
 
+                // 1. Lapisan samudra biru pekat P3R (Sea of Soul) menutup 100% layar tanpa celah
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: -20
+                    opacity: frameWin.p3OceanCoverage
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: "#010A1A" }
+                        GradientStop { position: 0.28; color: "#021C42" }
+                        GradientStop { position: 0.58; color: "#003A75" }
+                        GradientStop { position: 0.85; color: "#0077B6" }
+                        GradientStop { position: 1.0; color: "#00B4D8" }
+                    }
+                }
+
+                // 2. Berkas cahaya matahari dan caustics bawah air
                 Repeater {
-                    model: 12
-                    delegate: Image {
+                    model: 6
+                    delegate: Rectangle {
                         required property int index
-                        anchors.fill: parent
-                        fillMode: Image.PreserveAspectCrop
-                        visible: frameWin.p3SplashFrame === index
-                        asynchronous: false
-                        cache: true
-                        source: Qt.resolvedUrl("../../assets/themes/p3/menu/png/pngseq" + (index < 10 ? "0" + index : "" + index) + ".png")
+                        width: parent.width * 0.22 + (index * 25)
+                        height: parent.height * 1.4
+                        x: (parent.width * (0.04 + index * 0.17)) + Math.sin(frameWin.p3SplashFrame * 0.6 + index) * 24
+                        y: -parent.height * 0.2
+                        rotation: -14 + index * 4.5
+                        opacity: frameWin.p3OceanCoverage * (0.14 + (index % 3) * 0.08)
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "#9900F0FF" }
+                            GradientStop { position: 0.65; color: "#400077B6" }
+                            GradientStop { position: 1.0; color: "transparent" }
+                        }
+                    }
+                }
+
+                // 3. Gelembung udara spekular berombak naik dari bawah
+                Repeater {
+                    model: 28
+                    delegate: Item {
+                        required property int index
+                        readonly property real baseX: ((index * 67 + 31) % 100) / 100.0 * parent.width
+                        readonly property real startY: parent.height * (0.5 + ((index * 37) % 50) / 100.0)
+                        readonly property real speed: 0.75 + ((index * 13) % 10) / 10.0
+                        readonly property real bSize: 8 + ((index * 11) % 22)
+                        readonly property real wobble: Math.sin(frameWin.p3SplashFrame * 0.8 + index) * (12 + (index % 4) * 6)
+                        readonly property real currentY: startY - (parent.height * 0.85 * (frameWin.p3SplashFrame / 11.0) * speed)
+                        x: baseX + wobble
+                        y: currentY
+                        width: bSize
+                        height: bSize
+                        opacity: frameWin.p3OceanCoverage * (0.4 + (index % 4) * 0.15)
+                        visible: currentY > -30 && currentY < parent.height + 30
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: width / 2
+                            color: "#2600F0FF"
+                            border.color: "#E6FFFFFF"
+                            border.width: 1.2
+
+                            Rectangle {
+                                x: parent.width * 0.22
+                                y: parent.height * 0.2
+                                width: Math.max(2, parent.width * 0.28)
+                                height: Math.max(2, parent.height * 0.28)
+                                radius: width / 2
+                                color: "#FFFFFF"
+                                opacity: 0.9
+                            }
+                        }
+                    }
+                }
+
+                // 4. Hero Semburan Air Autentik P3R (Scaled 1.22x agar semburan dan buih melebar menembus sisi)
+                Item {
+                    anchors.fill: parent
+                    scale: 1.22
+                    transformOrigin: Item.Center
+
+                    Repeater {
+                        model: 12
+                        delegate: Image {
+                            required property int index
+                            anchors.fill: parent
+                            fillMode: Image.PreserveAspectCrop
+                            visible: frameWin.p3SplashFrame === index
+                            asynchronous: false
+                            cache: true
+                            source: Qt.resolvedUrl("../../assets/themes/p3/menu/png/pngseq" + (index < 10 ? "0" + index : "" + index) + ".png")
+                        }
+                    }
+                }
+
+                // 5. Percikan air sekunder kiri & kanan (mirrored) untuk mengisi sudut samping secara organik
+                Item {
+                    anchors.fill: parent
+                    scale: 1.18
+                    opacity: 0.7
+                    transformOrigin: Item.Center
+
+                    Repeater {
+                        model: 12
+                        delegate: Image {
+                            required property int index
+                            anchors.fill: parent
+                            fillMode: Image.PreserveAspectCrop
+                            visible: frameWin.p3SplashFrame === index
+                            mirror: true
+                            asynchronous: false
+                            cache: true
+                            source: Qt.resolvedUrl("../../assets/themes/p3/menu/png/pngseq" + (index < 10 ? "0" + index : "" + index) + ".png")
+                        }
                     }
                 }
             }

@@ -90,6 +90,22 @@ Singleton {
     property string transitionSub: "PALETTE SYNCHRONIZED"
     property string previousWallpaperPath: ""
     property string previousThemeId: "p3-reload"
+    property string targetThemeId: "p3-reload"
+    property string pendingPresetId: ""
+    property bool pendingSkipSave: false
+
+    Timer {
+        id: presetCommitTimer
+        interval: 220
+        repeat: false
+        running: false
+        onTriggered: {
+            if (root.pendingPresetId) {
+                root.commitPresetApply(root.pendingPresetId, root.pendingSkipSave)
+                root.pendingPresetId = ""
+            }
+        }
+    }
 
     function setSpecialWorkspaceActive(active) {
         if (root.specialWorkspaceActive === active) return
@@ -789,45 +805,67 @@ Singleton {
 
     // sinkronisasi preset tema, wallpaper bawaan, dan warna border hyprland
     function applyPreset(presetId, skipSave) {
-        if (presets[presetId]) {
-            const p = presets[presetId]
-            previousThemeId = themeId
-            themeId = p.id
-            themeName = p.name
-            primary = p.primary
-            secondary = p.secondary
-            accent = p.accent
-            background = p.background
-            surface = p.surface
-            surfaceAlt = p.surfaceAlt
-            foreground = p.foreground
-            muted = p.muted
-            borderLight = p.borderLight
-            borderDark = p.borderDark
-            urgent = p.urgent
-            success = p.success
+        if (!presets[presetId]) return
+        if (themeId === presetId && !root.isLoadingSettings) return
 
-            if (p.wallpaper && p.wallpaper !== wallpaperPath) {
-                previousWallpaperPath = wallpaperPath
-                wallpaperPath = p.wallpaper
-                Quickshell.execDetached(["sh", "-c", "swww img '" + p.wallpaper + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
-            }
+        if (root.isLoadingSettings) {
+            commitPresetApply(presetId, skipSave)
+            return
+        }
 
-            transitionTitle = p.name.toUpperCase()
-            transitionSub = "METAVERSE PALETTE & WALLPAPER SYNCHRONIZED"
-            transitionTick++
+        // Tunda perubahan tema sampai tirai transisi (air/slash) menutup layar penuh
+        pendingPresetId = presetId
+        pendingSkipSave = !!skipSave
+        targetThemeId = presetId
+        transitionTitle = presets[presetId].name.toUpperCase()
+        transitionSub = "METAVERSE PALETTE & WALLPAPER SYNCHRONIZED"
 
-            const cleanHex = String(p.primary).replace("#", "")
-            Quickshell.execDetached([
-                "hyprctl",
-                "eval",
-                "hl.config({ general = { col = { active_border = 'rgba(" + cleanHex + "ff)' } } })"
-            ])
-            syncAppThemes(p)
-            if (!skipSave && !root.isLoadingSettings) {
-                saveState()
-                playSfx("select")
-            }
+        // Mulai animasi transisi di layar terlebih dahulu
+        transitionTick++
+
+        // Waktu tunggu commit tema di balik tirai transisi (saat layar tertutup penuh):
+        // P3 Reload: semburan air dan samudra menutup 100% pada frame 6 (~220ms)
+        // P5 Crimson / tema lain: tebasan diagonal menutup tengah pada ~180ms
+        presetCommitTimer.interval = (presetId === "p3-reload") ? 220 : 180
+        presetCommitTimer.restart()
+    }
+
+    function commitPresetApply(presetId, skipSave) {
+        if (!presets[presetId]) return
+        const p = presets[presetId]
+        previousThemeId = themeId
+        themeId = p.id
+        targetThemeId = p.id
+        themeName = p.name
+        primary = p.primary
+        secondary = p.secondary
+        accent = p.accent
+        background = p.background
+        surface = p.surface
+        surfaceAlt = p.surfaceAlt
+        foreground = p.foreground
+        muted = p.muted
+        borderLight = p.borderLight
+        borderDark = p.borderDark
+        urgent = p.urgent
+        success = p.success
+
+        if (p.wallpaper && p.wallpaper !== wallpaperPath) {
+            previousWallpaperPath = wallpaperPath
+            wallpaperPath = p.wallpaper
+            Quickshell.execDetached(["sh", "-c", "swww img '" + p.wallpaper + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
+        }
+
+        const cleanHex = String(p.primary).replace("#", "")
+        Quickshell.execDetached([
+            "hyprctl",
+            "eval",
+            "hl.config({ general = { col = { active_border = 'rgba(" + cleanHex + "ff)' } } })"
+        ])
+        syncAppThemes(p)
+        if (!skipSave && !root.isLoadingSettings) {
+            saveState()
+            playSfx("select")
         }
     }
 
