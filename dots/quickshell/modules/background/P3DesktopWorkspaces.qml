@@ -25,6 +25,12 @@ Item {
         ? SystemTray.items.values[root.activeMenuIndex]
         : null
 
+    // Pembuka menu native DBus dari tray item aktif
+    QsMenuOpener {
+        id: activeMenuOpener
+        menu: root.activeTrayItem && root.activeTrayItem.hasMenu ? root.activeTrayItem.menu : null
+    }
+
     // Deteksi posisi sesuai setting desktopWorkspacesPosition atau auto berdasarkan posisi jam desktop
     readonly property string effectivePosition: {
         const customPos = PhantomState.desktopWorkspacesPosition || "auto"
@@ -332,40 +338,41 @@ Item {
         }
     }
 
-    // Menu Konteks Teks Stensil Persona 3 Reload (Pure Text, No Background, Blend Selaras Kaca Desktop)
+    // Menu Konteks Teks Stensil Persona 3 Reload (Pure Text, Vertical Column, No Background, Blend Selaras Kaca Desktop)
     Item {
         id: contextMenuCard
         visible: root.activeMenuIndex >= 0 && root.trayExpanded && root.activeTrayItem !== null
         anchors.top: wsRow.bottom
-        anchors.topMargin: 4
-        x: Math.max(0, traySection.x + trayIconsClip.x + (root.activeMenuIndex * 44) - 6)
-        width: actionsRow.implicitWidth
-        height: actionsRow.implicitHeight
+        anchors.topMargin: 8
+        x: Math.max(0, traySection.x + trayIconsClip.x + (root.activeMenuIndex * 44) - 2)
+        width: actionsCol.implicitWidth
+        height: actionsCol.implicitHeight
         z: 1000
 
-        Row {
-            id: actionsRow
-            spacing: 12
-            anchors.verticalCenter: parent.verticalCenter
+        Column {
+            id: actionsCol
+            spacing: 4
+            anchors.left: parent.left
+            anchors.top: parent.top
 
-            // Opsi 1: OPEN (Buka / Fokus)
+            // Jika aplikasi tidak memiliki menu DBus bawaan, sediakan opsi OPEN default
             Text {
-                id: openText
+                visible: activeMenuOpener.children.values.length === 0
                 text: "OPEN"
                 font.family: "Bebas Neue"
-                font.pixelSize: 26
+                font.pixelSize: 22
                 font.bold: true
                 font.italic: true
-                color: openMouse.containsMouse ? "#ffffff" : "#64aff0"
-                opacity: openMouse.containsMouse ? 1.0 : 0.40
-                scale: openMouse.containsMouse ? 1.10 : 1.0
+                color: "#ffffff"
+                opacity: defOpenMouse.containsMouse ? 1.0 : 0.45
+                scale: defOpenMouse.containsMouse ? 1.08 : 1.0
+                transformOrigin: Item.Left
 
-                Behavior on color { ColorAnimation { duration: 140 } }
                 Behavior on opacity { NumberAnimation { duration: 140 } }
                 Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
                 MouseArea {
-                    id: openMouse
+                    id: defOpenMouse
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
@@ -380,29 +387,68 @@ Item {
                 }
             }
 
-            // Garis pemisah stensil samar
-            Text {
-                text: "/"
-                font.family: "Bebas Neue"
-                font.pixelSize: 22
-                font.bold: true
-                font.italic: true
-                color: "#64aff0"
-                opacity: 0.20
-                anchors.verticalCenter: parent.verticalCenter
+            // Daftar lengkap opsi menu asli bawaan aplikasi (DBus) - Semua putih kecuali quit/kill
+            Repeater {
+                model: activeMenuOpener.children
+
+                delegate: Item {
+                    id: menuEntryWrap
+                    required property QsMenuEntry modelData
+                    readonly property string cleanLabel: String(modelData.text || "").replace(/_/g, "").trim()
+                    readonly property bool isKillOrQuit: /^(quit|kill|exit|keluar|tutup)/i.test(cleanLabel)
+                    visible: !modelData.isSeparator && cleanLabel.length > 0
+                    width: entryText.implicitWidth
+                    height: entryText.implicitHeight
+
+                    Text {
+                        id: entryText
+                        text: menuEntryWrap.cleanLabel.toUpperCase()
+                        font.family: "Bebas Neue"
+                        font.pixelSize: 22
+                        font.bold: true
+                        font.italic: true
+                        color: menuEntryWrap.isKillOrQuit
+                            ? (entryMouse.containsMouse ? "#ff2255" : "#ff5577")
+                            : "#ffffff"
+                        opacity: !menuEntryWrap.modelData.enabled
+                            ? 0.20
+                            : (entryMouse.containsMouse ? 1.0 : (menuEntryWrap.isKillOrQuit ? 0.60 : 0.45))
+                        scale: entryMouse.containsMouse ? 1.08 : 1.0
+                        transformOrigin: Item.Left
+
+                        Behavior on opacity { NumberAnimation { duration: 140 } }
+                        Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                        Behavior on color { ColorAnimation { duration: 140 } }
+                    }
+
+                    MouseArea {
+                        id: entryMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        enabled: menuEntryWrap.modelData.enabled
+                        cursorShape: menuEntryWrap.modelData.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onEntered: PhantomState.playSfx("select")
+                        onClicked: {
+                            PhantomState.playSfx("select")
+                            menuEntryWrap.modelData.triggered()
+                            root.activeMenuIndex = -1
+                        }
+                    }
+                }
             }
 
-            // Opsi 2: KILL (Matikan Paksa)
+            // Opsi KILL Paksa (selalu ada di paling bawah, warna merah crimson)
             Text {
                 id: killText
                 text: "KILL"
                 font.family: "Bebas Neue"
-                font.pixelSize: 26
+                font.pixelSize: 22
                 font.bold: true
                 font.italic: true
-                color: killMouse.containsMouse ? "#ff2255" : "#ff7088"
-                opacity: killMouse.containsMouse ? 1.0 : 0.45
-                scale: killMouse.containsMouse ? 1.10 : 1.0
+                color: killMouse.containsMouse ? "#ff2255" : "#ff5577"
+                opacity: killMouse.containsMouse ? 1.0 : 0.55
+                scale: killMouse.containsMouse ? 1.08 : 1.0
+                transformOrigin: Item.Left
 
                 Behavior on color { ColorAnimation { duration: 140 } }
                 Behavior on opacity { NumberAnimation { duration: 140 } }
