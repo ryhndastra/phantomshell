@@ -19,6 +19,17 @@ Item {
     // Status ekspansi baki aplikasi (tray) di samping workspace
     property bool trayExpanded: PhantomState.desktopTrayExpanded
     readonly property int trayCount: SystemTray.items.values.length
+    property int activeMenuIndex: -1
+
+    readonly property var activeTrayItem: (root.activeMenuIndex >= 0 && root.activeMenuIndex < SystemTray.items.values.length)
+        ? SystemTray.items.values[root.activeMenuIndex]
+        : null
+
+    // Pembuka menu native DBus dari tray item aktif
+    QsMenuOpener {
+        id: activeMenuOpener
+        menu: root.activeTrayItem && root.activeTrayItem.hasMenu ? root.activeTrayItem.menu : null
+    }
 
     // Deteksi posisi sesuai setting desktopWorkspacesPosition atau auto berdasarkan posisi jam desktop
     readonly property string effectivePosition: {
@@ -240,12 +251,13 @@ Item {
                     onEntered: PhantomState.playSfx("select")
                     onClicked: {
                         PhantomState.playSfx("select")
+                        root.activeMenuIndex = -1
                         PhantomState.toggleDesktopTray()
                     }
                 }
             }
 
-            // Ikon-ikon aplikasi tray yang muncul saat expand
+            // Ikon-ikon aplikasi tray yang muncul saat expand (horizontal clip only)
             Item {
                 id: trayIconsClip
                 height: 42
@@ -265,7 +277,7 @@ Item {
 
                 Row {
                     id: trayIconsRow
-                    spacing: 10
+                    spacing: 12
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
 
@@ -281,26 +293,17 @@ Item {
                             height: 32
                             anchors.verticalCenter: parent.verticalCenter
 
-                            // Hover scale & opacity
-                            scale: trayAppMouse.containsMouse ? 1.15 : 1.0
-                            opacity: trayAppMouse.containsMouse ? 1.0 : 0.85
-                            Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-                            Behavior on opacity { NumberAnimation { duration: 140 } }
+                            // Hover scale: bersih tanpa border, sedikit membesar secara halus
+                            scale: trayAppMouse.containsMouse ? 1.20 : 1.0
+                            opacity: trayAppMouse.containsMouse ? 1.0 : 0.80
+                            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                            Behavior on opacity { NumberAnimation { duration: 150 } }
 
-                            // Frame stensil halus saat hover
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: 4
-                                color: trayAppMouse.containsMouse ? Qt.rgba(0, 0.85, 1, 0.20) : Qt.rgba(0, 0, 0, 0.25)
-                                border.color: trayAppMouse.containsMouse ? "#00f0ff" : Qt.rgba(0, 0.85, 1, 0.18)
-                                border.width: 1
-                            }
-
-                            // Ikon aplikasi dari StatusNotifierItem
+                            // Ikon aplikasi dari StatusNotifierItem murni tanpa border/box
                             IconImage {
                                 anchors.centerIn: parent
-                                width: 22
-                                height: 22
+                                width: 24
+                                height: 24
                                 source: trayAppItem.modelData.icon
                                 asynchronous: true
                             }
@@ -315,15 +318,12 @@ Item {
                                 onClicked: mouse => {
                                     PhantomState.playSfx("select")
                                     if (mouse.button === Qt.LeftButton) {
+                                        root.activeMenuIndex = -1
                                         PhantomState.activateTrayItem(trayAppItem.modelData)
                                     } else if (mouse.button === Qt.RightButton) {
-                                        if (trayAppItem.modelData.hasMenu && root.Window.window) {
-                                            const pos = trayAppItem.mapToItem(null, 0, trayAppItem.height + 6)
-                                            trayAppItem.modelData.display(root.Window.window, Math.max(8, pos.x), pos.y)
-                                        } else {
-                                            trayAppItem.modelData.secondaryActivate()
-                                        }
+                                        root.activeMenuIndex = (root.activeMenuIndex === trayAppItem.index ? -1 : trayAppItem.index)
                                     } else if (mouse.button === Qt.MiddleButton) {
+                                        root.activeMenuIndex = -1
                                         trayAppItem.modelData.secondaryActivate()
                                     }
                                 }
@@ -331,39 +331,178 @@ Item {
                                     trayAppItem.modelData.scroll(wheel.angleDelta.y, false)
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-                            // Tooltip nama aplikasi saat di-hover
-                            Item {
-                                visible: trayAppMouse.containsMouse
-                                anchors.bottom: parent.top
-                                anchors.bottomMargin: 8
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                width: tipTxt.implicitWidth + 14
-                                height: 22
-                                z: 100
+    // Menu Konteks Klik Kanan S.E.E.S. Desktop (Bebas dari clipping, mengambang di bawah icon)
+    Item {
+        id: contextMenuCard
+        visible: root.activeMenuIndex >= 0 && root.trayExpanded && root.activeTrayItem !== null
+        anchors.top: wsRow.bottom
+        anchors.topMargin: 10
+        x: Math.max(0, traySection.x + trayIconsClip.x + (root.activeMenuIndex * 44))
+        width: 146
+        height: menuContentCol.implicitHeight + 16
+        z: 1000
 
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: 3
-                                    color: "#020718"
-                                    border.color: "#00dbff"
-                                    border.width: 1
-                                }
+        Rectangle {
+            anchors.fill: parent
+            radius: 4
+            color: "#020718"
+            border.color: "#00dbff"
+            border.width: 1
+        }
 
-                                Text {
-                                    id: tipTxt
-                                    anchors.centerIn: parent
-                                    text: {
-                                        const t = trayAppItem.modelData.title || trayAppItem.modelData.tooltipTitle || trayAppItem.modelData.id || "APP"
-                                        return String(t).replace(/^_/, "").toUpperCase()
-                                    }
-                                    color: "#00dbff"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 9
-                                    font.bold: true
-                                }
+        Column {
+            id: menuContentCol
+            anchors.top: parent.top
+            anchors.topMargin: 8
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - 16
+            spacing: 4
+
+            // Header: Judul Aplikasi
+            Text {
+                text: {
+                    if (!root.activeTrayItem) return "APPLICATION"
+                    const t = root.activeTrayItem.title || root.activeTrayItem.tooltipTitle || root.activeTrayItem.id || "APP"
+                    return String(t).replace(/^_/, "").toUpperCase()
+                }
+                color: "#00dbff"
+                font.family: "JetBrainsMono NFM"
+                font.pixelSize: 9
+                font.bold: true
+                elide: Text.ElideRight
+                width: parent.width
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: Qt.rgba(0, 0.85, 1, 0.25)
+            }
+
+            // Opsi 1: Buka / Fokus
+            Rectangle {
+                width: parent.width
+                height: 22
+                radius: 2
+                color: openMouse.containsMouse ? "#00dbff" : "transparent"
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 6
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "▸ BUKA"
+                    color: openMouse.containsMouse ? "#020718" : "#ffffff"
+                    font.family: "JetBrainsMono NFM"
+                    font.pixelSize: 9
+                    font.bold: true
+                }
+
+                MouseArea {
+                    id: openMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (root.activeTrayItem) {
+                            PhantomState.activateTrayItem(root.activeTrayItem)
+                        }
+                        root.activeMenuIndex = -1
+                    }
+                }
+            }
+
+            // Opsi 2: Daftar Menu Asli DBus dari Aplikasi jika tersedia
+            Repeater {
+                model: activeMenuOpener.children
+
+                delegate: Rectangle {
+                    id: menuEntryItem
+                    required property QsMenuEntry modelData
+                    readonly property string cleanLabel: String(modelData.text || "").replace(/_/g, "").trim()
+                    visible: !modelData.isSeparator && cleanLabel.length > 0
+                    width: parent.width
+                    height: 22
+                    radius: 2
+                    color: menuEntryMouse.containsMouse ? "#00dbff" : "transparent"
+
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 6
+                        anchors.right: parent.right
+                        anchors.rightMargin: 6
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: menuEntryItem.cleanLabel.toUpperCase()
+                        color: !menuEntryItem.modelData.enabled
+                            ? "#506080"
+                            : (menuEntryMouse.containsMouse ? "#020718" : "#e0f0ff")
+                        font.family: "JetBrainsMono NFM"
+                        font.pixelSize: 9
+                        font.bold: true
+                        elide: Text.ElideRight
+                    }
+
+                    MouseArea {
+                        id: menuEntryMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        enabled: menuEntryItem.modelData.enabled
+                        cursorShape: menuEntryItem.modelData.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: {
+                            menuEntryItem.modelData.triggered()
+                            root.activeMenuIndex = -1
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: Qt.rgba(0, 0, 0, 0.4)
+            }
+
+            // Opsi 3: Matikan Paksa (Force Kill)
+            Rectangle {
+                width: parent.width
+                height: 22
+                radius: 2
+                color: killMouse.containsMouse ? "#ff2244" : "transparent"
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 6
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "× MATIKAN (KILL)"
+                    color: killMouse.containsMouse ? "#ffffff" : "#ff5577"
+                    font.family: "JetBrainsMono NFM"
+                    font.pixelSize: 9
+                    font.bold: true
+                }
+
+                MouseArea {
+                    id: killMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (root.activeTrayItem) {
+                            const t = String(root.activeTrayItem.title || root.activeTrayItem.id || "").toLowerCase().trim()
+                            if (t.length > 0) {
+                                Quickshell.execDetached(["pkill", "-9", "-f", t])
+                                Quickshell.execDetached([
+                                    "notify-send", "-a", "S.E.E.S. Protocol", "-i", "process-stop",
+                                    "EXECUTION: TERMINATED", "Aplikasi " + t + " dimatikan paksa."
+                                ])
                             }
                         }
+                        root.activeMenuIndex = -1
                     }
                 }
             }
