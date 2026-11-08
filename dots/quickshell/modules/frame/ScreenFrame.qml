@@ -344,6 +344,7 @@ Scope {
             property real deathH: 600
             property real deathMelt: 0.0     // 0.0 (intact charred) -> 1.0 (fully melted down)
             property real deathBurn: 0.0     // 1.0 (searing burn) -> 0.0 (cools/evaporates)
+            property real deathSmoke: 0.0    // 0.0 (billowing start) -> 1.0 (fully dispersed)
             property real deathPuddle: 0.0   // 0.0 -> 1.0 (puddle pool & evaporation)
 
             property real lastWinX: 50
@@ -428,7 +429,7 @@ Scope {
                     }
                 }
 
-                // Tahap 2: Meleleh runtuh ke bawah, tetesan cairan jatuh, asap & abu membubung (~520ms)
+                // Tahap 2: Meleleh runtuh ke bawah, tetesan cairan jatuh, asap tebal & abu membubung (~720ms)
                 ParallelAnimation {
                     // Tubuh jendela mencair dan runtuh ke bawah
                     NumberAnimation {
@@ -436,7 +437,7 @@ Scope {
                         property: "deathMelt"
                         from: 0.0
                         to: 1.0
-                        duration: 520
+                        duration: 480
                         easing.type: Easing.InQuad
                     }
                     // Efek bara api dan nyala desis perlahan mereda
@@ -445,20 +446,29 @@ Scope {
                         property: "deathBurn"
                         from: 1.0
                         to: 0.0
-                        duration: 480
+                        duration: 420
                         easing.type: Easing.OutQuad
                     }
-                    // Genangan cairan hitam di lantai memuai lalu menguap
+                    // Genangan cairan hitam di lantai memuai lalu mendidih & menguap
                     SequentialAnimation {
-                        PauseAnimation { duration: 120 }
+                        PauseAnimation { duration: 100 }
                         NumberAnimation {
                             target: frameWin
                             property: "deathPuddle"
                             from: 0.0
                             to: 1.0
-                            duration: 400
+                            duration: 460
                             easing.type: Easing.OutQuad
                         }
+                    }
+                    // Asap hangus tebal & uap jiwa membubung tinggi, bergulung, lalu memudar perlahan
+                    NumberAnimation {
+                        target: frameWin
+                        property: "deathSmoke"
+                        from: 0.0
+                        to: 1.0
+                        duration: 720
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -469,6 +479,7 @@ Scope {
                         frameWin.deathMelt = 0.0
                         frameWin.deathBurn = 0.0
                         frameWin.deathPuddle = 0.0
+                        frameWin.deathSmoke = 0.0
                     }
                 }
             }
@@ -492,6 +503,7 @@ Scope {
                 frameWin.deathMelt = 0.0
                 frameWin.deathBurn = 0.0
                 frameWin.deathPuddle = 0.0
+                frameWin.deathSmoke = 0.0
                 frameWin.p3DeathActive = true
                 p3ShadowDeathAnim.restart()
             }
@@ -1539,9 +1551,7 @@ Scope {
                     }
                 }
             }
-// ==========================================
-            // OVERLAY P3R SHADOW DEATH (MELELEH & HANGUS)
-            // ==========================================
+
             Item {
                 id: p3ShadowDeathOverlay
                 x: frameWin.deathX
@@ -1568,16 +1578,15 @@ Scope {
                         ctx.reset()
                         ctx.clearRect(0, 0, width, height)
 
-                        var p = frameWin.deathMelt
-                        if (p >= 0.99) return
+                        var pMelt = frameWin.deathMelt
+                        if (pMelt >= 0.99) return
 
                         var burn = frameWin.deathBurn
-                        var topY = height * p
+                        var topY = height * pMelt
 
-                        // Tubuh bayangan hitam pekat yang hangus & mencair
+                        // Tubuh bayangan hitam pekat
                         ctx.fillStyle = "#020712"
-                        // Sisi atas yang terbakar membara warna cyan/biru neon
-                        ctx.strokeStyle = "rgba(0, 240, 255, " + (Math.max(0.1, burn) * 0.95).toFixed(2) + ")"
+                        ctx.strokeStyle = "rgba(0, 240, 255, " + (Math.max(0.15, burn) * 0.95).toFixed(2) + ")"
                         ctx.lineWidth = 3
 
                         ctx.beginPath()
@@ -1592,9 +1601,8 @@ Scope {
                             var xMid = x0 + segW * 0.5
                             var x1 = (i + 1) * segW
 
-                            // Panjang tetesan yang menggantung ke bawah saat mencair
                             var droopFactor = ((i * 47) % 60) + 15
-                            var droopY = topY + droopFactor * Math.sin(p * Math.PI) * (1.0 - p * 0.6)
+                            var droopY = topY + droopFactor * Math.sin(pMelt * Math.PI) * (1.0 - pMelt * 0.6)
 
                             ctx.bezierCurveTo(x0 + segW * 0.2, topY, xMid - segW * 0.2, droopY, xMid, droopY)
                             ctx.bezierCurveTo(xMid + segW * 0.2, droopY, x1 - segW * 0.2, topY, x1, topY)
@@ -1605,10 +1613,10 @@ Scope {
                         ctx.fill()
                         ctx.stroke()
 
-                        // Lapisan bara panas di tepi lelehan
+                        // Lapisan bara putih membara di garis tepi lelehan
                         if (burn > 0.05) {
-                            ctx.strokeStyle = "rgba(255, 255, 255, " + (burn * 0.85).toFixed(2) + ")"
-                            ctx.lineWidth = 1.2
+                            ctx.strokeStyle = "rgba(255, 255, 255, " + (burn * 0.9).toFixed(2) + ")"
+                            ctx.lineWidth = 1.8
                             ctx.beginPath()
                             ctx.moveTo(0, topY)
                             for (var j = 0; j < dripsCount; j++) {
@@ -1616,7 +1624,7 @@ Scope {
                                 var xMidb = x0b + segW * 0.5
                                 var x1b = (j + 1) * segW
                                 var droopFactorB = ((j * 47) % 60) + 15
-                                var droopYB = topY + droopFactorB * Math.sin(p * Math.PI) * (1.0 - p * 0.6)
+                                var droopYB = topY + droopFactorB * Math.sin(pMelt * Math.PI) * (1.0 - pMelt * 0.6)
                                 ctx.bezierCurveTo(x0b + segW * 0.2, topY, xMidb - segW * 0.2, droopYB, xMidb, droopYB)
                                 ctx.bezierCurveTo(xMidb + segW * 0.2, droopYB, x1b - segW * 0.2, topY, x1b, topY)
                             }
@@ -1625,7 +1633,141 @@ Scope {
                     }
                 }
 
-                // 2. Tetesan Cairan Hitam Kental yang Jatuh ke Bawah (Dripping Fluid Droplets)
+                // 2. Kanvas Asap Tebal Bergulung & Sulur Uap Jiwa (Cascading Volumetric Smoke Canvas)
+                Canvas {
+                    id: smokeCanvas
+                    x: -160
+                    y: -320
+                    width: parent.width + 320
+                    height: parent.height + 360
+                    antialiasing: true
+
+                    Connections {
+                        target: frameWin
+                        function onDeathSmokeChanged() { smokeCanvas.requestPaint() }
+                        function onDeathMeltChanged() { smokeCanvas.requestPaint() }
+                    }
+
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
+                        ctx.clearRect(0, 0, width, height)
+
+                        var p = frameWin.deathSmoke
+                        if (p <= 0.005 || p >= 0.995) return
+
+                        var pMelt = frameWin.deathMelt
+                        var offsetX = 160
+                        var offsetY = 320
+
+                        // A. Sulur-sulur asap hangus & uap tajam meliuk ke atas (Searing Smoke Wisps)
+                        var tendrilCount = 24
+                        var tendrilAlpha = Math.sin(Math.min(1.0, p * 1.3) * Math.PI) * (1.0 - p * 0.3)
+                        if (tendrilAlpha > 0.02) {
+                            for (var t = 0; t < tendrilCount; t++) {
+                                var tx = offsetX + (parent.width * ((t + 0.5) / tendrilCount))
+                                var meltLevel = Math.min(1.0, pMelt * 1.25)
+                                var ty = offsetY + (parent.height * meltLevel)
+                                var tLen = (140 + ((t * 43) % 180)) * (0.8 + p * 1.5)
+                                var tCurl = Math.sin(p * 5.0 + t * 1.5) * 55
+
+                                ctx.strokeStyle = "rgba(0, 240, 255, " + (tendrilAlpha * 0.85).toFixed(2) + ")"
+                                ctx.lineWidth = 4.8
+                                ctx.beginPath()
+                                ctx.moveTo(tx, ty)
+                                ctx.bezierCurveTo(tx + tCurl, ty - tLen * 0.4, tx - tCurl * 1.2, ty - tLen * 0.75, tx + tCurl * 0.7, ty - tLen)
+                                ctx.stroke()
+
+                                ctx.strokeStyle = "rgba(255, 255, 255, " + (tendrilAlpha * 0.95).toFixed(2) + ")"
+                                ctx.lineWidth = 2.2
+                                ctx.beginPath()
+                                ctx.moveTo(tx, ty)
+                                ctx.bezierCurveTo(tx + tCurl * 0.8, ty - tLen * 0.4, tx - tCurl, ty - tLen * 0.75, tx + tCurl * 0.5, ty - tLen)
+                                ctx.stroke()
+                            }
+                        }
+
+                        // B. Gumpalan Asap Tebal Bergulung Bersusun (Cascading Volumetric Smoke Clouds)
+                        // Asap lahir seiring garis lelehan turun dari atas ke bawah (Dynamic Wavefront Emission)
+                        var plumeCount = 48
+                        for (var i = 0; i < plumeCount; i++) {
+                            var spawnProg = (i % 30) / 30.0 * 0.65
+                            if (p < spawnProg) continue
+
+                            var age = (p - spawnProg) / (1.0 - spawnProg)
+                            if (age >= 1.0) continue
+
+                            var originX = offsetX + parent.width * (((i * 47) % 100) / 100.0)
+                            var birthY = offsetY + parent.height * (spawnProg / 0.65)
+                            var rise = age * (220 + ((i * 37) % 260))
+                            var drift = Math.sin(age * 4.2 + i * 1.3) * (50 + (i % 35))
+                            var cx = originX + drift
+                            var cy = birthY - rise
+
+                            // Radius awan memuai besar seiring membubung (starts 90px -> expands to 280px+)
+                            var rad = (85 + ((i * 31) % 75)) * (0.85 + age * 2.2)
+
+                            // Kepekatan tinggi: cepat pekat (0.95), tahan lama, lalu menguap halus
+                            var plumeAlpha = (age < 0.14) ? (age / 0.14) : ((age <= 0.62) ? 0.95 : Math.max(0.0, (1.0 - age) / 0.38 * 0.95))
+
+                            var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad)
+                            var variant = i % 3
+                            if (variant === 0) {
+                                // Tartarus Cyan & Searing White Core (Jiwa Bayangan Terbakar)
+                                grad.addColorStop(0.0, "rgba(255, 255, 255, " + (plumeAlpha * 0.95).toFixed(2) + ")")
+                                grad.addColorStop(0.32, "rgba(0, 240, 255, " + (plumeAlpha * 0.85).toFixed(2) + ")")
+                                grad.addColorStop(0.70, "rgba(15, 38, 65, " + (plumeAlpha * 0.65).toFixed(2) + ")")
+                                grad.addColorStop(1.0, "rgba(8, 20, 35, 0.0)")
+                            } else if (variant === 1) {
+                                // Searing Silver-Ash Smoke (Awan Asap Abu Panas)
+                                grad.addColorStop(0.0, "rgba(255, 255, 255, " + (plumeAlpha * 0.95).toFixed(2) + ")")
+                                grad.addColorStop(0.36, "rgba(195, 220, 245, " + (plumeAlpha * 0.80).toFixed(2) + ")")
+                                grad.addColorStop(0.72, "rgba(30, 50, 75, " + (plumeAlpha * 0.60).toFixed(2) + ")")
+                                grad.addColorStop(1.0, "rgba(12, 22, 35, 0.0)")
+                            } else {
+                                // Scorched Charcoal Volumetric Billow (Gumpalan Arang Hangus Pekat)
+                                grad.addColorStop(0.0, "rgba(180, 215, 245, " + (plumeAlpha * 0.88).toFixed(2) + ")")
+                                grad.addColorStop(0.40, "rgba(38, 62, 92, " + (plumeAlpha * 0.85).toFixed(2) + ")")
+                                grad.addColorStop(0.76, "rgba(12, 20, 32, " + (plumeAlpha * 0.60).toFixed(2) + ")")
+                                grad.addColorStop(1.0, "rgba(5, 10, 18, 0.0)")
+                            }
+
+                            ctx.fillStyle = grad
+                            ctx.beginPath()
+                            ctx.arc(cx, cy, rad, 0, Math.PI * 2)
+                            ctx.fill()
+                        }
+
+                        // C. Kepulan Uap Panas Mendidih dari Genangan Lantai (Boiling Floor Puddle Steam Plumes)
+                        var puddleSteamCount = 20
+                        for (var s = 0; s < puddleSteamCount; s++) {
+                            var pSpawn = 0.15 + (s / puddleSteamCount) * 0.55
+                            if (p < pSpawn) continue
+
+                            var pAge = (p - pSpawn) / (1.0 - pSpawn)
+                            if (pAge >= 1.0) continue
+
+                            var px = offsetX + parent.width * (0.08 + 0.84 * (s / puddleSteamCount))
+                            var py = offsetY + parent.height - 15 - (pAge * (180 + ((s * 33) % 200)))
+                            var pDrift = Math.sin(pAge * 4.8 + s) * 35
+                            var pRad = (90 + (s % 5) * 22) * (0.75 + pAge * 2.0)
+                            var pAlpha = (pAge < 0.12) ? (pAge / 0.12) : ((pAge <= 0.60) ? 0.96 : Math.max(0.0, (1.0 - pAge) / 0.40 * 0.96))
+
+                            var pGrad = ctx.createRadialGradient(px + pDrift, py, 0, px + pDrift, py, pRad)
+                            pGrad.addColorStop(0.0, "rgba(255, 255, 255, " + (pAlpha * 0.98).toFixed(2) + ")")
+                            pGrad.addColorStop(0.35, "rgba(125, 211, 252, " + (pAlpha * 0.88).toFixed(2) + ")")
+                            pGrad.addColorStop(0.70, "rgba(14, 116, 144, " + (pAlpha * 0.60).toFixed(2) + ")")
+                            pGrad.addColorStop(1.0, "rgba(8, 47, 73, 0.0)")
+
+                            ctx.fillStyle = pGrad
+                            ctx.beginPath()
+                            ctx.arc(px + pDrift, py, pRad, 0, Math.PI * 2)
+                            ctx.fill()
+                        }
+                    }
+                }
+
+                // 3. Tetesan Cairan Hitam Kental yang Jatuh ke Bawah (Dripping Fluid Droplets)
                 Item {
                     id: dripsContainer
                     anchors.fill: parent
@@ -1637,7 +1779,6 @@ Scope {
 
                             readonly property real p: frameWin.deathMelt
                             readonly property real segX: parent.width * ((index + 0.5) / 24.0)
-                            // Awal jatuhnya tetesan mengikuti level lelehan saat ini
                             readonly property real originY: parent.height * (0.15 + (index % 5) * 0.16)
                             readonly property real fallSpeed: 180 + ((index * 53) % 260)
                             readonly property real gravityDist: p * fallSpeed + (p * p * 350)
@@ -1647,7 +1788,6 @@ Scope {
                             visible: p > 0.05 && y < parent.height - 4
                             opacity: Math.max(0.0, (1.0 - p) * 0.95)
 
-                            // Tetesan cairan kental (lonjong ke bawah saat jatuh)
                             Rectangle {
                                 anchors.centerIn: parent
                                 width: 5 + (index % 4)
@@ -1671,69 +1811,71 @@ Scope {
                     }
                 }
 
-                // 3. Kepulan Asap & Abu Roh yang Membubung ke Atas (Hangus Berasap / Vapor Mist)
+                // 4. Serpihan Abu Gosong Melayang (32 Drifting Charred Ash Flakes)
                 Item {
-                    id: smokeContainer
+                    id: ashFlakesContainer
                     anchors.fill: parent
 
                     Repeater {
-                        model: 24
+                        model: 32
                         delegate: Item {
                             required property int index
 
-                            readonly property real p: frameWin.deathMelt
-                            readonly property real ox: parent.width * ((index * 39) % 100) / 100.0
-                            // Asap muncul dari area yang sedang meleleh
-                            readonly property real oy: parent.height * (p * 0.85 + 0.1)
+                            readonly property real p: frameWin.deathSmoke
+                            readonly property real ox: parent.width * ((index * 41) % 100) / 100.0
+                            readonly property real oy: parent.height * (0.25 + (index % 5) * 0.16)
+                            readonly property real riseDist: p * (260 + ((index * 47) % 280))
+                            readonly property real flutter: Math.sin(p * 6 + index * 1.7) * (38 + (index % 22))
 
-                            x: ox + Math.sin(p * 5 + index) * 30
-                            y: oy - (p * (100 + ((index * 43) % 120)))
-                            scale: 0.8 + p * 1.5
-                            opacity: Math.max(0.0, Math.sin(p * Math.PI) * 0.75)
+                            x: ox + flutter
+                            y: oy - riseDist
+                            rotation: (index * 45) + (p * 480)
+                            scale: 1.0 - p * 0.35
+                            opacity: Math.max(0.0, (1.0 - p * 0.9) * 0.95)
 
-                            // Gumpalan asap bundar lembut & bara cyan
                             Rectangle {
-                                anchors.centerIn: parent
-                                width: 14 + ((index * 9) % 22)
-                                height: width
-                                radius: width / 2
-                                color: (index % 3 === 0) ? "#3300F0FF" : ((index % 3 === 1) ? "#55071830" : "#44020814")
-                                border.color: (index % 4 === 0) ? "#5500F0FF" : "transparent"
+                                width: 5 + (index % 5)
+                                height: 4 + (index % 4)
+                                radius: 1
+                                color: "#0B1220"
+                                border.color: (index % 3 === 0) ? "#00F0FF" : ((index % 3 === 1) ? "#F59E0B" : "#94A3B8")
                                 border.width: 1
                             }
                         }
                     }
                 }
 
-                // 4. Bara Api Hangus Sizzling Embers (Percikan Bara Kecil yang Menguap)
+                // 5. Bara Api Hangus Sizzling Embers (Percikan Bara Api yang Menguap)
                 Item {
                     id: embersContainer
                     anchors.fill: parent
 
                     Repeater {
-                        model: 18
+                        model: 30
                         delegate: Item {
                             required property int index
 
-                            readonly property real p: frameWin.deathMelt
-                            readonly property real ox: parent.width * ((index * 57) % 100) / 100.0
-                            readonly property real oy: parent.height * (p * 0.8 + 0.15)
+                            readonly property real p: frameWin.deathSmoke
+                            readonly property real ox: parent.width * ((index * 47) % 100) / 100.0
+                            readonly property real oy: parent.height * (p * 0.7 + 0.15)
 
-                            x: ox + Math.cos(index * 2 + p * 6) * 20
-                            y: oy - (p * (140 + ((index * 61) % 120)))
+                            x: ox + Math.cos(index * 2 + p * 7) * (25 + (index % 15))
+                            y: oy - (p * (220 + ((index * 53) % 190)))
                             opacity: Math.max(0.0, (1.0 - p) * 0.95)
 
                             Rectangle {
                                 anchors.centerIn: parent
-                                width: 3 + (index % 3)
+                                width: 4 + (index % 4)
                                 height: width
                                 radius: width / 2
-                                color: (index % 2 === 0) ? "#00F0FF" : "#FFD700"
+                                color: (index % 3 === 0) ? "#00F0FF" : ((index % 3 === 1) ? "#FFD700" : "#FF6B6B")
+                                border.color: "#FFFFFF"
+                                border.width: 1
 
                                 Rectangle {
                                     anchors.centerIn: parent
-                                    width: 1
-                                    height: 1
+                                    width: 2
+                                    height: 2
                                     color: "#FFFFFF"
                                 }
                             }
@@ -1741,17 +1883,17 @@ Scope {
                     }
                 }
 
-                // 5. Genangan Hitam di Bawah Tempat Lelehan Mengalir (Boiling & Evaporating Puddle)
+                // 6. Genangan Hitam di Lantai yang Mendidih & Menguap (Boiling & Evaporating Puddle)
                 Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width * (0.3 + frameWin.deathMelt * 0.55)
-                    height: 20 * (1.0 - frameWin.deathPuddle * 0.75)
+                    width: parent.width * (0.35 + frameWin.deathMelt * 0.6)
+                    height: 22 * (1.0 - frameWin.deathPuddle * 0.75)
                     radius: height / 2
                     color: "#01050F"
                     border.color: "#00F0FF"
                     border.width: Math.max(1, 2 * (1.0 - frameWin.deathPuddle))
-                    opacity: Math.sin(Math.min(1.0, frameWin.deathPuddle) * Math.PI) * 0.90
+                    opacity: Math.sin(Math.min(1.0, frameWin.deathPuddle) * Math.PI) * 0.95
 
                     // Gelembung desis cairan di genangan (sizzling bubble)
                     Rectangle {
@@ -1760,7 +1902,7 @@ Scope {
                         height: parent.height * 0.55
                         radius: height / 2
                         color: "transparent"
-                        border.color: "#4400F0FF"
+                        border.color: "#6600F0FF"
                         border.width: 1
                     }
                 }
