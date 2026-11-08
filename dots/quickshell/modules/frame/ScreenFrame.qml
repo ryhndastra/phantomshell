@@ -429,7 +429,7 @@ Scope {
                     }
                 }
 
-                // Tahap 2: Meleleh runtuh ke bawah, tetesan cairan jatuh, asap tebal & abu membubung (~720ms)
+                // Tahap 2: Meleleh runtuh ke bawah, tetesan cairan jatuh, asap hangus tipis mengepul (~500ms)
                 ParallelAnimation {
                     // Tubuh jendela mencair dan runtuh ke bawah
                     NumberAnimation {
@@ -437,7 +437,7 @@ Scope {
                         property: "deathMelt"
                         from: 0.0
                         to: 1.0
-                        duration: 480
+                        duration: 460
                         easing.type: Easing.InQuad
                     }
                     // Efek bara api dan nyala desis perlahan mereda
@@ -446,29 +446,29 @@ Scope {
                         property: "deathBurn"
                         from: 1.0
                         to: 0.0
-                        duration: 420
+                        duration: 380
                         easing.type: Easing.OutQuad
                     }
                     // Genangan cairan hitam di lantai memuai lalu mendidih & menguap
                     SequentialAnimation {
-                        PauseAnimation { duration: 100 }
+                        PauseAnimation { duration: 80 }
                         NumberAnimation {
                             target: frameWin
                             property: "deathPuddle"
                             from: 0.0
                             to: 1.0
-                            duration: 460
+                            duration: 380
                             easing.type: Easing.OutQuad
                         }
                     }
-                    // Asap hangus tebal & uap jiwa membubung tinggi, bergulung, lalu memudar perlahan
+                    // Asap hangus tipis mengepul di tepi lelehan lalu menguap halus
                     NumberAnimation {
                         target: frameWin
                         property: "deathSmoke"
                         from: 0.0
                         to: 1.0
-                        duration: 720
-                        easing.type: Easing.OutCubic
+                        duration: 500
+                        easing.type: Easing.OutQuad
                     }
                 }
 
@@ -1633,13 +1633,13 @@ Scope {
                     }
                 }
 
-                // 2. Kanvas Asap Tebal Bergulung & Sulur Uap Jiwa (Cascading Volumetric Smoke Canvas)
+                // 2. Kanvas Asap Hangus Tipis & Uap Halus (Subtle Scorch Vapor Canvas)
                 Canvas {
                     id: smokeCanvas
-                    x: -160
-                    y: -320
-                    width: parent.width + 320
-                    height: parent.height + 360
+                    x: -30
+                    y: -80
+                    width: parent.width + 60
+                    height: parent.height + 90
                     antialiasing: true
 
                     Connections {
@@ -1654,82 +1654,74 @@ Scope {
                         ctx.clearRect(0, 0, width, height)
 
                         var p = frameWin.deathSmoke
-                        if (p <= 0.005 || p >= 0.995) return
+                        if (p <= 0.01 || p >= 0.99) return
 
                         var pMelt = frameWin.deathMelt
-                        var offsetX = 160
-                        var offsetY = 320
+                        var offsetX = 30
+                        var offsetY = 80
 
-                        // A. Sulur-sulur asap hangus & uap tajam meliuk ke atas (Searing Smoke Wisps)
-                        var tendrilCount = 24
-                        var tendrilAlpha = Math.sin(Math.min(1.0, p * 1.3) * Math.PI) * (1.0 - p * 0.3)
-                        if (tendrilAlpha > 0.02) {
+                        // A. Sulur-sulur asap tipis meliuk halus dari tepi lelehan (Delicate Smoke Wisps)
+                        var tendrilCount = 10
+                        var tendrilAlpha = Math.sin(p * Math.PI) * 0.45
+                        if (tendrilAlpha > 0.01) {
                             for (var t = 0; t < tendrilCount; t++) {
                                 var tx = offsetX + (parent.width * ((t + 0.5) / tendrilCount))
-                                var meltLevel = Math.min(1.0, pMelt * 1.25)
+                                var meltLevel = Math.min(1.0, pMelt * 1.15)
                                 var ty = offsetY + (parent.height * meltLevel)
-                                var tLen = (140 + ((t * 43) % 180)) * (0.8 + p * 1.5)
-                                var tCurl = Math.sin(p * 5.0 + t * 1.5) * 55
+                                var tLen = (45 + ((t * 23) % 40)) * (0.8 + p * 0.6)
+                                var tCurl = Math.sin(p * 5.0 + t * 1.8) * 22
 
-                                ctx.strokeStyle = "rgba(0, 240, 255, " + (tendrilAlpha * 0.85).toFixed(2) + ")"
-                                ctx.lineWidth = 4.8
+                                // Garis luar uap cyan lembut
+                                ctx.strokeStyle = "rgba(0, 240, 255, " + (tendrilAlpha * 0.55).toFixed(2) + ")"
+                                ctx.lineWidth = 2.0
                                 ctx.beginPath()
                                 ctx.moveTo(tx, ty)
-                                ctx.bezierCurveTo(tx + tCurl, ty - tLen * 0.4, tx - tCurl * 1.2, ty - tLen * 0.75, tx + tCurl * 0.7, ty - tLen)
+                                ctx.bezierCurveTo(tx + tCurl, ty - tLen * 0.4, tx - tCurl * 1.1, ty - tLen * 0.75, tx + tCurl * 0.6, ty - tLen)
                                 ctx.stroke()
 
-                                ctx.strokeStyle = "rgba(255, 255, 255, " + (tendrilAlpha * 0.95).toFixed(2) + ")"
-                                ctx.lineWidth = 2.2
+                                // Garis dalam uap putih
+                                ctx.strokeStyle = "rgba(255, 255, 255, " + (tendrilAlpha * 0.70).toFixed(2) + ")"
+                                ctx.lineWidth = 1.0
                                 ctx.beginPath()
                                 ctx.moveTo(tx, ty)
-                                ctx.bezierCurveTo(tx + tCurl * 0.8, ty - tLen * 0.4, tx - tCurl, ty - tLen * 0.75, tx + tCurl * 0.5, ty - tLen)
+                                ctx.bezierCurveTo(tx + tCurl * 0.8, ty - tLen * 0.4, tx - tCurl * 0.9, ty - tLen * 0.75, tx + tCurl * 0.4, ty - tLen)
                                 ctx.stroke()
                             }
                         }
 
-                        // B. Gumpalan Asap Tebal Bergulung Bersusun (Cascading Volumetric Smoke Clouds)
-                        // Asap lahir seiring garis lelehan turun dari atas ke bawah (Dynamic Wavefront Emission)
-                        var plumeCount = 48
+                        // B. Gumpalan Asap Tipis Hangus di Tepi Lelehan (Subtle Scorch Puffs)
+                        var plumeCount = 16
                         for (var i = 0; i < plumeCount; i++) {
-                            var spawnProg = (i % 30) / 30.0 * 0.65
+                            var spawnProg = (i % 12) / 12.0 * 0.7
                             if (p < spawnProg) continue
 
                             var age = (p - spawnProg) / (1.0 - spawnProg)
                             if (age >= 1.0) continue
 
-                            var originX = offsetX + parent.width * (((i * 47) % 100) / 100.0)
-                            var birthY = offsetY + parent.height * (spawnProg / 0.65)
-                            var rise = age * (220 + ((i * 37) % 260))
-                            var drift = Math.sin(age * 4.2 + i * 1.3) * (50 + (i % 35))
+                            var originX = offsetX + parent.width * (((i * 59) % 100) / 100.0)
+                            var birthY = offsetY + parent.height * (spawnProg / 0.7)
+                            var rise = age * (45 + ((i * 17) % 35))
+                            var drift = Math.sin(age * 4.0 + i) * 18
                             var cx = originX + drift
                             var cy = birthY - rise
 
-                            // Radius awan memuai besar seiring membubung (starts 90px -> expands to 280px+)
-                            var rad = (85 + ((i * 31) % 75)) * (0.85 + age * 2.2)
+                            // Radius kecil & ramping (20px - 45px)
+                            var rad = (20 + ((i * 13) % 18)) * (0.8 + age * 0.7)
 
-                            // Kepekatan tinggi: cepat pekat (0.95), tahan lama, lalu menguap halus
-                            var plumeAlpha = (age < 0.14) ? (age / 0.14) : ((age <= 0.62) ? 0.95 : Math.max(0.0, (1.0 - age) / 0.38 * 0.95))
+                            // Alpha transparan & halus (maksimal 0.40)
+                            var plumeAlpha = (age < 0.2) ? (age / 0.2 * 0.42) : Math.max(0.0, (1.0 - age) / 0.8 * 0.42)
 
                             var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad)
-                            var variant = i % 3
-                            if (variant === 0) {
-                                // Tartarus Cyan & Searing White Core (Jiwa Bayangan Terbakar)
-                                grad.addColorStop(0.0, "rgba(255, 255, 255, " + (plumeAlpha * 0.95).toFixed(2) + ")")
-                                grad.addColorStop(0.32, "rgba(0, 240, 255, " + (plumeAlpha * 0.85).toFixed(2) + ")")
-                                grad.addColorStop(0.70, "rgba(15, 38, 65, " + (plumeAlpha * 0.65).toFixed(2) + ")")
-                                grad.addColorStop(1.0, "rgba(8, 20, 35, 0.0)")
-                            } else if (variant === 1) {
-                                // Searing Silver-Ash Smoke (Awan Asap Abu Panas)
-                                grad.addColorStop(0.0, "rgba(255, 255, 255, " + (plumeAlpha * 0.95).toFixed(2) + ")")
-                                grad.addColorStop(0.36, "rgba(195, 220, 245, " + (plumeAlpha * 0.80).toFixed(2) + ")")
-                                grad.addColorStop(0.72, "rgba(30, 50, 75, " + (plumeAlpha * 0.60).toFixed(2) + ")")
-                                grad.addColorStop(1.0, "rgba(12, 22, 35, 0.0)")
+                            if (i % 2 === 0) {
+                                grad.addColorStop(0.0, "rgba(255, 255, 255, " + (plumeAlpha * 0.85).toFixed(2) + ")")
+                                grad.addColorStop(0.35, "rgba(0, 240, 255, " + (plumeAlpha * 0.60).toFixed(2) + ")")
+                                grad.addColorStop(0.75, "rgba(20, 45, 75, " + (plumeAlpha * 0.30).toFixed(2) + ")")
+                                grad.addColorStop(1.0, "rgba(10, 20, 35, 0.0)")
                             } else {
-                                // Scorched Charcoal Volumetric Billow (Gumpalan Arang Hangus Pekat)
-                                grad.addColorStop(0.0, "rgba(180, 215, 245, " + (plumeAlpha * 0.88).toFixed(2) + ")")
-                                grad.addColorStop(0.40, "rgba(38, 62, 92, " + (plumeAlpha * 0.85).toFixed(2) + ")")
-                                grad.addColorStop(0.76, "rgba(12, 20, 32, " + (plumeAlpha * 0.60).toFixed(2) + ")")
-                                grad.addColorStop(1.0, "rgba(5, 10, 18, 0.0)")
+                                grad.addColorStop(0.0, "rgba(240, 248, 255, " + (plumeAlpha * 0.75).toFixed(2) + ")")
+                                grad.addColorStop(0.40, "rgba(180, 215, 240, " + (plumeAlpha * 0.50).toFixed(2) + ")")
+                                grad.addColorStop(0.80, "rgba(30, 45, 65, " + (plumeAlpha * 0.20).toFixed(2) + ")")
+                                grad.addColorStop(1.0, "rgba(15, 25, 40, 0.0)")
                             }
 
                             ctx.fillStyle = grad
@@ -1738,25 +1730,25 @@ Scope {
                             ctx.fill()
                         }
 
-                        // C. Kepulan Uap Panas Mendidih dari Genangan Lantai (Boiling Floor Puddle Steam Plumes)
-                        var puddleSteamCount = 20
+                        // C. Uap Desis Kecil dari Genangan Dasar (Delicate Puddle Steam)
+                        var puddleSteamCount = 8
                         for (var s = 0; s < puddleSteamCount; s++) {
-                            var pSpawn = 0.15 + (s / puddleSteamCount) * 0.55
+                            var pSpawn = 0.25 + (s / puddleSteamCount) * 0.5
                             if (p < pSpawn) continue
 
                             var pAge = (p - pSpawn) / (1.0 - pSpawn)
                             if (pAge >= 1.0) continue
 
-                            var px = offsetX + parent.width * (0.08 + 0.84 * (s / puddleSteamCount))
-                            var py = offsetY + parent.height - 15 - (pAge * (180 + ((s * 33) % 200)))
-                            var pDrift = Math.sin(pAge * 4.8 + s) * 35
-                            var pRad = (90 + (s % 5) * 22) * (0.75 + pAge * 2.0)
-                            var pAlpha = (pAge < 0.12) ? (pAge / 0.12) : ((pAge <= 0.60) ? 0.96 : Math.max(0.0, (1.0 - pAge) / 0.40 * 0.96))
+                            var px = offsetX + parent.width * (0.2 + 0.6 * (s / puddleSteamCount))
+                            var py = offsetY + parent.height - 10 - (pAge * 45)
+                            var pDrift = Math.sin(pAge * 4.0 + s) * 12
+                            var pRad = (18 + (s % 3) * 8) * (0.8 + pAge * 0.6)
+                            var pAlpha = (pAge < 0.2) ? (pAge / 0.2 * 0.38) : Math.max(0.0, (1.0 - pAge) / 0.8 * 0.38)
 
                             var pGrad = ctx.createRadialGradient(px + pDrift, py, 0, px + pDrift, py, pRad)
-                            pGrad.addColorStop(0.0, "rgba(255, 255, 255, " + (pAlpha * 0.98).toFixed(2) + ")")
-                            pGrad.addColorStop(0.35, "rgba(125, 211, 252, " + (pAlpha * 0.88).toFixed(2) + ")")
-                            pGrad.addColorStop(0.70, "rgba(14, 116, 144, " + (pAlpha * 0.60).toFixed(2) + ")")
+                            pGrad.addColorStop(0.0, "rgba(255, 255, 255, " + (pAlpha * 0.90).toFixed(2) + ")")
+                            pGrad.addColorStop(0.4, "rgba(125, 211, 252, " + (pAlpha * 0.60).toFixed(2) + ")")
+                            pGrad.addColorStop(0.8, "rgba(14, 116, 144, " + (pAlpha * 0.25).toFixed(2) + ")")
                             pGrad.addColorStop(1.0, "rgba(8, 47, 73, 0.0)")
 
                             ctx.fillStyle = pGrad
@@ -1773,25 +1765,25 @@ Scope {
                     anchors.fill: parent
 
                     Repeater {
-                        model: 24
+                        model: 18
                         delegate: Item {
                             required property int index
 
                             readonly property real p: frameWin.deathMelt
-                            readonly property real segX: parent.width * ((index + 0.5) / 24.0)
+                            readonly property real segX: parent.width * ((index + 0.5) / 18.0)
                             readonly property real originY: parent.height * (0.15 + (index % 5) * 0.16)
                             readonly property real fallSpeed: 180 + ((index * 53) % 260)
                             readonly property real gravityDist: p * fallSpeed + (p * p * 350)
 
-                            x: segX + Math.sin(index + p * 4) * 6
+                            x: segX + Math.sin(index + p * 4) * 5
                             y: Math.min(parent.height - 8, originY + gravityDist)
                             visible: p > 0.05 && y < parent.height - 4
                             opacity: Math.max(0.0, (1.0 - p) * 0.95)
 
                             Rectangle {
                                 anchors.centerIn: parent
-                                width: 5 + (index % 4)
-                                height: 10 + (index % 8)
+                                width: 4 + (index % 3)
+                                height: 8 + (index % 6)
                                 radius: width / 2
                                 color: "#020712"
                                 border.color: "#00F0FF"
@@ -1801,7 +1793,7 @@ Scope {
                                     width: Math.max(2, parent.width * 0.4)
                                     height: width
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    y: 2
+                                    y: 1.5
                                     radius: width / 2
                                     color: "#FFFFFF"
                                     opacity: 0.8
@@ -1811,73 +1803,66 @@ Scope {
                     }
                 }
 
-                // 4. Serpihan Abu Gosong Melayang (32 Drifting Charred Ash Flakes)
+                // 4. Serpihan Abu Gosong Halus (12 Subtle Drifting Ash Specks)
                 Item {
                     id: ashFlakesContainer
                     anchors.fill: parent
 
                     Repeater {
-                        model: 32
+                        model: 12
                         delegate: Item {
                             required property int index
 
                             readonly property real p: frameWin.deathSmoke
-                            readonly property real ox: parent.width * ((index * 41) % 100) / 100.0
-                            readonly property real oy: parent.height * (0.25 + (index % 5) * 0.16)
-                            readonly property real riseDist: p * (260 + ((index * 47) % 280))
-                            readonly property real flutter: Math.sin(p * 6 + index * 1.7) * (38 + (index % 22))
+                            readonly property real ox: parent.width * ((index * 61) % 100) / 100.0
+                            readonly property real oy: parent.height * (0.25 + (index % 4) * 0.18)
+                            readonly property real riseDist: p * (80 + ((index * 31) % 70))
+                            readonly property real flutter: Math.sin(p * 5 + index * 1.5) * 16
 
                             x: ox + flutter
                             y: oy - riseDist
-                            rotation: (index * 45) + (p * 480)
-                            scale: 1.0 - p * 0.35
-                            opacity: Math.max(0.0, (1.0 - p * 0.9) * 0.95)
+                            rotation: (index * 45) + (p * 360)
+                            scale: 1.0 - p * 0.3
+                            opacity: Math.max(0.0, (1.0 - p) * 0.70)
 
                             Rectangle {
-                                width: 5 + (index % 5)
-                                height: 4 + (index % 4)
+                                width: 3 + (index % 3)
+                                height: 3 + (index % 2)
                                 radius: 1
                                 color: "#0B1220"
-                                border.color: (index % 3 === 0) ? "#00F0FF" : ((index % 3 === 1) ? "#F59E0B" : "#94A3B8")
-                                border.width: 1
+                                border.color: (index % 2 === 0) ? "#00F0FF" : "#94A3B8"
+                                border.width: 0.8
                             }
                         }
                     }
                 }
 
-                // 5. Bara Api Hangus Sizzling Embers (Percikan Bara Api yang Menguap)
+                // 5. Percikan Bara Desis Kecil (12 Subtle Sizzling Embers)
                 Item {
                     id: embersContainer
                     anchors.fill: parent
 
                     Repeater {
-                        model: 30
+                        model: 12
                         delegate: Item {
                             required property int index
 
                             readonly property real p: frameWin.deathSmoke
-                            readonly property real ox: parent.width * ((index * 47) % 100) / 100.0
+                            readonly property real ox: parent.width * ((index * 53) % 100) / 100.0
                             readonly property real oy: parent.height * (p * 0.7 + 0.15)
 
-                            x: ox + Math.cos(index * 2 + p * 7) * (25 + (index % 15))
-                            y: oy - (p * (220 + ((index * 53) % 190)))
-                            opacity: Math.max(0.0, (1.0 - p) * 0.95)
+                            x: ox + Math.cos(index * 2 + p * 6) * 15
+                            y: oy - (p * (70 + ((index * 37) % 60)))
+                            opacity: Math.max(0.0, (1.0 - p) * 0.85)
 
                             Rectangle {
                                 anchors.centerIn: parent
-                                width: 4 + (index % 4)
+                                width: 3 + (index % 2)
                                 height: width
                                 radius: width / 2
-                                color: (index % 3 === 0) ? "#00F0FF" : ((index % 3 === 1) ? "#FFD700" : "#FF6B6B")
+                                color: (index % 2 === 0) ? "#00F0FF" : "#FFD700"
                                 border.color: "#FFFFFF"
-                                border.width: 1
-
-                                Rectangle {
-                                    anchors.centerIn: parent
-                                    width: 2
-                                    height: 2
-                                    color: "#FFFFFF"
-                                }
+                                border.width: 0.8
                             }
                         }
                     }
@@ -1887,22 +1872,22 @@ Scope {
                 Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width * (0.35 + frameWin.deathMelt * 0.6)
-                    height: 22 * (1.0 - frameWin.deathPuddle * 0.75)
+                    width: parent.width * (0.3 + frameWin.deathMelt * 0.5)
+                    height: 14 * (1.0 - frameWin.deathPuddle * 0.75)
                     radius: height / 2
                     color: "#01050F"
                     border.color: "#00F0FF"
-                    border.width: Math.max(1, 2 * (1.0 - frameWin.deathPuddle))
-                    opacity: Math.sin(Math.min(1.0, frameWin.deathPuddle) * Math.PI) * 0.95
+                    border.width: Math.max(1, 1.5 * (1.0 - frameWin.deathPuddle))
+                    opacity: Math.sin(Math.min(1.0, frameWin.deathPuddle) * Math.PI) * 0.90
 
-                    // Gelembung desis cairan di genangan (sizzling bubble)
+                    // Gelembung desis halus di genangan
                     Rectangle {
                         anchors.centerIn: parent
-                        width: parent.width * 0.75
-                        height: parent.height * 0.55
+                        width: parent.width * 0.7
+                        height: parent.height * 0.5
                         radius: height / 2
                         color: "transparent"
-                        border.color: "#6600F0FF"
+                        border.color: "#4400F0FF"
                         border.width: 1
                     }
                 }
