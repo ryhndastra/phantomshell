@@ -33,77 +33,50 @@ Scope {
 
             property bool p3SplashActive: false
             property real p3SplashProg: 0.0
-            property int p3SplashFrame: Math.min(11, Math.floor(p3SplashProg))
-            property real p3SplashOpacity: 1.0
-            property real p3OceanCoverage: 0.0
-            property real p3SplashFoamY: 0.0
+            property int p3SplashFrame: Math.min(11, Math.max(0, Math.floor(p3SplashProg)))
+            property real p3OceanCoverage: Math.max(0.0, Math.min(1.0, (p3SplashProg - 0.4) / 4.6))
 
             SequentialAnimation {
                 id: p3SplashSequence
-                // Tahap 1: Terjun bebas air & samudra menutup layar penuh (Frame 0 -> 6.5, ~240ms)
+                // Tahap 1: Semburan air menerjang ke depan hingga mentok (Forward: Frame 0 -> 11, ~320ms)
                 NumberAnimation {
                     target: frameWin
                     property: "p3SplashProg"
                     from: 0.0
-                    to: 6.5
-                    duration: 240
-                    easing.type: Easing.Linear
+                    to: 11.0
+                    duration: 320
+                    easing.type: Easing.InQuad
                 }
-                // Tahap 2: Ombak membentur bawah sambil MENCURAH dan melarut sehalus sutra (~650ms, tanpa pause, tanpa blink!)
-                ParallelAnimation {
-                    // Selesaikan frame 6.5 -> 11.99
-                    NumberAnimation {
-                        target: frameWin
-                        property: "p3SplashProg"
-                        from: 6.5
-                        to: 11.99
-                        duration: 380
-                        easing.type: Easing.Linear
+                // Titik Puncak: Layar tertutup air 100% penuh -> Ganti tema di balik tirai air
+                ScriptAction {
+                    script: {
+                        if (PhantomState.pendingPresetId) {
+                            PhantomState.commitPresetApply(PhantomState.pendingPresetId, PhantomState.pendingSkipSave)
+                            PhantomState.pendingPresetId = ""
+                        }
                     }
-                    // Buih dan percikan air terus meluncur deras turun melewati batas bawah layar
-                    NumberAnimation {
-                        target: frameWin
-                        property: "p3SplashFoamY"
-                        from: 0.0
-                        to: 280.0
-                        duration: 650
-                        easing.type: Easing.InQuad
-                    }
-                    // Opasitas melarut lembut dan gradual dengan kurva InOutSine
-                    NumberAnimation {
-                        target: frameWin
-                        property: "p3SplashOpacity"
-                        from: 1.0
-                        to: 0.0
-                        duration: 650
-                        easing.type: Easing.InOutSine
-                    }
+                }
+                PauseAnimation { duration: 50 } // Tahan 50ms saat deburan ombak membentur mentok
+                // Tahap 2: Air surut / di-reverse kembali secara mulus (Reverse: Frame 11 -> 0, ~360ms)
+                NumberAnimation {
+                    target: frameWin
+                    property: "p3SplashProg"
+                    from: 11.0
+                    to: 0.0
+                    duration: 360
+                    easing.type: Easing.OutQuad
                 }
                 ScriptAction {
                     script: {
                         frameWin.p3SplashActive = false
                         frameWin.p3SplashProg = 0.0
-                        frameWin.p3SplashOpacity = 1.0
-                        frameWin.p3OceanCoverage = 0.0
-                        frameWin.p3SplashFoamY = 0.0
                     }
-                }
-            }
-
-            onP3SplashProgChanged: {
-                if (p3SplashActive) {
-                    if (p3SplashProg < 1.0) p3OceanCoverage = 0.35 + p3SplashProg * 0.35
-                    else if (p3SplashProg < 3.0) p3OceanCoverage = 0.70 + (p3SplashProg - 1.0) * 0.15
-                    else p3OceanCoverage = 1.0
                 }
             }
 
             function triggerP3Splash() {
                 p3SplashSequence.stop()
                 frameWin.p3SplashProg = 0.0
-                frameWin.p3SplashOpacity = 1.0
-                frameWin.p3OceanCoverage = 0.35
-                frameWin.p3SplashFoamY = 0.0
                 frameWin.p3SplashActive = true
                 PhantomState.playSfx("splash")
                 p3SplashSequence.restart()
@@ -806,14 +779,13 @@ Scope {
                 id: p3SplashOverlay
                 anchors.fill: parent
                 visible: frameWin.p3SplashActive
-                opacity: frameWin.p3SplashOpacity
                 z: 100
 
                 // 1. Lapisan samudra biru pekat P3R (Sea of Soul) menutup 100% layar tanpa celah
                 Rectangle {
                     anchors.fill: parent
                     anchors.margins: -20
-                    opacity: frameWin.p3OceanCoverage
+                    opacity: Math.max(0.0, Math.min(1.0, Math.pow(frameWin.p3SplashProg / 6.0, 1.8)))
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: "#010A1A" }
                         GradientStop { position: 0.28; color: "#021C42" }
@@ -833,7 +805,7 @@ Scope {
                         x: (parent.width * (0.04 + index * 0.17)) + Math.sin(frameWin.p3SplashFrame * 0.6 + index) * 24
                         y: -parent.height * 0.2
                         rotation: -14 + index * 4.5
-                        opacity: frameWin.p3OceanCoverage * (0.14 + (index % 3) * 0.08)
+                        opacity: Math.min(1.0, frameWin.p3SplashProg / 4.0) * (0.14 + (index % 3) * 0.08)
                         gradient: Gradient {
                             GradientStop { position: 0.0; color: "#9900F0FF" }
                             GradientStop { position: 0.65; color: "#400077B6" }
@@ -857,7 +829,7 @@ Scope {
                         y: currentY
                         width: bSize
                         height: bSize
-                        opacity: frameWin.p3OceanCoverage * (0.4 + (index % 4) * 0.15)
+                        opacity: Math.min(1.0, frameWin.p3SplashProg / 3.0) * (0.4 + (index % 4) * 0.15)
                         visible: currentY > -30 && currentY < parent.height + 30
 
                         Rectangle {
@@ -880,11 +852,10 @@ Scope {
                     }
                 }
 
-                // 4. Hero Semburan Air Autentik P3R (Scaled 1.22x agar semburan dan buih melebar menembus sisi)
+                // 4. Hero Semburan Air Autentik P3R (Scaled 1.25x agar semburan dan buih melebar menembus sisi)
                 Item {
                     anchors.fill: parent
-                    scale: 1.22
-                    y: frameWin.p3SplashFoamY
+                    scale: 1.25
                     transformOrigin: Item.Center
 
                     Repeater {
@@ -904,9 +875,8 @@ Scope {
                 // 5. Percikan air sekunder kiri & kanan (mirrored) untuk mengisi sudut samping secara organik
                 Item {
                     anchors.fill: parent
-                    scale: 1.18
-                    opacity: 0.7
-                    y: frameWin.p3SplashFoamY * 1.15
+                    scale: 1.22
+                    opacity: 0.85
                     transformOrigin: Item.Center
 
                     Repeater {

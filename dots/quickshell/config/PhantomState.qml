@@ -824,10 +824,17 @@ Singleton {
         transitionTick++
 
         // Waktu tunggu commit tema di balik tirai transisi (saat layar tertutup penuh):
-        // P3 Reload: semburan air dan samudra menutup 100% pada frame 5-6 (~200ms)
-        // P5 Crimson / tema lain: tebasan diagonal menutup tengah pada ~180ms
-        presetCommitTimer.interval = (presetId === "p3-reload") ? 200 : 180
-        presetCommitTimer.restart()
+        if (presetId === "p3-reload") {
+            // Untuk P3 Reload, commitPresetApply dipicu langsung oleh ScriptAction di ScreenFrame.qml
+            // pada saat semburan air mencapai puncak mentok (Frame 11 / 100% tertutup air).
+            // Timer di bawah hanya sebagai fallback darurat jika ScreenFrame tidak merespons.
+            presetCommitTimer.interval = 1200
+            presetCommitTimer.restart()
+        } else {
+            // P5 Crimson / tema lain: tebasan diagonal menutup tengah pada ~180ms
+            presetCommitTimer.interval = 180
+            presetCommitTimer.restart()
+        }
     }
 
     function commitPresetApply(presetId, skipSave) {
@@ -1031,7 +1038,7 @@ Singleton {
         const ffVol = Math.round(Math.max(1, Math.min(100, root.sfxVolume * 100)))
 
         var soundPath = ""
-        if (root.isP3) {
+        if (kind === "splash" || root.isP3) {
             if (kind === "notif") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_toast.wav")
             else if (kind === "into_game" || kind === "splash") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_into_game_detail.wav")
             else if (kind === "achievement") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_achievement_toast.wav")
