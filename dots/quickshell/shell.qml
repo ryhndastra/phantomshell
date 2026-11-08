@@ -177,6 +177,10 @@ ShellRoot {
             PhantomState.toggleOverview()
         }
 
+        function triggerOsd(label: string, val: int): void {
+            PhantomState.triggerOsd(label, val)
+        }
+
         function toggleVelvetRoom(): void {
             PhantomState.toggleVelvetRoom()
         }

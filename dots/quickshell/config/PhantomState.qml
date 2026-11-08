@@ -582,7 +582,7 @@ Singleton {
 
     // opsi grafik statistik dan efek suara notifikasi
     property string statsStyle: "pentagon"
-    property bool sfxEnabled: true
+    property bool sfxEnabled: false
     property real sfxVolume: 0.35
 
     // parameter live tuning hyprland

@@ -1454,6 +1454,29 @@ Variants {
                             readonly property string itemDesc: isApps ? (modelData ? (modelData.desc || "") : "") : (typeof msgBody !== "undefined" ? msgBody : (typeof message !== "undefined" ? message : (typeof model !== "undefined" && model ? (model.msgBody || model.message || "") : "")))
                             readonly property string itemIcon: isApps ? (modelData ? (modelData.appIcon || "") : "") : (typeof msgIcon !== "undefined" ? msgIcon : (typeof appIcon !== "undefined" ? appIcon : (typeof model !== "undefined" && model ? (model.msgIcon || model.appIcon || "") : "")))
                             readonly property string itemTime: !isApps ? (typeof msgTime !== "undefined" ? msgTime : (typeof time !== "undefined" ? time : (typeof model !== "undefined" && model ? (model.msgTime || model.time || "") : ""))) : ""
+                            readonly property string resolvedIcon: {
+                                const ic = (p3RowDelegate.itemIcon || "").trim()
+                                const lowerName = (p3RowDelegate.itemName || "").toLowerCase()
+                                const lowerIcon = ic.toLowerCase()
+                                const lowerDesc = (p3RowDelegate.itemDesc || "").toLowerCase()
+                                if (lowerIcon.indexOf("whatsapp") !== -1 || lowerName.indexOf("whatsapp") !== -1 || lowerDesc.indexOf("whatsapp") !== -1) {
+                                    return "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/whatsapp.svg"
+                                }
+                                if (lowerIcon.indexOf("zen") !== -1 || lowerName.indexOf("zen") !== -1) {
+                                    return "file:///etc/profiles/per-user/sho/share/icons/hicolor/128x128/apps/zen-browser.png"
+                                }
+                                if (ic.startsWith("file://") || ic.startsWith("/")) {
+                                    return ic.startsWith("/") ? ("file://" + ic) : ic
+                                }
+                                if (ic.startsWith("image://")) {
+                                    return ic
+                                }
+                                if (ic.length > 0) {
+                                    const r = Quickshell.iconPath(ic, true)
+                                    if (r && String(r).length > 0) return r
+                                }
+                                return PhantomState.resolveAppIconUrl(p3RowDelegate.itemName)
+                            }
 
                             // Pergeseran taktil: baris aktif sedikit melompat ke kanan
                             x: isSelected ? 8 : (isHovered ? 4 : 0)
@@ -1518,24 +1541,33 @@ Variants {
 
                                 // Ikon Aplikasi / Notifikasi di dalam Avatar Slashed
                                 Image {
+                                    id: avatarImg
                                     anchors.verticalCenter: parent.verticalCenter
                                     x: 6
                                     width: 32
                                     height: 32
-                                    source: p3RowDelegate.itemIcon
+                                    source: p3RowDelegate.resolvedIcon
                                     fillMode: Image.PreserveAspectFit
                                     smooth: true
-                                    mipmap: true
-                                    visible: p3RowDelegate.itemIcon !== "" && status === Image.Ready
+                                    visible: p3RowDelegate.resolvedIcon !== "" && status === Image.Ready && implicitWidth > 0
                                 }
 
-                                P5Icon {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    x: 10
-                                    name: p3RowDelegate.isApps ? (modelData ? (modelData.iconName || "app") : "app") : "chat"
-                                    color: "#ffffff"
-                                    size: 22
-                                    visible: p3RowDelegate.itemIcon === "" || p3RowDelegate.itemIcon.length === 0
+                                // Fallback Avatar Karakter / Monogram Persona 3 Reload saat ikon tidak tersedia
+                                Item {
+                                    anchors.fill: parent
+                                    visible: !avatarImg.visible
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: {
+                                            const n = (p3RowDelegate.itemName || "").trim()
+                                            return n.length > 0 ? n.charAt(0).toUpperCase() : "✉"
+                                        }
+                                        font.family: "Rubik"
+                                        font.pixelSize: 20
+                                        font.weight: Font.Black
+                                        color: "#ffffff"
+                                    }
                                 }
                             }
 
@@ -1821,21 +1853,48 @@ Variants {
                                         }
                                     }
                                     Image {
+                                        id: readerAvatarImg
                                         anchors.verticalCenter: parent.verticalCenter
                                         x: 6
                                         width: 28
                                         height: 28
-                                        source: p3MailStage.activeDetailNotif ? (p3MailStage.activeDetailNotif.icon || "") : ""
+                                        source: {
+                                            if (!p3MailStage.activeDetailNotif) return ""
+                                            const ic = (p3MailStage.activeDetailNotif.icon || "").trim()
+                                            const s = (p3MailStage.activeDetailNotif.sender || "").toLowerCase()
+                                            const lowerIcon = ic.toLowerCase()
+                                            if (lowerIcon === "whatsapp" || s.indexOf("whatsapp") !== -1) {
+                                                return "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/whatsapp.svg"
+                                            }
+                                            if (lowerIcon.indexOf("zen") !== -1 || s.indexOf("zen") !== -1) {
+                                                return "file:///etc/profiles/per-user/sho/share/icons/hicolor/128x128/apps/zen-browser.png"
+                                            }
+                                            if (ic.startsWith("file://") || ic.startsWith("/")) return ic.startsWith("/") ? ("file://" + ic) : ic
+                                            if (ic.startsWith("image://")) return ic
+                                            if (ic.length > 0) {
+                                                const r = Quickshell.iconPath(ic, true)
+                                                if (r && String(r).length > 0) return r
+                                            }
+                                            return PhantomState.resolveAppIconUrl(p3MailStage.activeDetailNotif.sender || "")
+                                        }
                                         fillMode: Image.PreserveAspectFit
-                                        visible: source !== ""
+                                        smooth: true
+                                        visible: source !== "" && status === Image.Ready && implicitWidth > 0
                                     }
-                                    P5Icon {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        x: 8
-                                        name: "chat"
-                                        color: "#ffffff"
-                                        size: 20
-                                        visible: !p3MailStage.activeDetailNotif || !p3MailStage.activeDetailNotif.icon || p3MailStage.activeDetailNotif.icon === ""
+                                    Item {
+                                        anchors.fill: parent
+                                        visible: !readerAvatarImg.visible
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: {
+                                                const s = (p3MailStage.activeDetailNotif ? p3MailStage.activeDetailNotif.sender : "").trim()
+                                                return s.length > 0 ? s.charAt(0).toUpperCase() : "✉"
+                                            }
+                                            font.family: "Rubik"
+                                            font.pixelSize: 18
+                                            font.weight: Font.Black
+                                            color: "#ffffff"
+                                        }
                                     }
                                 }
 

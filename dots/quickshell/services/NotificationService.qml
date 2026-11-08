@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
+import qs.config
 
 // layanan server notifikasi freedesktop dan antrean balon pesan im
 Scope {
@@ -29,10 +30,37 @@ Scope {
 
         onNotification: notif => {
             notif.tracked = true
-            const sender = notif.appName || "Ren"
+            const sender = notif.appName || notif.summary || "Notification"
             const summary = notif.summary || "New Message"
             const body = notif.body ? (summary + " — " + notif.body) : summary
-            const icon = notif.image || notif.appIcon || ""
+            
+            // Ekstraksi icon cerdas dari freedesktop hints / appIcon / desktop entry
+            const home = Quickshell.env("HOME") || "/home/sho"
+            const lowerSender = sender.toLowerCase()
+            const lowerBody = body.toLowerCase()
+            const rawAppIcon = String(notif.appIcon || "").toLowerCase()
+
+            let icon = ""
+            if (lowerBody.indexOf("whatsapp") !== -1 || lowerSender.indexOf("whatsapp") !== -1 || lowerBody.indexOf("wa.me") !== -1 || rawAppIcon.indexOf("whatsapp") !== -1) {
+                icon = "file://" + home + "/.config/quickshell/assets/icons/whatsapp.svg"
+            } else if (lowerSender.indexOf("zen") !== -1 || lowerBody.indexOf("zen") !== -1 || rawAppIcon.indexOf("zen") !== -1) {
+                icon = "file:///etc/profiles/per-user/sho/share/icons/hicolor/128x128/apps/zen-browser.png"
+            } else if (notif.image && String(notif.image).trim().length > 0) {
+                icon = String(notif.image).trim()
+            } else if (notif.appIcon && String(notif.appIcon).trim().length > 0) {
+                const ai = String(notif.appIcon).trim()
+                if (ai.startsWith("file://") || ai.startsWith("image://") || ai.startsWith("/")) {
+                    icon = ai.startsWith("/") ? ("file://" + ai) : ai
+                } else {
+                    const resolved = Quickshell.iconPath(ai, true)
+                    icon = (resolved && String(resolved).length > 0) ? resolved : ai
+                }
+            }
+
+            if (!icon || icon === "" || (!icon.startsWith("file://") && !icon.startsWith("image://") && !icon.startsWith("/"))) {
+                icon = PhantomState.resolveAppIconUrl(sender)
+            }
+
             root.pushImNotification(sender, body, "NORMAL", icon)
         }
     }

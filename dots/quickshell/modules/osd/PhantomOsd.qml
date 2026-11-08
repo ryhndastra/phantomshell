@@ -5,7 +5,10 @@ import Quickshell.Wayland
 import qs.config
 import qs.components
 
-// modul indikator pop-up volume audio dan kecerahan layar bergaya persona
+// =============================================================================
+// PERSONA 3 RELOAD: S.E.E.S. TACTICAL HUD OSD (VOLUME & LUMINANCE)
+// Tampilan pop-up volume dan brightness bertema HUD Tactical Persona 3 Reload
+// =============================================================================
 Scope {
     PanelWindow {
         id: osdWin
@@ -21,18 +24,15 @@ Scope {
         }
         margins.bottom: 68
 
-        implicitWidth: 386
-        implicitHeight: 92
+        implicitWidth: 420
+        implicitHeight: 90
         color: "transparent"
 
-        // kontainer utama osd dengan animasi kemiringan khas persona
+        // Kontainer Utama HUD OSD Bergaya Persona 3 Reload
         Item {
             id: osdBody
             anchors.fill: parent
-            anchors.leftMargin: 12
-            anchors.rightMargin: 14
-            anchors.topMargin: 16
-            anchors.bottomMargin: 10
+            anchors.margins: 6
 
             readonly property bool isOpen: PhantomState.osdVisible
             readonly property bool isVolume: PhantomState.osdLabel === "VOLUME"
@@ -40,304 +40,239 @@ Scope {
             readonly property real ratio: Math.max(0.0, Math.min(1.0, PhantomState.osdValue / 100.0))
 
             opacity: isOpen ? 1.0 : 0.0
-            scale: isOpen ? 1.0 : 0.86
-            rotation: isOpen ? (PhantomState.polygonMode ? -2.2 : 0) : -6.0
+            scale: isOpen ? 1.0 : 0.88
+            rotation: isOpen ? -2.0 : -5.0
 
             transform: Translate {
-                y: osdBody.isOpen ? 0 : 18
-                Behavior on y { NumberAnimation { duration: 200; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
+                y: osdBody.isOpen ? 0 : 20
+                Behavior on y { NumberAnimation { duration: 180; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
             }
 
-            Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            Behavior on scale { NumberAnimation { duration: 200; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
-            Behavior on rotation { NumberAnimation { duration: 200; easing.type: osdBody.isOpen ? Easing.OutBack : Easing.InCubic } }
+            Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+            Behavior on rotation { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
             HoverHandler {
                 id: bodyHover
             }
 
-            // kartu poligon miring utama dengan bayangan berlapis
-            P5SkewedCard {
-                anchors.fill: parent
-                fillColor: "#09090E"
-                borderColor: "#FFFFFF"
-                shadowColor: osdBody.isMuted ? PhantomState.urgent : PhantomState.primary
-                borderWidth: 3
-                skewPx: PhantomState.polygonMode ? 15 : 0
-                shadowOffsetX: 6
-                shadowOffsetY: 6
-            }
-
-            // dekorasi pita diagonal di latar dalam kartu osd
+            // Kartu Latar Belakang Slanted Khas P3R
             Canvas {
+                id: bgCanvas
                 anchors.fill: parent
-                anchors.margins: 4
-                opacity: 0.18
+                antialiasing: true
                 onPaint: {
                     var ctx = getContext("2d")
                     ctx.reset()
                     var w = width
                     var h = height
+                    var sk = 16.0
 
-                    ctx.fillStyle = String(PhantomState.primary)
+                    // Bayangan Luar Gelap Safir
                     ctx.beginPath()
-                    ctx.moveTo(w * 0.22, 0)
-                    ctx.lineTo(w * 0.36, 0)
-                    ctx.lineTo(w * 0.27, h)
-                    ctx.lineTo(w * 0.13, h)
+                    ctx.moveTo(sk + 4, 4)
+                    ctx.lineTo(w + 4, 4)
+                    ctx.lineTo(w - sk + 4, h + 4)
+                    ctx.lineTo(4, h + 4)
                     ctx.closePath()
+                    ctx.fillStyle = "rgba(0, 20, 60, 0.75)"
                     ctx.fill()
 
-                    ctx.fillStyle = "#FFFFFF"
+                    // Dasar Kartu Navy Gelap
                     ctx.beginPath()
-                    ctx.moveTo(w * 0.38, 0)
-                    ctx.lineTo(w * 0.40, 0)
-                    ctx.lineTo(w * 0.31, h)
-                    ctx.lineTo(w * 0.29, h)
+                    ctx.moveTo(sk, 0)
+                    ctx.lineTo(w, 0)
+                    ctx.lineTo(w - sk, h)
+                    ctx.lineTo(0, h)
                     ctx.closePath()
+                    ctx.fillStyle = "#030818"
                     ctx.fill()
+
+                    // Garis Tepi Neon Cyan Otentik P3R
+                    ctx.strokeStyle = osdBody.isMuted ? "#ff2a55" : "#00dbff"
+                    ctx.lineWidth = 2.0
+                    ctx.stroke()
+
+                    // Aksen Garis Refleksi Interior P3R
+                    ctx.beginPath()
+                    ctx.moveTo(sk + 12, 4)
+                    ctx.lineTo(w - 12, 4)
+                    ctx.strokeStyle = osdBody.isMuted ? "rgba(255, 42, 85, 0.4)" : "rgba(0, 219, 255, 0.4)"
+                    ctx.lineWidth = 1.0
+                    ctx.stroke()
+                }
+
+                Connections {
+                    target: osdBody
+                    function onIsMutedChanged() { bgCanvas.requestPaint() }
                 }
             }
 
-            // pita label miring di sudut kiri atas kartu osd
+            // Pita Header Slanted: S.E.E.S. TACTICAL HUD // AUDIO LEVEL
             Item {
-                x: 18
-                y: -11
-                width: 128
+                x: 24
+                y: -10
+                width: 170
                 height: 22
-                rotation: -3.5
-                z: 5
-
-                Rectangle {
-                    x: 3
-                    y: 3
-                    width: parent.width
-                    height: parent.height
-                    color: osdBody.isMuted ? PhantomState.urgent : PhantomState.primary
-                }
+                rotation: -2.0
+                z: 10
 
                 Rectangle {
                     anchors.fill: parent
-                    color: "#FFFFFF"
-                    border.color: "#09090E"
-                    border.width: 2
+                    radius: 2
+                    color: osdBody.isMuted ? "#ff2a55" : "#0038a8"
+                    border.color: osdBody.isMuted ? "#ffffff" : "#00dbff"
+                    border.width: 1.5
 
                     RowLayout {
                         anchors.centerIn: parent
-                        spacing: 5
+                        spacing: 6
 
-                        P5Star {
-                            Layout.preferredWidth: 13
-                            Layout.preferredHeight: 13
-                            spinning: true
+                        Text {
+                            text: osdBody.isMuted ? "⚠" : (osdBody.isVolume ? "🔊" : "☀")
+                            font.pixelSize: 11
                         }
 
                         Text {
                             text: osdBody.isVolume
-                                ? (osdBody.isMuted ? "MUTED // SFX" : "AUDIO // GAUGE")
-                                : "LIGHT // GAUGE"
-                            color: "#09090E"
-                            font.family: "JetBrainsMono NFM"
+                                ? (osdBody.isMuted ? "MUTED // S.E.E.S." : "S.E.E.S. // AUDIO")
+                                : "S.E.E.S. // LUMINANCE"
+                            color: "#ffffff"
+                            font.family: "Rubik"
                             font.pixelSize: 9
                             font.weight: Font.Black
-                            font.italic: true
+                            font.letterSpacing: 0.8
                         }
                     }
                 }
             }
 
+            // Baris Konten: Ikon, Baris Gauge Meter, dan Nilai Persentase
             RowLayout {
                 anchors.fill: parent
-                anchors.leftMargin: 18
+                anchors.leftMargin: 20
                 anchors.rightMargin: 18
-                anchors.topMargin: 8
-                anchors.bottomMargin: 6
+                anchors.topMargin: 12
                 spacing: 12
 
-                // lencana poligon miring kiri untuk ikon speaker atau kecerahan
-                Item {
-                    Layout.preferredWidth: 46
-                    Layout.preferredHeight: 42
-                    rotation: -3
+                // Ikon Indikator
+                Rectangle {
+                    Layout.preferredWidth: 36
+                    Layout.preferredHeight: 36
+                    radius: 3
+                    color: "#07122a"
+                    border.color: osdBody.isMuted ? "#ff2a55" : "#00dbff"
+                    border.width: 1.5
 
-                    P5SkewedCard {
-                        anchors.fill: parent
-                        fillColor: iconMouse.containsMouse
-                            ? PhantomState.primary
-                            : (osdBody.isMuted ? "#2A1218" : "#181824")
-                        borderColor: osdBody.isMuted ? PhantomState.urgent : "#FFFFFF"
-                        shadowColor: osdBody.isMuted ? PhantomState.urgent : PhantomState.primary
-                        borderWidth: 2
-                        skewPx: PhantomState.polygonMode ? 8 : 0
-                        shadowOffsetX: 3
-                        shadowOffsetY: 3
-                    }
-
-                    P5Icon {
+                    Text {
                         anchors.centerIn: parent
-                        name: osdBody.isVolume
-                            ? (osdBody.isMuted ? "mute" : "volume")
-                            : "brightness"
-                        size: 19
-                        color: osdBody.isMuted
-                            ? PhantomState.urgent
-                            : (iconMouse.containsMouse ? "#FFFFFF" : PhantomState.secondary)
+                        text: osdBody.isVolume
+                            ? (osdBody.isMuted ? "🔇" : (osdBody.ratio > 0.6 ? "🔊" : (osdBody.ratio > 0.25 ? "🔉" : "🔈")))
+                            : "☀"
+                        font.pixelSize: 16
                     }
 
                     MouseArea {
                         id: iconMouse
                         anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: osdBody.isVolume ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             if (osdBody.isVolume) {
-                                PhantomState.toggleSystemMute()
+                                PhantomState.toggleVolumeMute()
                             }
                         }
                     }
                 }
 
-                // bilah progres poligon miring terpisah dengan tebasan pembatas tengah
+                // Bilah Meter Slanted Persona 3 Reload
                 Item {
                     id: trackArea
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 42
-
-                    property real animRatio: osdBody.ratio
-                    Behavior on animRatio {
-                        enabled: !trackMouse.pressed
-                        NumberAnimation { duration: 110; easing.type: Easing.OutCubic }
-                    }
-
-                    onAnimRatioChanged: gaugeCanvas.requestPaint()
-
-                    Connections {
-                        target: osdBody
-                        function onIsMutedChanged() { gaugeCanvas.requestPaint() }
-                    }
-
-                    Connections {
-                        target: PhantomState
-                        function onPrimaryChanged() { gaugeCanvas.requestPaint() }
-                        function onSecondaryChanged() { gaugeCanvas.requestPaint() }
-                    }
+                    Layout.preferredHeight: 28
 
                     Canvas {
-                        id: gaugeCanvas
+                        id: barCanvas
                         anchors.fill: parent
+                        antialiasing: true
 
                         onPaint: {
                             var ctx = getContext("2d")
                             ctx.reset()
-
                             var w = width
                             var h = height
-                            var sk = PhantomState.polygonMode ? 9 : 0
-                            var barTop = 8
-                            var barBot = h - 8
-                            var barH = barBot - barTop
-                            var gap = 9
-                            var r = Math.max(0.0, Math.min(1.0, trackArea.animRatio))
-                            var usableW = Math.max(24, w - sk - gap)
-                            var splitX = sk + usableW * r
+                            var sk = 8.0
 
-                            // bagian kiri bilah miring yang terisi
-                            if (r > 0.01) {
-                                var leftEndTop = Math.max(sk + 2, splitX - gap * 0.45)
-                                var leftEndBot = leftEndTop - sk
-
-                                ctx.fillStyle = osdBody.isMuted
-                                    ? "#4A4A5E"
-                                    : (PhantomState.osdValue > 100 ? String(PhantomState.secondary) : String(PhantomState.primary))
-                                ctx.beginPath()
-                                ctx.moveTo(sk, barTop)
-                                ctx.lineTo(leftEndTop, barTop)
-                                ctx.lineTo(leftEndBot, barBot)
-                                ctx.lineTo(0, barBot)
-                                ctx.closePath()
-                                ctx.fill()
-
-                                // garis aksen miring internal pada bagian terisi
-                                ctx.save()
-                                ctx.clip()
-                                ctx.fillStyle = "rgba(255, 255, 255, 0.18)"
-                                for (var sx = -10; sx < leftEndTop + 20; sx += 16) {
-                                    ctx.beginPath()
-                                    ctx.moveTo(sx + 6, barTop)
-                                    ctx.lineTo(sx + 11, barTop)
-                                    ctx.lineTo(sx + 3, barBot)
-                                    ctx.lineTo(sx - 2, barBot)
-                                    ctx.closePath()
-                                    ctx.fill()
-                                }
-                                ctx.restore()
-
-                                ctx.strokeStyle = "#FFFFFF"
-                                ctx.lineWidth = 1.8
-                                ctx.stroke()
-                            }
-
-                            // bagian kanan bilah miring yang belum terisi
-                            if (r < 0.99) {
-                                var rightStartTop = Math.min(w - 2, splitX + gap * 0.55)
-                                var rightStartBot = rightStartTop - sk
-
-                                ctx.fillStyle = "#1E1F2B"
-                                ctx.beginPath()
-                                ctx.moveTo(rightStartTop, barTop)
-                                ctx.lineTo(w, barTop)
-                                ctx.lineTo(w - sk, barBot)
-                                ctx.lineTo(rightStartBot, barBot)
-                                ctx.closePath()
-                                ctx.fill()
-
-                                ctx.strokeStyle = "#484A60"
-                                ctx.lineWidth = 1.5
-                                ctx.stroke()
-                            }
-
-                            // bilah pisau pembatas miring di titik persentase saat ini
-                            var thumbTopX = splitX + 1.5
-                            var thumbBotX = splitX - sk - 1.5
-                            var thumbW = 5.0
-
-                            // bayangan warna tema di belakang garis pembatas
-                            ctx.fillStyle = osdBody.isMuted ? String(PhantomState.urgent) : String(PhantomState.secondary)
+                            // 1. Lintasan Dasar (Track Background)
                             ctx.beginPath()
-                            ctx.moveTo(thumbTopX + 2, 2)
-                            ctx.lineTo(thumbTopX + thumbW + 2, 2)
-                            ctx.lineTo(thumbBotX + thumbW + 2, h - 1)
-                            ctx.lineTo(thumbBotX + 2, h - 1)
+                            ctx.moveTo(sk, 0)
+                            ctx.lineTo(w, 0)
+                            ctx.lineTo(w - sk, h)
+                            ctx.lineTo(0, h)
                             ctx.closePath()
+                            ctx.fillStyle = "#07122a"
                             ctx.fill()
-
-                            // inti putih tajam garis pembatas
-                            ctx.fillStyle = "#FFFFFF"
-                            ctx.beginPath()
-                            ctx.moveTo(thumbTopX - thumbW * 0.5, 1)
-                            ctx.lineTo(thumbTopX + thumbW * 0.5, 1)
-                            ctx.lineTo(thumbBotX + thumbW * 0.5, h - 2)
-                            ctx.lineTo(thumbBotX - thumbW * 0.5, h - 2)
-                            ctx.closePath()
-                            ctx.fill()
-
-                            ctx.strokeStyle = "#09090E"
-                            ctx.lineWidth = 1.4
+                            ctx.strokeStyle = "rgba(0, 219, 255, 0.3)"
+                            ctx.lineWidth = 1.0
                             ctx.stroke()
+
+                            // 2. Baris Isi Persentase (Fill Bar)
+                            var fillW = Math.max(0, (w - sk) * osdBody.ratio)
+                            if (fillW > 0) {
+                                ctx.beginPath()
+                                ctx.moveTo(sk, 0)
+                                ctx.lineTo(sk + fillW, 0)
+                                ctx.lineTo(fillW, h)
+                                ctx.lineTo(0, h)
+                                ctx.closePath()
+
+                                if (osdBody.isMuted) {
+                                    ctx.fillStyle = "#ff2a55"
+                                } else {
+                                    var grad = ctx.createLinearGradient(0, 0, w, 0)
+                                    grad.addColorStop(0.0, "#0038a8")
+                                    grad.addColorStop(0.5, "#0088ff")
+                                    grad.addColorStop(1.0, "#00f0ff")
+                                    ctx.fillStyle = grad
+                                }
+                                ctx.fill()
+
+                                // Garis Pembatas Putih di Ujung Nilai (Slider Thumb Head)
+                                ctx.beginPath()
+                                ctx.moveTo(sk + fillW, 0)
+                                ctx.lineTo(fillW, h)
+                                ctx.strokeStyle = "#ffffff"
+                                ctx.lineWidth = 2.5
+                                ctx.stroke()
+                            }
+
+                            // 3. Garis Segmen / Grid Taktikal (Tick Marks Khas Persona 3)
+                            ctx.strokeStyle = "rgba(3, 8, 24, 0.6)"
+                            ctx.lineWidth = 1.5
+                            for (var step = 1; step <= 9; step++) {
+                                var tickX = (w - sk) * (step / 10.0)
+                                ctx.beginPath()
+                                ctx.moveTo(sk + tickX, 0)
+                                ctx.lineTo(tickX, h)
+                                ctx.stroke()
+                            }
+                        }
+
+                        Connections {
+                            target: osdBody
+                            function onRatioChanged() { barCanvas.requestPaint() }
+                            function onIsMutedChanged() { barCanvas.requestPaint() }
                         }
                     }
 
-                    // interaksi klik, geser, dan scroll langsung pada bilah osd
+                    // Interaksi Klik dan Drag
                     MouseArea {
                         id: trackMouse
                         anchors.fill: parent
-                        anchors.topMargin: -12
-                        anchors.bottomMargin: -12
                         hoverEnabled: true
-                        preventStealing: true
                         cursorShape: Qt.PointingHandCursor
                         readonly property bool interacting: pressed || containsMouse || iconMouse.containsMouse || bodyHover.hovered
                         onInteractingChanged: PhantomState.osdHovered = interacting
+
                         function applyAt(mx) {
                             const pct = Math.round(Math.max(0, Math.min(1, mx / Math.max(1, trackArea.width))) * 100)
                             if (osdBody.isVolume) {
@@ -346,10 +281,9 @@ Scope {
                                 PhantomState.setSystemBrightness(Math.max(1, pct))
                             }
                         }
+
                         onPressed: mouse => applyAt(mouse.x)
-                        onPositionChanged: mouse => {
-                            if (pressed) applyAt(mouse.x)
-                        }
+                        onPositionChanged: mouse => { if (pressed) applyAt(mouse.x) }
                         onWheel: wheel => {
                             const step = wheel.angleDelta.y > 0 ? 2 : -2
                             if (osdBody.isVolume) {
@@ -361,31 +295,23 @@ Scope {
                     }
                 }
 
-                // lencana poligon miring kanan untuk angka nilai persentase
-                Item {
-                    Layout.preferredWidth: 56
-                    Layout.preferredHeight: 42
-                    rotation: 2.5
-
-                    P5SkewedCard {
-                        anchors.fill: parent
-                        fillColor: osdBody.isMuted ? PhantomState.urgent : PhantomState.primary
-                        borderColor: "#FFFFFF"
-                        shadowColor: PhantomState.secondary
-                        borderWidth: 2
-                        skewPx: PhantomState.polygonMode ? 8 : 0
-                        shadowOffsetX: 3
-                        shadowOffsetY: 3
-                    }
+                // Lencana Persentase Slanted Kanan
+                Rectangle {
+                    Layout.preferredWidth: 62
+                    Layout.preferredHeight: 36
+                    radius: 3
+                    color: osdBody.isMuted ? "#ff2a55" : "#0038a8"
+                    border.color: osdBody.isMuted ? "#ffffff" : "#00dbff"
+                    border.width: 1.5
 
                     Text {
                         anchors.centerIn: parent
-                        text: osdBody.isMuted ? "X" : String(PhantomState.osdValue)
-                        color: "#FFFFFF"
-                        font.family: "JetBrainsMono NFM"
-                        font.pixelSize: 17
+                        text: osdBody.isMuted ? "MUTED" : (PhantomState.osdValue + "%")
+                        color: "#ffffff"
+                        font.family: "Rubik"
+                        font.pixelSize: osdBody.isMuted ? 10 : 13
                         font.weight: Font.Black
-                        font.italic: true
+                        font.letterSpacing: 0.5
                     }
                 }
             }

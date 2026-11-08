@@ -7,21 +7,24 @@ import Quickshell.Services.Pam
 import qs.config
 import qs.components
 
-// modul layar kunci wayland dengan autentikasi pam dan animasi transisi
+// =============================================================================
+// PERSONA 3 RELOAD: S.E.E.S. DARK HOUR PROTOCOL LOCK SCREEN
+// Layar Kunci Wayland Sesi Sistem bertema S.E.E.S. Evoker Authenticator P3R
+// =============================================================================
 Scope {
     id: lockScope
 
     property string currentTime: "23:45"
     property string currentDay: "SATURDAY"
     property string currentDate: "OCT 04"
-    property string statusText: "ENTER PASSCODE TO INFILTRATE"
+    property string statusText: "DARK HOUR DETECTED // AUTHORIZE EVOKER"
     property bool authError: false
     property bool authBusy: false
     property bool authSuccess: false
     property bool showPassword: false
     property string pendingPassword: ""
 
-    // timer pembaruan jam dan tanggal saat layar terkunci
+    // Timer pembaruan jam dan tanggal saat layar terkunci
     Timer {
         interval: 1000
         running: PhantomState.lockOpen
@@ -38,7 +41,7 @@ Scope {
         }
     }
 
-    // konteks pam untuk verifikasi kata sandi pengguna sistem
+    // Konteks PAM untuk verifikasi kata sandi pengguna sistem
     PamContext {
         id: pam
         config: "swaylock"
@@ -55,12 +58,12 @@ Scope {
             if (result === PamResult.Success) {
                 lockScope.authError = false
                 lockScope.authSuccess = true
-                lockScope.statusText = "IDENTITY VERIFIED // WELCOME BACK, JOKER"
+                lockScope.statusText = "AUTHORIZATION GRANTED // PERSONA DISPATCHED"
                 PhantomState.playSfx("select")
                 PhantomState.unlockScreen()
             } else {
                 lockScope.authError = true
-                lockScope.statusText = "ACCESS DENIED // WRONG PASSCODE"
+                lockScope.statusText = "AUTHORIZATION REJECTED // SHADOW DETECTED"
                 PhantomState.playSfx("notif")
             }
         }
@@ -68,7 +71,7 @@ Scope {
         onError: err => {
             lockScope.authBusy = false
             lockScope.authError = true
-            lockScope.statusText = "PAM ERROR // TRY AGAIN"
+            lockScope.statusText = "PAM ERROR // EVOKER OFFLINE"
         }
     }
 
@@ -82,7 +85,7 @@ Scope {
         }
         lockScope.authError = false
         lockScope.authBusy = true
-        lockScope.statusText = "VERIFYING IDENTITY..."
+        lockScope.statusText = "AUTHENTICATING EVOKER REGISTRATION..."
         lockScope.pendingPassword = clean
         if (pam.active) {
             pam.abort()
@@ -100,7 +103,7 @@ Scope {
         }
     }
 
-    // pengunci sesi wayland pada seluruh layar aktif
+    // Pengunci Sesi Wayland pada Seluruh Layar Aktif
     WlSessionLock {
         id: sessionLock
         locked: PhantomState.lockOpen
@@ -115,51 +118,28 @@ Scope {
                 property real bgOpacity: 0.0
                 property real clockSlideX: -140.0
                 property real clockOpacity: 0.0
-                property real cardScale: 0.78
-                property real cardRot: -6.5
+                property real cardScale: 0.82
                 property real cardOpacity: 0.0
-                property real shutterProgress: 1.0
-                property real unlockSlashProgress: 0.0
 
-                onShutterProgressChanged: shutterCanvas.requestPaint()
-                onUnlockSlashProgressChanged: shutterCanvas.requestPaint()
-
-                // animasi saat layar kunci dibuka
+                // Animasi Masuk
                 ParallelAnimation {
                     id: lockEnterAnim
-                    NumberAnimation { target: lockRoot; property: "bgOpacity"; from: 0.0; to: 1.0; duration: 340; easing.type: Easing.OutCubic }
-                    NumberAnimation { target: lockRoot; property: "shutterProgress"; from: 1.0; to: 0.0; duration: 560; easing.type: Easing.OutCubic }
-                    SequentialAnimation {
-                        PauseAnimation { duration: 90 }
-                        ParallelAnimation {
-                            NumberAnimation { target: lockRoot; property: "clockSlideX"; from: -140.0; to: 0.0; duration: 460; easing.type: Easing.OutBack }
-                            NumberAnimation { target: lockRoot; property: "clockOpacity"; from: 0.0; to: 1.0; duration: 340; easing.type: Easing.OutCubic }
-                            NumberAnimation { target: lockRoot; property: "cardScale"; from: 0.78; to: 1.0; duration: 480; easing.type: Easing.OutBack }
-                            NumberAnimation { target: lockRoot; property: "cardRot"; from: -6.5; to: 0.0; duration: 480; easing.type: Easing.OutBack }
-                            NumberAnimation { target: lockRoot; property: "cardOpacity"; from: 0.0; to: 1.0; duration: 320; easing.type: Easing.OutCubic }
-                        }
-                    }
+                    NumberAnimation { target: lockRoot; property: "bgOpacity"; from: 0.0; to: 1.0; duration: 280; easing.type: Easing.OutCubic }
+                    NumberAnimation { target: lockRoot; property: "clockSlideX"; from: -140.0; to: 0.0; duration: 380; easing.type: Easing.OutBack }
+                    NumberAnimation { target: lockRoot; property: "clockOpacity"; from: 0.0; to: 1.0; duration: 260; easing.type: Easing.OutCubic }
+                    NumberAnimation { target: lockRoot; property: "cardScale"; from: 0.82; to: 1.0; duration: 380; easing.type: Easing.OutBack; easing.overshoot: 1.15 }
+                    NumberAnimation { target: lockRoot; property: "cardOpacity"; from: 0.0; to: 1.0; duration: 240; easing.type: Easing.OutCubic }
                 }
 
-                // animasi saat layar kunci berhasil dibuka kembali
+                // Animasi Keluar Saat Berhasil Terbuka
                 SequentialAnimation {
                     id: lockExitAnim
                     ParallelAnimation {
-                        NumberAnimation { target: lockRoot; property: "unlockSlashProgress"; from: 0.0; to: 1.0; duration: 520; easing.type: Easing.InOutCubic }
-                        SequentialAnimation {
-                            NumberAnimation { target: lockRoot; property: "cardScale"; to: 1.05; duration: 130; easing.type: Easing.OutQuad }
-                            ParallelAnimation {
-                                NumberAnimation { target: lockRoot; property: "cardScale"; to: 0.76; duration: 360; easing.type: Easing.InBack }
-                                NumberAnimation { target: lockRoot; property: "cardRot"; to: 5.5; duration: 360; easing.type: Easing.InCubic }
-                                NumberAnimation { target: lockRoot; property: "cardOpacity"; to: 0.0; duration: 310; easing.type: Easing.InCubic }
-                            }
-                        }
-                        NumberAnimation { target: lockRoot; property: "clockSlideX"; to: -160.0; duration: 380; easing.type: Easing.InBack }
-                        NumberAnimation { target: lockRoot; property: "clockOpacity"; to: 0.0; duration: 300; easing.type: Easing.InCubic }
-                        SequentialAnimation {
-                            PauseAnimation { duration: 150 }
-                            NumberAnimation { target: lockRoot; property: "bgOpacity"; to: 0.0; duration: 360; easing.type: Easing.InCubic }
-                        }
+                        NumberAnimation { target: lockRoot; property: "cardScale"; to: 1.08; duration: 120; easing.type: Easing.OutQuad }
+                        NumberAnimation { target: lockRoot; property: "cardOpacity"; to: 0.0; duration: 260; easing.type: Easing.InCubic }
+                        NumberAnimation { target: lockRoot; property: "clockSlideX"; to: -140.0; duration: 280; easing.type: Easing.InBack }
+                        NumberAnimation { target: lockRoot; property: "clockOpacity"; to: 0.0; duration: 220; easing.type: Easing.InCubic }
+                        NumberAnimation { target: lockRoot; property: "bgOpacity"; to: 0.0; duration: 300; easing.type: Easing.InCubic }
                     }
                     ScriptAction {
                         script: {
@@ -167,7 +147,7 @@ Scope {
                             PhantomState.lockOpen = false
                             lockScope.authSuccess = false
                             lockScope.authError = false
-                            lockScope.statusText = "ENTER PASSCODE TO INFILTRATE"
+                            lockScope.statusText = "DARK HOUR DETECTED // AUTHORIZE EVOKER"
                         }
                     }
                 }
@@ -182,572 +162,481 @@ Scope {
                     }
                 }
 
-                // inisialisasi fokus dan mulai animasi masuk
                 Component.onCompleted: {
                     lockScope.authSuccess = false
                     lockScope.authError = false
-                    lockScope.statusText = "ENTER PASSCODE TO INFILTRATE"
+                    lockScope.statusText = "DARK HOUR DETECTED // AUTHORIZE EVOKER"
                     pwInput.forceActiveFocus()
                     lockEnterAnim.restart()
                 }
 
-                // lapisan latar belakang wallpaper dan redup gelap
+                // 1. Lapisan Latar Belakang Dark Hour P3R
                 Item {
                     anchors.fill: parent
                     opacity: lockRoot.bgOpacity
 
+                    // Dasar Hitam Malam / Dark Hour
                     Rectangle {
                         anchors.fill: parent
-                        color: "#07070B"
+                        color: "#020612"
                     }
 
-                    Image {
-                        anchors.fill: parent
-                        source: PhantomState.wallpaperPath ? ("file://" + PhantomState.wallpaperPath) : ""
-                        fillMode: Image.PreserveAspectCrop
-                        smooth: true
-                        opacity: 0.38
-                        scale: 1.0 + (1.0 - lockRoot.bgOpacity) * 0.06
-                    }
-
-                    Rectangle {
-                        id: darkOverlay
-                        anchors.fill: parent
-                        color: "#B807070C"
-                    }
-
-                    // aksen garis diagonal pada latar layar kunci
+                    // Kisi Garis Koordinat Taktikal (S.E.E.S. Operational Grid & Moon Aura)
                     Canvas {
                         anchors.fill: parent
+                        antialiasing: true
                         onPaint: {
                             var ctx = getContext("2d")
                             ctx.reset()
                             var w = width
                             var h = height
 
-                            ctx.fillStyle = Qt.rgba(PhantomState.primary.r, PhantomState.primary.g, PhantomState.primary.b, 0.16)
-                            ctx.beginPath()
-                            ctx.moveTo(0, h * 0.18)
-                            ctx.lineTo(w, h * 0.04)
-                            ctx.lineTo(w, h * 0.22)
-                            ctx.lineTo(0, h * 0.42)
-                            ctx.closePath()
-                            ctx.fill()
+                            // Cahaya Bulan Cyan P3R (Radial Moon Aura)
+                            var radGrad = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, Math.max(w, h) * 0.65)
+                            radGrad.addColorStop(0.0, "rgba(0, 219, 255, 0.16)")
+                            radGrad.addColorStop(0.45, "rgba(0, 56, 168, 0.10)")
+                            radGrad.addColorStop(1.0, "transparent")
+                            ctx.fillStyle = radGrad
+                            ctx.fillRect(0, 0, w, h)
 
-                            ctx.fillStyle = Qt.rgba(PhantomState.primary.r, PhantomState.primary.g, PhantomState.primary.b, 0.11)
+                            ctx.strokeStyle = "rgba(0, 219, 255, 0.08)"
+                            ctx.lineWidth = 1.0
+
+                            for (var x = 80; x < w; x += 120) {
+                                ctx.beginPath()
+                                ctx.moveTo(x, 0)
+                                ctx.lineTo(x, h)
+                                ctx.stroke()
+                            }
+                            for (var y = 60; y < h; y += 120) {
+                                ctx.beginPath()
+                                ctx.moveTo(0, y)
+                                ctx.lineTo(w, y)
+                                ctx.stroke()
+                            }
+
+                            // Garis Miring Diagonal Dark Hour
+                            ctx.strokeStyle = "rgba(0, 219, 255, 0.15)"
+                            ctx.lineWidth = 2.0
                             ctx.beginPath()
-                            ctx.moveTo(0, h * 0.78)
-                            ctx.lineTo(w, h * 0.62)
-                            ctx.lineTo(w, h * 0.74)
-                            ctx.lineTo(0, h * 0.92)
-                            ctx.closePath()
-                            ctx.fill()
+                            ctx.moveTo(0, h * 0.28)
+                            ctx.lineTo(w, h * 0.12)
+                            ctx.stroke()
+
+                            ctx.beginPath()
+                            ctx.moveTo(0, h * 0.88)
+                            ctx.lineTo(w, h * 0.72)
+                            ctx.stroke()
                         }
                     }
                 }
 
-                // kartu jam dan tanggal di pojok kiri atas
+                // 2. Kartu Jam Digital Dark Hour di Pojok Kiri Atas
                 Item {
                     anchors.top: parent.top
                     anchors.left: parent.left
-                    anchors.topMargin: 42
-                    anchors.leftMargin: 52
-                    width: 360
-                    height: 150
+                    anchors.topMargin: 46
+                    anchors.leftMargin: 56
+                    width: 380
+                    height: 160
                     opacity: lockRoot.clockOpacity
                     transform: Translate { x: lockRoot.clockSlideX }
 
-                    P5SkewedCard {
+                    // Backplate Slanted Cyan
+                    Canvas {
                         anchors.fill: parent
-                        fillColor: "#0B0B10"
-                        borderColor: "#FFFFFF"
-                        shadowColor: PhantomState.primary
-                        borderWidth: 3
-                        skewPx: 14
-                        shadowOffsetX: 6
-                        shadowOffsetY: 6
+                        antialiasing: true
+                        onPaint: {
+                            var ctx = getContext("2d")
+                            ctx.reset()
+                            var w = width
+                            var h = height
+                            var sk = 16.0
+
+                            ctx.beginPath()
+                            ctx.moveTo(sk, 0)
+                            ctx.lineTo(w, 0)
+                            ctx.lineTo(w - sk, h)
+                            ctx.lineTo(0, h)
+                            ctx.closePath()
+                            ctx.fillStyle = "#030a1c"
+                            ctx.fill()
+                            ctx.strokeStyle = "#00dbff"
+                            ctx.lineWidth = 2.0
+                            ctx.stroke()
+                        }
                     }
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 28
-                        anchors.rightMargin: 24
-                        anchors.topMargin: 14
-                        anchors.bottomMargin: 14
-                        spacing: 2
+                        anchors.margins: 20
+                        spacing: 4
 
                         RowLayout {
-                            spacing: 10
+                            spacing: 8
                             Rectangle {
-                                width: 92
+                                width: 108
                                 height: 22
-                                color: PhantomState.primary
-                                border.color: "#FFFFFF"
-                                border.width: 1
-                                rotation: -3
+                                radius: 2
+                                color: "#0038a8"
+                                border.color: "#00dbff"
+                                border.width: 1.2
                                 Text {
                                     anchors.centerIn: parent
-                                    text: lockScope.currentDate
-                                    color: "#FFFFFF"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 11
+                                    text: "DARK HOUR"
+                                    color: "#ffffff"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 10
                                     font.weight: Font.Black
+                                    font.letterSpacing: 1.2
                                 }
                             }
+
                             Text {
-                                text: lockScope.currentDay
-                                color: PhantomState.secondary
+                                text: "S.E.E.S. OPERATIONAL TIME"
+                                color: "#00dbff"
                                 font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 14
-                                font.weight: Font.Black
-                                font.italic: true
+                                font.pixelSize: 10
+                                font.bold: true
+                                font.letterSpacing: 1
                             }
                         }
 
                         Text {
                             text: lockScope.currentTime
-                            color: "#FFFFFF"
-                            font.family: "JetBrainsMono NFM"
+                            color: "#ffffff"
+                            font.family: "Rubik"
                             font.pixelSize: 64
                             font.weight: Font.Black
                             font.italic: true
                         }
+
+                        Text {
+                            text: lockScope.currentDay + " // " + lockScope.currentDate
+                            color: "#7fa8d8"
+                            font.family: "JetBrainsMono NFM"
+                            font.pixelSize: 11
+                            font.bold: true
+                        }
                     }
                 }
 
-                // kartu autentikasi utama di tengah layar
+                // 3. Kartu Autentikasi Utama S.E.E.S. di Tengah Layar
                 Item {
                     id: centerCard
-                    width: 520
-                    height: 330
+                    width: 540
+                    height: 350
                     anchors.centerIn: parent
                     opacity: lockRoot.cardOpacity
                     scale: lockRoot.cardScale
-                    rotation: lockRoot.cardRot
 
                     property real shakeOffset: 0
                     transform: Translate { x: centerCard.shakeOffset }
 
                     SequentialAnimation {
                         id: errorShakeAnim
-                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: -16; duration: 45 }
-                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: 16; duration: 45 }
-                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: -10; duration: 45 }
-                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: 10; duration: 45 }
-                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: 0; duration: 45 }
+                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: -16; duration: 40 }
+                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: 16; duration: 40 }
+                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: -10; duration: 40 }
+                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: 10; duration: 40 }
+                        NumberAnimation { target: centerCard; property: "shakeOffset"; to: 0; duration: 40 }
                     }
 
                     Connections {
                         target: lockScope
                         function onAuthErrorChanged() {
-                            if (lockScope.authError) {
-                                errorShakeAnim.restart()
-                            }
+                            if (lockScope.authError) errorShakeAnim.restart()
                         }
                     }
 
-                    P5SkewedCard {
+                    // Backplate Slanted P3R dengan Garis Neon Cyan
+                    Canvas {
+                        id: centerCardCanvas
                         anchors.fill: parent
-                        fillColor: "#0D0D14"
-                        borderColor: lockScope.authSuccess
-                            ? PhantomState.secondary
-                            : (lockScope.authError ? PhantomState.primary : "#FFFFFF")
-                        shadowColor: lockScope.authSuccess
-                            ? PhantomState.secondary
-                            : (lockScope.authError ? "#FF0022" : PhantomState.primary)
-                        borderWidth: 3
-                        skewPx: 14
-                        shadowOffsetX: 8
-                        shadowOffsetY: 8
+                        antialiasing: true
+                        onPaint: {
+                            var ctx = getContext("2d")
+                            ctx.reset()
+                            var w = width
+                            var h = height
+                            var sk = 18.0
+
+                            // Bayangan Luar Safir
+                            ctx.beginPath()
+                            ctx.moveTo(sk + 5, 5)
+                            ctx.lineTo(w + 5, 5)
+                            ctx.lineTo(w - sk + 5, h + 5)
+                            ctx.lineTo(5, h + 5)
+                            ctx.closePath()
+                            ctx.fillStyle = "rgba(0, 20, 60, 0.85)"
+                            ctx.fill()
+
+                            // Dasar Kartu Navy
+                            ctx.beginPath()
+                            ctx.moveTo(sk, 0)
+                            ctx.lineTo(w, 0)
+                            ctx.lineTo(w - sk, h)
+                            ctx.lineTo(0, h)
+                            ctx.closePath()
+                            ctx.fillStyle = "#030a1c"
+                            ctx.fill()
+
+                            // Garis Tepi Neon (Hijau/Cyan Sukses, Merah Error, Biru Normal)
+                            ctx.strokeStyle = lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ff2a55" : "#00dbff")
+                            ctx.lineWidth = 2.5
+                            ctx.stroke()
+                        }
+
+                        Connections {
+                            target: lockScope
+                            function onAuthSuccessChanged() { centerCardCanvas.requestPaint() }
+                            function onAuthErrorChanged() { centerCardCanvas.requestPaint() }
+                        }
                     }
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 28
+                        anchors.margins: 26
                         spacing: 16
 
-                        // informasi profil pengguna dan status autentikasi
+                        // Profil Operatif S.E.E.S.
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: 18
+                            spacing: 16
 
-                            // bingkai foto profil pengguna
+                            // Foto Profil Karakter Persona 3 (Makoto Yuki)
                             Item {
-                                Layout.preferredWidth: 84
-                                Layout.preferredHeight: 84
-                                rotation: -6
-
-                                Rectangle {
-                                    x: 5; y: 6
-                                    width: parent.width; height: parent.height
-                                    color: lockScope.authSuccess ? PhantomState.secondary : PhantomState.primary
-                                }
+                                Layout.preferredWidth: 80
+                                Layout.preferredHeight: 80
 
                                 Rectangle {
                                     anchors.fill: parent
-                                    color: "#09090D"
-                                    border.color: "#FFFFFF"
-                                    border.width: 3
+                                    radius: 4
+                                    color: "#071228"
+                                    border.color: lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ff2a55" : "#00dbff")
+                                    border.width: 2
                                     clip: true
 
                                     Image {
                                         anchors.fill: parent
-                                        source: Qt.resolvedUrl("../../assets/ren.png")
+                                        source: Qt.resolvedUrl("../../assets/themes/p3/ui/char_leader.png")
                                         fillMode: Image.PreserveAspectCrop
                                         smooth: true
-                                        mipmap: true
                                     }
                                 }
                             }
 
+                            // Identitas dan Status Operatif
                             ColumnLayout {
                                 Layout.fillWidth: true
-                                spacing: 4
+                                spacing: 3
 
                                 RowLayout {
                                     spacing: 8
                                     Rectangle {
-                                        width: 118
-                                        height: 22
-                                        color: lockScope.authSuccess ? PhantomState.secondary : "#FFFFFF"
-                                        rotation: -2
+                                        width: 82
+                                        height: 20
+                                        radius: 2
+                                        color: lockScope.authSuccess ? "#00ffd2" : (lockScope.authError ? "#ff2a55" : "#0038a8")
                                         Text {
                                             anchors.centerIn: parent
-                                            text: lockScope.authSuccess ? "ACCESS GRANTED" : "CALLING CARD LOCK"
-                                            color: "#09090D"
-                                            font.family: "JetBrainsMono NFM"
+                                            text: "S.E.E.S."
+                                            color: lockScope.authSuccess ? "#030818" : "#ffffff"
+                                            font.family: "Rubik"
                                             font.pixelSize: 10
                                             font.weight: Font.Black
+                                            font.letterSpacing: 1.5
                                         }
                                     }
+
                                     Text {
-                                        text: "// VELVET SECURITY"
-                                        color: PhantomState.secondary
+                                        text: "// SPECIALIZED EXECUTION SQUAD"
+                                        color: "#00dbff"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 10
-                                        font.weight: Font.Black
+                                        font.pixelSize: 9
+                                        font.bold: true
                                     }
                                 }
 
                                 Text {
-                                    text: PhantomState.sysHost
-                                    color: "#FFFFFF"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 24
+                                    text: "OPERATIVE // " + String(PhantomState.sysHost).toUpperCase()
+                                    color: "#ffffff"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 20
                                     font.weight: Font.Black
-                                    font.italic: true
+                                    font.letterSpacing: 1
                                 }
 
                                 Text {
                                     Layout.fillWidth: true
                                     text: lockScope.statusText
                                     color: lockScope.authSuccess
-                                        ? PhantomState.secondary
-                                        : (lockScope.authError ? PhantomState.primary : PhantomState.muted)
+                                        ? "#00ffd2"
+                                        : (lockScope.authError ? "#ff2a55" : "#7fa8d8")
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 11
-                                    font.weight: Font.Black
+                                    font.bold: true
                                     elide: Text.ElideRight
                                 }
                             }
                         }
 
-                        // kotak input kata sandi
+                        // Kotak Input Kata Sandi Slanted P3R
                         Item {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 54
+                            Layout.preferredHeight: 52
 
-                            P5SkewedCard {
+                            Rectangle {
                                 anchors.fill: parent
-                                fillColor: "#161622"
-                                borderColor: pwInput.activeFocus ? PhantomState.secondary : "#FFFFFF"
-                                shadowColor: PhantomState.primary
-                                borderWidth: 2
-                                skewPx: 8
-                            }
+                                radius: 4
+                                color: "#07132c"
+                                border.color: pwInput.activeFocus ? "#00dbff" : "#1a2c4e"
+                                border.width: 1.8
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 18
-                                anchors.rightMargin: 14
-                                spacing: 10
-
-                                P5Icon {
-                                    name: "lock"
-                                    size: 16
-                                    color: PhantomState.secondary
-                                }
-
-                                TextInput {
-                                    id: pwInput
-                                    Layout.fillWidth: true
-                                    color: "#FFFFFF"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 16
-                                    font.weight: Font.Black
-                                    echoMode: lockScope.showPassword ? TextInput.Normal : TextInput.Password
-                                    passwordCharacter: "★"
-                                    focus: true
-                                    clip: true
-                                    verticalAlignment: TextInput.AlignVCenter
-
-                                    Keys.onReturnPressed: {
-                                        lockScope.submitPassword(pwInput.text)
-                                        pwInput.text = ""
-                                    }
-                                    Keys.onEnterPressed: {
-                                        lockScope.submitPassword(pwInput.text)
-                                        pwInput.text = ""
-                                    }
-                                    Keys.onEscapePressed: {
-                                        pwInput.text = ""
-                                        lockScope.authError = false
-                                        lockScope.statusText = "ENTER PASSCODE TO INFILTRATE"
-                                    }
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 16
+                                    anchors.rightMargin: 12
+                                    spacing: 10
 
                                     Text {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: "Type Linux password & press Enter..."
-                                        color: "#6E6E82"
+                                        text: "🗝"
+                                        font.pixelSize: 15
+                                    }
+
+                                    TextInput {
+                                        id: pwInput
+                                        Layout.fillWidth: true
+                                        color: "#ffffff"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 16
                                         font.weight: Font.Bold
-                                        visible: pwInput.text.length === 0
+                                        echoMode: lockScope.showPassword ? TextInput.Normal : TextInput.Password
+                                        passwordCharacter: "●"
+                                        focus: true
+                                        clip: true
+                                        verticalAlignment: TextInput.AlignVCenter
+
+                                        Keys.onReturnPressed: {
+                                            lockScope.submitPassword(pwInput.text)
+                                            pwInput.text = ""
+                                        }
+                                        Keys.onEnterPressed: {
+                                            lockScope.submitPassword(pwInput.text)
+                                            pwInput.text = ""
+                                        }
+                                        Keys.onEscapePressed: {
+                                            pwInput.text = ""
+                                            lockScope.authError = false
+                                            lockScope.statusText = "DARK HOUR DETECTED // AUTHORIZE EVOKER"
+                                        }
+
+                                        Text {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: "Enter Evoker Authorization Passcode..."
+                                            color: "#3f5c84"
+                                            font.family: "JetBrainsMono NFM"
+                                            font.pixelSize: 12
+                                            font.bold: true
+                                            visible: pwInput.text.length === 0
+                                        }
                                     }
-                                }
 
-                                // tombol penampil atau penyembunyi karakter kata sandi
-                                Rectangle {
-                                    width: 52
-                                    height: 26
-                                    color: showPwMouse.containsMouse ? PhantomState.primary : "#232334"
-                                    border.color: "#FFFFFF"
-                                    border.width: 1
+                                    // Tombol Show/Hide Passcode
+                                    Rectangle {
+                                        width: 54
+                                        height: 26
+                                        radius: 3
+                                        color: showPwMouse.containsMouse ? "#0038a8" : "#0d1f42"
+                                        border.color: "#00dbff"
+                                        border.width: 1
 
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: lockScope.showPassword ? "HIDE" : "SHOW"
-                                        color: "#FFFFFF"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 9
-                                        font.weight: Font.Black
-                                    }
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: lockScope.showPassword ? "HIDE" : "SHOW"
+                                            color: "#ffffff"
+                                            font.family: "Rubik"
+                                            font.pixelSize: 9
+                                            font.bold: true
+                                        }
 
-                                    MouseArea {
-                                        id: showPwMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            lockScope.showPassword = !lockScope.showPassword
-                                            pwInput.forceActiveFocus()
+                                        MouseArea {
+                                            id: showPwMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                lockScope.showPassword = !lockScope.showPassword
+                                                pwInput.forceActiveFocus()
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // baris indikator baterai, volume, serta tombol suspend dan unlock
+                        // Baris Informasi Baterai & Tombol Aksi
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 10
 
                             Rectangle {
                                 height: 36
-                                width: 130
-                                color: "#14141E"
-                                border.color: "#343446"
+                                Layout.fillWidth: true
+                                radius: 3
+                                color: "#061226"
+                                border.color: "#182a4c"
                                 border.width: 1
 
                                 RowLayout {
                                     anchors.centerIn: parent
                                     spacing: 8
                                     Text {
-                                        text: "BAT " + PhantomState.batteryPct + "%"
-                                        color: PhantomState.secondary
+                                        text: "⚡ BAT " + PhantomState.batteryPct + "%"
+                                        color: "#00dbff"
                                         font.family: "JetBrainsMono NFM"
                                         font.pixelSize: 11
-                                        font.weight: Font.Black
+                                        font.bold: true
                                     }
                                     Text {
-                                        text: "• VOL " + PhantomState.volumePct + "%"
-                                        color: "#FFFFFF"
+                                        text: "• " + PhantomState.sysHost
+                                        color: "#54749f"
                                         font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 11
-                                        font.weight: Font.Bold
+                                        font.pixelSize: 10
                                     }
                                 }
                             }
 
-                            Item { Layout.fillWidth: true }
+                            // Tombol DISPATCH / AUTHORIZE
+                            Rectangle {
+                                height: 36
+                                Layout.preferredWidth: 150
+                                radius: 3
+                                color: submitMouse.containsMouse ? "#00e5ff" : "#0038a8"
+                                border.color: "#00dbff"
+                                border.width: 1.5
 
-                            // tombol suspend langsung dari lock screen
-                            Item {
-                                width: 108
-                                height: 40
-
-                                P5SkewedCard {
-                                    anchors.fill: parent
-                                    fillColor: suspendMouse.containsMouse ? "#252538" : "#151520"
-                                    borderColor: "#FFFFFF"
-                                    shadowColor: "#08080C"
-                                    borderWidth: 2
-                                    skewPx: 6
-                                }
-
-                                RowLayout {
+                                Text {
                                     anchors.centerIn: parent
-                                    spacing: 6
-                                    P5Icon { name: "moon"; size: 13; color: PhantomState.secondary }
-                                    Text {
-                                        text: "SUSPEND"
-                                        color: "#FFFFFF"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 11
-                                        font.weight: Font.Black
-                                    }
+                                    text: "DISPATCH ➔"
+                                    color: submitMouse.containsMouse ? "#030818" : "#ffffff"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Black
+                                    font.letterSpacing: 1
                                 }
 
                                 MouseArea {
-                                    id: suspendMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: Quickshell.execDetached(["systemctl", "suspend"])
-                                }
-                            }
-
-                            // tombol submit unlock
-                            Item {
-                                width: 138
-                                height: 42
-
-                                P5SkewedCard {
-                                    anchors.fill: parent
-                                    fillColor: unlockMouse.containsMouse ? PhantomState.secondary : PhantomState.primary
-                                    borderColor: "#FFFFFF"
-                                    shadowColor: "#08080C"
-                                    borderWidth: 2
-                                    skewPx: 8
-                                }
-
-                                RowLayout {
-                                    anchors.centerIn: parent
-                                    spacing: 6
-                                    P5Icon {
-                                        name: "star"
-                                        size: 14
-                                        color: unlockMouse.containsMouse ? "#09090D" : "#FFFFFF"
-                                    }
-                                    Text {
-                                        text: lockScope.authBusy ? "WAIT..." : "UNLOCK"
-                                        color: unlockMouse.containsMouse ? "#09090D" : "#FFFFFF"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 13
-                                        font.weight: Font.Black
-                                        font.italic: true
-                                    }
-                                }
-
-                                MouseArea {
-                                    id: unlockMouse
+                                    id: submitMouse
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
                                         lockScope.submitPassword(pwInput.text)
                                         pwInput.text = ""
-                                        pwInput.forceActiveFocus()
                                     }
                                 }
                             }
-                        }
-                    }
-                }
-
-                // lapisan bilah tebasan diagonal saat mengunci dan membuka kunci layar
-                Canvas {
-                    id: shutterCanvas
-                    anchors.fill: parent
-                    visible: lockRoot.shutterProgress > 0.001 || lockRoot.unlockSlashProgress > 0.001
-
-                    onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.reset()
-                        var w = width
-                        var h = height
-
-                        // animasi tirai diagonal saat mengunci layar
-                        if (lockRoot.shutterProgress > 0.001) {
-                            var sp = lockRoot.shutterProgress
-                            var reach = h * 0.65 * sp
-
-                            ctx.fillStyle = String(PhantomState.primary)
-                            ctx.beginPath()
-                            ctx.moveTo(0, 0)
-                            ctx.lineTo(w, 0)
-                            ctx.lineTo(w, reach * 0.72)
-                            ctx.lineTo(0, reach * 1.15)
-                            ctx.closePath()
-                            ctx.fill()
-
-                            ctx.fillStyle = "#08080C"
-                            ctx.beginPath()
-                            ctx.moveTo(0, 0)
-                            ctx.lineTo(w, 0)
-                            ctx.lineTo(w, reach * 0.54)
-                            ctx.lineTo(0, reach * 0.92)
-                            ctx.closePath()
-                            ctx.fill()
-
-                            ctx.fillStyle = String(PhantomState.primary)
-                            ctx.beginPath()
-                            ctx.moveTo(0, h - reach * 0.72)
-                            ctx.lineTo(w, h - reach * 1.15)
-                            ctx.lineTo(w, h)
-                            ctx.lineTo(0, h)
-                            ctx.closePath()
-                            ctx.fill()
-
-                            ctx.fillStyle = "#08080C"
-                            ctx.beginPath()
-                            ctx.moveTo(0, h - reach * 0.54)
-                            ctx.lineTo(w, h - reach * 0.92)
-                            ctx.lineTo(w, h)
-                            ctx.lineTo(0, h)
-                            ctx.closePath()
-                            ctx.fill()
-                        }
-
-                        // animasi tebasan diagonal saat membuka kunci layar
-                        if (lockRoot.unlockSlashProgress > 0.001) {
-                            var up = lockRoot.unlockSlashProgress
-                            var alpha = up < 0.5 ? (up * 2.0) : ((1.0 - up) * 2.0)
-                            var bandH = Math.max(12, h * 0.16 * alpha)
-                            var cy = h * 0.5
-
-                            ctx.save()
-                            ctx.globalAlpha = Math.max(0.0, Math.min(1.0, alpha))
-
-                            ctx.fillStyle = String(PhantomState.primary)
-                            ctx.beginPath()
-                            ctx.moveTo(0, cy - bandH * 0.6 + h * 0.12)
-                            ctx.lineTo(w * Math.min(1.0, up * 1.5), cy - bandH * 0.6 - h * 0.14)
-                            ctx.lineTo(w * Math.min(1.0, up * 1.5), cy + bandH * 0.6 - h * 0.14)
-                            ctx.lineTo(0, cy + bandH * 0.6 + h * 0.12)
-                            ctx.closePath()
-                            ctx.fill()
-
-                            ctx.fillStyle = "#FFFFFF"
-                            ctx.beginPath()
-                            ctx.moveTo(0, cy - bandH * 0.18 + h * 0.12)
-                            ctx.lineTo(w * Math.min(1.0, up * 1.6), cy - bandH * 0.18 - h * 0.14)
-                            ctx.lineTo(w * Math.min(1.0, up * 1.6), cy + bandH * 0.18 - h * 0.14)
-                            ctx.lineTo(0, cy + bandH * 0.18 + h * 0.12)
-                            ctx.closePath()
-                            ctx.fill()
-
-                            ctx.restore()
                         }
                     }
                 }

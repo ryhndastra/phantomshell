@@ -6,8 +6,12 @@ import Quickshell.Hyprland
 import qs.config
 import qs.components
 
+// =============================================================================
+// PERSONA 3 RELOAD: S.E.E.S. TACTICAL PHONE MAIL TOAST & NOTIFICATION CENTER
+// Pop-up notifikasi real-time bertema Tactical Phone Mail Persona 3 Reload
+// =============================================================================
 Scope {
-    // jendela popup balon notifikasi pesan di pojok kanan layar
+    // Jendela popup notifikasi pesan di pojok kanan layar
     PanelWindow {
         id: popupWin
         visible: PhantomState.imPopupStack.count > 0 && !PhantomState.notificationsOpen
@@ -26,22 +30,23 @@ Scope {
         margins {
             top: 44
             bottom: 44
-            right: 10
+            right: 14
         }
 
-        implicitWidth: 445
-        implicitHeight: Math.min(460, popupCol.implicitHeight + 16)
+        implicitWidth: 420
+        implicitHeight: Math.min(500, popupCol.implicitHeight + 20)
         color: "transparent"
 
         Column {
             id: popupCol
             anchors.right: parent.right
             anchors.top: parent.top
-            spacing: 10
+            spacing: 12
 
             Repeater {
                 model: PhantomState.imPopupStack
-                delegate: P5ComicBubble {
+                delegate: Item {
+                    id: p3ToastRoot
                     required property string senderName
                     required property string msgBody
                     required property string msgTime
@@ -49,281 +54,253 @@ Scope {
                     required property string msgIcon
                     required property int index
 
-                    sender: senderName
-                    message: msgBody
-                    timeText: msgTime
-                    urgency: msgUrgency
-                    appIcon: msgIcon
-                    onDismissed: PhantomState.dismissPopup(index)
-                }
-            }
-        }
-    }
+                    width: 390
+                    height: Math.max(76, toastLayout.implicitHeight + 18)
 
-    // panel pusat riwayat notifikasi pesan
-    Variants {
-        model: Quickshell.screens
-
-        PanelWindow {
-            id: snsPhoneWin
-            required property ShellScreen modelData
-            screen: modelData
-            visible: PhantomState.notificationsOpen && !PhantomState.isP3
-
-            HyprlandFocusGrab {
-                active: PhantomState.notificationsOpen && !PhantomState.isP3
-                windows: [snsPhoneWin]
-                onCleared: PhantomState.notificationsOpen = false
-            }
-
-            readonly property bool isBottom: PhantomState.barPosition === "bottom"
-
-            WlrLayershell.namespace: "phantomshell-sns-phone"
-            WlrLayershell.layer: WlrLayer.Overlay
-            exclusiveZone: 0
-
-            anchors {
-                top: true
-                bottom: true
-                left: true
-                right: true
-            }
-            margins {
-                top: snsPhoneWin.isBottom ? 0 : 38
-                bottom: snsPhoneWin.isBottom ? 38 : 0
-            }
-
-            color: "transparent"
-
-            onVisibleChanged: {
-                if (visible) snsEntryAnim.restart()
-            }
-
-            // area klik luar untuk menutup panel sns saat klik di tempat kosong
-            MouseArea {
-                anchors.fill: parent
-                onClicked: PhantomState.notificationsOpen = false
-            }
-
-            Item {
-                id: snsCard
-                width: Math.min(430, parent.width - 20)
-                height: Math.min(490, parent.height - 14)
-                anchors.top: !snsPhoneWin.isBottom ? parent.top : undefined
-                anchors.bottom: snsPhoneWin.isBottom ? parent.bottom : undefined
-                anchors.right: parent.right
-                anchors.topMargin: 4
-                anchors.bottomMargin: 4
-                anchors.rightMargin: 10
-                transformOrigin: snsPhoneWin.isBottom ? Item.BottomRight : Item.TopRight
-
-                // penahan klik agar klik di dalam kartu sns tidak menutup panel
-                MouseArea {
-                    anchors.fill: parent
-                }
-
-                ParallelAnimation {
-                    id: snsEntryAnim
-                    NumberAnimation {
-                        target: snsCard
-                        property: "scale"
-                        from: 0.85
-                        to: 1.0
-                        duration: 240
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 1.35
-                    }
-                    NumberAnimation {
-                        target: snsCard
-                        property: "opacity"
-                        from: 0.0
-                        to: 1.0
-                        duration: 160
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                P5SkewedCard {
-                    anchors.fill: parent
-                    fillColor: PhantomState.background
-                    borderColor: PhantomState.borderLight
-                    shadowColor: PhantomState.primary
-                    borderWidth: 2
-                    skewPx: PhantomState.polygonMode ? 8 : 0
-                    shadowOffsetX: 4
-                    shadowOffsetY: 4
-                }
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 10
-
-                    // baris header pusat notifikasi
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-
-                        P5Star {
-                            Layout.preferredWidth: 24
-                            Layout.preferredHeight: 24
+                    readonly property string resolvedIcon: {
+                        const ic = (msgIcon || "").trim()
+                        const lowerName = (senderName || "").toLowerCase()
+                        const lowerIcon = ic.toLowerCase()
+                        const lowerDesc = (msgBody || "").toLowerCase()
+                        if (lowerIcon.indexOf("whatsapp") !== -1 || lowerName.indexOf("whatsapp") !== -1 || lowerDesc.indexOf("whatsapp") !== -1) {
+                            return "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/whatsapp.svg"
                         }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 0
-                            Text {
-                                Layout.fillWidth: true
-                                text: "PHANTOM IM // SNS LOG"
-                                color: PhantomState.primary
-                                font.pixelSize: 15
-                                font.weight: Font.Black
-                                elide: Text.ElideRight
-                            }
-                            Text {
-                                Layout.fillWidth: true
-                                text: "Persona 5 Instant Messaging & Alerts"
-                                color: PhantomState.muted
-                                font.pixelSize: 10
-                                font.weight: Font.Bold
-                                elide: Text.ElideRight
-                            }
+                        if (lowerIcon.indexOf("zen") !== -1 || lowerName.indexOf("zen") !== -1) {
+                            return "file:///etc/profiles/per-user/sho/share/icons/hicolor/128x128/apps/zen-browser.png"
                         }
+                        if (ic.startsWith("file://") || ic.startsWith("/")) {
+                            return ic.startsWith("/") ? ("file://" + ic) : ic
+                        }
+                        if (ic.startsWith("image://")) return ic
+                        if (ic.length > 0) {
+                            const r = Quickshell.iconPath(ic, true)
+                            if (r && String(r).length > 0) return r
+                        }
+                        return PhantomState.resolveAppIconUrl(senderName)
+                    }
 
-                        // tombol pengirim notifikasi uji coba
-                        Item {
-                            Layout.preferredWidth: testBtnRow.implicitWidth + 20
-                            Layout.preferredHeight: 28
+                    // Animasi Masuk dari Kanan Layar
+                    ParallelAnimation {
+                        id: toastEnterAnim
+                        running: true
+                        NumberAnimation { target: p3ToastRoot; property: "x"; from: 60; to: 0; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.2 }
+                        NumberAnimation { target: p3ToastRoot; property: "opacity"; from: 0.0; to: 1.0; duration: 180; easing.type: Easing.OutCubic }
+                    }
 
-                            P5SkewedCard {
-                                anchors.fill: parent
-                                fillColor: PhantomState.primary
-                                borderColor: PhantomState.borderLight
-                                shadowColor: PhantomState.borderDark
-                                borderWidth: 1
-                                skewPx: 4
-                                shadowOffsetX: 2
-                                shadowOffsetY: 2
-                            }
+                    // Latar Belakang Kartu Slanted P3R
+                    Canvas {
+                        id: toastBgCanvas
+                        anchors.fill: parent
+                        antialiasing: true
+                        onPaint: {
+                            var ctx = getContext("2d")
+                            ctx.reset()
+                            var w = width
+                            var h = height
+                            var sk = 12.0
 
-                            Row {
-                                id: testBtnRow
+                            // Bayangan Safir Gelap
+                            ctx.beginPath()
+                            ctx.moveTo(sk + 3, 3)
+                            ctx.lineTo(w + 3, 3)
+                            ctx.lineTo(w - sk + 3, h + 3)
+                            ctx.lineTo(3, h + 3)
+                            ctx.closePath()
+                            ctx.fillStyle = "rgba(0, 15, 45, 0.7)"
+                            ctx.fill()
+
+                            // Dasar Kartu Navy P3R
+                            ctx.beginPath()
+                            ctx.moveTo(sk, 0)
+                            ctx.lineTo(w, 0)
+                            ctx.lineTo(w - sk, h)
+                            ctx.lineTo(0, h)
+                            ctx.closePath()
+                            ctx.fillStyle = "#040b1e"
+                            ctx.fill()
+
+                            // Garis Tepi Neon Cyan
+                            ctx.strokeStyle = "#00dbff"
+                            ctx.lineWidth = 1.8
+                            ctx.stroke()
+                        }
+                    }
+
+                    // Pita Header Miring: "✉ NEW TRANSMISSION"
+                    Item {
+                        x: 18
+                        y: -8
+                        width: 156
+                        height: 20
+                        z: 5
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 2
+                            color: "#0038a8"
+                            border.color: "#00dbff"
+                            border.width: 1.2
+
+                            RowLayout {
                                 anchors.centerIn: parent
-                                spacing: 4
-                                P5Icon { name: "plus"; size: 9; anchors.verticalCenter: parent.verticalCenter }
+                                spacing: 5
                                 Text {
-                                    text: "TEST IM"
-                                    color: PhantomState.foreground
+                                    text: "✉"
+                                    font.pixelSize: 10
+                                    color: "#ffffff"
+                                }
+                                Text {
+                                    text: "NEW TRANSMISSION"
+                                    color: "#ffffff"
+                                    font.family: "Rubik"
                                     font.pixelSize: 9
                                     font.weight: Font.Black
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    PhantomState.notificationsOpen = false
-                                    PhantomState.sendTestNotification()
+                                    font.letterSpacing: 0.8
                                 }
                             }
                         }
+                    }
 
-                        // tombol penghapus seluruh riwayat notifikasi
+                    // Baris Konten: Slashed Avatar, Teks Pengirim & Pesan, Tombol Dismiss
+                    RowLayout {
+                        id: toastLayout
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 14
+                        anchors.topMargin: 12
+                        anchors.bottomMargin: 8
+                        spacing: 10
+
+                        // Avatar Slashed
                         Item {
-                            Layout.preferredWidth: 56
-                            Layout.preferredHeight: 28
+                            Layout.preferredWidth: 44
+                            Layout.preferredHeight: 44
 
-                            P5SkewedCard {
+                            Canvas {
+                                id: toastAvCanvas
                                 anchors.fill: parent
-                                fillColor: PhantomState.surfaceAlt
-                                borderColor: PhantomState.borderLight
-                                showShadowOffset: false
-                                borderWidth: 1
-                                skewPx: 4
+                                antialiasing: true
+                                onPaint: {
+                                    var ctx = getContext("2d")
+                                    ctx.reset()
+                                    ctx.beginPath()
+                                    ctx.moveTo(0, 0)
+                                    ctx.lineTo(width, 0)
+                                    ctx.lineTo(width - 12, height)
+                                    ctx.lineTo(0, height)
+                                    ctx.closePath()
+                                    ctx.fillStyle = "#0038a8"
+                                    ctx.fill()
+                                    ctx.strokeStyle = "#00dbff"
+                                    ctx.lineWidth = 1.2
+                                    ctx.stroke()
+                                }
+                            }
+
+                            Image {
+                                id: toastAvImg
+                                anchors.centerIn: parent
+                                width: 26
+                                height: 26
+                                source: p3ToastRoot.resolvedIcon
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                visible: source !== "" && status === Image.Ready && implicitWidth > 0
                             }
 
                             Text {
                                 anchors.centerIn: parent
-                                text: "CLEAR"
-                                color: PhantomState.foreground
-                                font.pixelSize: 9
+                                visible: !toastAvImg.visible
+                                text: {
+                                    const s = (p3ToastRoot.senderName || "").trim()
+                                    return s.length > 0 ? s.charAt(0).toUpperCase() : "✉"
+                                }
+                                font.family: "Rubik"
+                                font.pixelSize: 16
                                 font.weight: Font.Black
+                                color: "#ffffff"
+                            }
+                        }
+
+                        // Teks Pengirim dan Pesan
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: p3ToastRoot.senderName
+                                    color: "#ffffff"
+                                    font.family: "Rubik"
+                                    font.pixelSize: 12
+                                    font.weight: Font.Black
+                                    elide: Text.ElideRight
+                                    renderType: Text.CurveRendering
+                                }
+
+                                Text {
+                                    text: p3ToastRoot.msgTime
+                                    color: "#00dbff"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                }
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: p3ToastRoot.msgBody
+                                color: "#9fb4cc"
+                                font.family: "Rubik"
+                                font.pixelSize: 11
+                                font.weight: Font.Medium
+                                maximumLineCount: 2
+                                elide: Text.ElideRight
+                                wrapMode: Text.WordWrap
+                                renderType: Text.CurveRendering
+                            }
+                        }
+
+                        // Tombol Tutup / Dismiss
+                        Rectangle {
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            radius: 11
+                            color: toastCloseMouse.containsMouse ? "#ff2a55" : "#0d1b38"
+                            border.color: "#00dbff"
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "×"
+                                font.family: "Rubik"
+                                font.pixelSize: 13
+                                font.weight: Font.Black
+                                color: "#ffffff"
                             }
 
                             MouseArea {
+                                id: toastCloseMouse
                                 anchors.fill: parent
+                                hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: PhantomState.imNotifications.clear()
+                                onClicked: PhantomState.dismissPopup(p3ToastRoot.index)
                             }
                         }
                     }
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 1
-                        color: PhantomState.primary
-                    }
-
-                    // daftar riwayat pesan masuk dan tampilan kosong
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 8
-                            visible: PhantomState.imNotifications.count === 0
-
-                            P5Star {
-                                width: 38
-                                height: 38
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "NO NEW MESSAGES"
-                                color: "#FFFFFF"
-                                font.pixelSize: 16
-                                font.weight: Font.Black
-                                font.italic: true
-                            }
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "Your SNS inbox is clear — Take Your Time."
-                                color: PhantomState.muted
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
-                            }
-                        }
-
-                        ListView {
-                            id: chatList
-                            anchors.fill: parent
-                            clip: true
-                            spacing: 12
-                            visible: PhantomState.imNotifications.count > 0
-                            model: PhantomState.imNotifications
-
-                            delegate: P5ComicBubble {
-                                required property string senderName
-                                required property string msgBody
-                                required property string msgTime
-                                required property string msgUrgency
-                                required property string msgIcon
-                                required property int index
-
-                                width: chatList.width - 6
-                                sender: senderName
-                                message: msgBody
-                                timeText: msgTime
-                                urgency: msgUrgency
-                                appIcon: msgIcon
-                                onDismissed: PhantomState.imNotifications.remove(index)
-                            }
+                    // Klik pada Kartu: Buka Pesan di Mail Detail Reader
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.rightMargin: 30
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            PhantomState.openP3ReaderIndex(p3ToastRoot.index)
+                            PhantomState.dismissPopup(p3ToastRoot.index)
                         }
                     }
                 }
