@@ -995,6 +995,7 @@ Singleton {
         var soundPath = ""
         if (root.isP3) {
             if (kind === "notif") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_toast.wav")
+            else if (kind === "into_game" || kind === "splash") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_into_game_detail.wav")
             else if (kind === "achievement") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_achievement_toast.wav")
             else if (kind === "select") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_default_activation.wav")
             else if (kind === "open") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_side_menu_fly_in.wav")

@@ -31,79 +31,52 @@ Scope {
             color: "transparent"
             mask: Region {}
 
-            property real waterPlungeProg: 1.0
-            onWaterPlungeProgChanged: console.log("[PLUNGE] prog=" + waterPlungeProg + " depth=" + waterDepthOpacity + " banner=" + waterBannerOpacity)
-            property real waterDepthOpacity: 0.0
-            property real waterBannerOpacity: 0.0
-            property real waterBannerScale: 0.85
+            property bool p3SplashActive: false
+            property int p3SplashFrame: 0
+            property real p3SplashOpacity: 1.0
 
-            ParallelAnimation {
-                id: p3WaterPlungeAnim
+            Timer {
+                id: p3SplashTimer
+                interval: 38
+                repeat: true
+                running: false
+                onTriggered: {
+                    if (frameWin.p3SplashFrame < 11) {
+                        frameWin.p3SplashFrame++
+                    } else {
+                        p3SplashTimer.stop()
+                        p3SplashFadeAnim.restart()
+                    }
+                }
+            }
+
+            SequentialAnimation {
+                id: p3SplashFadeAnim
+                PauseAnimation { duration: 160 }
                 NumberAnimation {
                     target: frameWin
-                    property: "waterPlungeProg"
-                    from: 0.0
-                    to: 1.0
-                    duration: 1200
+                    property: "p3SplashOpacity"
+                    from: 1.0
+                    to: 0.0
+                    duration: 320
                     easing.type: Easing.OutCubic
                 }
-                SequentialAnimation {
-                    NumberAnimation {
-                        target: frameWin
-                        property: "waterDepthOpacity"
-                        from: 0.0
-                        to: 0.92
-                        duration: 200
-                        easing.type: Easing.OutQuad
-                    }
-                    PauseAnimation { duration: 420 }
-                    NumberAnimation {
-                        target: frameWin
-                        property: "waterDepthOpacity"
-                        from: 0.92
-                        to: 0.0
-                        duration: 480
-                        easing.type: Easing.InCubic
+                ScriptAction {
+                    script: {
+                        frameWin.p3SplashActive = false
+                        frameWin.p3SplashFrame = 0
                     }
                 }
-                SequentialAnimation {
-                    NumberAnimation {
-                        target: frameWin
-                        property: "waterBannerOpacity"
-                        from: 0.0
-                        to: 1.0
-                        duration: 220
-                        easing.type: Easing.OutQuad
-                    }
-                    PauseAnimation { duration: 480 }
-                    NumberAnimation {
-                        target: frameWin
-                        property: "waterBannerOpacity"
-                        from: 1.0
-                        to: 0.0
-                        duration: 320
-                        easing.type: Easing.InCubic
-                    }
-                }
-                SequentialAnimation {
-                    NumberAnimation {
-                        target: frameWin
-                        property: "waterBannerScale"
-                        from: 0.82
-                        to: 1.0
-                        duration: 260
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 1.25
-                    }
-                    NumberAnimation {
-                        target: frameWin
-                        property: "waterBannerScale"
-                        from: 1.0
-                        to: 1.05
-                        duration: 800
-                        easing.type: Easing.OutQuad
-                    }
-                }
+            }
+
+            function triggerP3Splash() {
+                p3SplashTimer.stop()
+                p3SplashFadeAnim.stop()
+                frameWin.p3SplashFrame = 0
+                frameWin.p3SplashOpacity = 1.0
+                frameWin.p3SplashActive = true
+                PhantomState.playSfx("splash")
+                p3SplashTimer.restart()
             }
 
             property real slashProg: 1.0
@@ -226,10 +199,8 @@ Scope {
                 function onTransitionTickChanged() {
                     console.log("[SCREEN FRAME] onTransitionTickChanged: themeId=" + PhantomState.themeId)
                     if (PhantomState.themeId === "p3-reload") {
-                        console.log("[SCREEN FRAME] Starting p3WaterPlungeAnim")
-                        p3WaterPlungeAnim.restart()
+                        frameWin.triggerP3Splash()
                     } else {
-                        console.log("[SCREEN FRAME] Starting p5TransitionAnim")
                         p5TransitionAnim.restart()
                     }
                 }
@@ -800,209 +771,24 @@ Scope {
                 }
             }
 
-            // overlay transisi terjun ke dalam air (water plunge / bubbles) khusus Persona 3 Reload
+            // Efek transisi semburan air / water splash cel-shaded Persona 3 Reload (12 frame PNG)
             Item {
-                id: p3WaterPlungeOverlay
+                id: p3SplashOverlay
                 anchors.fill: parent
-                visible: frameWin.waterPlungeProg < 0.995
-                clip: true
+                visible: frameWin.p3SplashActive
+                opacity: frameWin.p3SplashOpacity
+                z: 100
 
-                // Latar belakang gelombang air samudra biru pekat
-                Rectangle {
-                    anchors.fill: parent
-                    opacity: frameWin.waterDepthOpacity
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: "#000814" }
-                        GradientStop { position: 0.35; color: "#001D3D" }
-                        GradientStop { position: 0.65; color: "#003566" }
-                        GradientStop { position: 0.88; color: "#0077B6" }
-                        GradientStop { position: 1.0; color: "#00B4D8" }
-                    }
-                }
-
-                // Gelombang riak air melingkar (shockwaves) menyebar ke segala arah
                 Repeater {
-                    model: 4
-                    delegate: Rectangle {
+                    model: 12
+                    delegate: Image {
                         required property int index
-                        readonly property real prog: Math.max(0.0, Math.min(1.0, (frameWin.waterPlungeProg * 1.5) - (index * 0.16)))
-                        anchors.centerIn: parent
-                        width: parent.width * (0.15 + prog * 1.6)
-                        height: parent.height * (0.15 + prog * 1.4)
-                        radius: width / 2
-                        color: "transparent"
-                        border.color: index % 2 === 0 ? "#00F0FF" : "#FFFFFF"
-                        border.width: Math.max(1, (1.0 - prog) * 3.5)
-                        opacity: Math.sin(prog * Math.PI) * 0.65
-                        visible: prog > 0.001 && prog < 0.999
-                    }
-                }
-
-                // Berkas cahaya matahari menembus ke dalam kedalaman air (sunbeams caustics)
-                Repeater {
-                    model: 5
-                    delegate: Rectangle {
-                        required property int index
-                        width: 90 + (index * 40)
-                        height: parent.height * 1.3
-                        x: (parent.width * (0.12 + index * 0.18)) + Math.sin(frameWin.waterPlungeProg * 3.5 + index) * 18
-                        y: -parent.height * 0.15
-                        rotation: -12 + index * 2
-                        opacity: Math.sin(frameWin.waterPlungeProg * Math.PI) * 0.15
-                        gradient: Gradient {
-                            GradientStop { position: 0.0; color: "#B300F0FF" }
-                            GradientStop { position: 0.55; color: "#4D0077B6" }
-                            GradientStop { position: 1.0; color: "transparent" }
-                        }
-                    }
-                }
-
-                // Rombongan gelembung air (bubbles) naik ke permukaan dengan osilasi goyangan riil
-                Repeater {
-                    model: 36
-                    delegate: Item {
-                        required property int index
-                        readonly property real baseX: ((index * 53 + 27) % 100) / 100.0 * parent.width
-                        readonly property real startY: parent.height * (0.6 + ((index * 29) % 50) / 100.0)
-                        readonly property real speed: 0.65 + ((index * 17) % 10) / 12.0
-                        readonly property real bSize: 6 + (index * 7) % 24
-                        readonly property real wobble: Math.sin(frameWin.waterPlungeProg * (10 + (index % 5) * 3) + index) * (10 + (index % 4) * 5)
-                        readonly property real currentY: startY - (parent.height * 1.15 * frameWin.waterPlungeProg * speed)
-                        x: baseX + wobble
-                        y: currentY
-                        width: bSize
-                        height: bSize
-                        opacity: Math.sin(frameWin.waterPlungeProg * Math.PI) * (0.35 + (index % 5) * 0.14)
-                        visible: currentY > -50 && currentY < parent.height + 50
-
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: width / 2
-                            color: "#2600F0FF"
-                            border.color: "#CCFFFFFF"
-                            border.width: 1.2
-
-                            // Titik kilauan refleksi cahaya dalam gelembung
-                            Rectangle {
-                                x: parent.width * 0.22
-                                y: parent.height * 0.2
-                                width: Math.max(2, parent.width * 0.28)
-                                height: Math.max(2, parent.height * 0.28)
-                                radius: width / 2
-                                color: "#FFFFFF"
-                                opacity: 0.85
-                            }
-                        }
-                    }
-                }
-
-                // Kartu status banner Persona 3 Reload di tengah layar (Murni Efek Air, Tanpa Makoto Yuki)
-                Item {
-                    anchors.centerIn: parent
-                    width: 520
-                    height: 90
-                    scale: frameWin.waterBannerScale
-                    opacity: frameWin.waterBannerOpacity
-
-                    Rectangle {
                         anchors.fill: parent
-                        radius: 8
-                        color: "#EE020B20"
-                        border.color: "#00F0FF"
-                        border.width: 2
-
-                        Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            radius: 5
-                            color: "transparent"
-                            border.color: "#4D00B4D8"
-                            border.width: 1
-                        }
-                    }
-
-                    Row {
-                        anchors.centerIn: parent
-                        spacing: 16
-
-                        // Emblem Dial Jam P3R Berputar
-                        Item {
-                            width: 44
-                            height: 44
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: 44
-                                height: 44
-                                radius: 22
-                                color: "transparent"
-                                border.color: "#00F0FF"
-                                border.width: 2
-                                rotation: frameWin.waterPlungeProg * 360
-                            }
-
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: 32
-                                height: 32
-                                radius: 16
-                                color: "#1A00F0FF"
-                                border.color: "#FFFFFF"
-                                border.width: 1.5
-                                rotation: -frameWin.waterPlungeProg * 280
-                            }
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "3"
-                                color: "#00F0FF"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 18
-                                font.weight: Font.Black
-                            }
-                        }
-
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 3
-
-                            Row {
-                                spacing: 8
-                                Text {
-                                    text: "PERSONA 3 RELOAD"
-                                    color: "#FFFFFF"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 18
-                                    font.weight: Font.Black
-                                    font.letterSpacing: 1.5
-                                }
-                                Rectangle {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    height: 16
-                                    width: 54
-                                    radius: 2
-                                    color: "#00F0FF"
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "S.E.E.S."
-                                        color: "#020B20"
-                                        font.family: "JetBrainsMono NFM"
-                                        font.pixelSize: 9
-                                        font.weight: Font.Black
-                                    }
-                                }
-                            }
-
-                            Text {
-                                text: "SEA OF SOUL // TARTARUS FREQUENCY SYNCHRONIZED"
-                                color: "#7DD3FC"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 9
-                                font.weight: Font.Bold
-                                font.letterSpacing: 0.8
-                            }
-                        }
+                        fillMode: Image.PreserveAspectCrop
+                        visible: frameWin.p3SplashFrame === index
+                        asynchronous: false
+                        cache: true
+                        source: Qt.resolvedUrl("../../assets/themes/p3/menu/png/pngseq" + (index < 10 ? "0" + index : "" + index) + ".png")
                     }
                 }
             }
