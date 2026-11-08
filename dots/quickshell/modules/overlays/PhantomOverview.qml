@@ -335,7 +335,7 @@ Scope {
                 // I. Teks Koordinat Taktikal S.E.E.S.
                 ctx.fillStyle = "rgba(0, 219, 255, 0.32)"
                 ctx.font = "bold 9px 'JetBrainsMono NFM', monospace"
-                ctx.fillText("TATSUMI BAY // SOUNDING: 42M", w * 0.36, h * 0.48)
+                ctx.fillText("TACTICAL BAY // SOUNDING: 42M", w * 0.36, h * 0.48)
                 ctx.fillText("MONORAIL LOOP LINE", w * 0.52, h * 0.38)
                 ctx.fillText("GRID: LAT 35°38'N / LONG 139°45'E", w * 0.08, h * 0.88)
                 ctx.fillText("S.E.E.S. SATELLITE TACTICAL LINK", w * 0.08, h * 0.90)
@@ -373,7 +373,7 @@ Scope {
                         color: "#00dbff"
                     }
                     Text {
-                        text: "TATSUMI PORT ISLAND // TACTICAL TOWN MAP"
+                        text: "S.E.E.S. TACTICAL MAP // WORKSPACE OVERVIEW"
                         color: "#ffffff"
                         font.family: "Rubik"
                         font.pixelSize: 16
