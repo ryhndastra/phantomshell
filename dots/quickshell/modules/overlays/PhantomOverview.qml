@@ -16,61 +16,61 @@ Scope {
     readonly property int activeWsId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
     property int selectedDistrictIdx: 0
 
-    // Data 6 Sektor Distrik Utama Tatsumi Port Island & Posisi pada Peta Vektor
+    // Data 6 Sektor Distrik Utama & Posisi Urut Rapi pada Peta Vektor (1, 2, 3 di Atas; 4, 5, 6 di Bawah)
     readonly property var districts: [
         {
             num: 1,
-            name: "Gekkoukan High School",
-            code: "GEKKOUKAN HIGH",
-            sub: "Classrooms & Rooftop",
-            mapX: 0.68,
-            mapY: 0.50,
-            cardSide: "left"
-        },
-        {
-            num: 2,
-            name: "Iwatodai Station Strip Mall",
-            code: "IWATODAI STRIP",
-            sub: "Dormitory & Station",
-            mapX: 0.34,
-            mapY: 0.32,
+            name: "Moonlight Gate & Bridge",
+            code: "MOONLIGHT GATE",
+            sub: "Western Coast & Bridge",
+            mapX: 0.20,
+            mapY: 0.36,
             cardSide: "right"
         },
         {
+            num: 2,
+            name: "Iwatodai Strip Mall",
+            code: "IWATODAI STRIP",
+            sub: "Station & Dormitory",
+            mapX: 0.36,
+            mapY: 0.28,
+            cardSide: "bottom"
+        },
+        {
             num: 3,
-            name: "Paulownia Mall",
-            code: "PAULOWNIA MALL",
-            sub: "Arcade & Police Dept",
-            mapX: 0.63,
-            mapY: 0.34,
-            cardSide: "left"
+            name: "Naganaki Shrine",
+            code: "NAGANAKI SHRINE",
+            sub: "Shrine Grounds & Woods",
+            mapX: 0.52,
+            mapY: 0.20,
+            cardSide: "bottom"
         },
         {
             num: 4,
             name: "Port Island Station",
             code: "PORT ISLAND STN",
-            sub: "Outskirts & Terminal",
-            mapX: 0.50,
+            sub: "Harbor & Rail Terminal",
+            mapX: 0.44,
             mapY: 0.64,
             cardSide: "right"
         },
         {
             num: 5,
-            name: "Naganaki Shrine",
-            code: "NAGANAKI SHRINE",
-            sub: "Shrine Grounds",
-            mapX: 0.48,
-            mapY: 0.20,
-            cardSide: "bottom"
+            name: "Paulownia Mall",
+            code: "PAULOWNIA MALL",
+            sub: "Arcade & Police Dept",
+            mapX: 0.58,
+            mapY: 0.44,
+            cardSide: "left"
         },
         {
             num: 6,
-            name: "Tartarus Gate & Bridge",
-            code: "TARTARUS GATE",
-            sub: "Monorail & Moonlight Bridge",
-            mapX: 0.20,
-            mapY: 0.38,
-            cardSide: "right"
+            name: "Gekkoukan High School",
+            code: "GEKKOUKAN HIGH",
+            sub: "Classrooms & Rooftop",
+            mapX: 0.72,
+            mapY: 0.52,
+            cardSide: "left"
         }
     ]
 
@@ -303,30 +303,31 @@ Scope {
                 ctx.beginPath()
                 ctx.moveTo(w * 0.62, h * 0.36); ctx.lineTo(w * 0.68, h * 0.52); ctx.stroke()
 
-                // G. Moonlight Bridge (Tartarus Gate ke Port Island)
+                // G. Moonlight Bridge (Gate 01 ke Port Island 04)
                 ctx.beginPath()
-                ctx.moveTo(w * 0.20, h * 0.40)
-                ctx.lineTo(w * 0.42, h * 0.54)
+                ctx.moveTo(w * 0.20, h * 0.36)
+                ctx.lineTo(w * 0.42, h * 0.58)
                 ctx.strokeStyle = "rgba(0, 240, 255, 0.7)"
                 ctx.lineWidth = 3.0
                 ctx.stroke()
 
                 ctx.beginPath()
-                ctx.moveTo(w * 0.20, h * 0.42)
-                ctx.lineTo(w * 0.42, h * 0.56)
+                ctx.moveTo(w * 0.20, h * 0.38)
+                ctx.lineTo(w * 0.42, h * 0.60)
                 ctx.strokeStyle = "rgba(0, 160, 255, 0.4)"
                 ctx.lineWidth = 1.5
                 ctx.stroke()
 
-                // H. Jalur Transit Monorel Tatsumi Port Island (Menghubungkan 6 Distrik)
+                // H. Jalur Transit Monorel (Menghubungkan 6 Distrik Berurutan 1-6)
                 ctx.setLineDash([8, 6])
                 ctx.beginPath()
-                ctx.moveTo(w * 0.20, h * 0.38) // Tartarus Gate
-                ctx.lineTo(w * 0.34, h * 0.32) // Iwatodai Strip
-                ctx.lineTo(w * 0.48, h * 0.20) // Naganaki Shrine
-                ctx.lineTo(w * 0.63, h * 0.34) // Paulownia Mall
-                ctx.lineTo(w * 0.68, h * 0.50) // Gekkoukan High
-                ctx.lineTo(w * 0.50, h * 0.64) // Port Island Station
+                ctx.moveTo(w * 0.20, h * 0.36) // 01 Moonlight Gate
+                ctx.lineTo(w * 0.36, h * 0.28) // 02 Iwatodai Strip
+                ctx.lineTo(w * 0.52, h * 0.20) // 03 Naganaki Shrine
+                ctx.lineTo(w * 0.72, h * 0.52) // 06 Gekkoukan High
+                ctx.lineTo(w * 0.58, h * 0.44) // 05 Paulownia Mall
+                ctx.lineTo(w * 0.44, h * 0.64) // 04 Port Island Station
+                ctx.closePath() // Kembali menyambung ke 01
                 ctx.strokeStyle = "#00ffcc"
                 ctx.lineWidth = 2.0
                 ctx.stroke()
@@ -701,8 +702,8 @@ Scope {
                         height: Math.max(140, appListCol.implicitHeight + 64)
                         z: 50
 
-                        x: pinItem.modelData.cardSide === "left" ? -350 : 60
-                        y: -30
+                        x: pinItem.modelData.cardSide === "left" ? -350 : (pinItem.modelData.cardSide === "bottom" ? -140 : 60)
+                        y: pinItem.modelData.cardSide === "bottom" ? 54 : -30
 
                         Canvas {
                             anchors.fill: parent
