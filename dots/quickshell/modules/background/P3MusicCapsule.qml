@@ -23,8 +23,19 @@ Item {
     readonly property string songArtist: mpris ? (mpris.trackArtist || "Persona 3 Reload") : (PhantomState.mediaArtist || "S.E.E.S. Audio")
     readonly property url songArt: mpris ? (mpris.trackArtUrl || "") : ""
 
-    property bool isManuallyOpened: false
-    readonly property bool isOpened: PhantomState.p3CapsuleForceOpen || isPlaying || isManuallyOpened
+    readonly property bool isOpened: PhantomState.p3CapsuleForceOpen || PhantomState.p3CapsuleOpen
+
+    onIsPlayingChanged: {
+        if (isPlaying) {
+            PhantomState.p3CapsuleOpen = true
+        }
+    }
+
+    Component.onCompleted: {
+        if (isPlaying || PhantomState.p3CapsuleForceOpen) {
+            PhantomState.p3CapsuleOpen = true
+        }
+    }
 
     x: isOpened ? 0 : -360
     Behavior on x {
@@ -292,18 +303,16 @@ Item {
         drag.maximumX: 0
 
         onClicked: {
-            p3CapsuleRoot.isManuallyOpened = !p3CapsuleRoot.isOpened
-            p3CapsuleRoot.x = p3CapsuleRoot.isManuallyOpened ? 0 : -360
-            PhantomState.playSfx("select")
+            PhantomState.toggleP3Capsule()
         }
 
         onReleased: {
             if (drag.active) {
                 if (p3CapsuleRoot.x > -180) {
-                    p3CapsuleRoot.isManuallyOpened = true
+                    PhantomState.p3CapsuleOpen = true
                     p3CapsuleRoot.x = 0
                 } else {
-                    p3CapsuleRoot.isManuallyOpened = false
+                    PhantomState.p3CapsuleOpen = false
                     p3CapsuleRoot.x = -360
                 }
                 PhantomState.playSfx("select")

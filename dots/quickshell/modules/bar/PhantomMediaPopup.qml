@@ -9,10 +9,10 @@ import qs.components
 // jendela popup media player mpris
 PanelWindow {
     id: mediaPopupWin
-    visible: PhantomState.mediaPopupOpen
+    visible: !PhantomState.isP3 && PhantomState.mediaPopupOpen
 
     HyprlandFocusGrab {
-        active: PhantomState.mediaPopupOpen
+        active: !PhantomState.isP3 && PhantomState.mediaPopupOpen
         windows: [mediaPopupWin]
         onCleared: PhantomState.mediaPopupOpen = false
     }

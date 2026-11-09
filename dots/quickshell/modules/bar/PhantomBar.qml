@@ -677,6 +677,8 @@ Scope {
         timeStr: barScope.timeStr
     }
 
-    // Media player popup
-    PhantomMediaPopup {}
+    // Media player popup (P5 mode only)
+    PhantomMediaPopup {
+        visible: !PhantomState.isP3
+    }
 }

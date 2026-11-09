@@ -63,6 +63,7 @@ Singleton {
     property bool p3ThemeConfirm: false
     property int p3ThemeConfirmIdx: 0
     property bool p3CapsuleForceOpen: false
+    property bool p3CapsuleOpen: false
     property bool p3WallpaperAutoPause: true
     readonly property bool hasActiveWindows: {
         if (!root.workspaceApps || !root.activeWorkspaceId) return false
@@ -289,7 +290,16 @@ Singleton {
         wallpaperSelectorOpen = next
     }
 
+    function toggleP3Capsule() {
+        p3CapsuleOpen = !p3CapsuleOpen
+        playSfx("select")
+    }
+
     function toggleMediaPopup() {
+        if (root.isP3) {
+            toggleP3Capsule()
+            return
+        }
         const next = !mediaPopupOpen
         if (next) closeAllModals()
         mediaPopupOpen = next
