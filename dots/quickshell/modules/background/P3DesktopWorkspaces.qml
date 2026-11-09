@@ -463,14 +463,13 @@ Item {
                     onClicked: {
                         PhantomState.playSfx("select")
                         if (root.activeTrayItem) {
-                            const t = String(root.activeTrayItem.title || root.activeTrayItem.id || "").toLowerCase().trim()
-                            if (t.length > 0) {
-                                Quickshell.execDetached(["pkill", "-9", "-f", t])
-                                Quickshell.execDetached([
-                                    "notify-send", "-a", "S.E.E.S. Protocol", "-i", "process-stop",
-                                    "EXECUTION: TERMINATED", "Aplikasi " + t + " dimatikan paksa."
-                                ])
-                            }
+                            const rawId = String(root.activeTrayItem.id || "")
+                            const rawTitle = String(root.activeTrayItem.title || "")
+                            const rawTooltip = String(root.activeTrayItem.tooltipTitle || "")
+                            Quickshell.execDetached([
+                                "/home/sho/.config/hypr/scripts/kill-tray-app.sh",
+                                rawId, rawTitle, rawTooltip
+                            ])
                         }
                         root.activeMenuIndex = -1
                     }
