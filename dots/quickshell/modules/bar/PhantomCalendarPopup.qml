@@ -91,7 +91,15 @@ PanelWindow {
 
     WlrLayershell.namespace: "phantomshell-calendar"
     WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: PhantomState.calendarOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     exclusiveZone: 0
+
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Escape) {
+            PhantomState.calendarOpen = false
+            event.accepted = true
+        }
+    }
 
     anchors {
         top: true
