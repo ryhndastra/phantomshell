@@ -1,22 +1,21 @@
 import QtQuick
 import QtQuick.Effects
 
-// Bola Fase Bulan 3D Persona 3 Reload - Proyeksi Kosinus Halus & Warna Slate Otentik
+// Orthographic cosine projection for 2.5D lunar phase rendering.
 Item {
     id: moonSphereRoot
     implicitWidth: 34
     implicitHeight: 34
 
-    property real moonDegree: 0 // Derajat fase lunar 0 - 360
+    property real moonDegree: 0 // lunar phase in degrees (0-360)
     property color litColor: "#ffffff"
-    property color darkColor: "#526074" // Slate silver-gray khas Atlus P3R
+    property color darkColor: "#526074"
     property color borderColor: "#88ffffff"
     property real borderWidth: 1.0
 
     readonly property bool isWaxing: moonDegree < 180
     readonly property real cosFactor: Math.cos(moonDegree * Math.PI / 180)
 
-    // Bayangan halus di bawah bola bulan
     Rectangle {
         anchors.centerIn: parent
         anchors.verticalCenterOffset: 2.5
@@ -26,7 +25,6 @@ Item {
         color: "#60000000"
     }
 
-    // Area masked berbentuk lingkaran sempurna
     Item {
         id: maskedArea
         anchors.fill: parent
@@ -47,7 +45,6 @@ Item {
             maskSpreadAtMin: 1.0
         }
 
-        // Belahan kiri bola
         Rectangle {
             x: 0
             y: 0
@@ -56,7 +53,6 @@ Item {
             color: moonSphereRoot.isWaxing ? moonSphereRoot.darkColor : moonSphereRoot.litColor
         }
 
-        // Belahan kanan bola
         Rectangle {
             x: parent.width / 2
             y: 0
@@ -65,7 +61,7 @@ Item {
             color: moonSphereRoot.isWaxing ? moonSphereRoot.litColor : moonSphereRoot.darkColor
         }
 
-        // Terminator elips kosinus penentu fase lengkung
+        // Cosine terminator ellipse projecting the lunar shadow curve.
         Rectangle {
             anchors.centerIn: parent
             width: parent.width
@@ -81,7 +77,6 @@ Item {
         }
     }
 
-    // Cincin luar bercahaya halus khas SEES HUD
     Rectangle {
         anchors.fill: parent
         radius: width / 2

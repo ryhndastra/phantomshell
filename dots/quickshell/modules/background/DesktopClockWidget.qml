@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.config
 import qs.components
 
-// widget jam dan informasi cuaca desktop dengan tiga pilihan gaya tampilan
+// Desktop clock and weather widget
 Item {
     id: desktopClockWidget
     visible: PhantomState.showDesktopClock
@@ -70,7 +70,6 @@ Item {
         anchors.fill: parent
         visible: PhantomState.desktopClockStyle === "p5-editorial" && !PhantomState.isP3
 
-        // siluet poligon luar putih dan potongan dalam hitam
         Canvas {
             id: p5ClockHull
             anchors.fill: parent
@@ -89,7 +88,6 @@ Item {
                     c.lineTo(278, 118)
                     c.lineTo(286, 118)
                     c.lineTo(274, 188)
-                    // dua sudut runcing bawah
                     c.lineTo(222, 189)
                     c.lineTo(221, 232)
                     c.lineTo(209, 189)
@@ -154,7 +152,6 @@ Item {
                 ctx.fillStyle = "#06090E"
                 ctx.fill()
 
-                // garis bawah miring di dalam kotak angka jam
                 ctx.fillStyle = "#F2F2EE"
                 ctx.beginPath()
                 ctx.moveTo(68, 121)
@@ -166,7 +163,6 @@ Item {
             }
         }
 
-        // angka jam miring di sisi kiri
         Item {
             x: 52
             y: 26
@@ -184,7 +180,6 @@ Item {
             }
         }
 
-        // angka menit miring di bagian tengah
         Item {
             x: 172
             y: 38
@@ -202,7 +197,6 @@ Item {
             }
         }
 
-        // label nama hari dengan aksen garis potong horizontal
         Item {
             x: 156
             y: 128
@@ -226,7 +220,6 @@ Item {
                 }
             }
 
-            // garis potong gelap melintasi teks nama hari
             Rectangle {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: 2
@@ -269,21 +262,18 @@ Item {
                     ctx.lineWidth = 3.2
 
                     function drawCloud(yOff) {
-                        // siluet awan latar belakang
                         ctx.beginPath()
                         ctx.arc(44, 34 + yOff, 11, 0, Math.PI * 2)
                         ctx.arc(57, 36 + yOff, 12, 0, Math.PI * 2)
                         ctx.arc(68, 43 + yOff, 9, 0, Math.PI * 2)
                         ctx.fill()
 
-                        // garis lengkung pemisah putih antar awan
                         ctx.beginPath()
                         ctx.arc(33, 41 + yOff, 16, -0.8, 0.5)
                         ctx.arc(50, 40 + yOff, 15, -1.2, 0.4)
                         ctx.arc(64, 47 + yOff, 11, -1.3, 0.3)
                         ctx.stroke()
 
-                        // siluet awan utama bagian depan
                         ctx.beginPath()
                         ctx.moveTo(14, 56 + yOff)
                         ctx.arc(22, 48 + yOff, 11, Math.PI * 0.85, Math.PI * 1.55)
@@ -296,7 +286,6 @@ Item {
                     }
 
                     if (wIcon === "clear-day") {
-                        // ikon matahari
                         ctx.beginPath()
                         ctx.arc(44, 42, 16, 0, Math.PI * 2)
                         ctx.fill()
@@ -310,30 +299,25 @@ Item {
                             ctx.fill()
                         }
                     } else if (wIcon === "clear-night") {
-                        // ikon bulan sabit dan bintang
                         ctx.beginPath()
                         ctx.arc(44, 42, 22, 0.3, Math.PI * 1.85)
                         ctx.arc(52, 35, 17, Math.PI * 1.75, 0.45, true)
                         ctx.closePath()
                         ctx.fill()
-                        // bintang empat sudut kecil
                         ctx.beginPath()
                         ctx.moveTo(64, 18); ctx.lineTo(66, 25); ctx.lineTo(73, 27)
                         ctx.lineTo(66, 29); ctx.lineTo(64, 36); ctx.lineTo(62, 29)
                         ctx.lineTo(55, 27); ctx.lineTo(62, 25); ctx.closePath()
                         ctx.fill()
                     } else if (wIcon === "partly-cloudy-day") {
-                        // ikon matahari di balik awan
                         ctx.beginPath()
                         ctx.arc(28, 30, 12, 0, Math.PI * 2)
                         ctx.fill()
                         ctx.stroke()
                         drawCloud(2)
                     } else if (wIcon === "partly-cloudy-night") {
-                        // ikon awan ganda malam
                         drawCloud(0)
                     } else if (wIcon === "rain") {
-                        // ikon awan dan garis hujan diagonal
                         drawCloud(-6)
                         var rx = [22, 35, 48, 61]
                         for (var r = 0; r < rx.length; r++) {
@@ -346,7 +330,6 @@ Item {
                             ctx.fill()
                         }
                     } else if (wIcon === "thunder") {
-                        // ikon awan dengan kilat dan hujan
                         drawCloud(-7)
                         ctx.beginPath()
                         ctx.moveTo(45, 50)
@@ -376,7 +359,6 @@ Item {
             }
         }
 
-        // indikator persentase kelembapan dan suhu di bawah ikon cuaca
         Column {
             x: 274
             y: 132

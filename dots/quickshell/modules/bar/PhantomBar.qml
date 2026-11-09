@@ -6,7 +6,7 @@ import Quickshell.Hyprland
 import qs.config
 import qs.components
 
-// modul bar status utama phantomshell beserta popup kalender dan media player
+// Main status bar and popups coordinator.
 Scope {
     id: barScope
 
@@ -47,7 +47,7 @@ Scope {
         onTriggered: barScope.updateClock()
     }
 
-    // jendela panel bar utama pada setiap monitor
+    // Per-monitor status bar window
     Variants {
         model: Quickshell.screens
 
@@ -73,7 +73,6 @@ Scope {
                 right: true
             }
 
-            // latar belakang bar solid opsional
             Rectangle {
                 anchors.fill: parent
                 visible: PhantomState.barShowBackground || PhantomState.barStyle === "hug"
@@ -89,7 +88,7 @@ Scope {
                 }
             }
 
-            // deretan komponen kiri bar: logo, tanggal/jam, workspace, dan tombol utilitas
+            // Left items: logo, date/time, workspaces, utility strip
             Row {
                 id: leftRow
                 anchors.left: parent.left
@@ -97,7 +96,6 @@ Scope {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 8
 
-                // tombol logo utama untuk membuka launcher atau pengaturan
                 Item {
                     width: 60
                     height: 36
@@ -133,7 +131,7 @@ Scope {
                     }
                 }
 
-                // pill tanggal & waktu ala persona 5 (klik buat buka popup kalender)
+                // Date and time pill
                 Item {
                     visible: PhantomState.showWeatherHud && !PhantomState.isP3
                     implicitWidth: hudRow.implicitWidth + 24
@@ -208,7 +206,7 @@ Scope {
                     }
                 }
 
-                // indikator nomor workspace dan ikon aplikasi aktif
+                // Workspaces
                 Item {
                     id: wsContainer
                     visible: PhantomState.showWorkspaces && !PhantomState.isP3
@@ -318,7 +316,6 @@ Scope {
                                         font.weight: Font.Black
                                     }
 
-                                    // deretan ikon aplikasi yang terbuka di workspace ini (maksimal tiga ikon)
                                     Repeater {
                                         model: wsDel.visibleApps
                                         delegate: Item {
@@ -372,7 +369,7 @@ Scope {
                             }
                         }
 
-                        // indikator ruang kerja khusus (special workspace) bertema velvet room
+                        // Velvet room special workspace indicator
                         Item {
                             id: velvetWsPill
                             readonly property bool isActive: PhantomState.specialWorkspaceActive
@@ -475,7 +472,7 @@ Scope {
                     }
                 }
 
-                // deretan tombol utilitas tangkapan layar dan pemilih warna
+                // Utility strip
                 Item {
                     id: utilContainer
                     visible: PhantomState.showUtilButtons && (PhantomState.showUtilSnip || PhantomState.showUtilPicker || PhantomState.showUtilMic || PhantomState.showUtilDark) && !PhantomState.isP3
@@ -499,7 +496,6 @@ Scope {
                         anchors.centerIn: parent
                         spacing: 6
 
-                        // tombol tangkapan layar area
                         Item {
                             visible: PhantomState.showUtilSnip
                             implicitWidth: 26
@@ -526,7 +522,6 @@ Scope {
                             }
                         }
 
-                        // tombol pemilih warna layar
                         Item {
                             visible: PhantomState.showUtilPicker
                             implicitWidth: 26
@@ -553,7 +548,6 @@ Scope {
                             }
                         }
 
-                        // tombol toggle mute mic
                         Item {
                             visible: PhantomState.showUtilMic
                             implicitWidth: 24; width: 24; height: 22
@@ -565,7 +559,6 @@ Scope {
                             }
                         }
 
-                        // tombol ganti dark/light mode
                         Item {
                             visible: PhantomState.showUtilDark
                             implicitWidth: 24; width: 24; height: 22
@@ -580,7 +573,7 @@ Scope {
                 }
             }
 
-            // bagian tengah bar: dynamic island dikunci di titik tengah layar dengan penyusutan lebar simetris
+            // Centered dynamic island
             Item {
                 id: dynamicIsland
                 readonly property real halfAvailLeft: (barWin.width / 2) - (leftRow.x + leftRow.width + 10)
@@ -667,7 +660,7 @@ Scope {
                 }
             }
 
-            // deretan komponen kanan bar
+            // Right pills
             BarRightPills {
                 id: rightRow
                 barWin: barWin
@@ -678,12 +671,12 @@ Scope {
         }
     }
 
-    // jendela popup kalender bulanan dan buku catatan daily log ala persona 5
+    // Calendar popup
     PhantomCalendarPopup {
         periodStr: barScope.periodStr
         timeStr: barScope.timeStr
     }
 
-    // jendela popup media player mpris
+    // Media player popup
     PhantomMediaPopup {}
 }

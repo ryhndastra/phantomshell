@@ -6,17 +6,14 @@ import Quickshell.Hyprland
 import qs.config
 import qs.components
 
-// =============================================================================
-// PERSONA 3 RELOAD: S.E.E.S. TACTICAL TOWN MAP OVERVIEW (NO PNG, NO CLOCK)
-// Ikhtisar Workspace Vektor Presisi Berdasarkan Peta Distrik Tatsumi Port Island
-// =============================================================================
+// Tatsumi Port Island workspace overview.
 Scope {
     id: root
 
     readonly property int activeWsId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
     property int selectedDistrictIdx: 0
 
-    // Data 6 Sektor Distrik Utama & Posisi Urut Rapi pada Peta Vektor (1, 2, 3 di Atas; 4, 5, 6 di Bawah)
+    // District layout coordinates
     readonly property var districts: [
         {
             num: 1,
@@ -126,7 +123,7 @@ Scope {
             }
         }
 
-        // Tangani Navigasi Keyboard Otentik (1-6, Panah, WASD, Enter, Esc)
+        // Keyboard navigation (1-6, arrows, WASD, Enter, Esc)
         Item {
             id: ovKeyHandler
             anchors.fill: parent
@@ -158,10 +155,7 @@ Scope {
             }
         }
 
-        // =====================================================================
-        // 1. PETA TAKTIKAL VEKTOR TATSUMI PORT ISLAND (BEBAS GAMBAR PNG)
-        // Dibuat murni dengan Canvas 2D: sonar radar, kontur pulau, monorail & teluk
-        // =====================================================================
+        // Vector map canvas
         Canvas {
             id: tacticalMapCanvas
             anchors.fill: parent
@@ -350,9 +344,7 @@ Scope {
             }
         }
 
-        // =====================================================================
-        // 2. HEADER S.E.E.S. DI KIRI ATAS (TANPA JAM / TANGGAL)
-        // =====================================================================
+        // Header
         Item {
             anchors.top: parent.top
             anchors.left: parent.left
@@ -394,9 +386,7 @@ Scope {
             }
         }
 
-        // =====================================================================
-        // 3. TOMBOL TUTUP [ESC] DI KANAN ATAS
-        // =====================================================================
+        // Close button
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
@@ -449,9 +439,7 @@ Scope {
             }
         }
 
-        // =====================================================================
-        // 4. STENSIL TOWNMAP DI KIRI BAWAH
-        // =====================================================================
+        // Townmap stencil
         Item {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
@@ -493,9 +481,7 @@ Scope {
             }
         }
 
-        // =====================================================================
-        // 5. BARIS KONTROL NAVIGASI KEYBOARD DI KANAN BAWAH
-        // =====================================================================
+        // Navigation controls bar
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
@@ -552,9 +538,7 @@ Scope {
             }
         }
 
-        // =====================================================================
-        // 6. PIN DISTRIK INTERAKTIF DI ATAS PETA
-        // =====================================================================
+        // Interactive district pins
         Item {
             anchors.fill: parent
             z: 10
@@ -624,7 +608,7 @@ Scope {
                         }
                     }
 
-                    // B. Pin Teardrop Biru Otentik Persona 3 Reload
+                    // Teardrop pin icon
                     Canvas {
                         id: pinCanvas
                         anchors.fill: parent
@@ -637,13 +621,13 @@ Scope {
                             var cy = 18
                             var r = 16
 
-                            // Bayangan Pin
+                            // Pin drop shadow
                             ctx.beginPath()
                             ctx.ellipse(cx, height - 4, 12, 4, 0, 0, Math.PI * 2)
                             ctx.fillStyle = "rgba(0, 0, 0, 0.6)"
                             ctx.fill()
 
-                            // Tubuh Pin Teardrop
+                            // Pin body
                             ctx.beginPath()
                             ctx.arc(cx, cy, r, Math.PI * 0.8, Math.PI * 0.2, false)
                             ctx.lineTo(cx, height - 4)
@@ -658,7 +642,7 @@ Scope {
                         }
                     }
 
-                    // Nomor Workspace di Dalam Pin
+                    // Workspace number inside pin
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         y: 8
@@ -669,7 +653,7 @@ Scope {
                         color: pinItem.isActiveWs ? "#020818" : "#ffffff"
                     }
 
-                    // C. Label Nama Distrik di Samping Pin (Hanya muncul jika pin tidak sedang aktif dipilih)
+                    // District name label (hidden when pin is active)
                     Rectangle {
                         anchors.left: parent.right
                         anchors.leftMargin: 8
@@ -694,7 +678,7 @@ Scope {
                         }
                     }
 
-                    // D. Kartu Detail Workspace Berbentuk Balon Dialog Foto 2
+                    // Workspace detail popup
                     Item {
                         id: detailHoverCard
                         visible: pinItem.isSelected
@@ -714,7 +698,7 @@ Scope {
                                 var w = width
                                 var h = height
 
-                                // Shard Aksen Biru Muda di Kanan
+                                // Shard accent
                                 ctx.fillStyle = "rgba(0, 160, 255, 0.28)"
                                 ctx.beginPath()
                                 ctx.moveTo(w - 60, -2)
@@ -724,7 +708,7 @@ Scope {
                                 ctx.closePath()
                                 ctx.fill()
 
-                                // Badan Dialog Navy
+                                // Dialog body
                                 var bx = 12
                                 var by = 8
                                 var bw = w - 24
@@ -750,7 +734,7 @@ Scope {
                                 ctx.lineWidth = 1.6
                                 ctx.stroke()
 
-                                // Wedge Segitiga Kiri Atas P3R (Foto 2)
+                                // Wedge accent
                                 ctx.beginPath()
                                 ctx.moveTo(-2, 18)
                                 ctx.lineTo(140, -2)
@@ -943,9 +927,7 @@ Scope {
             }
         }
 
-        // =====================================================================
-        // 7. THE VELVET ROOM (ELEVATOR OF THE SOUL) DI KIRI BAWAH
-        // =====================================================================
+        // Velvet Room shortcut card
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left

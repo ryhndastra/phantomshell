@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Hyprland
 import qs.config
 
-// Engine Wallpaper persona 3 reload lengkap: riak gelombang air mengalir, partikel cahaya mengapung, pergerakan pilar cahaya ambient, dan parallax 3d raymarching
+// Persona 3 Reload live wallpaper engine with water ripples, floating particles, and time-of-day phases.
 Item {
     id: p3WallpaperRoot
     anchors.fill: parent
@@ -13,7 +13,7 @@ Item {
 
     readonly property bool effectiveAnimRunning: animActive && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows) && !PhantomState.sessionOpen
 
-    // ── Jam & Periode Waktu Realistis Persona 3 Reload ──
+    // Time phase resolution
     property int currentHour: new Date().getHours()
 
     Timer {
@@ -40,31 +40,30 @@ Item {
         return "night"                              // 20:00 - 24:00 Deep Night
     }
 
-    // Warna atmosfer dasar berdasarkan fase waktu
+    // Base atmospheric color by time phase
     readonly property color ambientAtmosphereColor: {
         switch (timePhase) {
-            case "darkhour": return "#32003d1c"  // Hijau Emerald Supernatural Dark Hour
-            case "latenight": return "#2e010822" // Indigo Pekat Tengah Malam
-            case "morning": return "#16ffd880"   // Kilau Hangat Fajar Pagi
-            case "afterschool": return "#00000000" // Azure Murni P3R
-            case "evening": return "#28ff6820"   // Senja Keemasan Sunset
-            default: return "#22030f36"          // Biru Samudra Malam
+            case "darkhour": return "#32003d1c"
+            case "latenight": return "#2e010822"
+            case "morning": return "#16ffd880"
+            case "afterschool": return "#00000000"
+            case "evening": return "#28ff6820"
+            default: return "#22030f36"
         }
     }
 
-    // Warna gradasi pencahayaan langit atas
+    // Sky gradient color by time phase
     readonly property color ambientSkyTopColor: {
         switch (timePhase) {
-            case "darkhour": return "#40005a28"  // Cahaya Bulan Hijau Tartarus
+            case "darkhour": return "#40005a28"
             case "latenight": return "#20020d30"
-            case "morning": return "#1800f0ff"   // Biru Langit Pagi
+            case "morning": return "#1800f0ff"
             case "afterschool": return "#00000000"
-            case "evening": return "#2e881060"   // Magenta Twilight Dusk
+            case "evening": return "#2e881060"
             default: return "#1c041440"
         }
     }
 
-    // Gambar latar dasar samudra / langit malam p3 reload
     Image {
         id: bgRaw
         source: Qt.resolvedUrl("../../assets/themes/p3/bg/bg.png")
@@ -75,7 +74,6 @@ Item {
         visible: false
     }
 
-    // Masker kedalaman awan / permukaan air
     Image {
         id: cloudMaskRaw
         source: Qt.resolvedUrl("../../assets/themes/p3/bg/cloud_mask.png")
@@ -86,7 +84,6 @@ Item {
         visible: false
     }
 
-    // Normal map untuk distorsi gelombang air realistis
     Image {
         id: normalMapRipple
         source: Qt.resolvedUrl("../../assets/themes/p3/bg/water_ripple_normal.png")
@@ -97,7 +94,6 @@ Item {
         visible: false
     }
 
-    // Bilah pilar cahaya ambient mengapung khas p3 reload
     Image {
         id: barsRaw
         source: Qt.resolvedUrl("../../assets/themes/p3/bg/bars.png")
@@ -109,7 +105,7 @@ Item {
     }
 
 
-    // ── Tahap 0a: Shader efek riak gelombang air pada background ──
+    // Stage 0a: water ripple shader
     ShaderEffect {
         id: s0_bg_clouds
         anchors.fill: parent
@@ -142,7 +138,7 @@ Item {
         live: p3WallpaperRoot.effectiveAnimRunning
     }
 
-    // ── Tahap 0b: Shader partikel bintang / tetesan cahaya air melayang ──
+    // Stage 0b: floating particle shader
     ShaderEffect {
         id: s0_bg_stars
         anchors.fill: parent
@@ -165,7 +161,7 @@ Item {
         fragmentShader: Qt.resolvedUrl("../../assets/themes/p3/shaders/stars/stars.frag.qsb")
     }
 
-    // ── Tahap 1: Komposit background + pergerakan pilar cahaya + karakter Makoto Yuki ──
+    // Stage 1: composite background, light pillars, and character layer
     Item {
         id: s1_composite
         anchors.fill: parent
@@ -208,7 +204,7 @@ Item {
             mipmap: true
         }
 
-        // Lapisan Pencahayaan Dinamis Atmosfer Berdasarkan Waktu Jam Nyata (Time-of-Day)
+        // Dynamic atmosphere overlay
         Rectangle {
             id: timeOfDayOverlay
             anchors.fill: parent
@@ -220,7 +216,7 @@ Item {
             }
         }
 
-        // Lapisan Gradasi Langit & Suasana Malam / Senja / Dark Hour
+        // Sky gradient overlay
         Rectangle {
             id: timeOfDayGradient
             anchors.fill: parent
@@ -245,7 +241,7 @@ Item {
             }
         }
 
-        // Efek Vignette Khusus Dark Hour (00:00 - 01:00)
+        // Dark hour vignette effect
         Rectangle {
             anchors.fill: parent
             visible: p3WallpaperRoot.timePhase === "darkhour"

@@ -1,7 +1,7 @@
 import QtQuick
 import qs.config
 
-// kontainer bawah untuk visualizer audio cava dan lirik lagu tersinkronisasi
+// Audio spectrum visualizer and synchronized lyrics display.
 Item {
     id: bottomAudioBar
     z: 10
@@ -26,7 +26,7 @@ Item {
     property var rightBars: []
     property int cavaTick: 0
 
-    // slot tengah untuk tampilan lirik lima baris
+    // Synchronized five-line lyrics
     Item {
         id: centerLyricsSlot
         anchors.horizontalCenter: parent.horizontalCenter
@@ -42,7 +42,6 @@ Item {
             spacing: 2
             visible: bottomAudioBar.musicPlaying && bottomAudioBar.currentLyric !== ""
 
-            // baris lirik dua langkah sebelumnya
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
@@ -56,7 +55,6 @@ Item {
                 elide: Text.ElideRight
             }
 
-            // baris lirik satu langkah sebelumnya
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
@@ -72,7 +70,6 @@ Item {
                 elide: Text.ElideRight
             }
 
-            // baris lirik yang sedang dinyanyikan saat ini
             Text {
                 id: activeLyricText
                 width: parent.width
@@ -88,7 +85,6 @@ Item {
                 elide: Text.ElideRight
             }
 
-            // baris lirik satu langkah berikutnya
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
@@ -104,7 +100,6 @@ Item {
                 elide: Text.ElideRight
             }
 
-            // baris lirik dua langkah berikutnya
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
@@ -120,7 +115,7 @@ Item {
         }
     }
 
-    // kanvas spektrum audio cava sisi kiri
+    // Left audio spectrum canvas
     Canvas {
         id: leftCavaCanvas
         visible: PhantomState.showDesktopCava && bottomAudioBar.hasLiveAudio && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)
@@ -165,7 +160,7 @@ Item {
         }
     }
 
-    // kanvas spektrum audio cava sisi kanan
+    // Right audio spectrum canvas
     Canvas {
         id: rightCavaCanvas
         visible: PhantomState.showDesktopCava && bottomAudioBar.hasLiveAudio && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)

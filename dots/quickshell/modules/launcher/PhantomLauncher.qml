@@ -31,10 +31,10 @@ Variants {
         property string query: ""
         property int selectedIndex: 0
 
-        // daftar aplikasi desktop terinstal di sistem
+        // Installed desktop applications
         property var rawDesktopApps: DesktopEntries.applications.values
 
-        // daftar perintah cepat bawaan phantomshell
+        // Built-in quick commands
         readonly property var builtinCommands: [
             { isApp: false, name: ">lock", desc: "Lock Screen (Persona 5 Calling Card Lock)", cmd: "__lock", iconName: "lock", appIcon: "", badge: "LOCK", entryObj: null },
             { isApp: false, name: ">settings", desc: "Open Complete Velvet Room Configuration GUI", cmd: "__settings", iconName: "settings", appIcon: "", badge: "CONFIG", entryObj: null },
@@ -200,7 +200,6 @@ Variants {
             }
         }
 
-        // lapisan latar redup transparan
         Rectangle {
             id: bgFade
             anchors.fill: parent
@@ -213,7 +212,6 @@ Variants {
                 onClicked: PhantomState.launcherOpen = false
             }
 
-            // kontainer utama aplikasi launcher di tengah layar (Persona 5)
             Item {
                 id: launcherStage
                 visible: !PhantomState.isP3
@@ -221,10 +219,8 @@ Variants {
                 height: Math.min(parent.height - 80, 680)
                 anchors.centerIn: parent
 
-                // penahan klik di dalam area launcher
                 MouseArea { anchors.fill: parent }
 
-                // latar kartu bersih minimalis khas Persona 3 Reload
                 Rectangle {
                     anchors.fill: parent
                     anchors.rightMargin: 16
@@ -235,7 +231,6 @@ Variants {
                     border.color: Qt.rgba(0/255, 219/255, 255/255, 0.5)
                     border.width: 1
 
-                    // garis aksen biru cyan di atas
                     Rectangle {
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -246,7 +241,6 @@ Variants {
                     }
                 }
 
-                // latar kartu miring launcher beserta aksen sudut (P5)
                 Canvas {
                     anchors.fill: parent
                     visible: !PhantomState.isP3
@@ -261,7 +255,6 @@ Variants {
                         var w = width
                         var h = height
 
-                        // bayangan offset warna aksen
                         ctx.fillStyle = Qt.rgba(accent.r, accent.g, accent.b, 0.28)
                         ctx.beginPath()
                         ctx.moveTo(26, 16)
@@ -271,7 +264,6 @@ Variants {
                         ctx.closePath()
                         ctx.fill()
 
-                        // bidang gelap utama kartu launcher
                         ctx.fillStyle = "#E80B0B0F"
                         ctx.strokeStyle = "#FFFFFF"
                         ctx.lineWidth = 2.5
@@ -284,7 +276,6 @@ Variants {
                         ctx.fill()
                         ctx.stroke()
 
-                        // aksen pita miring di pojok kanan atas
                         ctx.fillStyle = accent
                         ctx.beginPath()
                         ctx.moveTo(w - 170, 0)
@@ -296,7 +287,6 @@ Variants {
                     }
                 }
 
-                // baris header atas dan kotak pencarian aplikasi
                 RowLayout {
                     id: topHeaderRow
                     anchors.top: parent.top
@@ -307,7 +297,6 @@ Variants {
                     anchors.rightMargin: 42
                     spacing: 18
 
-                    // lencana judul launcher
                     Item {
                         Layout.preferredWidth: PhantomState.isP3 ? 320 : 270
                         Layout.preferredHeight: 62
@@ -392,7 +381,6 @@ Variants {
                         }
                     }
 
-                    // kotak input pencarian aplikasi dan perintah
                     Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 56
@@ -511,7 +499,6 @@ Variants {
                     }
                 }
 
-                // daftar hasil pencarian aplikasi dan perintah
                 ListView {
                     id: resultsList
                     anchors.top: topHeaderRow.bottom
@@ -538,7 +525,6 @@ Variants {
                         readonly property bool isSelected: index === launcherWin.selectedIndex
                         readonly property bool isHovered: rowMouse.containsMouse
 
-                        // baris minimalis bersih untuk Persona 3 Reload
                         Rectangle {
                             anchors.fill: parent
                             visible: PhantomState.isP3
@@ -579,7 +565,6 @@ Variants {
                                 var rightBoxX = w - 210
 
                                 if (active) {
-                                    // bilah miring beraksen saat baris dipilih atau di-hover
                                     ctx.fillStyle = "#08080A"
                                     ctx.beginPath()
                                     ctx.moveTo(18, 10)
@@ -598,7 +583,6 @@ Variants {
                                     ctx.closePath()
                                     ctx.fill()
 
-                                    // garis sorot putih di tepi kiri bilah
                                     ctx.fillStyle = "#FFFFFF"
                                     ctx.beginPath()
                                     ctx.moveTo(0, h - 8)
@@ -608,7 +592,6 @@ Variants {
                                     ctx.closePath()
                                     ctx.fill()
                                 } else {
-                                    // latar baris gelap saat tidak aktif
                                     ctx.fillStyle = "#D0121218"
                                     ctx.beginPath()
                                     ctx.moveTo(56, 6)
@@ -619,7 +602,6 @@ Variants {
                                     ctx.fill()
                                 }
 
-                                // kotak lencana kanan dengan lekukan panah kiri
                                 ctx.fillStyle = "#FFFFFF"
                                 ctx.beginPath()
                                 ctx.moveTo(rightBoxX, 3)
@@ -632,7 +614,6 @@ Variants {
                                 ctx.closePath()
                                 ctx.fill()
 
-                                // latar gelap di dalam kotak lencana kanan
                                 ctx.fillStyle = "#08080A"
                                 ctx.beginPath()
                                 ctx.moveTo(rightBoxX + 7, 8)
@@ -644,7 +625,6 @@ Variants {
                             }
                         }
 
-                        // konten kiri berupa ikon aplikasi, nama, dan deskripsi
                         RowLayout {
                             anchors.left: parent.left
                             anchors.leftMargin: (rowDelegate.isSelected || rowDelegate.isHovered) ? 34 : 68
@@ -657,7 +637,6 @@ Variants {
                                 NumberAnimation { duration: 120; easing.type: Easing.OutBack }
                             }
 
-                            // bingkai ikon aplikasi
                             Rectangle {
                                 Layout.preferredWidth: 46
                                 Layout.preferredHeight: 46
@@ -666,7 +645,6 @@ Variants {
                                 border.width: 2
                                 rotation: (rowDelegate.isSelected || rowDelegate.isHovered) ? -5 : 0
 
-                                // gambar ikon asli aplikasi desktop
                                 Image {
                                     id: realAppIcon
                                     anchors.fill: parent
@@ -678,7 +656,6 @@ Variants {
                                     visible: modelData.appIcon !== "" && status === Image.Ready
                                 }
 
-                                // ikon vektor cadangan jika aplikasi tidak memiliki file ikon
                                 P5Icon {
                                     anchors.centerIn: parent
                                     name: modelData.iconName || "app"
@@ -715,7 +692,6 @@ Variants {
                             }
                         }
 
-                        // teks lencana aksi di sisi kanan baris
                         Item {
                             anchors.right: parent.right
                             anchors.rightMargin: 20
@@ -757,7 +733,6 @@ Variants {
                     }
                 }
 
-                // baris petunjuk navigasi keyboard di bagian bawah
                 RowLayout {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
@@ -806,7 +781,6 @@ Variants {
                     }
                 }
 
-                // tombol stempel penutup launcher di bagian bawah
                 Item {
                     id: okStampButton
                     anchors.bottom: parent.bottom
@@ -898,11 +872,7 @@ Variants {
                 }
             }
 
-            // =========================================================================
-            // KONTAINER APLIKASI LAUNCHER KHUSUS PERSONA 3 RELOAD: S.E.E.S. MAIL MENU
-            // Dynamic Tabs: "APPS" (S.E.E.S. System Apps) & "MAIL" (TODAY'S New Message)
-            // Overlay Mail Detail Reader (Membaca pesan panjang secara utuh ala P3R)
-            // =========================================================================
+            // S.E.E.S. mail and apps launcher container
             Item {
                 id: p3MailStage
                 visible: PhantomState.isP3
@@ -913,11 +883,9 @@ Variants {
                 width: 590
                 height: Math.min(parent.height - 70, 700)
 
-                // State Tab Aktif: "apps" (Launcher Aplikasi) atau "mail" (Riwayat Notifikasi)
                 readonly property string activeTab: PhantomState.p3LauncherTab
                 property int selectedNotifIndex: 0
 
-                // State Overlay Mail Reader untuk Membaca Pesan Notifikasi Lengkap
                 property var activeDetailNotif: null
                 property int activeDetailIndex: -1
 
@@ -940,25 +908,21 @@ Variants {
                     }
                 }
 
-                // Rotasi miring otentik Persona 3 Reload (-5.5 derajat) dengan layer multisample antialiasing
+                // -5.5 deg rotation with multisample AA
                 transformOrigin: Item.BottomLeft
                 rotation: -5.5
                 layer.enabled: true
                 layer.smooth: true
                 layer.samples: 4
 
-                // Animasi buka/tutup taktil halus
                 opacity: PhantomState.launcherOpen ? 1.0 : 0.0
                 scale: PhantomState.launcherOpen ? 1.0 : 0.94
                 Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                 Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
 
-                // Penahan klik agar tidak tembus ke background
                 MouseArea { anchors.fill: parent }
 
-                // ---------------------------------------------------------------------
-                // Latar Belakang Kartu P3R & Pelat Bayangan 3D Hitam Tebal (Canvas 2D)
-                // ---------------------------------------------------------------------
+                // Backdrop and drop shadow canvas
                 Canvas {
                     id: p3CardBackdrop
                     anchors.fill: parent
@@ -987,33 +951,27 @@ Variants {
                         var h = height - pad * 2 - 10;
                         var r = 6;
 
-                        // 1. Pelat Ekstrusi 3D Hitam Solid (Offset +12px kanan, +10px bawah)
                         drawRoundRect(ctx, pad + 12, pad + 10, w, h, r);
                         ctx.fillStyle = "#070b14";
                         ctx.fill();
 
-                        // 2. Badan Kartu Utama Slate Gelap P3R (#131926)
                         drawRoundRect(ctx, pad, pad, w, h, r);
                         ctx.fillStyle = "#131926";
                         ctx.fill();
 
-                        // 3. Garis Tepi Putih Bersih Tebal Otentik 3.5px
                         ctx.lineWidth = 3.5;
                         ctx.strokeStyle = "#ffffff";
                         ctx.stroke();
                     }
                 }
 
-                // ---------------------------------------------------------------------
-                // Konten Kartu Utama (Watermark, Ribbon, Tab Switcher, Search, Daftar)
-                // ---------------------------------------------------------------------
+                // Main card content
                 Item {
                     id: p3CardArea
                     anchors.fill: parent
                     anchors.margins: 8
                     clip: true
 
-                    // 1. Dynamic Watermark Kiri Atas: "APPS" saat Launcher, "MAIL" saat Notifikasi
                     Text {
                         anchors.left: parent.left
                         anchors.leftMargin: 16
@@ -1028,7 +986,6 @@ Variants {
                         renderType: Text.CurveRendering
                     }
 
-                    // 2. Dynamic Ribbon Kanan Atas: "S.E.E.S. System Apps" vs "TODAY'S New Message"
                     Canvas {
                         id: p3RibbonCanvas
                         anchors.top: parent.top
@@ -1045,7 +1002,6 @@ Variants {
                             var w = width;
                             var h = height;
 
-                            // Bayangan gelap di bawah pita miring (3D fold)
                             ctx.beginPath();
                             ctx.moveTo(34, 4);
                             ctx.lineTo(w, 4);
@@ -1055,7 +1011,6 @@ Variants {
                             ctx.fillStyle = "#061332";
                             ctx.fill();
 
-                            // Pita Biru Kobalt Utama
                             ctx.beginPath();
                             ctx.moveTo(42, 0);
                             ctx.lineTo(w, 0);
@@ -1065,7 +1020,6 @@ Variants {
                             ctx.fillStyle = "#0052cc";
                             ctx.fill();
 
-                            // Garis outline cyan halus
                             ctx.lineWidth = 1.5;
                             ctx.strokeStyle = "#00d0ff";
                             ctx.stroke();
@@ -1097,7 +1051,6 @@ Variants {
                         }
                     }
 
-                    // 3. Tab Switcher: [ APPS ] & [ MAIL (Count) ] + [Clear All]
                     Row {
                         id: p3TabRow
                         anchors.top: p3RibbonCanvas.bottom
@@ -1106,7 +1059,6 @@ Variants {
                         anchors.leftMargin: 16
                         spacing: 8
 
-                        // Tombol Tab APPS
                         Rectangle {
                             width: 86
                             height: 26
@@ -1146,7 +1098,6 @@ Variants {
                             }
                         }
 
-                        // Tombol Tab MAIL
                         Rectangle {
                             width: 96
                             height: 26
@@ -1170,7 +1121,6 @@ Variants {
                                     font.weight: Font.Black
                                     color: p3MailStage.activeTab === "mail" ? "#ffffff" : "#6f8cb0"
                                 }
-                                // Badge Notifikasi Baru
                                 Rectangle {
                                     visible: PhantomState.imNotifications.count > 0
                                     width: 16
@@ -1202,7 +1152,6 @@ Variants {
                             }
                         }
 
-                        // Tombol Clear All (Hanya di mode MAIL jika ada pesan)
                         Rectangle {
                             visible: p3MailStage.activeTab === "mail" && PhantomState.imNotifications.count > 0
                             width: 72
@@ -1235,7 +1184,6 @@ Variants {
                             }
                         }
 
-                        // Petunjuk Tombol Tab
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "[Tab] switch"
@@ -1246,7 +1194,6 @@ Variants {
                         }
                     }
 
-                    // 4. Baris Input Pencarian Aplikasi / Notifikasi
                     Rectangle {
                         id: p3SearchContainer
                         anchors.top: p3TabRow.bottom
@@ -1345,7 +1292,6 @@ Variants {
                                                 p3MailStage.activeDetailIndex = -1
                                                 PhantomState.playSfx("close")
                                             } else if (PhantomState.imNotifications.count > 0) {
-                                                // Buka Overlay Mail Detail Reader
                                                 var n = PhantomState.imNotifications.get(p3MailStage.selectedNotifIndex)
                                                 if (n) {
                                                     p3MailStage.activeDetailNotif = {
@@ -1395,7 +1341,6 @@ Variants {
                         }
                     }
 
-                    // 5. Pesan Kosong Jika Tidak Ada Notifikasi
                     Item {
                         anchors.centerIn: p3AppList
                         visible: p3MailStage.activeTab === "mail" && PhantomState.imNotifications.count === 0 && p3MailStage.activeDetailNotif === null
@@ -1433,7 +1378,6 @@ Variants {
                         }
                     }
 
-                    // 6. Daftar Aplikasi / Notifikasi (ListView Bersih)
                     ListView {
                         id: p3AppList
                         anchors.top: p3SearchContainer.bottom
@@ -1462,7 +1406,6 @@ Variants {
                             width: p3AppList.width - (isSelected ? 0 : 8)
                             height: 54
 
-                            // Data Helper tergantung tab (Safe untuk JS Array & ListModel)
                             readonly property string itemName: isApps ? (modelData ? (modelData.name || "") : "") : (typeof senderName !== "undefined" ? senderName : (typeof sender !== "undefined" ? sender : (typeof model !== "undefined" && model ? (model.senderName || model.sender || "") : "")))
                             readonly property string itemDesc: isApps ? (modelData ? (modelData.desc || "") : "") : (typeof msgBody !== "undefined" ? msgBody : (typeof message !== "undefined" ? message : (typeof model !== "undefined" && model ? (model.msgBody || model.message || "") : "")))
                             readonly property string itemIcon: isApps ? (modelData ? (modelData.appIcon || "") : "") : (typeof msgIcon !== "undefined" ? msgIcon : (typeof appIcon !== "undefined" ? appIcon : (typeof model !== "undefined" && model ? (model.msgIcon || model.appIcon || "") : "")))
@@ -1491,15 +1434,12 @@ Variants {
                                 return PhantomState.resolveAppIconUrl(p3RowDelegate.itemName)
                             }
 
-                            // Pergeseran taktil: baris aktif sedikit melompat ke kanan
                             x: isSelected ? 8 : (isHovered ? 4 : 0)
                             Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
 
-                            // Palet warna karakter Persona 3 Reload untuk avatar tidak aktif
                             readonly property var duotoneColors: ["#0099cc", "#9c27b0", "#1565c0", "#e65100", "#2e7d32", "#00838f"]
                             readonly property color avatarColor: isSelected ? "#e60039" : ((typeof index === "number" && index >= 0) ? duotoneColors[index % duotoneColors.length] : "#0099cc")
 
-                            // A. Ikon Lingkaran Biru Tanda Seru "!" di Sebelah Kiri Baris
                             Rectangle {
                                 id: exclBadge
                                 x: 6
@@ -1520,7 +1460,6 @@ Variants {
                                 }
                             }
 
-                            // B. Avatar Karakter dengan Potongan Diagonal Slash 25 Derajat
                             Item {
                                 id: avatarContainer
                                 x: 32
@@ -1552,7 +1491,6 @@ Variants {
                                     }
                                 }
 
-                                // Ikon Aplikasi / Notifikasi di dalam Avatar Slashed
                                 Image {
                                     id: avatarImg
                                     anchors.verticalCenter: parent.verticalCenter
@@ -1565,7 +1503,6 @@ Variants {
                                     visible: p3RowDelegate.resolvedIcon !== "" && status === Image.Ready && implicitWidth > 0
                                 }
 
-                                // Fallback Avatar Karakter / Monogram Persona 3 Reload saat ikon tidak tersedia
                                 Item {
                                     anchors.fill: parent
                                     visible: !avatarImg.visible
@@ -1584,7 +1521,6 @@ Variants {
                                 }
                             }
 
-                            // C. Kartu Pesan (Menyambung presisi dengan sudut diagonal slash avatar)
                             Item {
                                 id: messageCard
                                 x: 80
@@ -1603,7 +1539,7 @@ Variants {
                                         var h = height;
 
                                         if (p3RowDelegate.isSelected) {
-                                            // --- KARTU MITSURU KIRIJO: PUTIH SOLID DENGAN BORDER BIRU ROYAL ---
+                                            // Selected item card styling
                                             ctx.beginPath();
                                             ctx.moveTo(18, 0);
                                             ctx.lineTo(w, 0);
@@ -1613,12 +1549,10 @@ Variants {
                                             ctx.fillStyle = "#ffffff";
                                             ctx.fill();
 
-                                            // Border Biru Royal Tebal 2.5px
                                             ctx.lineWidth = 2.5;
                                             ctx.strokeStyle = "#0038a8";
                                             ctx.stroke();
 
-                                            // Aksen Garis Cyan Elektrik di Tepi Bawah Kartu
                                             ctx.beginPath();
                                             ctx.moveTo(0, h);
                                             ctx.lineTo(w, h);
@@ -1626,7 +1560,7 @@ Variants {
                                             ctx.strokeStyle = "#0099ff";
                                             ctx.stroke();
                                         } else {
-                                            // --- KARTU TIDAK TERPILIH: SLATE GELAP BERSIH ---
+                                            // Unselected item card styling
                                             ctx.beginPath();
                                             ctx.moveTo(18, 0);
                                             ctx.lineTo(w, 0);
@@ -1636,7 +1570,6 @@ Variants {
                                             ctx.fillStyle = p3RowDelegate.isHovered ? "#2a3750" : "#1e293c";
                                             ctx.fill();
 
-                                            // Garis Pemisah Halus di Bawah
                                             ctx.beginPath();
                                             ctx.moveTo(0, h);
                                             ctx.lineTo(w, h);
@@ -1654,7 +1587,6 @@ Variants {
                                     }
                                 }
 
-                                // Konten Teks Nama Aplikasi / Pengirim & Deskripsi
                                 Column {
                                     anchors.left: parent.left
                                     anchors.leftMargin: 24
@@ -1700,7 +1632,6 @@ Variants {
                                                 }
                                             }
 
-                                            // Garis bawah biru otentik di bawah nama kontak terpilih
                                             Rectangle {
                                                 width: Math.min(parent.width, 180)
                                                 height: 1.5
@@ -1723,7 +1654,6 @@ Variants {
                                 }
                             }
 
-                            // D. Area Interaksi Klik dan Hover
                             MouseArea {
                                 id: p3RowMouse
                                 anchors.fill: parent
@@ -1743,7 +1673,6 @@ Variants {
                                         launcherWin.selectedIndex = index
                                         launcherWin.executeItem(index)
                                     } else {
-                                        // Buka Overlay Mail Detail Reader
                                         p3MailStage.selectedNotifIndex = index
                                         p3MailStage.activeDetailNotif = {
                                             "sender": p3RowDelegate.itemName,
@@ -1760,9 +1689,7 @@ Variants {
                         }
                     }
 
-                    // -----------------------------------------------------------------
-                    // 7. Overlay Mail Detail Reader (P3R In-Game Authentic Message Card)
-                    // -----------------------------------------------------------------
+                    // Message detail reader overlay
                     Item {
                         id: p3MailReaderModal
                         anchors.fill: parent
@@ -1772,7 +1699,6 @@ Variants {
                         visible: opacity > 0.0
                         Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
 
-                        // Latar Belakang Redup Gelap Mencegah Klik ke Bawah
                         Rectangle {
                             anchors.fill: parent
                             color: "#F5080C16"
@@ -1780,12 +1706,10 @@ Variants {
                             MouseArea { anchors.fill: parent } // block clicks
                         }
 
-                        // Badan Kartu Pembaca Pesan P3R
                         Item {
                             anchors.fill: parent
                             anchors.margins: 14
 
-                            // Pita Header "MESSAGE DETAIL // INBOX"
                             Canvas {
                                 id: readerRibbon
                                 anchors.top: parent.top
@@ -1834,7 +1758,6 @@ Variants {
                                 }
                             }
 
-                            // Header Profil Pengirim
                             RowLayout {
                                 id: readerSenderRow
                                 anchors.top: readerRibbon.bottom
@@ -1845,7 +1768,6 @@ Variants {
                                 anchors.rightMargin: 8
                                 spacing: 12
 
-                                // Slashed Avatar Pengirim
                                 Item {
                                     width: 58
                                     height: 44
@@ -1935,7 +1857,6 @@ Variants {
                                 }
                             }
 
-                            // Garis Pemisah
                             Rectangle {
                                 id: readerDivider
                                 anchors.top: readerSenderRow.bottom
@@ -1948,7 +1869,6 @@ Variants {
                                 color: "#5900DBFF"
                             }
 
-                            // Area Isi Pesan Lengkap (Scrollable Flickable)
                             Flickable {
                                 id: readerFlick
                                 anchors.top: readerDivider.bottom
@@ -1978,7 +1898,6 @@ Variants {
                                 }
                             }
 
-                            // Baris Tombol Aksi di Bagian Bawah Reader
                             RowLayout {
                                 id: readerActionsRow
                                 anchors.bottom: parent.bottom
@@ -1989,7 +1908,6 @@ Variants {
                                 anchors.rightMargin: 8
                                 spacing: 12
 
-                                // Tombol Hapus Pesan (DISMISS)
                                 Rectangle {
                                     Layout.fillWidth: true
                                     height: 34
@@ -2026,7 +1944,6 @@ Variants {
                                     }
                                 }
 
-                                // Tombol Tutup (CLOSE / BACK)
                                 Rectangle {
                                     Layout.fillWidth: true
                                     height: 34

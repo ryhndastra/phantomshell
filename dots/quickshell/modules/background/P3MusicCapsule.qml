@@ -5,9 +5,7 @@ import Quickshell.Services.Mpris
 import qs.config
 import qs.components
 
-// Widget Pemutar Musik Kapsul Ikonik Makoto Yuki - Persona 3 Reload MP3 Player
-// Fitur: Terpasang di tepi kiri layar, ditarik/geser (drag) atau diklik untuk buka/tutup,
-// pas sempurna di dalam layar LCD kapsul, dan terintegrasi mulus dengan audio Mpris.
+// Persona 3 Reload MP3 capsule music player.
 Item {
     id: p3CapsuleRoot
     visible: PhantomState.isP3
@@ -15,7 +13,6 @@ Item {
     height: 270
     z: 25
 
-    // Posisi vertikal di sisi kiri layar
     anchors.verticalCenter: parent ? parent.verticalCenter : undefined
     anchors.verticalCenterOffset: 60
 
@@ -29,7 +26,6 @@ Item {
     property bool isManuallyOpened: false
     readonly property bool isOpened: PhantomState.p3CapsuleForceOpen || isPlaying || isManuallyOpened
 
-    // Animasi geser horizontal dengan Drag & Click
     x: isOpened ? 0 : -360
     Behavior on x {
         enabled: !capsuleDragArea.drag.active
@@ -44,7 +40,7 @@ Item {
         id: capsuleContainer
         anchors.fill: parent
 
-        // ── Gambar Fisik Pemutar MP3 Kapsul Makoto Yuki (player.png) ──
+        // Capsule player body
         Image {
             id: playerBody
             source: Qt.resolvedUrl("../../assets/themes/p3/components/player.png")
@@ -59,7 +55,7 @@ Item {
             smooth: true
             mipmap: true
 
-            // ── Kluster Kontrol & Tampilan di Dalam Layar LCD Kapsul (Child Langsung dari playerBody) ──
+            // LCD display controls and playback info
             Item {
                 id: playerUiContent
                 x: 214
@@ -71,14 +67,13 @@ Item {
                     anchors.fill: parent
                     spacing: 8
 
-                    // Piringan Vinyl Berputar (Album Mask & Play/Pause Dial)
+                    // Vinyl dial
                     Item {
                         id: vinylDial
                         width: 44
                         height: 44
                         anchors.verticalCenter: parent.verticalCenter
 
-                        // Piringan Dasar Vinyl Hitam Elegan
                         Rectangle {
                             anchors.fill: parent
                             radius: width / 2
@@ -87,7 +82,6 @@ Item {
                             border.width: 1.5
                         }
 
-                        // Lapisan Artwork Album atau Tekstur Vinyl Atlus yang Berputar
                         Item {
                             id: spinningDisc
                             anchors.fill: parent
@@ -117,7 +111,6 @@ Item {
                                 }
                             }
 
-                            // Titik Poros Tengah Vinyl Cyan P3
                             Rectangle {
                                 anchors.centerIn: parent
                                 width: 8
@@ -128,7 +121,6 @@ Item {
                                 border.width: 1
                             }
 
-                            // Animasi Rotasi Piringan Saat Musik Diputar
                             NumberAnimation on rotation {
                                 from: 0
                                 to: 360
@@ -138,7 +130,6 @@ Item {
                             }
                         }
 
-                        // Indikator Ikon Play/Pause Kecil Saat Kursor Mengarah ke Piringan
                         Rectangle {
                             anchors.fill: parent
                             radius: width / 2
@@ -170,13 +161,11 @@ Item {
                         }
                     }
 
-                    // Informasi Trek (Artis, Judul Lagu, dan Tombol Kontrol Prev/Next)
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - vinylDial.width - 10
                         spacing: 1
 
-                        // Artis Lagu
                         Text {
                             width: parent.width
                             text: p3CapsuleRoot.songArtist
@@ -187,7 +176,6 @@ Item {
                             elide: Text.ElideRight
                         }
 
-                        // Judul Lagu
                         Text {
                             width: parent.width
                             text: p3CapsuleRoot.songTitle
@@ -198,13 +186,11 @@ Item {
                             elide: Text.ElideRight
                         }
 
-                        // Baris Tombol Prev / Play-Pause / Next
                         Row {
                             spacing: 8
                             anchors.left: parent.left
                             anchors.leftMargin: 0
 
-                            // Tombol Prev
                             Item {
                                 width: 16
                                 height: 16
@@ -232,7 +218,6 @@ Item {
                                 }
                             }
 
-                            // Tombol Play / Pause
                             Item {
                                 width: 16
                                 height: 16
@@ -260,7 +245,6 @@ Item {
                                 }
                             }
 
-                            // Tombol Next
                             Item {
                                 width: 16
                                 height: 16
@@ -294,7 +278,7 @@ Item {
         }
     }
 
-    // Area Interaksi Drag & Click: Pengguna dapat mengklik atau menggeser (drag) badan kapsul untuk membuka/menutup
+    // Drag and click area to toggle capsule
     MouseArea {
         id: capsuleDragArea
         anchors.fill: parent

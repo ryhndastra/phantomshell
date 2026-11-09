@@ -2,11 +2,12 @@ import QtQuick
 import QtQuick.Layouts
 import QtMultimedia
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import qs.config
 import qs.components
 
-// modul menu sesi dan manajemen daya bergaya calling card persona
+// Session menu and power management.
 Scope {
     PanelWindow {
         id: sessionWin
@@ -115,7 +116,7 @@ Scope {
             }
         }
 
-        // penangkap navigasi papan ketik untuk memilih aksi sesi
+        // Keyboard navigation handler
         Item {
             id: keyCatcher
             anchors.fill: parent
@@ -242,7 +243,7 @@ Scope {
             }
         }
 
-        // lapisan latar gelap dan pita diagonal layar penuh
+        // Dimmed backdrop
         Item {
             id: backdropItem
             anchors.fill: parent
@@ -292,7 +293,7 @@ Scope {
             }
         }
 
-        // kontainer kartu utama menu sesi (Mode P5)
+        // P5 session card container
         Item {
             id: cardContainer
             visible: !PhantomState.isP3
@@ -312,7 +313,6 @@ Scope {
 
             MouseArea { anchors.fill: parent }
 
-            // bingkai luar bersih minimalis persona 3 reload
             Rectangle {
                 anchors.fill: parent
                 visible: PhantomState.isP3
@@ -322,7 +322,6 @@ Scope {
                 border.width: 1
                 clip: true
 
-                // garis aksen biru cyan di atas kartu
                 Rectangle {
                     anchors.top: parent.top
                     anchors.left: parent.left
@@ -331,7 +330,6 @@ Scope {
                     color: "#00dbff"
                 }
 
-                // gelombang laut halus persona 3 di latar kartu
                 Item {
                     id: sessionWaves
                     anchors.fill: parent
@@ -376,7 +374,6 @@ Scope {
                 }
             }
 
-            // bingkai luar miring dengan bayangan berlapis (P5)
             P5SkewedCard {
                 anchors.fill: parent
                 visible: !PhantomState.isP3
@@ -389,7 +386,6 @@ Scope {
                 shadowOffsetY: 9
             }
 
-            // dekorasi garis miring dan bintang besar di dalam kartu (P5)
             Item {
                 anchors.fill: parent
                 anchors.margins: 6
@@ -445,12 +441,10 @@ Scope {
                 anchors.bottomMargin: 20
                 spacing: 14
 
-                // baris header atas dengan pita calling card / S.E.E.S. dan info sesi
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 12
 
-                    // ikon header (P3 S.E.E.S. target ring vs P5 Star)
                     Item {
                         Layout.preferredWidth: 38
                         Layout.preferredHeight: 38
@@ -535,7 +529,6 @@ Scope {
                         }
                     }
 
-                    // lencana identitas pengguna dan waktu aktif sistem
                     Item {
                         Layout.preferredWidth: 168
                         Layout.preferredHeight: 42
@@ -583,7 +576,6 @@ Scope {
                         }
                     }
 
-                    // tombol penutup jendela menu sesi
                     Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 42
@@ -626,7 +618,7 @@ Scope {
                     }
                 }
 
-                // deretan kartu tarot aksi sesi dan daya
+                // Action cards row
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -657,7 +649,6 @@ Scope {
                             Behavior on scale { NumberAnimation { duration: 170; easing.type: Easing.OutBack } }
                             Behavior on rotation { NumberAnimation { duration: 170; easing.type: Easing.OutCubic } }
 
-                            // kartu latar bersih Persona 3 Reload
                             Rectangle {
                                 anchors.fill: parent
                                 visible: PhantomState.isP3
@@ -669,7 +660,6 @@ Scope {
                                 border.width: cardDelegate.isHighlighted ? 2 : 1
                             }
 
-                            // kartu latar miring untuk setiap opsi aksi (P5)
                             P5SkewedCard {
                                 anchors.fill: parent
                                 visible: !PhantomState.isP3
@@ -682,7 +672,6 @@ Scope {
                                 shadowOffsetY: cardDelegate.isHighlighted ? 6 : 4
                             }
 
-                            // aksen diagonal internal pada kartu opsi (P5)
                             Canvas {
                                 anchors.fill: parent
                                 anchors.margins: 4
@@ -710,7 +699,6 @@ Scope {
                                 anchors.bottomMargin: 14
                                 spacing: 6
 
-                                // baris atas kode arcana dan pintasan angka
                                 RowLayout {
                                     Layout.fillWidth: true
                                     spacing: 4
@@ -758,13 +746,11 @@ Scope {
 
                                 Item { Layout.fillHeight: true }
 
-                                // emblem tengah dengan ikon aksi
                                 Item {
                                     Layout.alignment: Qt.AlignHCenter
                                     Layout.preferredWidth: 68
                                     Layout.preferredHeight: 68
 
-                                    // Diamond P5
                                     Rectangle {
                                         anchors.centerIn: parent
                                         visible: !PhantomState.isP3
@@ -785,7 +771,6 @@ Scope {
                                         }
                                     }
 
-                                    // Rect P3
                                     Rectangle {
                                         anchors.centerIn: parent
                                         visible: PhantomState.isP3
@@ -797,7 +782,6 @@ Scope {
                                         border.width: 1.5
                                     }
 
-                                    // Tampilkan iconpack Persona 3 jika ada
                                     Image {
                                         anchors.centerIn: parent
                                         visible: PhantomState.isP3 && cardDelegate.modelData.p3Icon !== ""
@@ -808,7 +792,6 @@ Scope {
                                         smooth: true
                                     }
 
-                                    // Tampilkan icon P5 umum jika bukan iconpack P3
                                     P5Icon {
                                         anchors.centerIn: parent
                                         visible: !PhantomState.isP3 || cardDelegate.modelData.p3Icon === ""
@@ -820,7 +803,6 @@ Scope {
 
                                 Item { Layout.fillHeight: true }
 
-                                // pita label utama dan deskripsi sub-aksi di bagian bawah kartu
                                 ColumnLayout {
                                     Layout.fillWidth: true
                                     spacing: 5
@@ -874,7 +856,7 @@ Scope {
                     }
                 }
 
-                // bilah informasi pintasan dan target aktif di bagian bawah
+                // Target and shortcut info footer
                 Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
@@ -937,7 +919,7 @@ Scope {
             }
         }
 
-        // ── Menu Jeda & Daya Layar Penuh Otentik Persona 3 Reload (P3rpause Engine) ──
+        // Fullscreen tactical pause menu
         Item {
             id: p3Overlay
             anchors.fill: parent
@@ -1207,7 +1189,6 @@ Scope {
                 PhantomState.refreshBluetooth()
             }
 
-            // Latar Biru Samudra Pekat (Hanya aktif saat stage >= 1, sehingga stage 0 transparan memperlihatkan desktop)
             Rectangle {
                 anchors.fill: parent
                 color: "#0048aa"
@@ -1215,7 +1196,6 @@ Scope {
                 z: 0
             }
 
-            // Poster Frame 0 Part 2 (Grounded underwater frame to eliminate decode flash)
             Image {
                 id: p3PosterPart2
                 anchors.fill: parent
@@ -1227,7 +1207,6 @@ Scope {
                 z: 1
             }
 
-            // Lapisan Poster Bawah Air Statis
             Image {
                 id: p3PosterBase
                 anchors.fill: parent
@@ -1239,7 +1218,7 @@ Scope {
                 z: 2
             }
 
-            // Stage 0: Animasi Shatter Kaca Intro (12 Frame - Optimized 8-bit PNG)
+            // Stage 0: Shatter intro animation (12 frames)
             Image {
                 id: p3PngSequence
                 anchors.fill: parent
@@ -1272,7 +1251,7 @@ Scope {
                 }
             }
 
-            // Stage 1: Video Animasi Makoto Yuki Tenggelam ke Bawah Air (1080p 60fps Pristine)
+            // Stage 1: Sinking animation video loop
             Video {
                 id: p3Part2Video
                 anchors.fill: parent
@@ -1311,7 +1290,7 @@ Scope {
                 }
             }
 
-            // Stage 2: Video Animasi Mengambang Terus Menerus di Bawah Air (1080p 60fps Pristine Ping-Pong Loop)
+            // Stage 2: Ambient underwater loop
             Video {
                 id: p3Part3Video
                 anchors.fill: parent
@@ -1333,7 +1312,6 @@ Scope {
                 }
             }
 
-            // Lapisan Poster Section Sub-Menu
             Image {
                 id: p3PosterSection
                 anchors.fill: parent
@@ -1345,7 +1323,6 @@ Scope {
                 z: 2
             }
 
-            // Video Animasi Section Sub-Menu (Options_60fps.mp4: S.E.E.S. 1080p 60fps Pristine Ping-Pong Loop)
             Video {
                 id: p3SectionVideo
                 anchors.fill: parent
@@ -1362,7 +1339,6 @@ Scope {
                 }
             }
 
-            // Video Animasi Section Stats/List (Resume_60fps.mp4: Makoto Yuki Headphone & Butterflies 1080p 60fps Pristine Ping-Pong Loop)
             Video {
                 id: p3StatsVideo
                 anchors.fill: parent
@@ -1379,7 +1355,6 @@ Scope {
                 }
             }
 
-            // Video Animasi Section System Config (skills_ambient.mp4: Makoto Evoker & Skills Geometric 60fps Loop)
             Video {
                 id: p3ConfigVideo
                 anchors.fill: parent
@@ -1396,7 +1371,6 @@ Scope {
                 }
             }
 
-            // Video Animasi Section Control Center (makoto_train_ambient.mp4: Makoto Yuki Monorail Train 60fps Loop)
             Video {
                 id: p3ControlVideo
                 anchors.fill: parent
@@ -1413,7 +1387,6 @@ Scope {
                 }
             }
 
-            // Video Animasi Section S.E.E.S. Archive (dorm_ambient.mp4: S.E.E.S. Squad Iwatodai Dormitory Dark Hour 60fps Loop)
             Video {
                 id: p3ArchiveVideo
                 anchors.fill: parent
@@ -1430,14 +1403,14 @@ Scope {
                 }
             }
 
-            // ── Pusat Menu Game Taktis Lengkap Beranak (S.E.E.S. Tactical Hub - Aktif langsung saat stage >= 1) ──
+            // Tactical hub navigation
             Item {
                 id: p3TacticalHub
                 anchors.fill: parent
                 visible: p3Overlay.stage >= 1
                 z: 10
 
-                // ── LEVEL 0: MENU UTAMA TINGKAT PERTAMA (Pola Polished Atlus Persona 3 Reload - 6 Menu Lengkap) ──
+                // Main menu (level 0)
                 Item {
                     id: p3MainMenuContainer
                     visible: p3Overlay.currentSection === "main"
@@ -1514,7 +1487,7 @@ Scope {
                     }
                 }
 
-                // ── LEVEL 1: SUB-MENU POWER / DISPATCH (3 Tombol Ikonik Asli P3) ──
+                // Power dispatch sub-menu
                 Item {
                     id: p3DispatchSubMenu
                     visible: p3Overlay.currentSection === "dispatch" || p3Overlay.currentSection === "power"
@@ -1558,7 +1531,6 @@ Scope {
                         }
                     }
 
-                    // Tombol Kembali ke Menu Utama Bergaya Atlus
                     Item {
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: -35
@@ -1605,7 +1577,7 @@ Scope {
                     }
                 }
 
-                // ── LEVEL 1: SUB-MENU METAVERSE ERAS (KARTU KARAKTER HERO) ──
+                // Timeline selector sub-menu
                 Item {
                     id: p3PaletteSubMenu
                     visible: p3Overlay.currentSection === "palette"
@@ -1651,7 +1623,6 @@ Scope {
                                     Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                                     Behavior on color { ColorAnimation { duration: 150 } }
 
-                                    // Garis Aksen Merah Atlus di Bagian Atas Saat Aktif / Hovered (Sesuai Foto 3)
                                     Rectangle {
                                         anchors.top: parent.top
                                         anchors.left: parent.left
@@ -1665,7 +1636,6 @@ Scope {
                                         anchors.fill: parent
                                         spacing: 0
 
-                                        // Badge Kiri (Role + Strip Wajah Karakter Sesuai Foto 3)
                                         Item {
                                             Layout.preferredWidth: 100
                                             Layout.fillHeight: true
@@ -1703,7 +1673,6 @@ Scope {
                                             }
                                         }
 
-                                        // Body Kartu (Teks & Status)
                                         Item {
                                             Layout.fillWidth: true
                                             Layout.fillHeight: true
@@ -1778,7 +1747,6 @@ Scope {
                             }
                         }
 
-                        // Tombol Kembali Bergaya Atlus (Rata Kiri)
                         Item {
                             Layout.preferredWidth: 260
                             Layout.preferredHeight: 46
@@ -1824,7 +1792,7 @@ Scope {
                     }
                 }
 
-                // ── LEVEL 1: SUB-MENU STATS / LIST (PURE HARDWARE & SYSTEM TELEMETRY) ──
+                // Hardware & telemetry sub-menu
                 Item {
                     id: p3StatsSubMenu
                     visible: p3Overlay.currentSection === "stats"
@@ -1837,7 +1805,6 @@ Scope {
                         { badge: "IV",  title: "GPU & Displays",   subtitle: "Graphics Pipeline & Wayland HUD", rank: "IX" }
                     ]
 
-                    // Kolom Kiri: Judul "LIST", 4 Kartu Rank P3, dan Tombol Kembali
                     Item {
                         anchors.left: parent.left
                         anchors.leftMargin: 60
@@ -1880,7 +1847,6 @@ Scope {
                                         onPaint: {
                                             var ctx = getContext("2d");
                                             ctx.clearRect(0, 0, width, height);
-                                            // Kartu Poligon Miring P3
                                             ctx.beginPath();
                                             ctx.moveTo(0, 0);
                                             ctx.lineTo(width * 0.96, 0);
@@ -1895,7 +1861,6 @@ Scope {
                                                 ctx.stroke();
                                             }
 
-                                            // Bayangan bawah tebal
                                             ctx.beginPath();
                                             ctx.moveTo(width * 0.03, height);
                                             ctx.lineTo(width, height);
@@ -1918,7 +1883,6 @@ Scope {
                                         }
                                     }
 
-                                    // Lencana Angka Romawi Miring (I s.d. IV) - Render via Canvas Anti-Aliased Halus Mulus
                                     Item {
                                         x: -10
                                         y: 2
@@ -1980,7 +1944,6 @@ Scope {
                                         }
                                     }
 
-                                    // Judul Kategori
                                     Text {
                                         anchors.left: parent.left
                                         anchors.leftMargin: 52
@@ -1993,7 +1956,6 @@ Scope {
                                         color: cardWrap.isActive ? "#041238" : (cardWrap.isHovered ? "#ffffff" : "#8df6ff")
                                     }
 
-                                    // Badge Rank di Kanan Atas
                                     Row {
                                         anchors.right: parent.right
                                         anchors.rightMargin: 18
@@ -2019,7 +1981,6 @@ Scope {
                                         }
                                     }
 
-                                    // Banner Subtitle Miring di Bagian Bawah Kartu
                                     Canvas {
                                         id: subtitleCanvas
                                         anchors.left: parent.left
@@ -2078,7 +2039,6 @@ Scope {
                             }
                         }
 
-                        // Tombol Kembali ke Menu Utama
                         Item {
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: 4
@@ -2126,7 +2086,6 @@ Scope {
                         }
                     }
 
-                    // Kolom Kanan: Detail Panel Kaca P3 (Sesuai Foto 1 & P3R Asli)
                     Rectangle {
                         id: statsDetailPanel
                         anchors.right: parent.right
@@ -2140,7 +2099,6 @@ Scope {
                         border.width: 1
                         clip: true
 
-                        // Banner Header Detail Slanted Cyan (Sesuai Foto 1)
                         Canvas {
                             id: statsDetailHeaderCanvas
                             anchors.top: parent.top
@@ -2185,7 +2143,6 @@ Scope {
                             }
                         }
 
-                        // Isi Konten Tab Hardware Telemetry
                         Item {
                             anchors.top: statsDetailHeaderCanvas.bottom
                             anchors.bottom: parent.bottom
@@ -2193,7 +2150,7 @@ Scope {
                             anchors.right: parent.right
                             anchors.topMargin: 4
 
-                            // ── TAB 0: CORE TELEMETRY ──
+                            // Tab 0: Core telemetry
                             Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 0
@@ -2233,7 +2190,7 @@ Scope {
                                 }
                             }
 
-                            // ── TAB 1: MEMORY & STORAGE ──
+                            // Tab 1: Memory & storage
                             Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 1
@@ -2269,7 +2226,7 @@ Scope {
                                 }
                             }
 
-                            // ── TAB 2: THERMALS & POWER ──
+                            // Tab 2: Thermals & power
                             Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 2
@@ -2301,7 +2258,7 @@ Scope {
                                 }
                             }
 
-                            // ── TAB 3: GPU & DISPLAYS ──
+                            // Tab 3: GPU & displays
                             Column {
                                 anchors.fill: parent
                                 visible: p3Overlay.statsTab === 3
@@ -2336,7 +2293,7 @@ Scope {
                     }
                 }
 
-                // ── LEVEL 1: SUB-MENU SYSTEM CONFIG (Bar & Desktop, Sound Engine, Hyprland FX, Rules, Binds, Monitors) ──
+                // System configuration sub-menu
                 Item {
                     id: p3ConfigSubMenu
                     visible: p3Overlay.currentSection === "config"
@@ -2351,7 +2308,6 @@ Scope {
                         { badge: "VI",  title: "Displays & Monitors",    subtitle: "Resolutions, InFocus Mirror & Scaling",  rank: "III" }
                     ]
 
-                    // Kolom Kiri: Judul "CONFIG", 6 Kartu Slanted P3, dan Tombol Kembali
                     Item {
                         anchors.left: parent.left
                         anchors.leftMargin: 60
@@ -2428,7 +2384,6 @@ Scope {
                                         }
                                     }
 
-                                    // Badge Angka Romawi Miring (I, II, III, IV, V, VI)
                                     Item {
                                         anchors.left: parent.left
                                         anchors.leftMargin: 12
@@ -2473,7 +2428,6 @@ Scope {
                                         }
                                     }
 
-                                    // Judul Kategori
                                     Text {
                                         anchors.left: parent.left
                                         anchors.leftMargin: 48
@@ -2486,7 +2440,6 @@ Scope {
                                         color: cfgCardWrap.isActive ? "#041238" : (cfgCardWrap.isHovered ? "#ffffff" : "#8df6ff")
                                     }
 
-                                    // Badge Rank di Kanan Atas
                                     Row {
                                         anchors.right: parent.right
                                         anchors.rightMargin: 16
@@ -2512,7 +2465,6 @@ Scope {
                                         }
                                     }
 
-                                    // Banner Subtitle Miring di Bagian Bawah Kartu
                                     Canvas {
                                         id: cfgSubtitleCanvas
                                         anchors.left: parent.left
@@ -2571,7 +2523,6 @@ Scope {
                             }
                         }
 
-                        // Tombol Kembali ke Menu Utama
                         Item {
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: 4
@@ -2623,7 +2574,6 @@ Scope {
                         }
                     }
 
-                    // Kolom Kanan: Detail Panel Kaca P3
                     Rectangle {
                         id: cfgDetailPanel
                         anchors.right: parent.right
@@ -2637,7 +2587,6 @@ Scope {
                         border.width: 1
                         clip: true
 
-                        // Form states untuk Window Rules & Keybinds
                         property string newRuleClass: ""
                         property string newRuleWs: "1"
                         property bool newRuleFloat: false
@@ -2683,7 +2632,6 @@ Scope {
                             detectMonitorsProc.running = true
                         }
 
-                        // Banner Header Detail Slanted Cyan
                         Canvas {
                             id: cfgDetailHeaderCanvas
                             anchors.top: parent.top
@@ -2733,7 +2681,6 @@ Scope {
                             }
                         }
 
-                        // Isi Pengaturan Tiap Tab dengan Flickable scroll
                         Flickable {
                             id: cfgFlickable
                             anchors.top: cfgDetailHeaderCanvas.bottom
@@ -2763,7 +2710,7 @@ Scope {
                                 width: cfgFlickable.width - (cfgFlickable.contentHeight > cfgFlickable.height ? 10 : 0)
                                 spacing: 4
 
-                                // ── TAB 0: DESKTOP & ATMOSPHERE ──
+                                // Tab 0: Desktop & atmosphere
                                 Column {
                                     width: parent.width
                                     visible: p3Overlay.configTab === 0
@@ -2832,7 +2779,7 @@ Scope {
                                     }
                                 }
 
-                                // ── TAB 1: SOUND ENGINE ──
+                                // Tab 1: Sound engine
                                 Column {
                                     width: parent.width
                                     visible: p3Overlay.configTab === 1
@@ -2877,7 +2824,7 @@ Scope {
                                     }
                                 }
 
-                                // ── TAB 2: HYPRLAND COMPOSITOR ──
+                                // Tab 2: Hyprland compositor
                                 Column {
                                     width: parent.width
                                     visible: p3Overlay.configTab === 2
@@ -2954,13 +2901,12 @@ Scope {
                                     }
                                 }
 
-                                // ── TAB 3: WINDOW RULES DISPATCH ──
+                                // Tab 3: Window rules dispatch
                                 Column {
                                     width: parent.width
                                     visible: p3Overlay.configTab === 3
                                     spacing: 8
 
-                                    // Form Input Rule
                                     Rectangle {
                                         width: parent.width
                                         height: ruleFormCol.implicitHeight + 18
@@ -2985,7 +2931,6 @@ Scope {
                                                 font.weight: Font.Black
                                             }
 
-                                            // Row Input App Class + Tombol Detect
                                             Row {
                                                 width: parent.width
                                                 spacing: 8
@@ -3054,7 +2999,6 @@ Scope {
                                                 }
                                             }
 
-                                            // Row Target Workspace Selector
                                             Row {
                                                 spacing: 6
                                                 Text {
@@ -3101,7 +3045,6 @@ Scope {
                                                 }
                                             }
 
-                                            // Row Flags: Float & Center & Add Rule
                                             Row {
                                                 width: parent.width
                                                 spacing: 8
@@ -3195,7 +3138,6 @@ Scope {
                                                 }
                                             }
 
-                                            // Quick Presets
                                             Row {
                                                 spacing: 6
                                                 Text {
@@ -3249,7 +3191,6 @@ Scope {
                                         }
                                     }
 
-                                    // Header Daftar Rules Aktif
                                     Text {
                                         text: "ACTIVE CONFIGURED RULES (" + (PhantomState.customWindowRules ? PhantomState.customWindowRules.length : 0) + ")"
                                         color: "#00dbff"
@@ -3259,7 +3200,6 @@ Scope {
                                         topPadding: 4
                                     }
 
-                                    // List Active Rules
                                     Repeater {
                                         model: PhantomState.customWindowRules
                                         delegate: Rectangle {
@@ -3396,13 +3336,12 @@ Scope {
                                     }
                                 }
 
-                                // ── TAB 4: CUSTOM KEYBINDS ──
+                                // Tab 4: Custom keybinds
                                 Column {
                                     width: parent.width
                                     visible: p3Overlay.configTab === 4
                                     spacing: 8
 
-                                    // Form Input Keybind
                                     Rectangle {
                                         width: parent.width
                                         height: bindFormCol.implicitHeight + 18
@@ -3427,7 +3366,6 @@ Scope {
                                                 font.weight: Font.Black
                                             }
 
-                                            // Row Input Key Combo
                                             Row {
                                                 width: parent.width
                                                 spacing: 8
@@ -3477,7 +3415,6 @@ Scope {
                                                 }
                                             }
 
-                                            // Row Input Command
                                             Row {
                                                 width: parent.width
                                                 spacing: 8
@@ -3527,7 +3464,6 @@ Scope {
                                                 }
                                             }
 
-                                            // Row Input Description + Add Button
                                             Row {
                                                 width: parent.width
                                                 spacing: 8
@@ -3613,7 +3549,6 @@ Scope {
                                         }
                                     }
 
-                                    // Header Daftar Keybinds Aktif
                                     Text {
                                         text: "ACTIVE CONFIGURED KEYBINDS (" + (PhantomState.customKeybinds ? PhantomState.customKeybinds.length : 0) + ")"
                                         color: "#00dbff"
@@ -3623,7 +3558,6 @@ Scope {
                                         topPadding: 4
                                     }
 
-                                    // List Active Keybinds
                                     Repeater {
                                         model: PhantomState.customKeybinds
                                         delegate: Rectangle {
@@ -3729,7 +3663,7 @@ Scope {
                                     }
                                 }
 
-                                // ── TAB 5: DISPLAYS & MONITORS ──
+                                // Tab 5: Displays & monitors
                                 Column {
                                     width: parent.width
                                     visible: p3Overlay.configTab === 5
@@ -3848,13 +3782,12 @@ Scope {
                     }
                 }
 
-                // ── LEVEL 1: SUB-MENU CONTROL CENTER (S.E.E.S. Tactical Deck) ──
+                // Control center sub-menu
                 Item {
                     id: p3ControlCenterSubMenu
                     visible: p3Overlay.currentSection === "control"
                     anchors.fill: parent
 
-                    // Header Atlus Persona 3 (Left-docked)
                     Item {
                         anchors.top: parent.top
                         anchors.topMargin: 40
@@ -3912,7 +3845,6 @@ Scope {
                         }
                     }
 
-                    // Content Container (Left-Docked Deck)
                     Item {
                         anchors.left: parent.left
                         anchors.leftMargin: 80
@@ -3921,14 +3853,12 @@ Scope {
                         width: 740
                         height: 560
 
-                        // Dual Live Sliders Deck (Volume & Brightness)
                         Row {
                             id: slidersRow
                             anchors.top: parent.top
                             anchors.left: parent.left
                             spacing: 20
 
-                            // 1. Master Audio Volume Deck
                             Rectangle {
                                 width: 360
                                 height: 100
@@ -3971,7 +3901,6 @@ Scope {
                                     }
                                 }
 
-                                // Interactive Progress Track
                                 Rectangle {
                                     id: volTrack
                                     anchors.bottom: parent.bottom
@@ -4011,7 +3940,6 @@ Scope {
                                     }
                                 }
 
-                                // Mute Button
                                 Rectangle {
                                     anchors.bottom: parent.bottom
                                     anchors.bottomMargin: 14
@@ -4044,7 +3972,6 @@ Scope {
                                 }
                             }
 
-                            // 2. Display Brightness Deck
                             Rectangle {
                                 width: 360
                                 height: 100
@@ -4087,7 +4014,6 @@ Scope {
                                     }
                                 }
 
-                                // Interactive Brightness Track
                                 Rectangle {
                                     id: brightTrack
                                     anchors.bottom: parent.bottom
@@ -4129,7 +4055,6 @@ Scope {
                             }
                         }
 
-                        // S.E.E.S. 8 Tactical Action Cards (2 rows x 4 cols)
                         Grid {
                             id: tacticalActionsGrid
                             anchors.top: slidersRow.bottom
@@ -4138,7 +4063,6 @@ Scope {
                             columns: 4
                             spacing: 16
 
-                            // Card 1: Do Not Disturb
                             P3TacticalActionBtn {
                                 width: 173
                                 height: 96
@@ -4152,7 +4076,6 @@ Scope {
                                 }
                             }
 
-                            // Card 2: Night Light / Blue Filter
                             P3TacticalActionBtn {
                                 width: 173
                                 height: 96
@@ -4165,7 +4088,6 @@ Scope {
                                 }
                             }
 
-                            // Card 3: Airplane Mode
                             P3TacticalActionBtn {
                                 width: 173
                                 height: 96
@@ -4180,7 +4102,6 @@ Scope {
                                 }
                             }
 
-                            // Card 4: Mic Mute
                             P3TacticalActionBtn {
                                 width: 173
                                 height: 96
@@ -4194,7 +4115,6 @@ Scope {
                                 }
                             }
 
-                            // Card 5: Screen Snip
                             P3TacticalActionBtn {
                                 width: 173
                                 height: 96
@@ -4208,7 +4128,6 @@ Scope {
                                 }
                             }
 
-                            // Card 6: Color Picker
                             P3TacticalActionBtn {
                                 width: 173
                                 height: 96
@@ -4222,7 +4141,6 @@ Scope {
                                 }
                             }
 
-                            // Card 7: Screen Mirror
                             P3TacticalActionBtn {
                                 width: 173
                                 height: 96
@@ -4235,7 +4153,6 @@ Scope {
                                 }
                             }
 
-                            // Card 8: Git Repo Sync
                             P3TacticalActionBtn {
                                 width: 173
                                 height: 96
@@ -4249,7 +4166,6 @@ Scope {
                             }
                         }
 
-                        // Tombol Kembali ke Menu Utama
                         Item {
                             anchors.top: tacticalActionsGrid.bottom
                             anchors.topMargin: 20
@@ -4296,13 +4212,12 @@ Scope {
                     }
                 }
 
-                // ── LEVEL 1: SUB-MENU S.E.E.S. ARCHIVE (About Dossier & Machine Architecture) ──
+                // Archive & about sub-menu
                 Item {
                     id: p3ArchiveSubMenu
                     visible: p3Overlay.currentSection === "archive"
                     anchors.fill: parent
 
-                    // Header Atlus Persona 3
                     Item {
                         anchors.top: parent.top
                         anchors.topMargin: 40
@@ -4357,7 +4272,6 @@ Scope {
                         }
                     }
 
-                    // Content Container (Dual Tactical Cards)
                     Item {
                         anchors.centerIn: parent
                         anchors.verticalCenterOffset: 30
@@ -4369,7 +4283,6 @@ Scope {
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 30
 
-                            // 1. Project Dossier Card (Left)
                             Rectangle {
                                 width: 505
                                 height: 420
@@ -4424,7 +4337,6 @@ Scope {
                                 }
                             }
 
-                            // 2. Hardware & Host Telemetry Card (Right)
                             Rectangle {
                                 width: 505
                                 height: 420
@@ -4480,14 +4392,12 @@ Scope {
                             }
                         }
 
-                        // Bottom Actions Row (Refresh Specs, Open Dotfiles, Git Update, Return)
                         Row {
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: 0
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 16
 
-                            // Refresh Specs Button
                             Rectangle {
                                 width: 220
                                 height: 42
@@ -4516,7 +4426,6 @@ Scope {
                                 }
                             }
 
-                            // Open Dotfiles Button
                             Rectangle {
                                 width: 220
                                 height: 42
@@ -4545,7 +4454,6 @@ Scope {
                                 }
                             }
 
-                            // Check Updates Button
                             Rectangle {
                                 width: 220
                                 height: 42
@@ -4574,7 +4482,6 @@ Scope {
                                 }
                             }
 
-                            // Return Button
                             Rectangle {
                                 width: 220
                                 height: 42
@@ -4606,7 +4513,7 @@ Scope {
                     }
                 }
 
-                // ── MODAL KONFIRMASI PEMILIHAN TEMA BERGAYA ASLI ATLUS (Foto 4) ──
+                // Theme confirmation modal
                 Item {
                     id: p3ThemeConfirmModal
                     anchors.fill: parent
@@ -4617,7 +4524,6 @@ Scope {
 
                     readonly property var currentThemeData: p3Overlay.p3ThemesData[p3Overlay.selectedThemeIndex] || p3Overlay.p3ThemesData[0]
 
-                    // Latar Redup / Dimming
                     Rectangle {
                         anchors.fill: parent
                         color: "#a0020716"
@@ -4631,7 +4537,6 @@ Scope {
                         }
                     }
 
-                    // SISI KANAN: Hero Character Full Portrait Showcase (Makoto / Ren / Yu)
                     Item {
                         id: confirmPortraitShell
                         anchors.top: parent.top
@@ -4674,7 +4579,6 @@ Scope {
                             }
                         ]
 
-                        // Gambar Karakter Asli Atlus (Makoto All-Out Attack, Ren ArtStation, Yu Yasogami)
                         Image {
                             anchors.fill: parent
                             source: confirmPortraitShell.parent.currentThemeData.heroPortrait
@@ -4685,7 +4589,6 @@ Scope {
                         }
                     }
 
-                    // SISI KIRI: Panel Kartu Skewed Atlus (-20 Derajat, Full Width Melintasi Bawah Karakter Sesuai Foto 2/5)
                     Item {
                         id: confirmRevealPanel
                         x: -parent.width * 0.08
@@ -4724,7 +4627,6 @@ Scope {
                             }
                         ]
 
-                        // Latar Belakang Kartu Gradasi Persona (Sesuai Persona 3 Reload Asli)
                         Rectangle {
                             anchors.fill: parent
                             gradient: Gradient {
@@ -4735,7 +4637,6 @@ Scope {
                             border.width: 1
                         }
 
-                        // Garis Aksen Atas (Theme Accent Color)
                         Rectangle {
                             anchors.top: parent.top
                             anchors.left: parent.left
@@ -4744,7 +4645,6 @@ Scope {
                             color: "#e60012"
                         }
 
-                        // Tab Bar Navigasi 3 Timeline (P3 / P5 / P4)
                         Row {
                             id: confirmTabRow
                             anchors.top: parent.top
@@ -4797,7 +4697,6 @@ Scope {
                             }
                         }
 
-                        // Area Tengah: Judul & Deskripsi Cerita Persona (FULL WIDTH ke kanan, Tinggi 65% Sesuai Foto 5)
                         Rectangle {
                             id: confirmUpperBar
                             anchors.top: confirmTabRow.bottom
@@ -4851,7 +4750,6 @@ Scope {
                             }
                         }
 
-                        // Tombol Aksi Konfirmasi (Apply / Return)
                         Row {
                             anchors.top: confirmUpperBar.bottom
                             anchors.topMargin: 16
@@ -4859,7 +4757,6 @@ Scope {
                             anchors.leftMargin: 480
                             spacing: 16
 
-                            // Tombol Eksekusi / Apply
                             Rectangle {
                                 width: 230
                                 height: 44
@@ -4895,7 +4792,6 @@ Scope {
                                 }
                             }
 
-                            // Tombol Batal / Return
                             Rectangle {
                                 width: 140
                                 height: 44
@@ -4931,7 +4827,7 @@ Scope {
                 }
             }
 
-            // ── ANIMASI TRANSISI MULTI-BAR SKYSCRAPER SKEWED (P3rTransition2 Asli Atlus) ──
+            // Skyscraper multi-bar transition animation
             Item {
                 id: p3WipeTransition
                 anchors.fill: parent
@@ -5083,7 +4979,7 @@ Scope {
                 }
             }
 
-            // ── ANIMASI TRANSISI STATS (P3R Vertical Ribbon Bands Swipe: Cyan, Blue, Solid Navy Sesuai Foto 2 & 3) ──
+            // Vertical ribbon wipe transition
             Item {
                 id: p3StatsTransition
                 anchors.fill: parent
@@ -5102,7 +4998,6 @@ Scope {
                     statsRibbonWipeAnim.restart()
                 }
 
-                // Band 1 (Bawah): Cyan (#7dd5fc) - memimpin sapuan ke kanan
                 Rectangle {
                     id: bandCyan
                     anchors.top: parent.top
@@ -5113,7 +5008,6 @@ Scope {
                     z: 1
                 }
 
-                // Band 2 (Tengah): Blue (#1b6afe) - menyusul di belakang cyan
                 Rectangle {
                     id: bandBlue
                     anchors.top: parent.top
@@ -5124,7 +5018,6 @@ Scope {
                     z: 2
                 }
 
-                // Band 3 (Atas): Deep Navy (#071330) - menyusul dan menutup layar penuh
                 Rectangle {
                     id: bandNavy
                     anchors.top: parent.top
@@ -5139,8 +5032,6 @@ Scope {
                     id: statsRibbonWipeAnim
                     running: false
 
-                    // Fase 1: Sapuan Masuk dari Kiri ke Kanan (Wipe In)
-                    // Cyan paling cepat mencapai ujung kanan, Blue menyusul, Navy menutup layar penuh (Foto 3 & Foto 2)
                     ParallelAnimation {
                         NumberAnimation {
                             target: bandCyan
@@ -5168,18 +5059,15 @@ Scope {
                         }
                     }
 
-                    // Section Swap terjadi saat layar 100% tertutup rapat oleh Deep Navy (Foto 2)
+                    // Swap section when screen is fully occluded
                     ScriptAction {
                         script: {
                             p3Overlay.currentSection = p3Overlay.targetSection
                         }
                     }
 
-                    // Hold singkat untuk decode video Resume_60fps.mp4 frame 0
                     PauseAnimation { duration: 70 }
 
-                    // Fase 2: Sapuan Keluar ke Kanan (Wipe Out)
-                    // Navy bergerak ke kanan lebih dulu mengungkap Blue, lalu Cyan, lalu menu Stats
                     ParallelAnimation {
                         NumberAnimation {
                             target: bandNavy
@@ -5216,7 +5104,7 @@ Scope {
                 }
             }
 
-            // ── ANIMASI TRANSISI CONFIG (Diagonal Shard Slash: Razor Blade & Splitting Geometric Shards) ──
+            // Diagonal shard slash transition
             Item {
                 id: p3ConfigTransition
                 anchors.fill: parent
@@ -5237,7 +5125,6 @@ Scope {
                     configSlashAnim.restart()
                 }
 
-                // Shard Top-Right
                 Rectangle {
                     id: slashShardTop
                     width: parent.width * 1.6
@@ -5249,7 +5136,6 @@ Scope {
                     z: 2
                 }
 
-                // Shard Bottom-Left
                 Rectangle {
                     id: slashShardBottom
                     width: parent.width * 1.6
@@ -5261,7 +5147,6 @@ Scope {
                     z: 2
                 }
 
-                // Neon Slash Cutting Line
                 Rectangle {
                     id: slashLine
                     width: parent.width * 2
@@ -5273,7 +5158,6 @@ Scope {
                     z: 3
                 }
 
-                // Flash curtain
                 Rectangle {
                     id: slashFlash
                     anchors.fill: parent
@@ -5316,7 +5200,7 @@ Scope {
                 }
             }
 
-            // ── ANIMASI TRANSISI CONTROL CENTER (Sonar Radar Ripple: Expanding Concentric Tactical Rings) ──
+            // Sonar ripple transition
             Item {
                 id: p3ControlTransition
                 anchors.fill: parent
@@ -5441,7 +5325,7 @@ Scope {
                 }
             }
 
-            // ── ANIMASI TRANSISI ARCHIVE (Vertical Blinds Scan: Top-to-Bottom Shutter Drop & Cyber Laser Scan) ──
+            // Vertical blinds scan transition
             Item {
                 id: p3ArchiveTransition
                 anchors.fill: parent
@@ -5460,7 +5344,6 @@ Scope {
                     archiveScanAnim.restart()
                 }
 
-                // Vertical Shutter 1: Deep Navy
                 Rectangle {
                     id: shutterNavy
                     anchors.left: parent.left
@@ -5471,7 +5354,6 @@ Scope {
                     z: 1
                 }
 
-                // Vertical Shutter 2: Cobalt Steel
                 Rectangle {
                     id: shutterSteel
                     anchors.left: parent.left
@@ -5482,7 +5364,6 @@ Scope {
                     z: 2
                 }
 
-                // Scanning Laser Line
                 Rectangle {
                     id: scanLaser
                     anchors.left: parent.left
@@ -5523,7 +5404,7 @@ Scope {
                 }
             }
 
-            // Klik latar kosong untuk menutup menu jeda (dinonaktifkan di mode P3 agar tidak keluar saat missclick)
+            // Click outside dismiss handler (disabled in P3 mode)
             MouseArea {
                 anchors.fill: parent
                 enabled: !PhantomState.isP3
@@ -5633,7 +5514,6 @@ Scope {
             elide: Text.ElideRight
         }
 
-        // Slanted Parallelogram Badge Khas Persona 3 Reload (Sesuai Foto 1)
         Item {
             id: badgeShell
             anchors.right: parent.right
@@ -5690,7 +5570,6 @@ Scope {
             }
         }
 
-        // Garis Pembatas Halus Antar Baris
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
@@ -5743,7 +5622,6 @@ Scope {
             }
         }
 
-        // Active LED dot indicator
         Rectangle {
             anchors.top: parent.top
             anchors.topMargin: 10
@@ -5757,7 +5635,6 @@ Scope {
             border.width: 1
         }
 
-        // Glyph Icon
         Text {
             anchors.top: parent.top
             anchors.topMargin: 12
@@ -5769,7 +5646,6 @@ Scope {
             color: actionBtnRoot.isToggled ? "#00ffff" : (actionBtnRoot.isHovered ? "#ffffff" : "#8df6ff")
         }
 
-        // Title
         Text {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 24
@@ -5785,7 +5661,6 @@ Scope {
             elide: Text.ElideRight
         }
 
-        // Subtitle
         Text {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 10

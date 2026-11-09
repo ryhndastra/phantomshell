@@ -124,7 +124,6 @@ Scope {
             }
         }
 
-        // Latar Gelap Semi-Transparan
         Rectangle {
             anchors.fill: parent
             color: "#D0020716"
@@ -147,7 +146,6 @@ Scope {
                 NumberAnimation { target: sheetCard; property: "opacity"; from: 0.0; to: 1.0; duration: 160; easing.type: Easing.OutCubic }
             }
 
-            // Bingkai Kartu Taktikal S.E.E.S. Modern (Bebas Skew P5)
             Rectangle {
                 anchors.fill: parent
                 color: "#F203091C"
@@ -155,7 +153,6 @@ Scope {
                 border.width: 1.8
                 radius: 8
 
-                // Aksen Garis Biru Taktikal di Sudut
                 Rectangle { anchors.top: parent.top; anchors.left: parent.left; width: 34; height: 3; color: "#00f0ff" }
                 Rectangle { anchors.top: parent.top; anchors.left: parent.left; width: 3; height: 34; color: "#00f0ff" }
                 Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: 34; height: 3; color: "#00f0ff" }
@@ -169,9 +166,7 @@ Scope {
                 anchors.margins: 20
                 spacing: 12
 
-                // -------------------------------------------------------------
-                // 1. BARIS HEADER & PENCARIAN
-                // -------------------------------------------------------------
+                // Header and search bar
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 12
@@ -215,7 +210,6 @@ Scope {
 
                     Item { Layout.fillWidth: true }
 
-                    // Kotak Input Pencarian
                     Rectangle {
                         Layout.preferredWidth: 260
                         Layout.preferredHeight: 32
@@ -271,7 +265,6 @@ Scope {
                                 }
                             }
 
-                            // Tombol Bersihkan Pencarian
                             Text {
                                 visible: searchInput.text.length > 0
                                 text: "✕"
@@ -290,7 +283,6 @@ Scope {
                         }
                     }
 
-                    // Tombol Tutup [ESC]
                     Rectangle {
                         Layout.preferredWidth: 32
                         Layout.preferredHeight: 32
@@ -317,9 +309,7 @@ Scope {
                     }
                 }
 
-                // -------------------------------------------------------------
-                // 2. BARIS TAB KATEGORI
-                // -------------------------------------------------------------
+                // Category tabs
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 6
@@ -360,9 +350,7 @@ Scope {
                     Item { Layout.fillWidth: true }
                 }
 
-                // -------------------------------------------------------------
-                // 3. DAFTAR KARTU SHORTCUT 2 KOLOM
-                // -------------------------------------------------------------
+                // Shortcuts list
                 Flickable {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -396,7 +384,6 @@ Scope {
                                     anchors.rightMargin: 10
                                     spacing: 8
 
-                                    // Lencana Tombol Keybind
                                     Rectangle {
                                         width: kTxt.implicitWidth + 14
                                         height: 20
@@ -416,7 +403,6 @@ Scope {
                                         }
                                     }
 
-                                    // Deskripsi Aksi
                                     Text {
                                         Layout.fillWidth: true
                                         text: modelData.act
@@ -427,7 +413,6 @@ Scope {
                                         elide: Text.ElideRight
                                     }
 
-                                    // Kategori
                                     Text {
                                         text: modelData.cat
                                         color: "#4A6E9E"

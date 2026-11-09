@@ -11,7 +11,7 @@ Scope {
     Variants {
         model: Quickshell.screens
 
-        // bingkai layar opsional + efek transisi tebasan diagonal ala persona 5 waktu ganti tema / wallpaper
+        // Optional screen frame and theme transition overlay.
         PanelWindow {
             id: frameWin
             required property ShellScreen modelData
@@ -40,7 +40,7 @@ Scope {
 
             SequentialAnimation {
                 id: p3SplashSequence
-                // Tahap 1: Semburan air menerjang ke depan hingga mentok (Forward: Frame 0 -> 11, ~320ms)
+                // Forward splash sweep (frames 0 -> 11)
                 NumberAnimation {
                     target: frameWin
                     property: "p3SplashProg"
@@ -49,7 +49,7 @@ Scope {
                     duration: 320
                     easing.type: Easing.InQuad
                 }
-                // Titik Puncak: Layar tertutup air 100% penuh -> Ganti tema di balik tirai air
+                // Swap theme at full cover
                 ScriptAction {
                     script: {
                         if (PhantomState.pendingPresetId) {
@@ -58,8 +58,8 @@ Scope {
                         }
                     }
                 }
-                PauseAnimation { duration: 50 } // Tahan 50ms saat deburan ombak membentur mentok
-                // Tahap 2: Air surut / di-reverse kembali secara mulus (Reverse: Frame 11 -> 0, ~360ms)
+                PauseAnimation { duration: 50 }
+                // Reverse splash sweep (frames 11 -> 0)
                 NumberAnimation {
                     target: frameWin
                     property: "p3SplashProg"
@@ -192,9 +192,7 @@ Scope {
                 }
             }
 
-            // ==========================================
-            // P3 RELOAD AMBUSH / DUAL KATANA SLASH & CRYSTAL SHATTER
-            // ==========================================
+            // Katana slash & crystal shatter transition sequence
             property bool p3AmbushActive: false
             property real p3SlashTrail1: 0.0
             property real p3SlashTrail2: 0.0
@@ -206,9 +204,8 @@ Scope {
             SequentialAnimation {
                 id: p3AmbushAnim
 
-                // Tahap 1: Tebasan Ganda Menyilang (Katana Dual Cross-Slash, 220ms)
+                // Phase 1: dual cross-slash (220ms)
                 ParallelAnimation {
-                    // Sabetan 1 (Kiri-Atas ke Kanan-Bawah)
                     NumberAnimation {
                         target: frameWin
                         property: "p3SlashTrail1"
@@ -217,7 +214,6 @@ Scope {
                         duration: 190
                         easing.type: Easing.OutQuad
                     }
-                    // Sabetan 2 (Kanan-Atas ke Kiri-Bawah, sedikit offset)
                     SequentialAnimation {
                         PauseAnimation { duration: 30 }
                         NumberAnimation {
@@ -231,7 +227,7 @@ Scope {
                     }
                 }
 
-                // Titik Tabrakan / Impact Silang: Wallpaper berganti di balik kilatan cahaya putih & cyan!
+                // Midpoint impact: switch wallpaper behind the flash
                 ScriptAction {
                     script: {
                         frameWin.p3FlashAlpha = 0.90
@@ -239,9 +235,8 @@ Scope {
                     }
                 }
 
-                // Tahap 2: Ledakan Kristal Es & Kaca, Bintang Flare, dan Semburan Air (~700ms)
+                // Phase 2: glass shatter & particle burst (~700ms)
                 ParallelAnimation {
-                    // Flash menyala lalu melarut lembut
                     NumberAnimation {
                         target: frameWin
                         property: "p3FlashAlpha"
@@ -250,7 +245,6 @@ Scope {
                         duration: 320
                         easing.type: Easing.OutQuad
                     }
-                    // Flare bintang di titik potong memuai dan memudar
                     SequentialAnimation {
                         NumberAnimation {
                             target: frameWin
@@ -270,7 +264,6 @@ Scope {
                             easing.type: Easing.OutQuad
                         }
                     }
-                    // 54 Shards kristal kaca & es meledak ke segala penjuru
                     NumberAnimation {
                         target: frameWin
                         property: "p3ShardProg"
@@ -279,7 +272,6 @@ Scope {
                         duration: 680
                         easing.type: Easing.OutCubic
                     }
-                    // Cincin gelombang kejut air meluas
                     NumberAnimation {
                         target: frameWin
                         property: "p3RippleScale"
@@ -288,7 +280,6 @@ Scope {
                         duration: 600
                         easing.type: Easing.OutQuad
                     }
-                    // Ekor energi kedua tebasan memudar dan melarut
                     NumberAnimation {
                         target: frameWin
                         property: "p3SlashTrail1"
@@ -307,7 +298,6 @@ Scope {
                     }
                 }
 
-                // Selesai: Reset state
                 ScriptAction {
                     script: {
                         frameWin.p3AmbushActive = false
@@ -334,9 +324,7 @@ Scope {
                 p3AmbushAnim.restart()
             }
 
-            // ==========================================
-            // P3 RELOAD SHADOW DEATH / APP CLOSE (MELELEH & HANGUS)
-            // ==========================================
+            // Shadow dissolve window-close sequence
             property bool p3DeathActive: false
             property real deathX: 50
             property real deathY: 50
@@ -410,9 +398,8 @@ Scope {
             SequentialAnimation {
                 id: p3ShadowDeathAnim
 
-                // Seketika meleleh runtuh ke bawah tanpa jeda (Zero-delay instant response)
+                // Dissolve animation sequence
                 ParallelAnimation {
-                    // Tubuh jendela mencair dan runtuh ke bawah seketika
                     NumberAnimation {
                         target: frameWin
                         property: "deathMelt"
@@ -421,7 +408,6 @@ Scope {
                         duration: 380
                         easing.type: Easing.InOutQuad
                     }
-                    // Efek bara api dan desis langsung memudar dari 1.0 ke 0.0
                     NumberAnimation {
                         target: frameWin
                         property: "deathBurn"
@@ -430,7 +416,6 @@ Scope {
                         duration: 320
                         easing.type: Easing.OutQuad
                     }
-                    // Genangan cairan hitam di lantai memuai lalu mendidih & menguap
                     SequentialAnimation {
                         PauseAnimation { duration: 40 }
                         NumberAnimation {
@@ -442,7 +427,6 @@ Scope {
                             easing.type: Easing.OutQuad
                         }
                     }
-                    // Asap hangus tipis mengepul di tepi lelehan lalu menguap halus
                     NumberAnimation {
                         target: frameWin
                         property: "deathSmoke"
@@ -453,7 +437,6 @@ Scope {
                     }
                 }
 
-                // Selesai
                 ScriptAction {
                     script: {
                         frameWin.p3DeathActive = false
@@ -560,13 +543,11 @@ Scope {
 
                     ctx.fillStyle = isVelvet ? "#060B1E" : PhantomState.background
 
-                    // strip garis batas tepi luar layar
                     ctx.fillRect(0, 0, w, t)
                     ctx.fillRect(0, h - t, w, t)
                     ctx.fillRect(0, t, t, h - t * 2)
                     ctx.fillRect(w - t, t, t, h - t * 2)
 
-                    // potongan segitiga di keempat sudut dalam
                     ctx.beginPath()
                     ctx.moveTo(t, t); ctx.lineTo(t + c, t); ctx.lineTo(t, t + c); ctx.closePath(); ctx.fill()
 
@@ -579,7 +560,6 @@ Scope {
                     ctx.beginPath()
                     ctx.moveTo(t, h - t); ctx.lineTo(t + c, h - t); ctx.lineTo(t, h - t - c); ctx.closePath(); ctx.fill()
 
-                    // garis aksen di sepanjang tepi dalam bingkai
                     ctx.strokeStyle = isVelvet ? "#60A5FA" : PhantomState.primary
                     ctx.lineWidth = isVelvet ? 2.0 : 1.5
                     ctx.beginPath()
@@ -596,7 +576,7 @@ Scope {
                 }
             }
 
-            // atmosfer dan indikator pasif saat berada di dalam velvet room (special workspace)
+            // Velvet room indicator overlay
             Item {
                 id: velvetAtmosphere
                 anchors.fill: parent
@@ -612,7 +592,6 @@ Scope {
                     NumberAnimation { duration: 240; easing.type: Easing.OutCubic }
                 }
 
-                // Garis aksen biru laut velvet di sudut kanan atas
                 Rectangle {
                     width: 240
                     height: 3
@@ -637,7 +616,6 @@ Scope {
                     opacity: 0.55
                 }
 
-                // Kartu panduan di tengah layar apabila belum ada jendela di dalam special workspace
                 Item {
                     anchors.centerIn: parent
                     width: 480
@@ -670,7 +648,6 @@ Scope {
                         anchors.centerIn: parent
                         spacing: 16
 
-                        // Dial Velvet Room
                         Item {
                             width: 40
                             height: 40
@@ -750,7 +727,6 @@ Scope {
                     }
                 }
 
-                // Lencana status velvet room di sudut kanan bawah layar
                 Item {
                     width: velvetCornerRow.implicitWidth + 24
                     height: 32
@@ -822,21 +798,19 @@ Scope {
                 }
             }
 
-            // overlay transisi velvet room (special workspace) ala Persona 3 Reload Sea of Soul
+            // Velvet room transition animation
             Item {
                 id: velvetSlashOverlay
                 anchors.fill: parent
                 visible: frameWin.velvetSlashProg < 0.995
                 clip: true
 
-                // Latar belakang sapphire / velvet navy
                 Rectangle {
                     anchors.fill: parent
                     color: "#030A1E"
                     opacity: Math.sin(frameWin.velvetSlashProg * Math.PI) * 0.75
                 }
 
-                // Efek tirai cahaya horizontal sapphire & cyan
                 Rectangle {
                     anchors.centerIn: parent
                     width: parent.width
@@ -851,7 +825,6 @@ Scope {
                     }
                 }
 
-                // Ring aperture / dial elevator velvet room
                 Rectangle {
                     anchors.centerIn: parent
                     width: parent.height * (0.3 + frameWin.velvetSlashProg * 0.9)
@@ -863,7 +836,6 @@ Scope {
                     opacity: Math.sin(frameWin.velvetSlashProg * Math.PI) * 0.6
                 }
 
-                // Kartu status banner velvet room di tengah layar
                 Item {
                     anchors.centerIn: parent
                     width: 480
@@ -892,7 +864,6 @@ Scope {
                         anchors.centerIn: parent
                         spacing: 16
 
-                        // Dial emblem velvet room berputar
                         Item {
                             width: 40
                             height: 40
@@ -974,28 +945,25 @@ Scope {
                 }
             }
 
-            // overlay animasi tebasan diagonal & banner waktu ganti tema (Persona 5 & tema lainnya)
+            // Diagonal ribbon theme transition
             Item {
                 id: slashOverlay
                 anchors.fill: parent
                 visible: frameWin.slashProg < 0.995 && PhantomState.themeId !== "p3-reload"
                 clip: true
 
-                // kilatan tipis warna tema di awal transisi
                 Rectangle {
                     anchors.fill: parent
                     color: PhantomState.primary
                     opacity: Math.max(0.0, (1.0 - frameWin.slashProg) * 0.16)
                 }
 
-                // pita tebasan diagonal miring dari kiri ke kanan
                 Item {
                     anchors.centerIn: parent
                     width: parent.width * 1.6
                     height: 220
                     rotation: -13
 
-                    // pita aksen warna sekunder
                     Rectangle {
                         width: parent.width * 0.55
                         height: 28
@@ -1006,7 +974,6 @@ Scope {
                         border.width: 2
                     }
 
-                    // pita tebasan utama warna primer
                     Rectangle {
                         width: parent.width * 0.72
                         height: 82
@@ -1024,7 +991,6 @@ Scope {
                         }
                     }
 
-                    // pita tebasan putih di bagian bawah
                     Rectangle {
                         width: parent.width * 0.48
                         height: 14
@@ -1036,7 +1002,6 @@ Scope {
                     }
                 }
 
-                // kartu banner indikator transisi di tengah layar
                 Item {
                     anchors.centerIn: parent
                     width: 440
@@ -1103,14 +1068,13 @@ Scope {
                 }
             }
 
-            // Efek transisi semburan air / water splash cel-shaded Persona 3 Reload (12 frame PNG)
+            // Water splash transition overlay (12-frame sequence)
             Item {
                 id: p3SplashOverlay
                 anchors.fill: parent
                 visible: frameWin.p3SplashActive
                 z: 100
 
-                // 1. Lapisan samudra biru pekat P3R (Sea of Soul) menutup 100% layar tanpa celah
                 Rectangle {
                     anchors.fill: parent
                     anchors.margins: -20
@@ -1124,7 +1088,6 @@ Scope {
                     }
                 }
 
-                // 2. Berkas cahaya matahari dan caustics bawah air
                 Repeater {
                     model: 6
                     delegate: Rectangle {
@@ -1143,7 +1106,6 @@ Scope {
                     }
                 }
 
-                // 3. Gelembung udara spekular berombak naik dari bawah
                 Repeater {
                     model: 28
                     delegate: Item {
@@ -1181,7 +1143,6 @@ Scope {
                     }
                 }
 
-                // 4. Hero Semburan Air Autentik P3R (Scaled 1.25x agar semburan dan buih melebar menembus sisi)
                 Item {
                     anchors.fill: parent
                     scale: 1.25
@@ -1201,7 +1162,6 @@ Scope {
                     }
                 }
 
-                // 5. Percikan air sekunder kiri & kanan (mirrored) untuk mengisi sudut samping secara organik
                 Item {
                     anchors.fill: parent
                     scale: 1.22
@@ -1224,16 +1184,13 @@ Scope {
                 }
             }
 
-            // ==========================================
-            // OVERLAY AMBUSH KATANA SLASH & KRISTAL AIR PERSONA 3 RELOAD
-            // ==========================================
+            // Katana slash & crystal particle overlay
             Item {
                 id: p3AmbushOverlay
                 anchors.fill: parent
                 visible: frameWin.p3AmbushActive
                 z: 110
 
-                // 1. Kilatan Cahaya Cyan-Putih Saat Benturan
                 Rectangle {
                     anchors.fill: parent
                     color: "#FFFFFF"
@@ -1245,7 +1202,6 @@ Scope {
                     opacity: frameWin.p3FlashAlpha * 0.35
                 }
 
-                // 2. Riak Gelombang Kejut Air Melingkar & Diamond P3R
                 Rectangle {
                     anchors.centerIn: parent
                     width: parent.width * 1.6 * frameWin.p3RippleScale
@@ -1267,7 +1223,6 @@ Scope {
                     }
                 }
 
-                // Cincin Diamond Kejut Konsentris P3R
                 Rectangle {
                     anchors.centerIn: parent
                     width: parent.width * 0.85 * frameWin.p3RippleScale
@@ -1279,7 +1234,6 @@ Scope {
                     opacity: Math.max(0.0, (1.0 - frameWin.p3RippleScale) * 0.7)
                 }
 
-                // 3. Garis Busur Tebasan Ganda Silang (Dual Cross Katana Slash) & Central Starburst Flare
                 Canvas {
                     id: slashCanvas
                     anchors.fill: parent
@@ -1326,19 +1280,16 @@ Scope {
                             else ctx.lineTo(endX, endY)
                         }
 
-                        // Layer 1: Outer Neon Cyan Aura Glow
                         ctx.strokeStyle = "rgba(0, 240, 255, " + (alpha * 0.65).toFixed(2) + ")"
                         ctx.lineWidth = 32 * (1.0 - tStart * 0.5)
                         buildBladePath()
                         ctx.stroke()
 
-                        // Layer 2: Mid Ocean Cyan Blade Edge
                         ctx.strokeStyle = "rgba(0, 180, 216, " + (alpha * 0.88).toFixed(2) + ")"
                         ctx.lineWidth = 16 * (1.0 - tStart * 0.5)
                         buildBladePath()
                         ctx.stroke()
 
-                        // Layer 3: Piercing White Core Edge
                         ctx.strokeStyle = "rgba(255, 255, 255, " + (alpha * 0.98).toFixed(2) + ")"
                         ctx.lineWidth = 6 * (1.0 - tStart * 0.4)
                         buildBladePath()
@@ -1353,16 +1304,12 @@ Scope {
                         var midX = width * 0.50
                         var midY = height * 0.50
 
-                        // Sabetan 1: Kiri-Atas ke Kanan-Bawah
                         drawBlade(ctx, frameWin.p3SlashTrail1, -100, height * 0.12, width * 0.50, height * 0.50, width + 100, height * 0.88)
 
-                        // Sabetan 2: Kanan-Atas ke Kiri-Bawah (Menyilang X)
                         drawBlade(ctx, frameWin.p3SlashTrail2, width + 100, height * 0.14, width * 0.50, height * 0.50, -100, height * 0.86)
 
-                        // Kilau Bintang Starburst Flare di Titik Tabrakan Tengah
                         var flare = frameWin.p3ImpactFlare
                         if (flare > 0.01) {
-                            // Radial core halo
                             var radGrd = ctx.createRadialGradient(midX, midY, 0, midX, midY, 160 * flare)
                             radGrd.addColorStop(0.0, "rgba(255, 255, 255, " + (flare * 0.98).toFixed(2) + ")")
                             radGrd.addColorStop(0.35, "rgba(0, 240, 255, " + (flare * 0.75).toFixed(2) + ")")
@@ -1372,7 +1319,6 @@ Scope {
                             ctx.arc(midX, midY, 160 * flare, 0, Math.PI * 2)
                             ctx.fill()
 
-                            // Horizontal beam diamond
                             var hLen = width * 0.45 * flare
                             var hW = 15 * flare
                             ctx.fillStyle = "rgba(255, 255, 255, " + (flare * 0.95).toFixed(2) + ")"
@@ -1384,7 +1330,6 @@ Scope {
                             ctx.closePath()
                             ctx.fill()
 
-                            // Vertical beam diamond
                             var vLen = height * 0.48 * flare
                             var vW = 15 * flare
                             ctx.beginPath()
@@ -1395,7 +1340,6 @@ Scope {
                             ctx.closePath()
                             ctx.fill()
 
-                            // Diagonal cross spikes (45 derajat)
                             var dLen = width * 0.24 * flare
                             var dW = 9 * flare
                             ctx.fillStyle = "rgba(0, 240, 255, " + (flare * 0.85).toFixed(2) + ")"
@@ -1421,8 +1365,6 @@ Scope {
                     }
                 }
 
-                // 4. Serpihan Kristal Kaca & Es Biru Laut (54 High-Fidelity Crystalline Shards)
-                // Hanya muncul setelah titik tabrakan / impact (p3ShardProg > 0)
                 Item {
                     id: shardsContainer
                     anchors.fill: parent
@@ -1452,8 +1394,7 @@ Scope {
                             scale: Math.max(0.10, (1.0 - frameWin.p3ShardProg * 0.45) * (0.85 + ((index % 5) * 0.25)))
                             opacity: Math.max(0.0, 1.0 - Math.pow(frameWin.p3ShardProg, 1.5))
 
-                            // Variasi Bentuk Kristal:
-                            // index%5: 0=Needle Sliver, 1=Diamond Rhombus, 2=Sharp Wedge, 3=Crystal Chip, 4=Giant Impact Chunk
+                            // Crystal shapes: 0=sliver, 1=rhombus, 2=wedge, 3=chip, 4=impact chunk
                             Rectangle {
                                 anchors.centerIn: parent
                                 width: (index % 5 === 0) ? (5 + (index % 4)) :
@@ -1472,7 +1413,6 @@ Scope {
                                 border.color: (index % 3 === 0) ? "#00F0FF" : ((index % 3 === 1) ? "#FFFFFF" : "#70E0FF")
                                 border.width: (index % 5 === 4) ? 2.0 : 1.4
 
-                                // Facet spekular kristal es
                                 Rectangle {
                                     width: Math.max(2, parent.width * 0.45)
                                     height: Math.max(2, parent.height * 0.45)
@@ -1486,8 +1426,6 @@ Scope {
                     }
                 }
 
-                // 5. Gelembung & Cipratan Air (36 Specular Bubbles)
-                // Hanya muncul setelah titik tabrakan / impact
                 Item {
                     id: bubblesContainer
                     anchors.fill: parent
@@ -1543,7 +1481,6 @@ Scope {
                 visible: frameWin.p3DeathActive
                 z: 120
 
-                // 1. Kanvas Meleleh (Dripping Fluid Mass)
                 Canvas {
                     id: meltCanvas
                     anchors.fill: parent
@@ -1566,7 +1503,6 @@ Scope {
                         var burn = frameWin.deathBurn
                         var topY = height * pMelt
 
-                        // Tubuh bayangan hitam pekat
                         ctx.fillStyle = "#020712"
                         ctx.strokeStyle = "rgba(0, 240, 255, " + (Math.max(0.15, burn) * 0.95).toFixed(2) + ")"
                         ctx.lineWidth = 3
@@ -1575,7 +1511,6 @@ Scope {
                         ctx.moveTo(0, height)
                         ctx.lineTo(0, topY)
 
-                        // Gelombang lelehan cairan kental (viscous dripping waves)
                         var dripsCount = 12
                         var segW = width / dripsCount
                         for (var i = 0; i < dripsCount; i++) {
@@ -1595,7 +1530,6 @@ Scope {
                         ctx.fill()
                         ctx.stroke()
 
-                        // Lapisan bara putih membara di garis tepi lelehan
                         if (burn > 0.05) {
                             ctx.strokeStyle = "rgba(255, 255, 255, " + (burn * 0.9).toFixed(2) + ")"
                             ctx.lineWidth = 1.8
@@ -1615,7 +1549,6 @@ Scope {
                     }
                 }
 
-                // 2. Kanvas Asap Hangus Tipis & Uap Halus (Subtle Scorch Vapor Canvas)
                 Canvas {
                     id: smokeCanvas
                     x: -30
@@ -1642,7 +1575,6 @@ Scope {
                         var offsetX = 30
                         var offsetY = 80
 
-                        // A. Sulur-sulur asap tipis meliuk halus dari tepi lelehan (Delicate Smoke Wisps)
                         var tendrilCount = 10
                         var tendrilAlpha = Math.sin(p * Math.PI) * 0.45
                         if (tendrilAlpha > 0.01) {
@@ -1653,7 +1585,6 @@ Scope {
                                 var tLen = (45 + ((t * 23) % 40)) * (0.8 + p * 0.6)
                                 var tCurl = Math.sin(p * 5.0 + t * 1.8) * 22
 
-                                // Garis luar uap cyan lembut
                                 ctx.strokeStyle = "rgba(0, 240, 255, " + (tendrilAlpha * 0.55).toFixed(2) + ")"
                                 ctx.lineWidth = 2.0
                                 ctx.beginPath()
@@ -1661,7 +1592,6 @@ Scope {
                                 ctx.bezierCurveTo(tx + tCurl, ty - tLen * 0.4, tx - tCurl * 1.1, ty - tLen * 0.75, tx + tCurl * 0.6, ty - tLen)
                                 ctx.stroke()
 
-                                // Garis dalam uap putih
                                 ctx.strokeStyle = "rgba(255, 255, 255, " + (tendrilAlpha * 0.70).toFixed(2) + ")"
                                 ctx.lineWidth = 1.0
                                 ctx.beginPath()
@@ -1671,7 +1601,6 @@ Scope {
                             }
                         }
 
-                        // B. Gumpalan Asap Tipis Hangus di Tepi Lelehan (Subtle Scorch Puffs)
                         var plumeCount = 16
                         for (var i = 0; i < plumeCount; i++) {
                             var spawnProg = (i % 12) / 12.0 * 0.7
@@ -1687,10 +1616,8 @@ Scope {
                             var cx = originX + drift
                             var cy = birthY - rise
 
-                            // Radius kecil & ramping (20px - 45px)
                             var rad = (20 + ((i * 13) % 18)) * (0.8 + age * 0.7)
 
-                            // Alpha transparan & halus (maksimal 0.40)
                             var plumeAlpha = (age < 0.2) ? (age / 0.2 * 0.42) : Math.max(0.0, (1.0 - age) / 0.8 * 0.42)
 
                             var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad)
@@ -1712,7 +1639,6 @@ Scope {
                             ctx.fill()
                         }
 
-                        // C. Uap Desis Kecil dari Genangan Dasar (Delicate Puddle Steam)
                         var puddleSteamCount = 8
                         for (var s = 0; s < puddleSteamCount; s++) {
                             var pSpawn = 0.25 + (s / puddleSteamCount) * 0.5
@@ -1741,7 +1667,6 @@ Scope {
                     }
                 }
 
-                // 3. Tetesan Cairan Hitam Kental yang Jatuh ke Bawah (Dripping Fluid Droplets)
                 Item {
                     id: dripsContainer
                     anchors.fill: parent
@@ -1785,7 +1710,6 @@ Scope {
                     }
                 }
 
-                // 4. Serpihan Abu Gosong Halus (12 Subtle Drifting Ash Specks)
                 Item {
                     id: ashFlakesContainer
                     anchors.fill: parent
@@ -1819,7 +1743,6 @@ Scope {
                     }
                 }
 
-                // 5. Percikan Bara Desis Kecil (12 Subtle Sizzling Embers)
                 Item {
                     id: embersContainer
                     anchors.fill: parent
@@ -1850,7 +1773,6 @@ Scope {
                     }
                 }
 
-                // 6. Genangan Hitam di Lantai yang Mendidih & Menguap (Boiling & Evaporating Puddle)
                 Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -1862,7 +1784,6 @@ Scope {
                     border.width: Math.max(1, 1.5 * (1.0 - frameWin.deathPuddle))
                     opacity: Math.sin(Math.min(1.0, frameWin.deathPuddle) * Math.PI) * 0.90
 
-                    // Gelembung desis halus di genangan
                     Rectangle {
                         anchors.centerIn: parent
                         width: parent.width * 0.7

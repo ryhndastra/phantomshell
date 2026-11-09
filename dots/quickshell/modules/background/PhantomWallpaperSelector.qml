@@ -5,7 +5,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.config
 
-// Selektor Wallpaper Persona 3 Reload: Minimalis, Bersih, Anti-Alay, Tanpa Ikon
+// Persona 3 Reload wallpaper picker modal.
 Scope {
     id: wpScope
 
@@ -13,7 +13,7 @@ Scope {
     property string searchQuery: ""
     property var localFiles: []
 
-    // 7 Ambient Wallpaper Bawaan Persona 3 Reload
+    // Default P3R ambient wallpapers
     readonly property var liveAmbients: [
         {
             id: "train_shader",
@@ -123,7 +123,6 @@ Scope {
                 }
             }
 
-            // Lapisan Latar Belakang Gelap Penutup Layar
             Rectangle {
                 anchors.fill: parent
                 color: "#B2020612"
@@ -136,13 +135,12 @@ Scope {
                 }
             }
 
-            // Pintasan Tombol Escape
             Shortcut {
                 sequence: "Escape"
                 onActivated: PhantomState.wallpaperSelectorOpen = false
             }
 
-            // ── Kartu Dialog Utama Persona 3 Reload ──
+            // Main dialog container
             Rectangle {
                 id: selectorModal
                 width: Math.min(1180, parent.width - 48)
@@ -185,7 +183,7 @@ Scope {
                     anchors.margins: 20
                     spacing: 14
 
-                    // ── Header Bersih Tanpa Ikon ──
+                    // Header
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 40
@@ -200,7 +198,7 @@ Scope {
                             font.letterSpacing: 1.2
                         }
 
-                        // Tab Navigasi Bersih
+                        // Navigation tabs
                         Row {
                             spacing: 8
                             Layout.alignment: Qt.AlignVCenter
@@ -269,7 +267,7 @@ Scope {
 
                         Item { Layout.fillWidth: true }
 
-                        // Kolom Pencarian
+                        // Search input
                         Rectangle {
                             visible: wpScope.activeTab === 1
                             Layout.preferredWidth: 200
@@ -303,7 +301,7 @@ Scope {
                             }
                         }
 
-                        // Tombol Tutup Bersih
+                        // Close button
                         Rectangle {
                             Layout.preferredWidth: 32
                             Layout.preferredHeight: 32
@@ -331,19 +329,18 @@ Scope {
                         }
                     }
 
-                    // Garis Pemisah Cyan
                     Rectangle {
                         Layout.fillWidth: true
                         height: 1
                         color: "#182C4E"
                     }
 
-                    // ── Konten Utama Grid Wallpaper Murni Pratinjau (Tanpa Judul Alay) ──
+                    // Wallpaper preview grid
                     Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
-                        // View 0: Grid Live Ambients Persona 3 Reload
+                        // P3R live ambient presets
                         GridView {
                             id: liveGrid
                             visible: wpScope.activeTab === 0
@@ -389,7 +386,6 @@ Scope {
                                         Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                                     }
 
-                                    // Lencana ACTIVE yang Minimalis di Sudut Kanan Atas
                                     Rectangle {
                                         visible: liveCardDelegate.isEquipped
                                         anchors.top: parent.top
@@ -423,7 +419,7 @@ Scope {
                             }
                         }
 
-                        // View 1: Grid Wallpaper / Video Kustom
+                        // Custom wallpaper files
                         GridView {
                             id: localGrid
                             visible: wpScope.activeTab === 1
@@ -467,7 +463,6 @@ Scope {
                                         Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                                     }
 
-                                    // Indikator Format Video
                                     Rectangle {
                                         visible: modelData.isVideo
                                         anchors.top: parent.top
@@ -490,7 +485,6 @@ Scope {
                                         }
                                     }
 
-                                    // Lencana ACTIVE Minimalis di Sudut Kanan Atas
                                     Rectangle {
                                         visible: localCardDelegate.isEquipped
                                         anchors.top: parent.top
@@ -525,7 +519,7 @@ Scope {
                         }
                     }
 
-                    // ── Strip Kontrol Bawah Bersih ──
+                    // Footer control strip
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 40
@@ -604,7 +598,7 @@ Scope {
 
                             Item { Layout.fillWidth: true }
 
-                            // Toggle Jeda Otomatis
+                            // Auto-pause toggle
                             Row {
                                 spacing: 8
                                 Layout.alignment: Qt.AlignVCenter

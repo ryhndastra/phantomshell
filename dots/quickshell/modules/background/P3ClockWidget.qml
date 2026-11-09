@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import qs.config
 
-// Widget Tanggal & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
+// Persona 3 Reload date & lunar HUD
 Item {
     id: p3ClockRoot
     implicitWidth: dynamicWidth
@@ -26,14 +26,13 @@ Item {
         return h + ":" + m
     }
 
-    // Format Tanggal Asli Persona 3 Reload: M/D (contoh 11/5 atau 4/20)
+    // Format: M/D (e.g. 11/9)
     readonly property string p3DateStr: {
         const m = (p3ClockRoot.currentTime.getMonth() + 1).toString()
         const d = p3ClockRoot.currentTime.getDate().toString()
         return m + "/" + d
     }
 
-    // Nama Hari Asli Persona 3 Reload (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
     readonly property string p3WeekdayStr: {
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         return days[p3ClockRoot.currentTime.getDay()]
@@ -46,7 +45,7 @@ Item {
 
     readonly property int currentHour: p3ClockRoot.currentTime.getHours()
 
-    // Penentuan Periode Waktu Persona 3 Reload
+    // Time phase mapping
     readonly property string periodId: {
         if (PhantomState.p3TimePhaseOverride && PhantomState.p3TimePhaseOverride !== "auto") {
             return PhantomState.p3TimePhaseOverride
@@ -72,14 +71,14 @@ Item {
         }
     }
 
-    // Warna Teks Periode Atlus Raksasa (Deep Tone)
+    // Period watermark background color
     readonly property color periodBgTextColor: {
         switch (periodId) {
-            case "darkhour": return "#0b3d1d"  // Deep Dark Hour Green
-            case "evening": return "#1a2254"   // Deep Atlus Navy
-            case "morning": return "#102356"   // Deep Ocean Navy
+            case "darkhour": return "#0b3d1d"
+            case "evening": return "#1a2254"
+            case "morning": return "#102356"
             case "afterschool": return "#142864"
-            case "latenight": return "#0c1436" // Deep Midnight
+            case "latenight": return "#0c1436"
             default: return "#142864"
         }
     }
@@ -95,19 +94,19 @@ Item {
         }
     }
 
-    // Warna Aksen Dinamis Berdasarkan Waktu
+    // Dynamic accent color by period
     readonly property color periodColor: {
         switch (periodId) {
-            case "darkhour": return "#72ff95"  // Hijau Neon Ikonik Dark Hour
-            case "morning": return "#00dbff"   // Biru Cyan Listrik P3 Atlus
-            case "afterschool": return "#29b6f6" // Biru Cerah Sore
-            case "evening": return "#ff9f43"   // Kuning-Oranye Sunset Dusk
-            case "latenight": return "#82b1ff" // Biru Indigo Larut Malam
+            case "darkhour": return "#72ff95"
+            case "morning": return "#00dbff"
+            case "afterschool": return "#29b6f6"
+            case "evening": return "#ff9f43"
+            case "latenight": return "#82b1ff"
             default: return "#54a0ff"
         }
     }
 
-    // Warna Tinting Gelombang Air
+    // Wave tint color by period
     readonly property color waveColorTint: {
         switch (periodId) {
             case "darkhour": return "#2ed573"
@@ -148,7 +147,7 @@ Item {
         id: clockContent
         anchors.fill: parent
 
-        // ── Teks Periode Atlus Raksasa (Menonjol di Atas Gelombang Air Seperti di Game Asli P3R) ──
+        // Background period watermark text
         Text {
             id: bgPeriodText
             z: 2
@@ -165,7 +164,7 @@ Item {
             opacity: 0.96
         }
 
-        // ── Gelombang Air Laut Latar Belakang (Dinamis Berubah Warna Mengikuti Waktu) ──
+        // Wave ribbons
         Item {
             id: waveContainerOuter
             z: 5
@@ -237,7 +236,7 @@ Item {
             }
         }
 
-        // ── Lingkaran Cahaya Halo Bulan Kuning Keemasan ──
+        // Moon halo ring
         Rectangle {
             id: circle1
             z: 60
@@ -274,7 +273,7 @@ Item {
             }
         }
 
-        // ── Bola Bulan 3D Kosinus Dinamis ──
+        // 3D moon sphere
         Item {
             id: moonSphere
             z: 62
@@ -325,7 +324,7 @@ Item {
             }
         }
 
-        // ── Kluster HUD Tanggal & Periode Otentik Persona 3 Reload ──
+        // Date cluster HUD
         Item {
             id: p3DateCluster
             z: 50
@@ -341,12 +340,10 @@ Item {
                 id: dateClusterCol
                 spacing: -4
 
-                // Baris Tanggal M/D dan Hari dengan Penanda Segitiga Terbalik ▼
                 Row {
                     spacing: 8
                     anchors.right: parent.right
 
-                    // Angka Tanggal M/D Putih Tebal Miring (Contoh 4/20 atau 11/5)
                     Text {
                         text: p3ClockRoot.p3DateStr
                         font.family: "Inter Display"
@@ -359,12 +356,11 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
-                    // Kolom Hari dalam Pekan dan Segitiga Terbalik
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 1
 
-                        // Segitiga Terbalik Ikonik S.E.E.S. ▼
+                        // SEES inverted indicator arrow
                         Canvas {
                             width: 18
                             height: 12
@@ -385,7 +381,6 @@ Item {
                             }
                         }
 
-                        // Teks Hari (Mon / Thu)
                         Text {
                             text: p3ClockRoot.p3WeekdayStr
                             font.family: "Inter Display"
@@ -399,7 +394,6 @@ Item {
                     }
                 }
 
-                // Jam Digital Sistem di Bawah Tanggal (Menggantikan Teks Periode)
                 Text {
                     anchors.right: parent.right
                     text: p3ClockRoot.timeStr
@@ -415,7 +409,7 @@ Item {
         }
     }
 
-    // Klik pada area jam/HUD untuk membuka layar transisi kalender Persona 3 Reload
+    // Click HUD to toggle full calendar screen
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor

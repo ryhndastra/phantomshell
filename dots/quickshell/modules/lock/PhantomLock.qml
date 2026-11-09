@@ -7,10 +7,7 @@ import Quickshell.Services.Pam
 import qs.config
 import qs.components
 
-// =============================================================================
-// PERSONA 3 RELOAD: S.E.E.S. DARK HOUR PROTOCOL LOCK SCREEN
-// Layar Kunci Wayland tanpa shape skew P5, menggunakan ikon SVG (Bebas Emoji)
-// =============================================================================
+// Wayland lock screen using PAM authentication and SVG icons.
 Scope {
     id: lockScope
 
@@ -24,7 +21,7 @@ Scope {
     property bool showPassword: false
     property string pendingPassword: ""
 
-    // Timer pembaruan jam dan tanggal saat layar terkunci
+    // Clock update timer
     Timer {
         interval: 1000
         running: PhantomState.lockOpen
@@ -41,7 +38,7 @@ Scope {
         }
     }
 
-    // Konteks PAM untuk verifikasi kata sandi pengguna sistem
+    // PAM authentication context
     PamContext {
         id: pam
         config: "swaylock"
@@ -101,7 +98,7 @@ Scope {
         }
     }
 
-    // Pengunci Sesi Wayland pada Seluruh Layar Aktif
+    // Wayland session lock across active screens
     WlSessionLock {
         id: sessionLock
         locked: PhantomState.lockOpen
@@ -119,7 +116,7 @@ Scope {
                 property real cardScale: 0.85
                 property real cardOpacity: 0.0
 
-                // Animasi Masuk
+                // Enter animation
                 ParallelAnimation {
                     id: lockEnterAnim
                     NumberAnimation { target: lockRoot; property: "bgOpacity"; from: 0.0; to: 1.0; duration: 280; easing.type: Easing.OutCubic }
@@ -129,7 +126,7 @@ Scope {
                     NumberAnimation { target: lockRoot; property: "cardOpacity"; from: 0.0; to: 1.0; duration: 240; easing.type: Easing.OutCubic }
                 }
 
-                // Animasi Keluar Saat Berhasil Terbuka
+                // Exit animation on successful unlock
                 SequentialAnimation {
                     id: lockExitAnim
                     ParallelAnimation {
@@ -168,18 +165,16 @@ Scope {
                     lockEnterAnim.restart()
                 }
 
-                // 1. Lapisan Latar Belakang Dark Hour P3R
+                // Background layer
                 Item {
                     anchors.fill: parent
                     opacity: lockRoot.bgOpacity
 
-                    // Dasar Hitam Malam / Dark Hour
                     Rectangle {
                         anchors.fill: parent
                         color: "#020612"
                     }
 
-                    // Kisi Garis Koordinat Taktikal (S.E.E.S. Operational Grid & Moon Aura)
                     Canvas {
                         anchors.fill: parent
                         antialiasing: true
@@ -189,7 +184,6 @@ Scope {
                             var w = width
                             var h = height
 
-                            // Cahaya Bulan Cyan P3R (Radial Moon Aura)
                             var radGrad = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, Math.max(w, h) * 0.65)
                             radGrad.addColorStop(0.0, "rgba(0, 219, 255, 0.16)")
                             radGrad.addColorStop(0.45, "rgba(0, 56, 168, 0.10)")
@@ -216,7 +210,7 @@ Scope {
                     }
                 }
 
-                // 2. Kartu Jam Digital Dark Hour di Pojok Kiri Atas (Tanpa Skew P5)
+                // Digital clock card
                 Rectangle {
                     anchors.top: parent.top
                     anchors.left: parent.left
@@ -285,7 +279,7 @@ Scope {
                     }
                 }
 
-                // 3. Kartu Autentikasi Utama S.E.E.S. di Tengah Layar (Bentuk Dialog P3R Tanpa Skew P5)
+                // Authentication card
                 Item {
                     id: centerCard
                     width: 540
@@ -313,7 +307,6 @@ Scope {
                         }
                     }
 
-                    // Background Kartu Dialog P3R dengan Wedge Segitiga Kiri Atas (Foto 2)
                     Canvas {
                         id: centerCardCanvas
                         anchors.fill: parent
@@ -325,7 +318,6 @@ Scope {
                             var w = width
                             var h = height
 
-                            // Shard Aksen Biru di Kanan
                             ctx.fillStyle = "rgba(0, 160, 255, 0.28)"
                             ctx.beginPath()
                             ctx.moveTo(w - 85, -4)
@@ -335,7 +327,6 @@ Scope {
                             ctx.closePath()
                             ctx.fill()
 
-                            // Badan Utama Kotak Dialog
                             var bx = 16
                             var by = 12
                             var bw = w - 32
@@ -361,7 +352,6 @@ Scope {
                             ctx.lineWidth = 1.8
                             ctx.stroke()
 
-                            // Wedge Segitiga Kiri Atas P3R (Sesuai Foto 2)
                             ctx.beginPath()
                             ctx.moveTo(-2, 22)
                             ctx.lineTo(165, -2)
@@ -383,7 +373,6 @@ Scope {
                         }
                     }
 
-                    // Teks Label pada Wedge Segitiga Kiri Atas
                     Item {
                         x: 8
                         y: -1
@@ -417,7 +406,6 @@ Scope {
                         }
                     }
 
-                    // Konten Kartu Autentikasi
                     ColumnLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 30
@@ -426,12 +414,10 @@ Scope {
                         anchors.bottomMargin: 20
                         spacing: 16
 
-                        // Profil Operatif S.E.E.S.
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 16
 
-                            // Foto Profil Makoto Yuki
                             Rectangle {
                                 Layout.preferredWidth: 72
                                 Layout.preferredHeight: 72
@@ -449,7 +435,6 @@ Scope {
                                 }
                             }
 
-                            // Identitas dan Status
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 4
@@ -485,7 +470,6 @@ Scope {
                             }
                         }
 
-                        // Kotak Input Kata Sandi
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 48
@@ -500,7 +484,6 @@ Scope {
                                 anchors.rightMargin: 12
                                 spacing: 10
 
-                                // Ikon Kunci SVG Resmi (Bebas Emoji)
                                 Image {
                                     width: 18
                                     height: 18
@@ -547,7 +530,6 @@ Scope {
                                     }
                                 }
 
-                                // Tombol Show/Hide Passcode
                                 Rectangle {
                                     width: 52
                                     height: 26
@@ -579,7 +561,6 @@ Scope {
                             }
                         }
 
-                        // Baris Informasi Baterai (Ikon SVG Resmi - Bebas Emoji) & Tombol Aksi
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 12
@@ -596,7 +577,6 @@ Scope {
                                     anchors.centerIn: parent
                                     spacing: 8
 
-                                    // Ikon Baterai SVG Resmi (Bebas Emoji)
                                     Image {
                                         width: 18
                                         height: 18
@@ -622,7 +602,6 @@ Scope {
                                 }
                             }
 
-                            // Tombol DISPATCH / AUTHORIZE
                             Rectangle {
                                 height: 38
                                 Layout.preferredWidth: 150

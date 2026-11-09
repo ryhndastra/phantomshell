@@ -6,11 +6,10 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.config
 
-// modul latar belakang wallpaper, jam desktop, cuaca, spektrum cava, dan lirik lagu
+// Desktop wallpaper background, clock, weather, cava, and lyrics coordinator.
 Scope {
     id: bgScope
 
-    // state waktu dan tanggal jam desktop
     property string hoursStr: "23"
     property string minsStr: "10"
     property string secsStr: "00"
@@ -18,14 +17,12 @@ Scope {
     property string dateFullStr: "SATURDAY // OCT 03"
     property string periodStr: "EVENING"
 
-    // state data cuaca desktop
     property string weatherTemp: "24°C"
     property string weatherHumidity: "69%"
     property string weatherIcon: "cloudy"
     property string weatherLabel: "CLOUDY"
     property string weatherCity: "BANDUNG"
 
-    // state lirik lagu tersinkronisasi
     property bool musicPlaying: false
     property string musicPlayer: ""
     property string musicTitle: ""
@@ -41,7 +38,7 @@ Scope {
     property var rightBars: []
     property int cavaTick: 0
 
-    // timer penyembunyi visualizer cava saat audio hening
+    // Cava idle silence timer
     Timer {
         id: cavaSilenceTimer
         interval: 450
@@ -77,7 +74,7 @@ Scope {
         onTriggered: bgScope.updateDesktopClock()
     }
 
-    // proses pengambil data cuaca berkala
+    // Periodic weather fetch process
     Process {
         id: weatherProc
         command: ["python3", "/mnt/data/Projects/rice/phantomshell/scripts/phantom-weather.py"]
@@ -105,7 +102,7 @@ Scope {
         onTriggered: weatherProc.running = true
     }
 
-    // proses pembaca spektrum audio cava secara real-time
+    // Cava audio spectrum reader process
     Process {
         id: cavaProc
         running: PhantomState.showDesktopCava
@@ -163,7 +160,7 @@ Scope {
         }
     }
 
-    // proses pengambil lirik lagu tersinkronisasi
+    // Synchronized lyrics fetch process
     Process {
         id: lyricsProc
         running: PhantomState.showDesktopLyrics
@@ -254,7 +251,7 @@ Scope {
                 }
             }
 
-            // lapisan gambar wallpaper sebelumnya untuk transisi crossfade
+            // Wallpaper crossfade transition layer
             Image {
                 id: wpPrevImg
                 visible: PhantomState.showWallpaperLayer && PhantomState.previousWallpaperPath.startsWith("/") && bgWin.wpCrossfade < 0.99
@@ -284,7 +281,7 @@ Scope {
                 PhantomState.p3LiveScene === ""
             )
 
-            // lapisan wallpaper dinamis persona 3 reload (riak air, makoto yuki, parallax 3d)
+            // P3R dynamic live wallpaper layer
             P3WallpaperEngine {
                 anchors.fill: parent
                 visible: PhantomState.showWallpaperLayer && bgWin.isShaderScene
@@ -292,7 +289,7 @@ Scope {
                 forceDarkHour: PhantomState.p3LiveScene === "tartarus"
             }
 
-            // pemutar video wallpaper ambient persona 3 reload (1080p 60fps loop hening tanpa audio sink)
+            // P3R ambient video wallpaper player
             MediaPlayer {
                 id: liveVideoPlayer
                 source: PhantomState.p3VideoPath !== "" ? (PhantomState.p3VideoPath.startsWith("/") ? ("file://" + PhantomState.p3VideoPath) : PhantomState.p3VideoPath) : ""
@@ -328,7 +325,7 @@ Scope {
                 }
             }
 
-            // lapisan gambar wallpaper kustom jika memilih gambar statis
+            // Static image wallpaper layer
             Image {
                 id: wpImg
                 visible: PhantomState.showWallpaperLayer && !bgWin.isShaderScene && !bgWin.isLiveVideoScene && PhantomState.wallpaperPath.startsWith("/")
@@ -349,7 +346,7 @@ Scope {
                 }
             }
 
-            // gradasi vignette gelap pada bagian atas dan bawah layar
+            // Vignette gradient overlay
             Rectangle {
                 anchors.fill: parent
                 gradient: Gradient {
@@ -360,7 +357,6 @@ Scope {
                 }
             }
 
-            // widget jam dan informasi cuaca desktop
             DesktopClockWidget {
                 hoursStr: bgScope.hoursStr
                 minsStr: bgScope.minsStr
@@ -374,7 +370,6 @@ Scope {
                 weatherCity: bgScope.weatherCity
             }
 
-            // kontainer bawah untuk visualizer audio cava dan lirik lagu
             DesktopCavaLyrics {
                 musicPlaying: bgScope.musicPlaying
                 past2Lyric: bgScope.past2Lyric
@@ -388,12 +383,10 @@ Scope {
                 cavaTick: bgScope.cavaTick
             }
 
-            // widget pemutar musik kapsul makoto yuki khusus mode persona 3 reload
             P3MusicCapsule {
                 visible: PhantomState.isP3
             }
 
-            // widget nomor workspace stensil kaca di background kiri atas khusus persona 3 reload
             P3DesktopWorkspaces {
                 visible: PhantomState.isP3 && PhantomState.showWorkspaces
             }

@@ -5,10 +5,7 @@ import Quickshell.Wayland
 import qs.config
 import qs.components
 
-// =============================================================================
-// PERSONA 3 RELOAD: S.E.E.S. DIALOGUE-STYLE HUD OSD (VOLUME & LUMINANCE)
-// Bentuk speech bubble otentik P3R (mirip dialog Akihiko Sanada) dengan ikon SVG
-// =============================================================================
+// Dialogue HUD on-screen display for volume and brightness.
 Scope {
     PanelWindow {
         id: osdWin
@@ -38,7 +35,7 @@ Scope {
             readonly property bool isMuted: isVolume && (PhantomState.osdMuted || PhantomState.osdValue <= 0)
             readonly property real ratio: Math.max(0.0, Math.min(1.0, PhantomState.osdValue / 100.0))
 
-            // Pemilihan ikon SVG resmi (Bebas Emoji)
+            // Icon selection
             readonly property string resolvedIconUrl: {
                 const home = Quickshell.env("HOME") || "/home/sho"
                 if (!osdBody.isVolume) {
@@ -71,7 +68,7 @@ Scope {
                 id: bodyHover
             }
 
-            // 1. Kanvas Gambar Bentuk Speech Bubble Otentik Persona 3 Reload (Foto 2)
+            // Speech bubble canvas
             Canvas {
                 id: p3BubbleCanvas
                 anchors.fill: parent
@@ -83,7 +80,6 @@ Scope {
                     var w = width
                     var h = height
 
-                    // A. Shard Aksen Biru Muda Transparan di Ujung Kanan (Right Accent Shard)
                     ctx.fillStyle = "rgba(0, 160, 255, 0.32)"
                     ctx.beginPath()
                     ctx.moveTo(w - 75, -2)
@@ -93,7 +89,6 @@ Scope {
                     ctx.closePath()
                     ctx.fill()
 
-                    // B. Badan Kotak Dialog Utama (Navy Gelap Transparan dengan Sudut Halus)
                     var bx = 16
                     var by = 8
                     var bw = w - 34
@@ -115,13 +110,10 @@ Scope {
                     ctx.fillStyle = "rgba(4, 12, 38, 0.95)"
                     ctx.fill()
 
-                    // Garis Tepi Cyan / Merah saat Mute
                     ctx.strokeStyle = osdBody.isMuted ? "rgba(255, 42, 85, 0.85)" : "rgba(0, 219, 255, 0.75)"
                     ctx.lineWidth = 1.6
                     ctx.stroke()
 
-                    // C. Wedge Segitiga Menonjol di Kiri Atas (Top-Left Protruding Triangular Tag)
-                    // Bentuk segitiga runcing khas P3R dialogue header
                     ctx.beginPath()
                     ctx.moveTo(-2, 18)           // Ujung runcing kiri
                     ctx.lineTo(135, -2)          // Titik atas kanan
@@ -142,7 +134,7 @@ Scope {
                 }
             }
 
-            // 2. Teks Label pada Wedge Segitiga Kiri Atas
+            // Label on wedge tag
             Item {
                 x: 8
                 y: -1
@@ -178,7 +170,7 @@ Scope {
                 }
             }
 
-            // 3. Konten Utama: Ikon SVG, Gauge Bar Segmen, dan Badge Angka
+            // Main content: icon, gauge bar, and percentage
             RowLayout {
                 anchors.fill: parent
                 anchors.leftMargin: 28
@@ -188,7 +180,6 @@ Scope {
                 spacing: 12
                 z: 5
 
-                // Ikon SVG Resmi (Vector Image)
                 Rectangle {
                     Layout.preferredWidth: 38
                     Layout.preferredHeight: 38
@@ -216,7 +207,7 @@ Scope {
                     }
                 }
 
-                // Gauge Bar Slanted P3R
+                // Gauge bar
                 Item {
                     id: trackArea
                     Layout.fillWidth: true
@@ -234,7 +225,6 @@ Scope {
                             var h = height
                             var sk = 7.0
 
-                            // 1. Dasar Track Bar
                             ctx.beginPath()
                             ctx.moveTo(sk, 0)
                             ctx.lineTo(w, 0)
@@ -247,7 +237,6 @@ Scope {
                             ctx.lineWidth = 1.0
                             ctx.stroke()
 
-                            // 2. Baris Isi Persentase
                             var fillW = Math.max(0, (w - sk) * osdBody.ratio)
                             if (fillW > 0) {
                                 ctx.beginPath()
@@ -268,7 +257,6 @@ Scope {
                                 }
                                 ctx.fill()
 
-                                // Garis Pembatas Putih
                                 ctx.beginPath()
                                 ctx.moveTo(sk + fillW, 0)
                                 ctx.lineTo(fillW, h)
@@ -277,7 +265,6 @@ Scope {
                                 ctx.stroke()
                             }
 
-                            // 3. Grid Tick Marks
                             ctx.strokeStyle = "rgba(4, 12, 38, 0.65)"
                             ctx.lineWidth = 1.5
                             for (var step = 1; step <= 9; step++) {
@@ -326,7 +313,6 @@ Scope {
                     }
                 }
 
-                // Lencana Persentase
                 Rectangle {
                     Layout.preferredWidth: 58
                     Layout.preferredHeight: 34

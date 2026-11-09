@@ -6,12 +6,8 @@ import Quickshell.Hyprland
 import qs.config
 import qs.components
 
-// =============================================================================
-// PERSONA 3 RELOAD: S.E.E.S. DIALOGUE-STYLE TOAST NOTIFICATION
-// Bentuk pop-up speech bubble otentik P3R (sesuai Foto 2) dengan ikon SVG & app logo
-// =============================================================================
+// Dialogue toast notifications.
 Scope {
-    // Jendela popup notifikasi pesan di pojok kanan atas layar
     PanelWindow {
         id: popupWin
         visible: PhantomState.imPopupStack.count > 0 && !PhantomState.notificationsOpen
@@ -79,7 +75,7 @@ Scope {
                         return PhantomState.resolveAppIconUrl(senderName)
                     }
 
-                    // Animasi Masuk Halus dari Kanan
+                    // Slide-in enter animation
                     ParallelAnimation {
                         id: toastEnterAnim
                         running: true
@@ -87,7 +83,7 @@ Scope {
                         NumberAnimation { target: p3ToastRoot; property: "opacity"; from: 0.0; to: 1.0; duration: 190; easing.type: Easing.OutCubic }
                     }
 
-                    // 1. Bentuk Otentik Speech Bubble Persona 3 Reload (Sesuai Foto 2)
+                    // Speech bubble canvas
                     Canvas {
                         id: toastCanvas
                         anchors.fill: parent
@@ -99,7 +95,6 @@ Scope {
                             var w = width
                             var h = height
 
-                            // A. Shard Aksen Biru Muda Transparan di Ujung Kanan
                             ctx.fillStyle = "rgba(0, 160, 255, 0.30)"
                             ctx.beginPath()
                             ctx.moveTo(w - 75, -2)
@@ -109,7 +104,6 @@ Scope {
                             ctx.closePath()
                             ctx.fill()
 
-                            // B. Badan Utama Kotak Dialog
                             var bx = 16
                             var by = 10
                             var bw = w - 34
@@ -135,7 +129,6 @@ Scope {
                             ctx.lineWidth = 1.6
                             ctx.stroke()
 
-                            // C. Wedge Segitiga Menonjol di Kiri Atas (Top-Left Protruding Triangular Tag)
                             ctx.beginPath()
                             ctx.moveTo(-2, 20)           // Ujung runcing kiri
                             ctx.lineTo(150, -2)          // Titik atas kanan
@@ -151,7 +144,7 @@ Scope {
                         }
                     }
 
-                    // 2. Teks Nama Pengirim & Subjudul pada Wedge Segitiga Kiri Atas (Sesuai Foto 2)
+                    // Sender label on wedge tag
                     Item {
                         x: 8
                         y: -1
@@ -186,7 +179,7 @@ Scope {
                         }
                     }
 
-                    // 3. Konten Baris: Avatar Logo Aplikasi, Teks Pesan, dan Tombol Close
+                    // Notification content row
                     RowLayout {
                         id: toastLayout
                         anchors.fill: parent
@@ -197,7 +190,6 @@ Scope {
                         spacing: 12
                         z: 5
 
-                        // Avatar Logo Aplikasi / Inisial Monogram
                         Rectangle {
                             Layout.preferredWidth: 38
                             Layout.preferredHeight: 38
@@ -231,7 +223,6 @@ Scope {
                             }
                         }
 
-                        // Teks Pesan Lengkap
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 2
@@ -273,7 +264,6 @@ Scope {
                             }
                         }
 
-                        // Tombol Tutup / Dismiss
                         Rectangle {
                             Layout.preferredWidth: 24
                             Layout.preferredHeight: 24
@@ -301,7 +291,7 @@ Scope {
                         }
                     }
 
-                    // Klik pada Kartu: Buka Pesan di Mail Detail Reader
+                    // Click card to open message
                     MouseArea {
                         anchors.fill: parent
                         anchors.rightMargin: 34

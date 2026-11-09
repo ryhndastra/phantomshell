@@ -7,16 +7,11 @@ import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import qs.config
 
-// Indikator Workspace Numerik Stensil Kaca Persona 3 Reload
-// Menyatu dengan background gerbong monorail kiri atas.
-// Nomor samar/almost transparent menyatu dengan background.
-// Saat occupied, ikon aplikasi me-override nomor workspace.
-// Saat active, tampil putih/terang bersih tanpa underline.
-// Disertai tombol simbol "V" expander untuk baki aplikasi (tray) yang menyatu dinamis.
+// Persona 3 Reload glass stencil workspace indicator with integrated tray expander.
 Item {
     id: root
 
-    // Status ekspansi baki aplikasi (tray) di samping workspace
+    // Tray expander state
     property bool trayExpanded: PhantomState.desktopTrayExpanded
     readonly property int trayCount: SystemTray.items.values.length
     property int activeMenuIndex: -1
@@ -25,13 +20,13 @@ Item {
         ? SystemTray.items.values[root.activeMenuIndex]
         : null
 
-    // Pembuka menu native DBus dari tray item aktif
+    // DBus menu opener for active tray item
     QsMenuOpener {
         id: activeMenuOpener
         menu: root.activeTrayItem && root.activeTrayItem.hasMenu ? root.activeTrayItem.menu : null
     }
 
-    // Deteksi posisi sesuai setting desktopWorkspacesPosition atau auto berdasarkan posisi jam desktop
+    // Resolve docked position
     readonly property string effectivePosition: {
         const customPos = PhantomState.desktopWorkspacesPosition || "auto"
         if (customPos !== "auto") return customPos
@@ -62,7 +57,7 @@ Item {
 
     z: 10
 
-    // Hubungan ke Hyprland untuk refresh real-time saat ada event workspace/window
+    // Hyprland event listeners
     Connections {
         target: Hyprland
         function onRawEvent(event) {
@@ -73,7 +68,7 @@ Item {
         }
     }
 
-    // Deretan Slot Workspace + Tray Expander
+    // Workspace slots and tray expander
     Row {
         id: wsRow
         spacing: 24
@@ -96,17 +91,12 @@ Item {
                 width: Math.max(isOccupied ? (appList.length > 1 ? 52 : 36) : numText.implicitWidth, 38)
                 height: 42
 
-                // Scale interaktif halus
                 scale: isActive ? 1.12 : (isHovered ? 1.06 : 1.0)
                 transformOrigin: Item.Center
                 Behavior on scale {
                     NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
                 }
 
-                // Opacity kontrol:
-                // Active: 1.0 (Putih / icon tegas terang)
-                // Inactive: 0.30 (Samar-samar, almost transparent, nyaru dengan latar belakang)
-                // Hovered: 0.85 (Feedback interaktif)
                 opacity: {
                     if (isActive) return 1.0
                     if (isHovered) return 0.85
@@ -116,7 +106,7 @@ Item {
                     NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
                 }
 
-                // 1. Ikon Aplikasi: Meng-override nomor workspace saat ada aplikasi (occupied)
+                // App icon overrides workspace number when occupied
                 Item {
                     anchors.centerIn: parent
                     visible: wsItem.isOccupied
@@ -160,7 +150,7 @@ Item {
                     }
                 }
 
-                // 2. Nomor Workspace: Hanya tampil saat workspace KOSONG (tidak ter-override icon)
+                // Workspace number when unoccupied
                 Text {
                     id: numText
                     anchors.centerIn: parent
@@ -170,11 +160,9 @@ Item {
                     font.pixelSize: wsItem.isActive ? 42 : 38
                     font.bold: true
                     font.italic: true
-                    // Putih murni saat active; warna biru lembut selaras background saat inactive
                     color: wsItem.isActive ? "#ffffff" : "#64aff0"
                 }
 
-                // Area Interaksi Mouse: Klik untuk pindah workspace
                 MouseArea {
                     id: wsMouse
                     anchors.fill: parent
@@ -191,15 +179,13 @@ Item {
             }
         }
 
-        // Bagian Baki Aplikasi (Tray) Terintegrasi di Desktop Workspace
-        // Terhubung langsung di container yang sama sehingga otomatis bergeser jika workspace bertambah (mis. WS 7)
+        // Integrated tray expander
         Row {
             id: traySection
             spacing: 12
             anchors.verticalCenter: parent.verticalCenter
             visible: root.trayCount > 0
 
-            // Garis pemisah stensil tipis
             Rectangle {
                 width: 1
                 height: 20
@@ -208,7 +194,6 @@ Item {
                 opacity: 0.25
             }
 
-            // Tombol Simbol "V" / Toggle Tray Expander
             Item {
                 id: vBtn
                 width: 30
@@ -225,7 +210,6 @@ Item {
                     font.italic: true
                     color: root.trayExpanded ? "#ffffff" : (vMouse.containsMouse ? "#ffffff" : "#64aff0")
 
-                    // Rotasi halus saat di-expand: V berputar -90° menghadap ke kanan (>)
                     rotation: root.trayExpanded ? -90 : 0
                     transformOrigin: Item.Center
 
@@ -237,7 +221,6 @@ Item {
                     }
                 }
 
-                // Opacity & scale interaktif
                 opacity: root.trayExpanded ? 1.0 : (vMouse.containsMouse ? 0.90 : 0.35)
                 scale: vMouse.containsMouse ? 1.14 : (root.trayExpanded ? 1.06 : 1.0)
                 Behavior on opacity { NumberAnimation { duration: 180 } }
@@ -257,14 +240,12 @@ Item {
                 }
             }
 
-            // Ikon-ikon aplikasi tray yang muncul saat expand (horizontal clip only)
             Item {
                 id: trayIconsClip
                 height: 42
                 anchors.verticalCenter: parent.verticalCenter
                 clip: true
 
-                // Lebar menganimasi otomatis saat expand/collapse
                 width: root.trayExpanded ? trayIconsRow.implicitWidth : 0
                 opacity: root.trayExpanded ? 1.0 : 0.0
 
@@ -293,13 +274,11 @@ Item {
                             height: 32
                             anchors.verticalCenter: parent.verticalCenter
 
-                            // Hover scale: bersih tanpa border, sedikit membesar secara halus
                             scale: trayAppMouse.containsMouse ? 1.20 : 1.0
                             opacity: trayAppMouse.containsMouse ? 1.0 : 0.80
                             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
                             Behavior on opacity { NumberAnimation { duration: 150 } }
 
-                            // Ikon aplikasi dari StatusNotifierItem murni tanpa border/box
                             IconImage {
                                 anchors.centerIn: parent
                                 width: 24
@@ -338,7 +317,7 @@ Item {
         }
     }
 
-    // Menu Konteks Teks Stensil Persona 3 Reload (Pure Text, Vertical Column, No Background, Blend Selaras Kaca Desktop)
+    // Stencil context menu
     Item {
         id: contextMenuCard
         visible: root.activeMenuIndex >= 0 && root.trayExpanded && root.activeTrayItem !== null
@@ -355,7 +334,7 @@ Item {
             anchors.left: parent.left
             anchors.top: parent.top
 
-            // Jika aplikasi tidak memiliki menu DBus bawaan, sediakan opsi OPEN default
+            // Fallback open action when application has no DBus menu
             Text {
                 visible: activeMenuOpener.children.values.length === 0
                 text: "OPEN"
@@ -387,7 +366,7 @@ Item {
                 }
             }
 
-            // Daftar lengkap opsi menu asli bawaan aplikasi (DBus) - Semua putih kecuali quit/kill
+            // Native DBus menu items
             Repeater {
                 model: activeMenuOpener.children
 
@@ -437,7 +416,7 @@ Item {
                 }
             }
 
-            // Opsi KILL Paksa (selalu ada di paling bawah, warna merah crimson)
+            // Force kill option
             Text {
                 id: killText
                 text: "KILL"
@@ -478,7 +457,7 @@ Item {
         }
     }
 
-    // Scroll Wheel Navigasi Antar Workspace
+    // Scroll wheel navigation
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.NoButton

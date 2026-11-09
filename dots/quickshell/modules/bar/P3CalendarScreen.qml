@@ -20,7 +20,7 @@ Item {
 
     focus: true
 
-    // ── Dedicated Key Catcher for ESC and Navigation Keys ──
+    // Key navigation (ESC, arrow keys, space)
     Item {
         id: screenKeyCatcher
         anchors.fill: parent
@@ -50,7 +50,7 @@ Item {
         onTriggered: screenKeyCatcher.forceActiveFocus()
     }
 
-    // ── Entrance Animation ──
+    // Entrance animation
     property real animProgress: 0.0
 
     NumberAnimation {
@@ -77,7 +77,7 @@ Item {
         }
     }
 
-    // ── Background: Authentic P3R Deep Indigo Navy ──
+    // Backdrop
     Rectangle {
         anchors.fill: parent
         color: "#0b113d"
@@ -86,8 +86,7 @@ Item {
         z: 0
     }
 
-    // ── Blue Ribbon: 275px thick, centered at X=1060, Y=540, angle 20 deg ──
-    // Encompasses Today's date number AND Today's moon inside the ribbon!
+    // Diagonal blue ribbon
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -109,7 +108,7 @@ Item {
         }
     }
 
-    // ── White Line Rail: Centered at X=1060, Y=590, angle -19.5 deg ──
+    // White guide rail
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -131,7 +130,7 @@ Item {
         }
     }
 
-    // ── Year / Month Section: Persis Foto 3 (2026 & November di KIRI, Angka Bulan Besar di KANAN & Maju ke Depan) ──
+    // Year and month header
     Item {
         id: ymSection
         visible: root.contentVisible
@@ -140,7 +139,6 @@ Item {
         z: 3
         anchors.fill: parent
 
-        // Tahun dan Nama Bulan di KIRI (mengikuti ribbon pada x=45)
         Column {
             x: 45
             y: 132
@@ -163,7 +161,6 @@ Item {
             }
         }
 
-        // Angka Bulan Besar di KANAN, maju ke depan (x=235) dan turun ke bawah mengikuti kemiringan ribbon (centered)
         Text {
             x: 235
             y: 154
@@ -175,7 +172,7 @@ Item {
         }
     }
 
-    // ── 7 Date Entries across the screen (Spacing 340px ensures neighbor dates never touch ribbon) ──
+    // Date entries
     Item {
         id: datesContainer
         anchors.fill: parent
@@ -202,7 +199,7 @@ Item {
         }
     }
 
-    // ── Background Click to Dismiss ──
+    // Backdrop click / scroll dismiss
     MouseArea {
         anchors.fill: parent
         z: 5
@@ -216,7 +213,7 @@ Item {
         onClicked: PhantomState.calendarOpen = false
     }
 
-    // ── Calendar Entry Component ──
+    // Calendar entry component
     component CalendarEntry: Item {
         id: entryRoot
         required property var dateObj
@@ -224,12 +221,10 @@ Item {
         required property bool pastFlag
         required property int dayOffsetVal
 
-        // White rail: centered at X=1060, Y=590, angle -19.5 deg
-        // Spacing 340px guarantees 8 SUN and 10 TUE have a wide gap and never touch the blue ribbon!
+        // Align dates along the -19.5 deg white rail
         readonly property real targetCenterX: 1060 + dayOffsetVal * 340
         readonly property real whiteLineY: 590 - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - 1060)
 
-        // Jarak bersih 28px di atas rel garis putih (angka tidak ada yang terpotong/tersentuh)
         x: targetCenterX - 45
         y: whiteLineY - 28 - 115
         width: 170
@@ -238,7 +233,7 @@ Item {
 
         transform: Translate { y: (1.0 - root.animProgress) * 35 }
 
-        // Opacity gradient:
+        // Perspective opacity falloff
         readonly property real alphaVal: {
             if (todayFlag) return 1.0
             if (dayOffsetVal === -1) return 0.82
@@ -250,10 +245,7 @@ Item {
             return 0.5
         }
 
-        // Moon size:
-        // 3 days back: decreasing (17, 25, 34)
-        // today: most prominent (66)
-        // 3 days future: smaller than today but larger than past 3 (44, 40, 36)
+        // Moon size by distance from today
         readonly property real moonSize: {
             if (todayFlag) return 66
             if (dayOffsetVal === -1) return 34
@@ -284,7 +276,7 @@ Item {
 
         opacity: alphaVal * root.animProgress
 
-        // ── Ripple concentric rings (Today only) ──
+        // Concentric focus rings for today
         Item {
             visible: entryRoot.todayFlag
             x: dayNumText.x + dayNumText.width / 2
@@ -316,7 +308,7 @@ Item {
             }
         }
 
-        // ── Date Number + 3-Letter Day Name (Chunky Rubik Bold, identical font size 115 across all dates) ──
+        // Date number and day name
         Row {
             id: dateRow
             x: 0
@@ -357,7 +349,7 @@ Item {
             }
         }
 
-        // ── Lunar Moon Sphere (Directly below day name & with clean 16px gap beneath white rail) ──
+        // Lunar sphere
         Item {
             id: moonContainer
             x: dayNumText.width + 6 + (dayNameCol.width / 2) - (width / 2)
@@ -366,7 +358,7 @@ Item {
             height: entryRoot.moonSize
             z: 2
 
-            // Glowing golden halo ring around Today's moon
+            // Gold halo ring for today
             Rectangle {
                 visible: entryRoot.todayFlag
                 anchors.centerIn: parent
