@@ -39,7 +39,7 @@ Item {
         z: 0
     }
 
-    // ── Blue Ribbon: Authentic P3R Royal Blue Band ──
+    // ── Blue Ribbon: Centered at Y=520, 250px thick, angle 20 deg ──
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -52,13 +52,13 @@ Item {
             height: 250
             color: "#1a50a8"
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: -45
+            anchors.verticalCenterOffset: -20
             rotation: 20
             antialiasing: true
         }
     }
 
-    // ── White Line Rail ──
+    // ── White Line Rail: Angle -19.5 deg, passes right at baseline Y=578 ──
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -71,7 +71,7 @@ Item {
             height: 4
             color: "white"
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: 40
+            anchors.verticalCenterOffset: 38
             rotation: -19.5
             antialiasing: true
         }
@@ -82,7 +82,7 @@ Item {
         visible: root.contentVisible
         z: 3
         x: 40
-        y: 75
+        y: 85
         width: 360
         height: 220
 
@@ -194,12 +194,12 @@ Item {
         required property bool pastFlag
         required property int dayOffsetVal
 
-        // White rail: center at (parent.width/2, parent.height/2 + 40), angle -19.5 deg
+        // White rail: center at (parent.width/2, parent.height/2 + 38), angle -19.5 deg
         readonly property real targetCenterX: parent.width / 2 + dayOffsetVal * 250
-        readonly property real whiteLineY: (parent.height / 2 + 40) - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - parent.width / 2)
+        readonly property real whiteLineY: (parent.height / 2 + 38) - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - parent.width / 2)
 
         x: targetCenterX - 65
-        y: whiteLineY - 136
+        y: whiteLineY - 118
         width: 170
         height: 250
 
@@ -250,9 +250,11 @@ Item {
         opacity: alphaVal
 
         // ── Ripple concentric rings (Today only) ──
+        // Centered directly on dayNumText
         Item {
             visible: entryRoot.todayFlag
-            anchors.centerIn: dayNumText
+            x: dayNumText.x + dayNumText.width / 2
+            y: dayNumText.y + dayNumText.height / 2
             width: 0
             height: 0
             z: 0
@@ -283,8 +285,8 @@ Item {
         // ── Date Number + 3-Letter Day Name (Chunky Rubik Bold, identical font size 115 across all dates) ──
         Row {
             id: dateRow
-            anchors.top: parent.top
-            anchors.left: parent.left
+            x: 0
+            y: 0
             spacing: 6
             z: 1
 
@@ -300,7 +302,7 @@ Item {
             Column {
                 id: dayNameCol
                 anchors.top: dayNumText.top
-                anchors.topMargin: 26
+                anchors.topMargin: 24
                 spacing: 2
 
                 Text {
@@ -324,9 +326,8 @@ Item {
         // ── Lunar Moon Sphere (Directly below day name & beneath the white rail) ──
         Item {
             id: moonContainer
-            anchors.top: parent.top
-            anchors.topMargin: 144
-            x: dayNumText.width + 6
+            x: dayNumText.width + 6 + (dayNameCol.width / 2) - (width / 2)
+            y: 124 // Sits directly below the white line
             width: entryRoot.moonSize
             height: entryRoot.moonSize
             z: 2
