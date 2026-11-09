@@ -101,10 +101,6 @@ PanelWindow {
         focus: true
         z: 999
 
-        Keys.onEscapePressed: {
-            PhantomState.calendarOpen = false
-            event.accepted = true
-        }
         Keys.onPressed: event => {
             if (event.key === Qt.Key_Escape) {
                 PhantomState.calendarOpen = false

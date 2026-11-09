@@ -20,16 +20,11 @@ Item {
 
     focus: true
 
-    // ── Dedicated Key Catcher for ESC and Arrow Keys ──
+    // ── Dedicated Key Catcher for ESC and Navigation Keys ──
     Item {
         id: screenKeyCatcher
         anchors.fill: parent
         focus: true
-
-        Keys.onEscapePressed: {
-            PhantomState.calendarOpen = false
-            event.accepted = true
-        }
 
         Keys.onPressed: event => {
             if (event.key === Qt.Key_Escape) {
@@ -49,7 +44,7 @@ Item {
     }
 
     Timer {
-        interval: 40
+        interval: 30
         running: root.contentVisible
         repeat: false
         onTriggered: screenKeyCatcher.forceActiveFocus()
@@ -91,7 +86,8 @@ Item {
         z: 0
     }
 
-    // ── Blue Ribbon: 215px thick, centered at X=1060, Y=520, angle 20 deg ──
+    // ── Blue Ribbon: 275px thick, centered at X=1060, Y=540, angle 20 deg ──
+    // Encompasses Today's date number AND Today's moon inside the ribbon!
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -103,11 +99,11 @@ Item {
         Rectangle {
             id: blueRibbon
             width: parent.width * 2.8
-            height: 215
+            height: 275
             color: "#1a50a8"
             anchors.centerIn: parent
             anchors.horizontalCenterOffset: 100
-            anchors.verticalCenterOffset: -20
+            anchors.verticalCenterOffset: 0
             rotation: 20
             antialiasing: true
         }
@@ -135,33 +131,22 @@ Item {
         }
     }
 
-    // ── Year / Month Section: Angka Bulan di DEPAN (kiri), ukuran pas dengan ribbon (200px) ──
+    // ── Year / Month Section: Persis Foto 3 (2026 & November di KIRI, Angka Bulan Besar di KANAN) ──
     Item {
         visible: root.contentVisible
         opacity: root.animProgress
         transform: Translate { x: (1.0 - root.animProgress) * -80 }
         z: 3
         x: 40
-        y: 70
-        width: 420
-        height: 220
+        y: 65
+        width: 440
+        height: 260
 
         Row {
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 14
+            spacing: 16
 
-            // Angka Bulan Besar di DEPAN (kiri), hampir pas dengan ukuran ribbon
-            Text {
-                id: bigMonthNum
-                text: root.now.getMonth() + 1
-                font.family: "Rubik"
-                font.pixelSize: 200
-                font.bold: true
-                color: "white"
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            // Tahun dan Nama Bulan di BELAKANGNYA (kanan)
+            // Tahun dan Nama Bulan di KIRI
             Column {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: -4
@@ -169,7 +154,7 @@ Item {
                 Text {
                     text: root.now.getFullYear()
                     font.family: "Rubik"
-                    font.pixelSize: 48
+                    font.pixelSize: 52
                     font.bold: true
                     color: "white"
                 }
@@ -177,15 +162,25 @@ Item {
                 Text {
                     text: Qt.formatDate(root.now, "MMMM")
                     font.family: "Rubik"
-                    font.pixelSize: 28
+                    font.pixelSize: 30
                     font.bold: true
                     color: "#b4c8ff"
                 }
             }
+
+            // Angka Bulan Besar di KANAN, tinggi hampir pas dengan ribbon (220px)
+            Text {
+                text: root.now.getMonth() + 1
+                font.family: "Rubik"
+                font.pixelSize: 220
+                font.bold: true
+                color: "white"
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
     }
 
-    // ── 7 Date Entries across the screen (Spacing 280px ensures neighbor dates never touch ribbon) ──
+    // ── 7 Date Entries across the screen (Spacing 340px ensures neighbor dates never touch ribbon) ──
     Item {
         id: datesContainer
         anchors.fill: parent
@@ -235,13 +230,13 @@ Item {
         required property int dayOffsetVal
 
         // White rail: centered at X=1060, Y=590, angle -19.5 deg
-        // Spacing 280px guarantees 8 SUN and 10 TUE have a wide gap and never touch the blue ribbon!
-        readonly property real targetCenterX: 1060 + dayOffsetVal * 280
+        // Spacing 340px guarantees 8 SUN and 10 TUE have a wide gap and never touch the blue ribbon!
+        readonly property real targetCenterX: 1060 + dayOffsetVal * 340
         readonly property real whiteLineY: 590 - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - 1060)
 
-        // Jarak bersih 26px di atas rel garis putih (tidak ada angka yang terpotong/tersentuh)
+        // Jarak bersih 28px di atas rel garis putih (angka tidak ada yang terpotong/tersentuh)
         x: targetCenterX - 45
-        y: whiteLineY - 26 - 115
+        y: whiteLineY - 28 - 115
         width: 170
         height: 260
         z: 6
@@ -262,10 +257,10 @@ Item {
 
         // Moon size:
         // 3 days back: decreasing (17, 25, 34)
-        // today: most prominent (68)
+        // today: most prominent (66)
         // 3 days future: smaller than today but larger than past 3 (44, 40, 36)
         readonly property real moonSize: {
-            if (todayFlag) return 68
+            if (todayFlag) return 66
             if (dayOffsetVal === -1) return 34
             if (dayOffsetVal === -2) return 25
             if (dayOffsetVal === -3) return 17
@@ -367,11 +362,11 @@ Item {
             }
         }
 
-        // ── Lunar Moon Sphere (Directly below day name & with clean 18px gap beneath white rail) ──
+        // ── Lunar Moon Sphere (Directly below day name & with clean 16px gap beneath white rail) ──
         Item {
             id: moonContainer
             x: dayNumText.width + 6 + (dayNameCol.width / 2) - (width / 2)
-            y: 160
+            y: 158
             width: entryRoot.moonSize
             height: entryRoot.moonSize
             z: 2
