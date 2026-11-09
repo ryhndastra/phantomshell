@@ -131,52 +131,47 @@ Item {
         }
     }
 
-    // ── Year / Month Section: Persis Foto 3 (2026 & November di KIRI, Angka Bulan Besar di KANAN) ──
+    // ── Year / Month Section: Persis Foto 3 (2026 & November di KIRI, Angka Bulan Besar di KANAN & Maju ke Depan) ──
     Item {
+        id: ymSection
         visible: root.contentVisible
         opacity: root.animProgress
         transform: Translate { x: (1.0 - root.animProgress) * -80 }
         z: 3
-        x: 40
-        y: 65
-        width: 440
-        height: 260
+        anchors.fill: parent
 
-        Row {
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 16
+        // Tahun dan Nama Bulan di KIRI (mengikuti ribbon pada x=45)
+        Column {
+            x: 45
+            y: 132
+            spacing: -4
 
-            // Tahun dan Nama Bulan di KIRI
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: -4
-
-                Text {
-                    text: root.now.getFullYear()
-                    font.family: "Rubik"
-                    font.pixelSize: 52
-                    font.bold: true
-                    color: "white"
-                }
-
-                Text {
-                    text: Qt.formatDate(root.now, "MMMM")
-                    font.family: "Rubik"
-                    font.pixelSize: 30
-                    font.bold: true
-                    color: "#b4c8ff"
-                }
-            }
-
-            // Angka Bulan Besar di KANAN, tinggi hampir pas dengan ribbon (220px)
             Text {
-                text: root.now.getMonth() + 1
+                text: root.now.getFullYear()
                 font.family: "Rubik"
-                font.pixelSize: 220
+                font.pixelSize: 52
                 font.bold: true
                 color: "white"
-                anchors.verticalCenter: parent.verticalCenter
             }
+
+            Text {
+                text: Qt.formatDate(root.now, "MMMM")
+                font.family: "Rubik"
+                font.pixelSize: 30
+                font.bold: true
+                color: "#b4c8ff"
+            }
+        }
+
+        // Angka Bulan Besar di KANAN, maju ke depan (x=235) dan turun ke bawah mengikuti kemiringan ribbon (centered)
+        Text {
+            x: 235
+            y: 154
+            text: root.now.getMonth() + 1
+            font.family: "Rubik"
+            font.pixelSize: 220
+            font.bold: true
+            color: "white"
         }
     }
 
