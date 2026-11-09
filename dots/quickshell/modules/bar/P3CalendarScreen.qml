@@ -1,16 +1,15 @@
 import QtQuick
 import QtQuick.Effects
-import Quickshell
-import Quickshell.Wayland
 import qs.config
 
-// Layar Kalender Otentik Persona 3 Reload - 1:1 Foto Referensi
 Item {
-    id: p3CalRoot
+    id: root
     anchors.fill: parent
 
     property bool active: false
+    property bool contentVisible: false
 
+    // navigation
     property int dayOffset: 0
     property var baseDate: new Date()
     readonly property var now: {
@@ -19,190 +18,217 @@ Item {
         return d
     }
 
-    readonly property int currentYear: now.getFullYear()
-    readonly property int currentMonth: now.getMonth()
-    readonly property var monthNames: [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ]
-    readonly property string monthNameStr: monthNames[currentMonth]
-    readonly property string monthNumStr: String(currentMonth + 1)
-
     focus: true
 
     onActiveChanged: {
         if (active) {
             baseDate = new Date()
             dayOffset = 0
-            p3CalRoot.forceActiveFocus()
+            contentVisible = true
+            root.forceActiveFocus()
+        } else {
+            contentVisible = false
         }
     }
 
-    // ── 1. Background Indigo Gelap P3R (#0b113d) ──
+    // ── Background ──
     Rectangle {
         anchors.fill: parent
-        color: "#0b113d"
+        color: "#080c24"
+        visible: root.contentVisible
         z: 0
     }
 
-    // Area interaksi klik luar & scroll wheel
-    MouseArea {
-        anchors.fill: parent
-        z: 0
-        hoverEnabled: true
-        onWheel: event => {
-            if (event.angleDelta.y > 0) {
-                p3CalRoot.dayOffset += 1
-            } else if (event.angleDelta.y < 0) {
-                p3CalRoot.dayOffset -= 1
-            }
-        }
-        onClicked: PhantomState.calendarOpen = false
-    }
-
-    // ── 2. Pita Biru Miring (bluebar - #1a4fa8 rotasi +20.0°) ──
+    // ── Blue Ribbon (Centered diagonally across screen) ──
     Item {
         anchors.fill: parent
+        visible: root.contentVisible
+        clip: true
         z: 1
-        clip: true
 
-        Item {
-            x: parent.width * 0.50
-            y: parent.height * 0.46
-            rotation: 20.0
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: p3CalRoot.width * 2.5
-                height: p3CalRoot.height * 0.22
-                color: "#1a4fa8"
-            }
+        Rectangle {
+            id: blueRibbon
+            width: parent.width * 2.8
+            height: 300
+            color: "#1153ba"
+            anchors.centerIn: parent
+            rotation: 20
+            antialiasing: true
         }
     }
 
-    // ── 3. Garis Rel Putih Menyilang (whiteline - rotasi -20.0°) ──
+    // ── White Line (Centered diagonally across screen, opposing slope) ──
     Item {
         anchors.fill: parent
-        z: 2
+        visible: root.contentVisible
         clip: true
+        z: 2
 
-        Item {
-            x: parent.width * 0.50
-            y: parent.height * 0.535
-            rotation: -20.0
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: p3CalRoot.width * 2.5
-                height: 4.5
-                color: "#ffffff"
-            }
+        Rectangle {
+            id: whiteRail
+            width: parent.width * 2.8
+            height: 4
+            color: "white"
+            anchors.centerIn: parent
+            anchors.verticalCenterOffset: 35
+            rotation: -20
+            antialiasing: true
         }
     }
 
-    // ── 4. Label Tahun & Bulan (Di dalam pita sisi kiri atas) ──
+    // ── Year / Month label (Inside the blue ribbon on the left) ──
     Item {
+        visible: root.contentVisible
         z: 3
-        x: parent.width * 0.05
-        y: parent.height * 0.11
-        width: 450
-        height: 260
+        x: 45
+        y: 135
+        width: 320
+        height: 200
 
-        Column {
-            anchors.left: parent.left
+        Row {
             anchors.verticalCenter: parent.verticalCenter
-            spacing: -4
+            spacing: 14
 
-            Text {
-                text: String(p3CalRoot.currentYear)
-                font.family: "Montserrat Alternates, Montserrat, sans-serif"
-                font.pixelSize: 56
-                font.bold: true
-                color: "#ffffff"
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: -2
+
+                Text {
+                    text: root.now.getFullYear()
+                    font.family: "Montserrat Alternates"
+                    font.pixelSize: 44
+                    font.bold: true
+                    color: "white"
+                }
+
+                Text {
+                    text: Qt.formatDate(root.now, "MMMM")
+                    font.family: "Inter Display"
+                    font.pixelSize: 24
+                    font.bold: true
+                    color: "#b4c8ff"
+                }
             }
 
             Text {
-                text: p3CalRoot.monthNameStr
-                font.family: "Inter Display, sans-serif"
-                font.pixelSize: 28
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.now.getMonth() + 1
+                font.family: "Montserrat Alternates"
+                font.pixelSize: 175
                 font.bold: true
-                color: "#b4c8ff"
+                color: "white"
             }
-        }
-
-        Text {
-            anchors.left: parent.left
-            anchors.leftMargin: 195
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: -12
-            text: p3CalRoot.monthNumStr
-            font.family: "Montserrat Alternates, Montserrat, sans-serif"
-            font.pixelSize: 220
-            font.bold: true
-            color: "#ffffff"
         }
     }
 
-    // ── 5. Kontainer 7 Entri Tanggal Sepanjang Rel Putih ──
+    // ── 7 Date Entries across the screen ──
     Item {
         id: datesContainer
         anchors.fill: parent
+        visible: root.contentVisible
         z: 4
-
-        readonly property real slopeTan: Math.tan(20.0 * Math.PI / 180.0) // ~0.36397
-        readonly property real railCenterY: parent.height * 0.535
-        readonly property real railCenterX: parent.width * 0.50
 
         Repeater {
             model: 7
-
             delegate: CalendarEntry {
                 required property int index
-
                 readonly property int offset: index - 3
                 readonly property var entryDate: {
-                    var d = new Date(p3CalRoot.now)
+                    var d = new Date(root.now)
                     d.setDate(d.getDate() + offset)
                     d.setHours(12, 0, 0, 0)
                     return d
                 }
-                readonly property bool isToday: offset === 0
-                readonly property bool isPast: offset < 0
-                readonly property real t: index / 6.0
-
-                // Posisi X linier di sepanjang layar (persis melintasi titik potong pita biru di index 3)
-                readonly property real targetX: datesContainer.width * (0.24 + t * 0.65)
-                // Posisi Y persis pada garis rel putih
-                readonly property real targetY: datesContainer.railCenterY - datesContainer.slopeTan * (targetX - datesContainer.railCenterX)
-
-                x: targetX
-                y: targetY
 
                 dateObj: entryDate
-                todayFlag: isToday
-                pastFlag: isPast
+                todayFlag: offset === 0
+                pastFlag: offset < 0
+                dayOffsetVal: offset
             }
         }
     }
 
-    // ── 6. Komponen Entri Tanggal & Fase Bulan ──
+    // ── Dismiss & Keyboard Handling ──
+    FocusScope {
+        anchors.fill: parent
+        focus: visible
+        z: 10
+
+        MouseArea {
+            anchors.fill: parent
+            z: -1
+            hoverEnabled: true
+            onWheel: event => {
+                if (event.angleDelta.y > 0)
+                    root.dayOffset += 1
+                else if (event.angleDelta.y < 0)
+                    root.dayOffset -= 1
+            }
+            onClicked: PhantomState.calendarOpen = false
+        }
+
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_Escape) {
+                PhantomState.calendarOpen = false
+                event.accepted = true
+            } else if (event.key === Qt.Key_Left) {
+                root.dayOffset -= 1
+                event.accepted = true
+            } else if (event.key === Qt.Key_Right) {
+                root.dayOffset += 1
+                event.accepted = true
+            } else if (event.key === Qt.Key_Space) {
+                root.dayOffset = 0
+                event.accepted = true
+            }
+        }
+    }
+
+    // ── Calendar Entry Component ──
     component CalendarEntry: Item {
         id: entryRoot
         required property var dateObj
         required property bool todayFlag
         required property bool pastFlag
+        required property int dayOffsetVal
 
-        readonly property int offset: {
-            var d = new Date(p3CalRoot.now)
-            d.setHours(12, 0, 0, 0)
-            return Math.round((dateObj - d) / 86400000)
+        // White line geometry:
+        // center: cx = parent.width / 2, cy = parent.height / 2 + 35
+        // slope = tan(-20 deg) = -0.36397
+        readonly property real targetCenterX: parent.width / 2 + dayOffsetVal * 230
+        readonly property real whiteLineY: (parent.height / 2 + 35) - Math.tan(20 * Math.PI / 180) * (targetCenterX - parent.width / 2)
+
+        x: targetCenterX - width / 2
+        y: whiteLineY - 95
+        width: 150
+        height: 200
+
+        // Opacity gradient:
+        readonly property real alphaVal: {
+            if (todayFlag) return 1.0
+            if (dayOffsetVal === -1) return 0.80
+            if (dayOffsetVal === -2) return 0.58
+            if (dayOffsetVal === -3) return 0.38
+            if (dayOffsetVal === 1) return 0.88
+            if (dayOffsetVal === 2) return 0.72
+            if (dayOffsetVal === 3) return 0.58
+            return 0.5
         }
 
-        // Skala perspektif 3D mendalam khas Persona 3 Reload
-        readonly property real scaleFactor: todayFlag ? 1.0 : (offset === -3 ? 0.50 : offset === -2 ? 0.65 : offset === -1 ? 0.80 : offset === 1 ? 1.15 : offset === 2 ? 1.30 : 1.45)
-        readonly property real alphaVal: todayFlag ? 1.0 : (offset === -3 ? 0.45 : offset === -2 ? 0.65 : offset === -1 ? 0.85 : offset === 1 ? 0.90 : offset === 2 ? 0.75 : 0.60)
-        readonly property real numSize: todayFlag ? 95 : Math.round(95 * scaleFactor)
-        readonly property real dayLabelSize: todayFlag ? 22 : Math.round(22 * scaleFactor)
+        // Moon size:
+        // 3 days back: decreasing (18, 26, 34)
+        // today: most prominent (66)
+        // 3 days future: smaller than today but bigger than past 3 (46, 42, 38)
+        readonly property real moonSize: {
+            if (todayFlag) return 66
+            if (dayOffsetVal === -1) return 34
+            if (dayOffsetVal === -2) return 25
+            if (dayOffsetVal === -3) return 17
+            if (dayOffsetVal === 1) return 46
+            if (dayOffsetVal === 2) return 41
+            if (dayOffsetVal === 3) return 37
+            return 30
+        }
 
         readonly property real moonPhaseDeg: {
             const synodicMonth = 29.53059
@@ -210,10 +236,8 @@ Item {
             const diffDays = (dateObj - ref) / 86400000
             const days = ((diffDays % synodicMonth) + synodicMonth) % synodicMonth
             var deg = 360 - Math.floor((days / synodicMonth) * 360)
-            if (deg >= 355 || deg <= 5)
-                return 0
-            if (deg >= 175 && deg <= 185)
-                return 180
+            if (deg >= 355 || deg <= 5) return 0
+            if (deg >= 175 && deg <= 185) return 180
             return deg
         }
 
@@ -222,123 +246,105 @@ Item {
         readonly property bool isSunday: dayOfWeek === 0
         readonly property bool isSaturday: dayOfWeek === 6
 
-        width: 1
-        height: 1
         opacity: alphaVal
 
-        // Cincin Riak Air Konsentris Biru (#4a88f0) untuk Hari Aktif (Today)
+        // ── Ripple concentric rings (Today only) ──
         Item {
             visible: entryRoot.todayFlag
             anchors.centerIn: dayNumText
-            anchors.horizontalCenterOffset: 0
-            width: entryRoot.numSize * 2.3
-            height: width
-            z: -1
+            width: 0
+            height: 0
+            z: 0
 
             Rectangle {
                 anchors.centerIn: parent
-                width: parent.width
-                height: width
-                radius: width / 2
+                width: 210
+                height: 210
+                radius: 105
                 color: "transparent"
-                border.color: "#4a88f0"
+                border.color: "#4f84ea"
                 border.width: 14
                 opacity: 0.55
             }
 
             Rectangle {
                 anchors.centerIn: parent
-                width: parent.width * 0.66
-                height: width
-                radius: width / 2
+                width: 126
+                height: 126
+                radius: 63
                 color: "transparent"
-                border.color: "#4a88f0"
-                border.width: 9
+                border.color: "#4f84ea"
+                border.width: 10
                 opacity: 0.65
             }
         }
 
-        // Angka Tanggal - Duduk persis di ATAS garis rel putih
-        Text {
-            id: dayNumText
+        // ── Date Number + 3-Letter Day Name (IDENTICAL font size across all 7 dates) ──
+        Row {
+            id: dateRow
+            anchors.top: parent.top
             anchors.left: parent.left
-            anchors.bottom: parent.top
-            anchors.bottomMargin: 8
-            text: String(entryRoot.dateObj.getDate())
-            font.family: "Montserrat Alternates, Montserrat, sans-serif"
-            font.pixelSize: entryRoot.numSize
-            font.bold: true
-            color: "#ffffff"
-        }
-
-        // Teks Hari (SUN/MON/...) & Garis Bawah
-        Column {
-            id: dayLabelCol
-            anchors.left: dayNumText.right
-            anchors.leftMargin: 6
-            anchors.bottom: dayNumText.bottom
-            anchors.bottomMargin: entryRoot.todayFlag ? 14 : Math.max(6, 8 * entryRoot.scaleFactor)
-            spacing: 2
+            spacing: 6
+            z: 1
 
             Text {
-                text: entryRoot.dayNames[entryRoot.dayOfWeek]
-                font.family: "Bahnschrift Condensed, Roboto Condensed, sans-serif"
-                font.pixelSize: entryRoot.dayLabelSize
+                id: dayNumText
+                text: entryRoot.dateObj.getDate()
+                font.family: "Montserrat Alternates"
+                font.pixelSize: 85
                 font.bold: true
-                color: entryRoot.isSunday ? "#ff4444" : entryRoot.isSaturday ? "#4488ff" : "#ffffff"
+                color: "white"
             }
 
-            Rectangle {
-                visible: entryRoot.isSunday || entryRoot.isSaturday
-                width: parent.children[0].implicitWidth
-                height: 2.0
-                color: entryRoot.isSunday ? "#ff4444" : "#4488ff"
+            Column {
+                id: dayNameCol
+                anchors.verticalCenter: dayNumText.verticalCenter
+                anchors.verticalCenterOffset: 6
+                spacing: 2
+
+                Text {
+                    id: dayNameText
+                    text: entryRoot.dayNames[entryRoot.dayOfWeek]
+                    font.family: "Inter Display"
+                    font.pixelSize: 22
+                    font.bold: true
+                    color: entryRoot.isSunday ? "#ff4444" : entryRoot.isSaturday ? "#4488ff" : "white"
+                }
+
+                Rectangle {
+                    visible: entryRoot.isSunday || entryRoot.isSaturday
+                    width: dayNameText.implicitWidth
+                    height: 2
+                    color: entryRoot.isSunday ? "#ff4444" : "#4488ff"
+                }
             }
         }
 
-        // Bola Bulan 3D di BAWAH garis rel putih
+        // ── Lunar Moon Sphere (Directly below day name & white line) ──
         Item {
-            id: moonItem
-            readonly property real moonR: entryRoot.todayFlag ? 36 : Math.max(14, 25 * entryRoot.scaleFactor)
-            readonly property color litColor: "#ffe700"
-            readonly property color darkColor: "#2a2720"
-
-            anchors.horizontalCenter: dayLabelCol.horizontalCenter
+            id: moonContainer
             anchors.top: parent.top
-            anchors.topMargin: 12
-            width: moonR * 2
-            height: moonR * 2
+            anchors.topMargin: 104
+            anchors.horizontalCenter: dayNameCol.horizontalCenter
+            width: entryRoot.moonSize
+            height: entryRoot.moonSize
+            z: 2
 
-            // Cincin Emas Mengelilingi Bulan Hari Ini
+            // Golden halo ring around Today's moon
             Rectangle {
                 visible: entryRoot.todayFlag
                 anchors.centerIn: parent
-                width: parent.moonR * 2 + 8
+                width: parent.width + 8
                 height: width
                 radius: width / 2
                 color: "transparent"
                 border.color: "#ffe700"
-                border.width: 2.5
-            }
-
-            // Faint border rim
-            Rectangle {
-                anchors.centerIn: parent
-                width: parent.moonR * 2
-                height: width
-                radius: width / 2
-                color: "transparent"
-                border.color: entryRoot.todayFlag ? "#ffe700" : "#3b4462"
-                border.width: 1.0
-                opacity: 0.6
-                z: 2
+                border.width: 2.0
             }
 
             Item {
                 id: moonSphere
-                anchors.centerIn: parent
-                width: parent.moonR * 2
-                height: width
+                anchors.fill: parent
                 clip: true
 
                 layer.enabled: true
@@ -360,14 +366,14 @@ Item {
                     width: parent.width / 2
                     height: parent.height
                     x: 0
-                    color: entryRoot.moonPhaseDeg < 180 ? moonItem.litColor : moonItem.darkColor
+                    color: entryRoot.moonPhaseDeg < 180 ? "#ffe700" : "#242730"
                 }
 
                 Rectangle {
                     width: parent.width / 2
                     height: parent.height
                     x: parent.width / 2
-                    color: entryRoot.moonPhaseDeg < 180 ? moonItem.darkColor : moonItem.litColor
+                    color: entryRoot.moonPhaseDeg < 180 ? "#242730" : "#ffe700"
                 }
 
                 Rectangle {
@@ -381,41 +387,15 @@ Item {
                         xScale: Math.max(0.001, Math.abs(Math.cos(entryRoot.moonPhaseDeg * Math.PI / 180)))
                         yScale: 1
                     }
-                    color: Math.cos(entryRoot.moonPhaseDeg * Math.PI / 180) >= 0 ? moonItem.darkColor : moonItem.litColor
+                    color: Math.cos(entryRoot.moonPhaseDeg * Math.PI / 180) >= 0 ? "#242730" : "#ffe700"
                 }
-            }
-        }
-
-        // Animasi transisi halus saat tanggal bergeser
-        Behavior on x {
-            SpringAnimation {
-                spring: 2.2
-                damping: 0.35
-            }
-        }
-        Behavior on y {
-            SpringAnimation {
-                spring: 2.2
-                damping: 0.35
-            }
-        }
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 200
             }
         }
 
         MouseArea {
             anchors.fill: parent
-            anchors.margins: -10
             cursorShape: Qt.PointingHandCursor
-            onClicked: p3CalRoot.dayOffset += entryRoot.offset
+            onClicked: root.dayOffset += entryRoot.dayOffsetVal
         }
     }
-
-    // ── 7. Penanganan Keyboard ESC & Arrow Keys ──
-    Keys.onEscapePressed: PhantomState.calendarOpen = false
-    Keys.onLeftPressed: p3CalRoot.dayOffset -= 1
-    Keys.onRightPressed: p3CalRoot.dayOffset += 1
-    Keys.onSpacePressed: p3CalRoot.dayOffset = 0
 }
