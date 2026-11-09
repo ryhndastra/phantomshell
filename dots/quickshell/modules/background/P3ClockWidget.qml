@@ -5,7 +5,7 @@ import qs.config
 // Widget Tanggal & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
 Item {
     id: p3ClockRoot
-    implicitWidth: 345
+    implicitWidth: 540
     implicitHeight: 140
 
     property var currentTime: new Date()
@@ -155,9 +155,9 @@ Item {
             anchors.rightMargin: 8
             text: p3ClockRoot.watermarkText
             font.family: "Anton"
-            font.pixelSize: 82
+            font.pixelSize: 74
             font.weight: Font.Black
-            font.letterSpacing: -1
+            font.letterSpacing: -4
             color: p3ClockRoot.periodBgTextColor
             opacity: 0.96
         }
