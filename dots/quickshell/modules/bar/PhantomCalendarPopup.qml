@@ -94,16 +94,30 @@ PanelWindow {
     WlrLayershell.keyboardFocus: PhantomState.calendarOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     exclusiveZone: 0
 
-    Shortcut {
-        sequence: "Escape"
-        onActivated: PhantomState.calendarOpen = false
-    }
+    // Key catcher untuk memastikan ESC selalu menutup kalender
+    Item {
+        id: calKeyCatcher
+        anchors.fill: parent
+        focus: true
+        z: 999
 
-    Keys.onPressed: event => {
-        if (event.key === Qt.Key_Escape) {
+        Keys.onEscapePressed: {
             PhantomState.calendarOpen = false
             event.accepted = true
         }
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_Escape) {
+                PhantomState.calendarOpen = false
+                event.accepted = true
+            }
+        }
+    }
+
+    Timer {
+        interval: 40
+        running: calPopupWin.visible
+        repeat: false
+        onTriggered: calKeyCatcher.forceActiveFocus()
     }
 
     anchors {

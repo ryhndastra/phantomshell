@@ -20,26 +20,39 @@ Item {
 
     focus: true
 
-    // ── Global Shortcut: ESC closes the calendar ──
-    Shortcut {
-        sequence: "Escape"
-        onActivated: PhantomState.calendarOpen = false
-    }
+    // ── Dedicated Key Catcher for ESC and Arrow Keys ──
+    Item {
+        id: screenKeyCatcher
+        anchors.fill: parent
+        focus: true
 
-    Keys.onPressed: event => {
-        if (event.key === Qt.Key_Escape) {
+        Keys.onEscapePressed: {
             PhantomState.calendarOpen = false
             event.accepted = true
-        } else if (event.key === Qt.Key_Left) {
-            root.dayOffset -= 1
-            event.accepted = true
-        } else if (event.key === Qt.Key_Right) {
-            root.dayOffset += 1
-            event.accepted = true
-        } else if (event.key === Qt.Key_Space) {
-            root.dayOffset = 0
-            event.accepted = true
         }
+
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_Escape) {
+                PhantomState.calendarOpen = false
+                event.accepted = true
+            } else if (event.key === Qt.Key_Left) {
+                root.dayOffset -= 1
+                event.accepted = true
+            } else if (event.key === Qt.Key_Right) {
+                root.dayOffset += 1
+                event.accepted = true
+            } else if (event.key === Qt.Key_Space) {
+                root.dayOffset = 0
+                event.accepted = true
+            }
+        }
+    }
+
+    Timer {
+        interval: 40
+        running: root.contentVisible
+        repeat: false
+        onTriggered: screenKeyCatcher.forceActiveFocus()
     }
 
     // ── Entrance Animation ──
@@ -62,7 +75,7 @@ Item {
             contentVisible = true
             animProgress = 0.0
             enterAnim.restart()
-            root.forceActiveFocus()
+            screenKeyCatcher.forceActiveFocus()
         } else {
             contentVisible = false
             animProgress = 0.0
@@ -78,7 +91,7 @@ Item {
         z: 0
     }
 
-    // ── Blue Ribbon: Centered at X=1000, Y=520, 250px thick, angle 20 deg ──
+    // ── Blue Ribbon: 215px thick, centered at X=1060, Y=520, angle 20 deg ──
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -90,17 +103,17 @@ Item {
         Rectangle {
             id: blueRibbon
             width: parent.width * 2.8
-            height: 250
+            height: 215
             color: "#1a50a8"
             anchors.centerIn: parent
-            anchors.horizontalCenterOffset: 40
+            anchors.horizontalCenterOffset: 100
             anchors.verticalCenterOffset: -20
             rotation: 20
             antialiasing: true
         }
     }
 
-    // ── White Line Rail: Centered at X=1000, Y=590, angle -19.5 deg ──
+    // ── White Line Rail: Centered at X=1060, Y=590, angle -19.5 deg ──
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -115,62 +128,64 @@ Item {
             height: 4
             color: "white"
             anchors.centerIn: parent
-            anchors.horizontalCenterOffset: 40
+            anchors.horizontalCenterOffset: 100
             anchors.verticalCenterOffset: 50
             rotation: -19.5
             antialiasing: true
         }
     }
 
-    // ── Year / Month Section (Inside blue ribbon on top-left, matching reference photo 2) ──
+    // ── Year / Month Section: Angka Bulan di DEPAN (kiri), ukuran pas dengan ribbon (200px) ──
     Item {
         visible: root.contentVisible
         opacity: root.animProgress
         transform: Translate { x: (1.0 - root.animProgress) * -80 }
         z: 3
         x: 40
-        y: 80
-        width: 380
-        height: 230
+        y: 70
+        width: 420
+        height: 220
 
-        Column {
-            id: ymCol
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.topMargin: 40
-            spacing: -4
+        Row {
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 14
 
+            // Angka Bulan Besar di DEPAN (kiri), hampir pas dengan ukuran ribbon
             Text {
-                text: root.now.getFullYear()
+                id: bigMonthNum
+                text: root.now.getMonth() + 1
                 font.family: "Rubik"
-                font.pixelSize: 50
+                font.pixelSize: 200
                 font.bold: true
                 color: "white"
+                anchors.verticalCenter: parent.verticalCenter
             }
 
-            Text {
-                text: Qt.formatDate(root.now, "MMMM")
-                font.family: "Rubik"
-                font.pixelSize: 28
-                font.bold: true
-                color: "#b4c8ff"
-            }
-        }
+            // Tahun dan Nama Bulan di BELAKANGNYA (kanan)
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: -4
 
-        Text {
-            anchors.left: ymCol.right
-            anchors.leftMargin: 18
-            anchors.top: parent.top
-            anchors.topMargin: 12
-            text: root.now.getMonth() + 1
-            font.family: "Rubik"
-            font.pixelSize: 175
-            font.bold: true
-            color: "white"
+                Text {
+                    text: root.now.getFullYear()
+                    font.family: "Rubik"
+                    font.pixelSize: 48
+                    font.bold: true
+                    color: "white"
+                }
+
+                Text {
+                    text: Qt.formatDate(root.now, "MMMM")
+                    font.family: "Rubik"
+                    font.pixelSize: 28
+                    font.bold: true
+                    color: "#b4c8ff"
+                }
+            }
         }
     }
 
-    // ── 7 Date Entries across the screen ──
+    // ── 7 Date Entries across the screen (Spacing 280px ensures neighbor dates never touch ribbon) ──
     Item {
         id: datesContainer
         anchors.fill: parent
@@ -219,13 +234,14 @@ Item {
         required property bool pastFlag
         required property int dayOffsetVal
 
-        // White rail: exact rotation center is at (1000, 590), angle -19.5 deg
-        readonly property real targetCenterX: 1000 + dayOffsetVal * 240
-        readonly property real whiteLineY: 590 - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - 1000)
+        // White rail: centered at X=1060, Y=590, angle -19.5 deg
+        // Spacing 280px guarantees 8 SUN and 10 TUE have a wide gap and never touch the blue ribbon!
+        readonly property real targetCenterX: 1060 + dayOffsetVal * 280
+        readonly property real whiteLineY: 590 - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - 1060)
 
-        // Clear 18px gap above white rail ensures no date numbers are ever cut or touched
+        // Jarak bersih 26px di atas rel garis putih (tidak ada angka yang terpotong/tersentuh)
         x: targetCenterX - 45
-        y: whiteLineY - 18 - 115
+        y: whiteLineY - 26 - 115
         width: 170
         height: 260
         z: 6
@@ -351,11 +367,11 @@ Item {
             }
         }
 
-        // ── Lunar Moon Sphere (Directly below day name & with clean 16px gap beneath white rail) ──
+        // ── Lunar Moon Sphere (Directly below day name & with clean 18px gap beneath white rail) ──
         Item {
             id: moonContainer
             x: dayNumText.width + 6 + (dayNameCol.width / 2) - (width / 2)
-            y: 154
+            y: 160
             width: entryRoot.moonSize
             height: entryRoot.moonSize
             z: 2
