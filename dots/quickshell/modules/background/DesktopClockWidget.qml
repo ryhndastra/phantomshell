@@ -7,7 +7,7 @@ import qs.components
 Item {
     id: desktopClockWidget
     visible: PhantomState.showDesktopClock
-    width: PhantomState.isP3 ? 540 : 430
+    width: PhantomState.isP3 ? (p3SeesClock ? p3SeesClock.dynamicWidth : 450) : 430
     height: PhantomState.isP3 ? 140 : 250
     z: 10
     scale: PhantomState.desktopClockScale / 100.0
@@ -55,6 +55,9 @@ Item {
         return 48
     }
 
+    Behavior on width {
+        NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
+    }
     Behavior on x {
         NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
     }

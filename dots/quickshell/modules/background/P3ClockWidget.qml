@@ -5,8 +5,11 @@ import qs.config
 // Widget Tanggal & Lunar HUD otentik Persona 3 Reload - Game-Accurate Atlus HUD
 Item {
     id: p3ClockRoot
-    implicitWidth: 540
+    implicitWidth: dynamicWidth
     implicitHeight: 140
+
+    readonly property real leftPadding: 28
+    readonly property real dynamicWidth: Math.max(320, Math.ceil(bgPeriodText.contentWidth) + 86 + leftPadding)
 
     property var currentTime: new Date()
 
@@ -226,7 +229,7 @@ Item {
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
                             GradientStop { position: 0.0; color: "transparent" }
-                            GradientStop { position: 0.08; color: "white" }
+                            GradientStop { position: 0.05; color: "white" }
                             GradientStop { position: 1.0; color: "white" }
                         }
                     }
