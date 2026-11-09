@@ -5,7 +5,7 @@ import Quickshell.Wayland
 import qs.config
 import qs.components
 
-// modul pemilih emoji cepat bergaya persona 5 (super + .)
+// S.E.E.S. symbol & emoji picker overlay (Super + .)
 Scope {
     id: root
 
@@ -67,7 +67,9 @@ Scope {
         if (!item) return
         Quickshell.execDetached(["bash", "-c", "printf '%s' '" + item.char + "' | wl-copy"])
         PhantomState.emojiOpen = false
-        PhantomState.pushImNotification("Emoji Compendium", item.char + " disalin ke clipboard!", "NORMAL", "")
+        PhantomState.playSfx("select")
+        const notifTitle = PhantomState.isP3 ? "S.E.E.S. Archive" : "Emoji Compendium"
+        PhantomState.pushImNotification(notifTitle, item.char + " copied to clipboard!", "NORMAL", "")
     }
 
     PanelWindow {
@@ -96,12 +98,15 @@ Scope {
                 emojiSearch.text = ""
                 emojiAnim.restart()
                 emojiSearch.forceActiveFocus()
+                PhantomState.playSfx("open")
+            } else {
+                PhantomState.playSfx("close")
             }
         }
 
         Rectangle {
             anchors.fill: parent
-            color: "#AA050508"
+            color: PhantomState.isP3 ? "#D0020716" : "#AA050508"
             MouseArea {
                 anchors.fill: parent
                 onClicked: PhantomState.emojiOpen = false
@@ -110,18 +115,33 @@ Scope {
 
         Item {
             id: emojiCard
-            width: 560
-            height: 440
+            width: Math.min(parent.width - 64, 620)
+            height: Math.min(parent.height - 80, 480)
             anchors.centerIn: parent
 
             ParallelAnimation {
                 id: emojiAnim
-                NumberAnimation { target: emojiCard; property: "scale"; from: 0.88; to: 1.0; duration: 210; easing.type: Easing.OutBack; easing.overshoot: 1.25 }
-                NumberAnimation { target: emojiCard; property: "opacity"; from: 0.0; to: 1.0; duration: 150; easing.type: Easing.OutCubic }
+                NumberAnimation { target: emojiCard; property: "scale"; from: 0.90; to: 1.0; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.15 }
+                NumberAnimation { target: emojiCard; property: "opacity"; from: 0.0; to: 1.0; duration: 160; easing.type: Easing.OutCubic }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                visible: PhantomState.isP3
+                color: "#F203091C"
+                border.color: "#8000DBFF"
+                border.width: 1.8
+                radius: 8
+
+                Rectangle { anchors.top: parent.top; anchors.left: parent.left; width: 34; height: 3; color: "#00f0ff" }
+                Rectangle { anchors.top: parent.top; anchors.left: parent.left; width: 3; height: 34; color: "#00f0ff" }
+                Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: 34; height: 3; color: "#00f0ff" }
+                Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: 3; height: 34; color: "#00f0ff" }
             }
 
             P5SkewedCard {
                 anchors.fill: parent
+                visible: !PhantomState.isP3
                 fillColor: "#0B0B10"
                 borderColor: "#FFFFFF"
                 shadowColor: PhantomState.primary
@@ -135,52 +155,95 @@ Scope {
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 22
+                anchors.margins: 20
                 spacing: 12
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 10
+                    spacing: 12
+
+                    Rectangle {
+                        visible: PhantomState.isP3
+                        Layout.preferredWidth: 34
+                        Layout.preferredHeight: 34
+                        radius: 4
+                        color: "#0028e0"
+                        border.color: "#00f0ff"
+                        border.width: 1.4
+
+                        Canvas {
+                            anchors.fill: parent
+                            onPaint: {
+                                var ctx = getContext("2d")
+                                ctx.clearRect(0, 0, width, height)
+                                var cx = width / 2
+                                var cy = height / 2
+
+                                ctx.strokeStyle = "#00f0ff"
+                                ctx.lineWidth = 1.4
+
+                                ctx.beginPath()
+                                ctx.arc(cx, cy, 8, 0, Math.PI * 2)
+                                ctx.stroke()
+
+                                ctx.beginPath()
+                                ctx.arc(cx, cy, 3, 0, Math.PI * 2)
+                                ctx.fillStyle = "#ffffff"
+                                ctx.fill()
+
+                                ctx.beginPath(); ctx.moveTo(cx - 12, cy); ctx.lineTo(cx - 8, cy); ctx.stroke()
+                                ctx.beginPath(); ctx.moveTo(cx + 8, cy); ctx.lineTo(cx + 12, cy); ctx.stroke()
+                                ctx.beginPath(); ctx.moveTo(cx, cy - 12); ctx.lineTo(cx, cy - 8); ctx.stroke()
+                                ctx.beginPath(); ctx.moveTo(cx, cy + 8); ctx.lineTo(cx, cy + 12); ctx.stroke()
+                            }
+                        }
+                    }
 
                     P5Star {
+                        visible: !PhantomState.isP3
                         Layout.preferredWidth: 26
                         Layout.preferredHeight: 26
                         spinning: true
                     }
 
                     ColumnLayout {
-                        spacing: 1
+                        spacing: 2
                         Text {
-                            text: "PHANTOM EMOJI // SYMBOL COMPENDIUM"
+                            text: PhantomState.isP3 ? "S.E.E.S. ARCHIVE // SYMBOL COMPENDIUM" : "PHANTOM EMOJI // SYMBOL COMPENDIUM"
                             color: "#FFFFFF"
-                            font.family: "JetBrainsMono NFM"
-                            font.pixelSize: 16
+                            font.family: PhantomState.isP3 ? "Rubik" : "JetBrainsMono NFM"
+                            font.pixelSize: 13
                             font.weight: Font.Black
-                            font.italic: true
+                            font.italic: !PhantomState.isP3
+                            font.letterSpacing: PhantomState.isP3 ? 0.8 : 0
                         }
                         Text {
-                            text: "CLICK OR PRESS [ENTER] TO COPY TO CLIPBOARD"
-                            color: PhantomState.secondary
+                            text: root.filteredEmojis.length + " SYMBOLS • [ENTER] COPY • [ESC] CLOSE"
+                            color: PhantomState.isP3 ? "#00dbff" : PhantomState.secondary
                             font.family: "JetBrainsMono NFM"
                             font.pixelSize: 9
-                            font.weight: Font.Black
+                            font.weight: Font.Bold
                         }
                     }
 
                     Item { Layout.fillWidth: true }
 
-                    Item {
-                        Layout.preferredWidth: 28
-                        Layout.preferredHeight: 28
-                        P5SkewedCard {
-                            anchors.fill: parent
-                            fillColor: closeEmMouse.containsMouse ? PhantomState.primary : "#1A1A26"
-                            borderColor: "#FFFFFF"
-                            borderWidth: 1.5
-                            skewPx: 4
-                            showShadowOffset: false
+                    Rectangle {
+                        Layout.preferredWidth: 30
+                        Layout.preferredHeight: 30
+                        radius: 4
+                        color: closeEmMouse.containsMouse ? "#d60032" : (PhantomState.isP3 ? "#0A183C" : "#1A1A26")
+                        border.color: closeEmMouse.containsMouse ? "#ffffff" : (PhantomState.isP3 ? "#6000DBFF" : "#ffffff")
+                        border.width: 1.4
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "✕"
+                            color: "#ffffff"
+                            font.pixelSize: 13
+                            font.bold: true
                         }
-                        P5Icon { anchors.centerIn: parent; name: "close"; size: 10; color: "#FFFFFF" }
+
                         MouseArea {
                             id: closeEmMouse
                             anchors.fill: parent
@@ -191,35 +254,47 @@ Scope {
                     }
                 }
 
-                Item {
+                Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 36
-
-                    P5SkewedCard {
-                        anchors.fill: parent
-                        fillColor: "#141420"
-                        borderColor: PhantomState.secondary
-                        borderWidth: 2
-                        skewPx: 6
-                        showShadowOffset: false
-                    }
+                    Layout.preferredHeight: 34
+                    radius: 4
+                    color: "#07122C"
+                    border.color: emojiSearch.activeFocus ? "#00f0ff" : "#4000DBFF"
+                    border.width: 1.4
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 12
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
                         spacing: 8
 
-                        P5Icon { name: "search"; size: 12; color: PhantomState.secondary }
+                        Canvas {
+                            Layout.preferredWidth: 14
+                            Layout.preferredHeight: 14
+                            onPaint: {
+                                var ctx = getContext("2d")
+                                ctx.clearRect(0, 0, width, height)
+                                ctx.strokeStyle = "#00f0ff"
+                                ctx.lineWidth = 1.6
+                                ctx.beginPath()
+                                ctx.arc(5.5, 5.5, 3.8, 0, Math.PI * 2)
+                                ctx.stroke()
+                                ctx.beginPath()
+                                ctx.moveTo(8.5, 8.5)
+                                ctx.lineTo(12.5, 12.5)
+                                ctx.stroke()
+                            }
+                        }
 
                         TextInput {
                             id: emojiSearch
                             Layout.fillWidth: true
                             color: "#FFFFFF"
                             font.family: "JetBrainsMono NFM"
-                            font.pixelSize: 12
-                            font.weight: Font.Bold
+                            font.pixelSize: 11
+                            font.bold: true
                             clip: true
+                            selectByMouse: true
                             onTextChanged: {
                                 root.searchQuery = text
                                 root.selectedIdx = 0
@@ -231,6 +306,12 @@ Scope {
                             Keys.onLeftPressed: {
                                 if (root.filteredEmojis.length > 0) root.selectedIdx = (root.selectedIdx - 1 + root.filteredEmojis.length) % root.filteredEmojis.length
                             }
+                            Keys.onDownPressed: {
+                                if (root.filteredEmojis.length > 0) root.selectedIdx = Math.min(root.filteredEmojis.length - 1, root.selectedIdx + 5)
+                            }
+                            Keys.onUpPressed: {
+                                if (root.filteredEmojis.length > 0) root.selectedIdx = Math.max(0, root.selectedIdx - 5)
+                            }
                             Keys.onReturnPressed: {
                                 if (root.filteredEmojis.length > 0 && root.selectedIdx < root.filteredEmojis.length) {
                                     root.pickEmoji(root.filteredEmojis[root.selectedIdx])
@@ -239,10 +320,27 @@ Scope {
 
                             Text {
                                 anchors.fill: parent
-                                text: "Search emoji (e.g. fire, joker, cat, heart)..."
-                                color: PhantomState.muted
-                                font: parent.font
-                                visible: !parent.text
+                                text: "Search symbols (e.g. fire, sword, moon, heart)..."
+                                color: "#4A6894"
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 11
+                                visible: !emojiSearch.text && !emojiSearch.activeFocus
+                            }
+                        }
+
+                        Text {
+                            visible: emojiSearch.text.length > 0
+                            text: "✕"
+                            color: "#00f0ff"
+                            font.pixelSize: 11
+                            font.bold: true
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    emojiSearch.text = ""
+                                    root.searchQuery = ""
+                                }
                             }
                         }
                     }
@@ -254,6 +352,7 @@ Scope {
                     contentWidth: width
                     contentHeight: emojiGrid.implicitHeight + 10
                     clip: true
+                    boundsBehavior: Flickable.StopAtBounds
 
                     GridLayout {
                         id: emojiGrid
@@ -265,40 +364,36 @@ Scope {
                         Repeater {
                             model: root.filteredEmojis
 
-                            delegate: Item {
+                            delegate: Rectangle {
                                 required property var modelData
                                 required property int index
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: 54
+                                Layout.preferredHeight: 56
+                                radius: 4
 
                                 readonly property bool isSel: index === root.selectedIdx
 
-                                P5SkewedCard {
-                                    anchors.fill: parent
-                                    fillColor: parent.isSel || emCellMouse.containsMouse ? PhantomState.primary : "#14141F"
-                                    borderColor: parent.isSel ? PhantomState.secondary : "#2E2E44"
-                                    borderWidth: parent.isSel ? 2 : 1.2
-                                    skewPx: 5
-                                    showShadowOffset: false
+                                color: isSel ? "#0028e0" : (emCellMouse.containsMouse ? "#0E2456" : "#071638")
+                                border.color: isSel ? "#00f0ff" : (emCellMouse.containsMouse ? "#00f0ff" : "#2800DBFF")
+                                border.width: isSel || emCellMouse.containsMouse ? 1.4 : 1.0
 
-                                    ColumnLayout {
-                                        anchors.centerIn: parent
-                                        spacing: 2
+                                ColumnLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 3
 
-                                        Text {
-                                            Layout.alignment: Qt.AlignHCenter
-                                            text: modelData.char
-                                            font.pixelSize: 22
-                                        }
+                                    Text {
+                                        Layout.alignment: Qt.AlignHCenter
+                                        text: modelData.char
+                                        font.pixelSize: 22
+                                    }
 
-                                        Text {
-                                            Layout.alignment: Qt.AlignHCenter
-                                            text: modelData.name.split(" ")[0].toUpperCase()
-                                            color: "#FFFFFF"
-                                            font.family: "JetBrainsMono NFM"
-                                            font.pixelSize: 8
-                                            font.weight: Font.Black
-                                        }
+                                    Text {
+                                        Layout.alignment: Qt.AlignHCenter
+                                        text: modelData.name.split(" ")[0].toUpperCase()
+                                        color: parent.parent.isSel ? "#ffffff" : "#8AA6CE"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 8
+                                        font.weight: Font.Black
                                     }
                                 }
 
