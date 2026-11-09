@@ -9,7 +9,7 @@ Item {
     property bool active: false
     property bool contentVisible: false
 
-    // navigation
+    // Navigation
     property int dayOffset: 0
     property var baseDate: new Date()
     readonly property var now: {
@@ -31,15 +31,15 @@ Item {
         }
     }
 
-    // ── Background ──
+    // ── Background: Authentic P3R Deep Indigo Navy ──
     Rectangle {
         anchors.fill: parent
-        color: "#080c24"
+        color: "#0b113d"
         visible: root.contentVisible
         z: 0
     }
 
-    // ── Blue Ribbon (Centered diagonally across screen) ──
+    // ── Blue Ribbon: Authentic P3R Royal Blue Band ──
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -49,15 +49,16 @@ Item {
         Rectangle {
             id: blueRibbon
             width: parent.width * 2.8
-            height: 300
-            color: "#1153ba"
+            height: 250
+            color: "#1a50a8"
             anchors.centerIn: parent
+            anchors.verticalCenterOffset: -45
             rotation: 20
             antialiasing: true
         }
     }
 
-    // ── White Line (Centered diagonally across screen, opposing slope) ──
+    // ── White Line Rail ──
     Item {
         anchors.fill: parent
         visible: root.contentVisible
@@ -70,54 +71,55 @@ Item {
             height: 4
             color: "white"
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: 35
-            rotation: -20
+            anchors.verticalCenterOffset: 40
+            rotation: -19.5
             antialiasing: true
         }
     }
 
-    // ── Year / Month label (Inside the blue ribbon on the left) ──
+    // ── Year / Month Section (Inside the blue ribbon on top-left) ──
     Item {
         visible: root.contentVisible
         z: 3
-        x: 45
-        y: 135
-        width: 320
-        height: 200
+        x: 40
+        y: 75
+        width: 360
+        height: 220
 
-        Row {
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 14
-
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: -2
-
-                Text {
-                    text: root.now.getFullYear()
-                    font.family: "Montserrat Alternates"
-                    font.pixelSize: 44
-                    font.bold: true
-                    color: "white"
-                }
-
-                Text {
-                    text: Qt.formatDate(root.now, "MMMM")
-                    font.family: "Inter Display"
-                    font.pixelSize: 24
-                    font.bold: true
-                    color: "#b4c8ff"
-                }
-            }
+        Column {
+            id: ymCol
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.topMargin: 38
+            spacing: -4
 
             Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.now.getMonth() + 1
-                font.family: "Montserrat Alternates"
-                font.pixelSize: 175
+                text: root.now.getFullYear()
+                font.family: "Rubik"
+                font.pixelSize: 48
                 font.bold: true
                 color: "white"
             }
+
+            Text {
+                text: Qt.formatDate(root.now, "MMMM")
+                font.family: "Rubik"
+                font.pixelSize: 26
+                font.bold: true
+                color: "#b4c8ff"
+            }
+        }
+
+        Text {
+            anchors.left: ymCol.right
+            anchors.leftMargin: 16
+            anchors.top: parent.top
+            anchors.topMargin: 14
+            text: root.now.getMonth() + 1
+            font.family: "Rubik"
+            font.pixelSize: 165
+            font.bold: true
+            color: "white"
         }
     }
 
@@ -192,22 +194,20 @@ Item {
         required property bool pastFlag
         required property int dayOffsetVal
 
-        // White line geometry:
-        // center: cx = parent.width / 2, cy = parent.height / 2 + 35
-        // slope = tan(-20 deg) = -0.36397
-        readonly property real targetCenterX: parent.width / 2 + dayOffsetVal * 230
-        readonly property real whiteLineY: (parent.height / 2 + 35) - Math.tan(20 * Math.PI / 180) * (targetCenterX - parent.width / 2)
+        // White rail: center at (parent.width/2, parent.height/2 + 40), angle -19.5 deg
+        readonly property real targetCenterX: parent.width / 2 + dayOffsetVal * 250
+        readonly property real whiteLineY: (parent.height / 2 + 40) - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - parent.width / 2)
 
-        x: targetCenterX - width / 2
-        y: whiteLineY - 95
-        width: 150
-        height: 200
+        x: targetCenterX - 65
+        y: whiteLineY - 136
+        width: 170
+        height: 250
 
         // Opacity gradient:
         readonly property real alphaVal: {
             if (todayFlag) return 1.0
-            if (dayOffsetVal === -1) return 0.80
-            if (dayOffsetVal === -2) return 0.58
+            if (dayOffsetVal === -1) return 0.82
+            if (dayOffsetVal === -2) return 0.60
             if (dayOffsetVal === -3) return 0.38
             if (dayOffsetVal === 1) return 0.88
             if (dayOffsetVal === 2) return 0.72
@@ -216,20 +216,21 @@ Item {
         }
 
         // Moon size:
-        // 3 days back: decreasing (18, 26, 34)
-        // today: most prominent (66)
-        // 3 days future: smaller than today but bigger than past 3 (46, 42, 38)
+        // 3 days back: decreasing (17, 25, 34)
+        // today: most prominent (68)
+        // 3 days future: smaller than today but larger than past 3 (44, 40, 36)
         readonly property real moonSize: {
-            if (todayFlag) return 66
+            if (todayFlag) return 68
             if (dayOffsetVal === -1) return 34
             if (dayOffsetVal === -2) return 25
             if (dayOffsetVal === -3) return 17
-            if (dayOffsetVal === 1) return 46
-            if (dayOffsetVal === 2) return 41
-            if (dayOffsetVal === 3) return 37
+            if (dayOffsetVal === 1) return 44
+            if (dayOffsetVal === 2) return 40
+            if (dayOffsetVal === 3) return 36
             return 30
         }
 
+        // Lunar phase degree calculation
         readonly property real moonPhaseDeg: {
             const synodicMonth = 29.53059
             const ref = new Date(Date.UTC(2000, 0, 6, 18, 14))
@@ -258,28 +259,28 @@ Item {
 
             Rectangle {
                 anchors.centerIn: parent
-                width: 210
-                height: 210
-                radius: 105
+                width: 220
+                height: 220
+                radius: 110
                 color: "transparent"
-                border.color: "#4f84ea"
+                border.color: "#3870dc"
                 border.width: 14
-                opacity: 0.55
+                opacity: 0.5
             }
 
             Rectangle {
                 anchors.centerIn: parent
-                width: 126
-                height: 126
-                radius: 63
+                width: 136
+                height: 136
+                radius: 68
                 color: "transparent"
-                border.color: "#4f84ea"
+                border.color: "#3870dc"
                 border.width: 10
                 opacity: 0.65
             }
         }
 
-        // ── Date Number + 3-Letter Day Name (IDENTICAL font size across all 7 dates) ──
+        // ── Date Number + 3-Letter Day Name (Chunky Rubik Bold, identical font size 115 across all dates) ──
         Row {
             id: dateRow
             anchors.top: parent.top
@@ -290,23 +291,23 @@ Item {
             Text {
                 id: dayNumText
                 text: entryRoot.dateObj.getDate()
-                font.family: "Montserrat Alternates"
-                font.pixelSize: 85
+                font.family: "Rubik"
+                font.pixelSize: 115
                 font.bold: true
                 color: "white"
             }
 
             Column {
                 id: dayNameCol
-                anchors.verticalCenter: dayNumText.verticalCenter
-                anchors.verticalCenterOffset: 6
+                anchors.top: dayNumText.top
+                anchors.topMargin: 26
                 spacing: 2
 
                 Text {
                     id: dayNameText
                     text: entryRoot.dayNames[entryRoot.dayOfWeek]
-                    font.family: "Inter Display"
-                    font.pixelSize: 22
+                    font.family: "Rubik"
+                    font.pixelSize: 24
                     font.bold: true
                     color: entryRoot.isSunday ? "#ff4444" : entryRoot.isSaturday ? "#4488ff" : "white"
                 }
@@ -314,23 +315,23 @@ Item {
                 Rectangle {
                     visible: entryRoot.isSunday || entryRoot.isSaturday
                     width: dayNameText.implicitWidth
-                    height: 2
+                    height: 2.5
                     color: entryRoot.isSunday ? "#ff4444" : "#4488ff"
                 }
             }
         }
 
-        // ── Lunar Moon Sphere (Directly below day name & white line) ──
+        // ── Lunar Moon Sphere (Directly below day name & beneath the white rail) ──
         Item {
             id: moonContainer
             anchors.top: parent.top
-            anchors.topMargin: 104
-            anchors.horizontalCenter: dayNameCol.horizontalCenter
+            anchors.topMargin: 144
+            x: dayNumText.width + 6
             width: entryRoot.moonSize
             height: entryRoot.moonSize
             z: 2
 
-            // Golden halo ring around Today's moon
+            // Glowing golden halo ring around Today's moon
             Rectangle {
                 visible: entryRoot.todayFlag
                 anchors.centerIn: parent
@@ -339,7 +340,7 @@ Item {
                 radius: width / 2
                 color: "transparent"
                 border.color: "#ffe700"
-                border.width: 2.0
+                border.width: 2.5
             }
 
             Item {
