@@ -20,14 +20,52 @@ Item {
 
     focus: true
 
+    // ── Global Shortcut: ESC closes the calendar ──
+    Shortcut {
+        sequence: "Escape"
+        onActivated: PhantomState.calendarOpen = false
+    }
+
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Escape) {
+            PhantomState.calendarOpen = false
+            event.accepted = true
+        } else if (event.key === Qt.Key_Left) {
+            root.dayOffset -= 1
+            event.accepted = true
+        } else if (event.key === Qt.Key_Right) {
+            root.dayOffset += 1
+            event.accepted = true
+        } else if (event.key === Qt.Key_Space) {
+            root.dayOffset = 0
+            event.accepted = true
+        }
+    }
+
+    // ── Entrance Animation ──
+    property real animProgress: 0.0
+
+    NumberAnimation {
+        id: enterAnim
+        target: root
+        property: "animProgress"
+        from: 0.0
+        to: 1.0
+        duration: 350
+        easing.type: Easing.OutCubic
+    }
+
     onActiveChanged: {
         if (active) {
             baseDate = new Date()
             dayOffset = 0
             contentVisible = true
+            animProgress = 0.0
+            enterAnim.restart()
             root.forceActiveFocus()
         } else {
             contentVisible = false
+            animProgress = 0.0
         }
     }
 
@@ -36,14 +74,17 @@ Item {
         anchors.fill: parent
         color: "#0b113d"
         visible: root.contentVisible
+        opacity: root.animProgress
         z: 0
     }
 
-    // ── Blue Ribbon: Centered at Y=520, 250px thick, angle 20 deg ──
+    // ── Blue Ribbon: Centered at X=1000, Y=520, 250px thick, angle 20 deg ──
     Item {
         anchors.fill: parent
         visible: root.contentVisible
         clip: true
+        opacity: root.animProgress
+        transform: Translate { x: (1.0 - root.animProgress) * -180 }
         z: 1
 
         Rectangle {
@@ -52,17 +93,20 @@ Item {
             height: 250
             color: "#1a50a8"
             anchors.centerIn: parent
+            anchors.horizontalCenterOffset: 40
             anchors.verticalCenterOffset: -20
             rotation: 20
             antialiasing: true
         }
     }
 
-    // ── White Line Rail: Angle -19.5 deg, passes right at baseline Y=578 ──
+    // ── White Line Rail: Centered at X=1000, Y=590, angle -19.5 deg ──
     Item {
         anchors.fill: parent
         visible: root.contentVisible
         clip: true
+        opacity: root.animProgress
+        transform: Translate { x: (1.0 - root.animProgress) * -120 }
         z: 2
 
         Rectangle {
@@ -71,32 +115,35 @@ Item {
             height: 4
             color: "white"
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: 38
+            anchors.horizontalCenterOffset: 40
+            anchors.verticalCenterOffset: 50
             rotation: -19.5
             antialiasing: true
         }
     }
 
-    // ── Year / Month Section (Inside the blue ribbon on top-left) ──
+    // ── Year / Month Section (Inside blue ribbon on top-left, matching reference photo 2) ──
     Item {
         visible: root.contentVisible
+        opacity: root.animProgress
+        transform: Translate { x: (1.0 - root.animProgress) * -80 }
         z: 3
         x: 40
-        y: 85
-        width: 360
-        height: 220
+        y: 80
+        width: 380
+        height: 230
 
         Column {
             id: ymCol
             anchors.left: parent.left
             anchors.top: parent.top
-            anchors.topMargin: 38
+            anchors.topMargin: 40
             spacing: -4
 
             Text {
                 text: root.now.getFullYear()
                 font.family: "Rubik"
-                font.pixelSize: 48
+                font.pixelSize: 50
                 font.bold: true
                 color: "white"
             }
@@ -104,7 +151,7 @@ Item {
             Text {
                 text: Qt.formatDate(root.now, "MMMM")
                 font.family: "Rubik"
-                font.pixelSize: 26
+                font.pixelSize: 28
                 font.bold: true
                 color: "#b4c8ff"
             }
@@ -112,12 +159,12 @@ Item {
 
         Text {
             anchors.left: ymCol.right
-            anchors.leftMargin: 16
+            anchors.leftMargin: 18
             anchors.top: parent.top
-            anchors.topMargin: 14
+            anchors.topMargin: 12
             text: root.now.getMonth() + 1
             font.family: "Rubik"
-            font.pixelSize: 165
+            font.pixelSize: 175
             font.bold: true
             color: "white"
         }
@@ -150,40 +197,18 @@ Item {
         }
     }
 
-    // ── Dismiss & Keyboard Handling ──
-    FocusScope {
+    // ── Background Click to Dismiss ──
+    MouseArea {
         anchors.fill: parent
-        focus: visible
-        z: 10
-
-        MouseArea {
-            anchors.fill: parent
-            z: -1
-            hoverEnabled: true
-            onWheel: event => {
-                if (event.angleDelta.y > 0)
-                    root.dayOffset += 1
-                else if (event.angleDelta.y < 0)
-                    root.dayOffset -= 1
-            }
-            onClicked: PhantomState.calendarOpen = false
-        }
-
-        Keys.onPressed: event => {
-            if (event.key === Qt.Key_Escape) {
-                PhantomState.calendarOpen = false
-                event.accepted = true
-            } else if (event.key === Qt.Key_Left) {
-                root.dayOffset -= 1
-                event.accepted = true
-            } else if (event.key === Qt.Key_Right) {
+        z: 5
+        hoverEnabled: true
+        onWheel: event => {
+            if (event.angleDelta.y > 0)
                 root.dayOffset += 1
-                event.accepted = true
-            } else if (event.key === Qt.Key_Space) {
-                root.dayOffset = 0
-                event.accepted = true
-            }
+            else if (event.angleDelta.y < 0)
+                root.dayOffset -= 1
         }
+        onClicked: PhantomState.calendarOpen = false
     }
 
     // ── Calendar Entry Component ──
@@ -194,14 +219,18 @@ Item {
         required property bool pastFlag
         required property int dayOffsetVal
 
-        // White rail: center at (parent.width/2, parent.height/2 + 38), angle -19.5 deg
-        readonly property real targetCenterX: parent.width / 2 + dayOffsetVal * 250
-        readonly property real whiteLineY: (parent.height / 2 + 38) - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - parent.width / 2)
+        // White rail: exact rotation center is at (1000, 590), angle -19.5 deg
+        readonly property real targetCenterX: 1000 + dayOffsetVal * 240
+        readonly property real whiteLineY: 590 - Math.tan(19.5 * Math.PI / 180) * (targetCenterX - 1000)
 
-        x: targetCenterX - 65
-        y: whiteLineY - 118
+        // Clear 18px gap above white rail ensures no date numbers are ever cut or touched
+        x: targetCenterX - 45
+        y: whiteLineY - 18 - 115
         width: 170
-        height: 250
+        height: 260
+        z: 6
+
+        transform: Translate { y: (1.0 - root.animProgress) * 35 }
 
         // Opacity gradient:
         readonly property real alphaVal: {
@@ -247,10 +276,9 @@ Item {
         readonly property bool isSunday: dayOfWeek === 0
         readonly property bool isSaturday: dayOfWeek === 6
 
-        opacity: alphaVal
+        opacity: alphaVal * root.animProgress
 
         // ── Ripple concentric rings (Today only) ──
-        // Centered directly on dayNumText
         Item {
             visible: entryRoot.todayFlag
             x: dayNumText.x + dayNumText.width / 2
@@ -323,11 +351,11 @@ Item {
             }
         }
 
-        // ── Lunar Moon Sphere (Directly below day name & beneath the white rail) ──
+        // ── Lunar Moon Sphere (Directly below day name & with clean 16px gap beneath white rail) ──
         Item {
             id: moonContainer
             x: dayNumText.width + 6 + (dayNameCol.width / 2) - (width / 2)
-            y: 124 // Sits directly below the white line
+            y: 154
             width: entryRoot.moonSize
             height: entryRoot.moonSize
             z: 2

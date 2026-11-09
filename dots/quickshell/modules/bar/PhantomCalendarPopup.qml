@@ -94,6 +94,11 @@ PanelWindow {
     WlrLayershell.keyboardFocus: PhantomState.calendarOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     exclusiveZone: 0
 
+    Shortcut {
+        sequence: "Escape"
+        onActivated: PhantomState.calendarOpen = false
+    }
+
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
             PhantomState.calendarOpen = false
