@@ -64,7 +64,7 @@ local function extract_bool(json, key, default)
 end
 
 function Phantom.hexToRgba(hex, alphaHex)
-    local clean = (hex or "#E60012"):gsub("#", "")
+    local clean = (hex or "#00B4D8"):gsub("#", "")
     return "rgba(" .. clean .. (alphaHex or "ee") .. ")"
 end
 
@@ -83,12 +83,12 @@ Phantom.settings = {
 }
 
 Phantom.colors = {
-    primary = extract_string(colorsRaw, "primary", "#E60012"),
-    secondary = extract_string(colorsRaw, "secondary", "#FFD700"),
-    accent = extract_string(colorsRaw, "accent", "#FF1E2E"),
-    background = extract_string(colorsRaw, "background", "#0B0B0E"),
-    surface = extract_string(colorsRaw, "surface", "#141419"),
-    foreground = extract_string(colorsRaw, "foreground", "#FFFFFF"),
+    primary = extract_string(colorsRaw, "primary", "#00B4D8"),
+    secondary = extract_string(colorsRaw, "secondary", "#90E0EF"),
+    accent = extract_string(colorsRaw, "accent", "#00F0FF"),
+    background = extract_string(colorsRaw, "background", "#070C18"),
+    surface = extract_string(colorsRaw, "surface", "#0E172C"),
+    foreground = extract_string(colorsRaw, "foreground", "#F8FBFF"),
 }
 
 return Phantom

@@ -75,26 +75,6 @@ Item {
     }
 
     Image {
-        id: cloudMaskRaw
-        source: Qt.resolvedUrl("../../assets/themes/p3/bg/cloud_mask.png")
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
-        smooth: true
-        mipmap: true
-        visible: false
-    }
-
-    Image {
-        id: normalMapRipple
-        source: Qt.resolvedUrl("../../assets/themes/p3/bg/water_ripple_normal.png")
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
-        smooth: true
-        mipmap: true
-        visible: false
-    }
-
-    Image {
         id: barsRaw
         source: Qt.resolvedUrl("../../assets/themes/p3/bg/bars.png")
         anchors.fill: parent
@@ -104,46 +84,12 @@ Item {
         visible: false
     }
 
-
-    // Stage 0a: water ripple shader
-    ShaderEffect {
-        id: s0_bg_clouds
-        anchors.fill: parent
-
-        property var source: bgRaw
-        property var normalMap: normalMapRipple
-        property var depthMask: cloudMaskRaw
-        property real time: 0
-        property real flowStrength: 0.006
-        property real speed: 0.8
-        property real frequency: 1.0
-
-        NumberAnimation on time {
-            from: 0
-            to: 1000
-            duration: 450000
-            loops: Animation.Infinite
-            running: p3WallpaperRoot.effectiveAnimRunning
-        }
-
-        vertexShader: Qt.resolvedUrl("../../assets/themes/p3/shaders/ripple.vert.qsb")
-        fragmentShader: Qt.resolvedUrl("../../assets/themes/p3/shaders/ripple.frag.qsb")
-    }
-
-    ShaderEffectSource {
-        id: s0_clouds_out
-        sourceItem: s0_bg_clouds
-        anchors.fill: parent
-        hideSource: true
-        live: p3WallpaperRoot.effectiveAnimRunning
-    }
-
-    // Stage 0b: floating particle shader
+    // Stage 0: floating particle shader (wavy cloud ripple shader disabled)
     ShaderEffect {
         id: s0_bg_stars
         anchors.fill: parent
 
-        property var source: s0_clouds_out
+        property var source: bgRaw
         property real time: 0
         property real strength: 40.0
         property real speed: 1.8

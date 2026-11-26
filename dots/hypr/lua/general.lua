@@ -112,9 +112,9 @@ hl.config({
         on_focus_under_fullscreen = 2,
         allow_session_lock_restore = true,
         session_lock_xray = true,
-        initial_workspace_tracking = false,
+        initial_workspace_tracking = 1,
         focus_on_activate = true,
-        close_special_on_empty = false
+        close_special_on_empty = true
     },
     input = {
         kb_layout = "us",
@@ -132,7 +132,7 @@ hl.config({
     },
     binds = {
         scroll_event_delay = 0,
-        hide_special_on_workspace_change = false
+        hide_special_on_workspace_change = true
     },
     cursor = {
         zoom_factor = 1,

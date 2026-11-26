@@ -497,6 +497,10 @@ Scope {
                 }
             }
 
+            function isP5Theme(id) {
+                return id === "p5-crimson" || id === "kasumi-violet" || id === "akechi-crow" || id === "futaba-matrix" || id === "monochrome"
+            }
+
             Connections {
                 target: PhantomState
                 function onPrimaryChanged() { frameCanvas.requestPaint() }
@@ -510,6 +514,8 @@ Scope {
                     console.log("[SCREEN FRAME] onTransitionTickChanged: targetThemeId=" + PhantomState.targetThemeId)
                     if (PhantomState.targetThemeId === "p3-reload") {
                         frameWin.triggerP3Splash()
+                    } else if (frameWin.isP5Theme(PhantomState.targetThemeId)) {
+                        p5TitleTransition.startTransition()
                     } else {
                         p5TransitionAnim.restart()
                     }
@@ -1794,6 +1800,12 @@ Scope {
                         border.width: 1
                     }
                 }
+            }
+
+            // P5 Return to Title / Joker Swing & Glass Shatter Transition
+            P5ReturnToTitleTransition {
+                id: p5TitleTransition
+                anchors.fill: parent
             }
         }
     }

@@ -266,13 +266,14 @@ Scope {
                 smooth: true
             }
 
-            readonly property bool isLiveVideoScene: PhantomState.isP3 && (
+            readonly property bool isLiveVideoScene: PhantomState.p3VideoPath !== "" && (
                 PhantomState.p3LiveScene === "velvet" ||
                 PhantomState.p3LiveScene === "dorm" ||
                 PhantomState.p3LiveScene === "monorail" ||
                 PhantomState.p3LiveScene === "fuuka" ||
                 PhantomState.p3LiveScene === "train_loop" ||
-                PhantomState.p3LiveScene === "video_custom"
+                PhantomState.p3LiveScene === "video_custom" ||
+                PhantomState.p3LiveScene.startsWith("p5_")
             )
 
             readonly property bool isShaderScene: PhantomState.isP3 && (
@@ -389,6 +390,10 @@ Scope {
 
             P3DesktopWorkspaces {
                 visible: PhantomState.isP3 && PhantomState.showWorkspaces
+            }
+
+            P5DesktopWorkspaces {
+                visible: PhantomState.isP5 && PhantomState.showWorkspaces
             }
         }
     }

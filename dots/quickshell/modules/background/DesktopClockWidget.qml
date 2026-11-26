@@ -65,6 +65,16 @@ Item {
         NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
     }
 
+    // Klik jam desktop untuk membuka kalender
+    MouseArea {
+        id: desktopClockRootClickArea
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: true
+        z: 50
+        onClicked: PhantomState.toggleCalendar()
+    }
+
     // gaya jam potongan poligon editorial dengan ikon cuaca
     Item {
         anchors.fill: parent

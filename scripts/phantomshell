@@ -262,13 +262,29 @@ case "$cmd" in
         ;;
 
     restart)
-        pkill -x qs 2>/dev/null || pkill -x quickshell 2>/dev/null || true
+        if pgrep -f 'phantomshell daemon' >/dev/null 2>&1; then
+            pkill -f 'quickshell' 2>/dev/null || true
+            pkill -f 'qs -' 2>/dev/null || true
+        else
+            pkill -f 'quickshell' 2>/dev/null || true
+            pkill -f 'qs -' 2>/dev/null || true
+            sleep 0.3
+            qs -d -p "$QS_DIR" >/dev/null 2>&1
+        fi
+        ;;
+
+    daemon)
+        pkill -f 'quickshell' 2>/dev/null || true
+        pkill -f 'qs -' 2>/dev/null || true
         sleep 0.2
-        nohup qs -p "$QS_DIR" >/dev/null 2>&1 &
+        while true; do
+            qs -p "$QS_DIR" || true
+            sleep 1
+        done
         ;;
 
     start)
-        exec qs -p "$QS_DIR"
+        exec qs -d -p "$QS_DIR"
         ;;
 
     *)

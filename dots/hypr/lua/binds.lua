@@ -71,6 +71,9 @@ hl.bind("CTRL + " .. mod .. " + ALT + T", hl.dsp.exec_cmd(qsCall .. "cycleWallpa
 hl.bind("CTRL + " .. mod .. " + SHIFT + D", hl.dsp.exec_cmd(qsCall .. "toggleDarkMode"), {
     description = "Phantomshell: Toggle Light/Dark Mode"
 })
+hl.bind("CTRL + " .. mod .. " + C", hl.dsp.exec_cmd(qsCall .. "toggleCalendar"), {
+    description = "Phantomshell: Toggle Persona Calendar"
+})
 hl.bind("CTRL + " .. mod .. " + P", hl.dsp.exec_cmd(qsCall .. "cycleTheme"), {
     description = "Phantomshell: Cycle Persona Theme Palette"
 })
@@ -318,7 +321,6 @@ hl.bind(mod .. " + ALT + mouse_up",     hl.dsp.window.move({ workspace = "r+1" }
 -- pintasan scratchpad (special workspace / velvet room)
 hl.bind(mod .. " + S",       hl.dsp.exec_cmd(qsCall .. "toggleVelvetRoom"), { description = "Workspace: Toggle Velvet Room (Scratchpad)" })
 hl.bind("CTRL + " .. mod .. " + S", hl.dsp.exec_cmd(qsCall .. "toggleVelvetRoom"))
-hl.bind(mod .. " + mouse:275", hl.dsp.exec_cmd(qsCall .. "toggleVelvetRoom"))
 hl.bind(mod .. " + ALT + S", hl.dsp.window.move({ workspace = "special:special", follow = false }), {
     description = "Window: Send to Scratchpad"
 })

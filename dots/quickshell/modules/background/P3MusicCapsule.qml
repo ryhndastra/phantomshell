@@ -137,7 +137,7 @@ Item {
                                 to: 360
                                 duration: 5000
                                 loops: Animation.Infinite
-                                running: p3CapsuleRoot.isPlaying
+                                running: p3CapsuleRoot.visible && p3CapsuleRoot.isPlaying && (!PhantomState.p3WallpaperAutoPause || !PhantomState.hasActiveWindows)
                             }
                         }
 

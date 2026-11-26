@@ -132,7 +132,6 @@ Item {
                                     source: appData.iconUrl || ""
                                     visible: Boolean(appData.iconUrl)
                                     fillMode: Image.PreserveAspectFit
-                                    asynchronous: true
                                     cache: true
                                     smooth: true
                                 }
@@ -284,7 +283,6 @@ Item {
                                 width: 24
                                 height: 24
                                 source: trayAppItem.modelData.icon
-                                asynchronous: true
                             }
 
                             MouseArea {

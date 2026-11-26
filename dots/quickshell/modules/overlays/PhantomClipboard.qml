@@ -252,7 +252,7 @@ Scope {
                         visible: !PhantomState.isP3
                         Layout.preferredWidth: 26
                         Layout.preferredHeight: 26
-                        spinning: true
+                        spinning: PhantomState.clipboardOpen
                     }
 
                     ColumnLayout {

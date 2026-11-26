@@ -568,7 +568,7 @@ Scope {
 
                         SequentialAnimation on scale {
                             loops: Animation.Infinite
-                            running: pinItem.isSelected
+                            running: PhantomState.overviewOpen && pinItem.isSelected
                             NumberAnimation { from: 0.94; to: 1.08; duration: 900; easing.type: Easing.InOutSine }
                             NumberAnimation { from: 1.08; to: 0.94; duration: 900; easing.type: Easing.InOutSine }
                         }

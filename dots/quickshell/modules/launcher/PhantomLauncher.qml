@@ -72,7 +72,7 @@ Variants {
             }
             list.sort(function(x, y) {
                 return x.name.localeCompare(y.name)
-            })
+            })  
             for (var j = 0; j < builtinCommands.length; j++) {
                 list.push(builtinCommands[j])
             }
@@ -160,6 +160,26 @@ Variants {
             query = ""
         }
 
+        function cleanSnippet(str) {
+            if (!str) return ""
+            return String(str).replace(/[\r\n]+/g, " ").trim()
+        }
+
+        FontLoader {
+            id: p5HeadlineFont
+            source: "../../assets/themes/p5/fonts/Persona5RoyalHeadlineFont.ttf"
+        }
+
+        FontLoader {
+            id: p5RegFont
+            source: "../../assets/themes/p5/fonts/Persona5RoyalRegulerFont.ttf"
+        }
+
+        FontLoader {
+            id: p5BodyFont
+            source: "../../assets/themes/p5/fonts/Arsenal-Bold.ttf"
+        }
+
         Connections {
             target: PhantomState
             function onLauncherOpenChanged() {
@@ -171,8 +191,8 @@ Variants {
                         p3SearchInput.text = ""
                         p3SearchInput.forceActiveFocus()
                     } else {
-                        searchInput.text = ""
-                        searchInput.forceActiveFocus()
+                        p5SearchInput.text = ""
+                        p5SearchInput.forceActiveFocus()
                     }
                 } else {
                     PhantomState.playSfx("close")
@@ -181,7 +201,7 @@ Variants {
             function onModalForceExclusiveChanged() {
                 if (PhantomState.launcherOpen && PhantomState.modalForceExclusive) {
                     if (PhantomState.isP3) p3SearchInput.forceActiveFocus()
-                    else searchInput.forceActiveFocus()
+                    else p5SearchInput.forceActiveFocus()
                 }
             }
         }
@@ -194,8 +214,8 @@ Variants {
                     p3SearchInput.text = ""
                     p3SearchInput.forceActiveFocus()
                 } else {
-                    searchInput.text = ""
-                    searchInput.forceActiveFocus()
+                    p5SearchInput.text = ""
+                    p5SearchInput.forceActiveFocus()
                 }
             }
         }
@@ -212,661 +232,1262 @@ Variants {
                 onClicked: PhantomState.launcherOpen = false
             }
 
+
+
+            // Ren Amamiya's Persona 5 Smartphone Launcher Deck
             Item {
-                id: launcherStage
+                id: p5PhoneStage
                 visible: !PhantomState.isP3
-                width: Math.min(parent.width - 80, 900)
-                height: Math.min(parent.height - 80, 680)
-                anchors.centerIn: parent
+                anchors.left: parent.left
+                anchors.leftMargin: 64
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 28
+                width: 510
+                height: Math.min(parent.height - 150, 860)
+
+                readonly property string activeTab: PhantomState.p3LauncherTab
+                property int selectedNotifIndex: 0
+
+                property var activeDetailNotif: null
+                property int activeDetailIndex: -1
+
+                Connections {
+                    target: PhantomState
+                    function onP3ReaderIndexChanged() {
+                        if (PhantomState.p3ReaderIndex >= 0 && PhantomState.p3ReaderIndex < PhantomState.imNotifications.count) {
+                            var n = PhantomState.imNotifications.get(PhantomState.p3ReaderIndex)
+                            if (n) {
+                                p5PhoneStage.activeDetailNotif = {
+                                    "sender": n.senderName || n.sender || "New Message",
+                                    "body": n.msgBody || n.message || "",
+                                    "time": n.msgTime || n.time || "",
+                                    "icon": n.msgIcon || n.appIcon || "",
+                                    "color": "#E60012"
+                                }
+                                p5PhoneStage.activeDetailIndex = PhantomState.p3ReaderIndex
+                            }
+                        }
+                    }
+                }
+
+                // Authentic Persona 5 phone tilt (-4.0 deg)
+                transformOrigin: Item.BottomLeft
+                rotation: -4.0
+                layer.enabled: true
+                layer.smooth: true
+                layer.samples: 4
+
+                opacity: PhantomState.launcherOpen ? 1.0 : 0.0
+                scale: PhantomState.launcherOpen ? 1.0 : 0.94
+                Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
 
                 MouseArea { anchors.fill: parent }
 
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.rightMargin: 16
-                    anchors.bottomMargin: 48
-                    visible: PhantomState.isP3
-                    radius: 10
-                    color: Qt.rgba(7/255, 14/255, 32/255, 0.94)
-                    border.color: Qt.rgba(0/255, 219/255, 255/255, 0.5)
-                    border.width: 1
-
-                    Rectangle {
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 3
-                        radius: 1
-                        color: PhantomState.primary
-                    }
-                }
-
+                // Persona 5 Smartphone Chassis with Crimson Drop Shadow and Thick White Bezel
                 Canvas {
+                    id: p5CardBackdrop
                     anchors.fill: parent
-                    visible: !PhantomState.isP3
-                    property color accent: PhantomState.primary
-                    onAccentChanged: requestPaint()
-                    onWidthChanged: requestPaint()
-                    onHeightChanged: requestPaint()
+                    antialiasing: true
+
+                    function drawRoundRect(ctx, x, y, w, h, r) {
+                        ctx.beginPath();
+                        ctx.moveTo(x + r, y);
+                        ctx.lineTo(x + w - r, y);
+                        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                        ctx.lineTo(x + w, y + h - r);
+                        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                        ctx.lineTo(x + r, y + h);
+                        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                        ctx.lineTo(x, y + r);
+                        ctx.quadraticCurveTo(x, y, x + r, y);
+                        ctx.closePath();
+                    }
 
                     onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.reset()
-                        var w = width
-                        var h = height
+                        var ctx = getContext("2d");
+                        ctx.reset();
 
-                        ctx.fillStyle = Qt.rgba(accent.r, accent.g, accent.b, 0.28)
-                        ctx.beginPath()
-                        ctx.moveTo(26, 16)
-                        ctx.lineTo(w, 6)
-                        ctx.lineTo(w - 18, h - 50)
-                        ctx.lineTo(8, h - 42)
-                        ctx.closePath()
-                        ctx.fill()
+                        var pad = 6;
+                        var w = width - pad * 2 - 14;
+                        var h = height - pad * 2 - 12;
 
-                        ctx.fillStyle = "#E80B0B0F"
-                        ctx.strokeStyle = "#FFFFFF"
-                        ctx.lineWidth = 2.5
-                        ctx.beginPath()
-                        ctx.moveTo(18, 8)
-                        ctx.lineTo(w - 10, 0)
-                        ctx.lineTo(w - 26, h - 58)
-                        ctx.lineTo(0, h - 50)
-                        ctx.closePath()
-                        ctx.fill()
-                        ctx.stroke()
+                        // 1. Black & Dark Crimson Drop Shadow
+                        drawRoundRect(ctx, pad + 14, pad + 12, w, h, 18);
+                        ctx.fillStyle = "#000000";
+                        ctx.fill();
 
-                        ctx.fillStyle = accent
-                        ctx.beginPath()
-                        ctx.moveTo(w - 170, 0)
-                        ctx.lineTo(w - 10, 0)
-                        ctx.lineTo(w - 14, 18)
-                        ctx.lineTo(w - 185, 18)
-                        ctx.closePath()
-                        ctx.fill()
+                        drawRoundRect(ctx, pad + 8, pad + 7, w, h, 18);
+                        ctx.fillStyle = "#8B0007";
+                        ctx.fill();
+
+                        // 2. Main Phone Chassis: Crisp Thick White Bezel
+                        drawRoundRect(ctx, pad, pad, w, h, 16);
+                        ctx.fillStyle = "#FFFFFF";
+                        ctx.fill();
+
+                        // Crisp outer black border
+                        ctx.lineWidth = 3.5;
+                        ctx.strokeStyle = "#000000";
+                        ctx.stroke();
+
+                        // 3. Left Bezel vertical notch (Persona 5 iconic smartphone detail)
+                        ctx.beginPath();
+                        ctx.rect(pad + 3, pad + 140, 4, 52);
+                        ctx.fillStyle = "#000000";
+                        ctx.fill();
+
+                        // 4. Inner Red Screen Area (inset by 12px from bezel)
+                        drawRoundRect(ctx, pad + 12, pad + 12, w - 24, h - 24, 8);
+                        ctx.fillStyle = "#C8000A";
+                        ctx.fill();
+
+                        // Inner black frame border around red screen
+                        ctx.lineWidth = 2.0;
+                        ctx.strokeStyle = "#000000";
+                        ctx.stroke();
                     }
                 }
 
-                RowLayout {
-                    id: topHeaderRow
+                // White paint splatters across red screen
+                Image {
+                    id: p5SplatterBg
+                    x: 20
+                    y: 20
+                    width: parent.width - 54
+                    height: parent.height - 54
+                    source: "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/themes/p5/ui/p5_splatters.svg"
+                    fillMode: Image.PreserveAspectCrop
+                    opacity: 0.28
+                    smooth: true
+                    visible: status === Image.Ready
+                }
+
+                // Top phone speaker slit & camera pinhole (positioned in white top bezel)
+                Row {
                     anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.topMargin: 24
-                    anchors.leftMargin: 36
-                    anchors.rightMargin: 42
-                    spacing: 18
+                    anchors.topMargin: 11
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 8
+                    z: 15
 
+                    Rectangle {
+                        width: 5
+                        height: 5
+                        radius: 2.5
+                        color: "#181820"
+                    }
+
+                    Rectangle {
+                        width: 36
+                        height: 4
+                        radius: 2
+                        color: "#181820"
+                    }
+                }
+
+                // Screen content area (Strictly inside the red screen!)
+                Item {
+                    id: p5CardArea
+                    x: 20
+                    y: 20
+                    width: parent.width - 54
+                    height: parent.height - 54
+                    clip: true
+
+                    // Persona 5 Iconic IM Header Row
                     Item {
-                        Layout.preferredWidth: PhantomState.isP3 ? 320 : 270
-                        Layout.preferredHeight: 62
-                        rotation: PhantomState.isP3 ? 0 : -2.5
+                        id: p5HeaderContainer
+                        anchors.top: parent.top
+                        anchors.topMargin: 4
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 66
+                        z: 10
 
-                        Canvas {
-                            anchors.fill: parent
-                            visible: !PhantomState.isP3
-                            onPaint: {
-                                var ctx = getContext("2d")
-                                ctx.reset()
-                                ctx.fillStyle = "#FFFFFF"
-                                ctx.beginPath()
-                                ctx.moveTo(10, 0)
-                                ctx.lineTo(width, 4)
-                                ctx.lineTo(width - 12, height)
-                                ctx.lineTo(0, height - 4)
-                                ctx.closePath()
-                                ctx.fill()
-
-                                ctx.fillStyle = "#08080A"
-                                ctx.beginPath()
-                                ctx.moveTo(15, 5)
-                                ctx.lineTo(width - 6, 8)
-                                ctx.lineTo(width - 16, height - 5)
-                                ctx.lineTo(5, height - 8)
-                                ctx.closePath()
-                                ctx.fill()
-                            }
+                        // Iconic "IM" Logo SVG
+                        Image {
+                            id: p5ImLogoImg
+                            anchors.left: parent.left
+                            anchors.leftMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 84
+                            height: 60
+                            source: "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/themes/p5/ui/p5_im_logo.svg"
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
                         }
 
-                        Rectangle {
-                            anchors.fill: parent
-                            visible: PhantomState.isP3
-                            radius: 4
-                            color: Qt.rgba(4/255, 13/255, 36/255, 0.85)
-                            border.color: "#00dbff"
-                            border.width: 1
+                        // Right section: Date sticker chips & Tabs
+                        Column {
+                            anchors.left: p5ImLogoImg.right
+                            anchors.leftMargin: 12
+                            anchors.right: parent.right
+                            anchors.rightMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 5
 
-                            Rectangle {
-                                anchors.left: parent.left
-                                anchors.top: parent.top
-                                anchors.bottom: parent.bottom
-                                width: 3
-                                color: "#00dbff"
-                            }
-                        }
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 18
-                            anchors.rightMargin: 18
-                            spacing: 10
-
-                            Image {
-                                Layout.preferredWidth: 42
-                                Layout.preferredHeight: 42
-                                source: PhantomState.logoPath
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                mipmap: true
-                            }
-
-                            ColumnLayout {
-                                spacing: 0
-                                Text {
-                                    text: PhantomState.isP3 ? "S.E.E.S. // TACTICAL SEARCH" : "PHANTOM LAUNCH"
+                            // Persona 5 Date Sticker Banner
+                            Row {
+                                spacing: 6
+                                Rectangle {
+                                    height: 20
+                                    width: 136
                                     color: "#FFFFFF"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: PhantomState.isP3 ? 15 : 18
-                                    font.weight: Font.Black
-                                    font.italic: !PhantomState.isP3
+                                    radius: 2
+                                    border.color: "#000000"
+                                    border.width: 1.5
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        Text {
+                                            text: "★"
+                                            font.pixelSize: 9
+                                            color: "#E60012"
+                                        }
+                                        Text {
+                                            text: Qt.formatDateTime(new Date(), "ddd M/d").toUpperCase()
+                                            font.family: "Rubik"
+                                            font.pixelSize: 10
+                                            font.weight: Font.Black
+                                            color: "#000000"
+                                        }
+                                    }
                                 }
-                                Text {
-                                    text: PhantomState.isP3 ? "MEMENTO MORI • PROTOCOL DISPATCH" : (launcherWin.filteredItems.length + " APPS & COMMANDS")
-                                    color: PhantomState.isP3 ? "#00dbff" : PhantomState.secondary
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 9
-                                    font.weight: Font.Black
+                            }
+
+                            // Slanted Tabs: APPS and CHAT
+                            Row {
+                                spacing: 6
+
+                                // APPS Tab (Slanted Manga Pill)
+                                Item {
+                                    width: 74
+                                    height: 26
+
+                                    Canvas {
+                                        id: appsTabCanvas
+                                        anchors.fill: parent
+                                        onPaint: {
+                                            var ctx = getContext("2d");
+                                            ctx.reset();
+                                            var w = width; var h = height; var s = 8;
+                                            var active = p5PhoneStage.activeTab === "apps";
+                                            ctx.beginPath();
+                                            ctx.moveTo(s, 0); ctx.lineTo(w, 0); ctx.lineTo(w - s, h); ctx.lineTo(0, h);
+                                            ctx.closePath();
+                                            ctx.fillStyle = active ? "#FFFFFF" : "#0A0A0E";
+                                            ctx.fill();
+                                            ctx.lineWidth = 1.5;
+                                            ctx.strokeStyle = active ? "#000000" : "#FFFFFF";
+                                            ctx.stroke();
+                                        }
+
+                                        Connections {
+                                            target: p5PhoneStage
+                                            function onActiveTabChanged() { appsTabCanvas.requestPaint() }
+                                        }
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "APPS"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Black
+                                        color: p5PhoneStage.activeTab === "apps" ? "#000000" : "#FFFFFF"
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (p5PhoneStage.activeTab !== "apps") {
+                                                PhantomState.p3LauncherTab = "apps"
+                                                p5PhoneStage.activeDetailNotif = null
+                                                PhantomState.playSfx("select")
+                                                p5SearchInput.forceActiveFocus()
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // CHAT Tab (Slanted Manga Pill)
+                                Item {
+                                    width: PhantomState.imNotifications.count > 0 ? 88 : 74
+                                    height: 26
+
+                                    Canvas {
+                                        id: chatTabCanvas
+                                        anchors.fill: parent
+                                        onPaint: {
+                                            var ctx = getContext("2d");
+                                            ctx.reset();
+                                            var w = width; var h = height; var s = 8;
+                                            var active = p5PhoneStage.activeTab === "mail";
+                                            ctx.beginPath();
+                                            ctx.moveTo(s, 0); ctx.lineTo(w, 0); ctx.lineTo(w - s, h); ctx.lineTo(0, h);
+                                            ctx.closePath();
+                                            ctx.fillStyle = active ? "#FFFFFF" : "#0A0A0E";
+                                            ctx.fill();
+                                            ctx.lineWidth = 1.5;
+                                            ctx.strokeStyle = active ? "#000000" : "#FFFFFF";
+                                            ctx.stroke();
+                                        }
+
+                                        Connections {
+                                            target: p5PhoneStage
+                                            function onActiveTabChanged() { chatTabCanvas.requestPaint() }
+                                        }
+                                    }
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: 5
+                                        Text {
+                                            text: "CHAT"
+                                            font.family: "Rubik"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Black
+                                            color: p5PhoneStage.activeTab === "mail" ? "#000000" : "#FFFFFF"
+                                        }
+
+                                        Rectangle {
+                                            visible: PhantomState.imNotifications.count > 0
+                                            width: 16
+                                            height: 16
+                                            radius: 8
+                                            color: p5PhoneStage.activeTab === "mail" ? "#000000" : "#E60012"
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: PhantomState.imNotifications.count
+                                                font.pixelSize: 9
+                                                font.weight: Font.Black
+                                                color: "#FFFFFF"
+                                            }
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (p5PhoneStage.activeTab !== "mail") {
+                                                PhantomState.p3LauncherTab = "mail"
+                                                p5PhoneStage.activeDetailNotif = null
+                                                PhantomState.playSfx("select")
+                                                p5SearchInput.forceActiveFocus()
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Clear All button (in CHAT tab)
+                                Rectangle {
+                                    visible: p5PhoneStage.activeTab === "mail" && PhantomState.imNotifications.count > 0
+                                    width: 62
+                                    height: 26
+                                    radius: 2
+                                    color: p5ClearAllMouse.containsMouse ? "#B0000A" : "#1A0003"
+                                    border.color: "#FFFFFF"
+                                    border.width: 1.2
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "CLEAR"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Black
+                                        color: "#FFFFFF"
+                                    }
+
+                                    MouseArea {
+                                        id: p5ClearAllMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            PhantomState.imNotifications.clear()
+                                            p5PhoneStage.activeDetailNotif = null
+                                            p5PhoneStage.activeDetailIndex = -1
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
 
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 56
 
-                        Canvas {
-                            anchors.fill: parent
-                            visible: !PhantomState.isP3
-                            property color accent: PhantomState.primary
-                            onAccentChanged: requestPaint()
-                            onPaint: {
-                                var ctx = getContext("2d")
-                                ctx.reset()
-                                var w = width
-                                var h = height
-
-                                ctx.fillStyle = accent
-                                ctx.beginPath()
-                                ctx.moveTo(14, 6)
-                                ctx.lineTo(w, 4)
-                                ctx.lineTo(w - 10, h)
-                                ctx.lineTo(4, h - 2)
-                                ctx.closePath()
-                                ctx.fill()
-
-                                ctx.fillStyle = "#FFFFFF"
-                                ctx.beginPath()
-                                ctx.moveTo(10, 0)
-                                ctx.lineTo(w - 6, 0)
-                                ctx.lineTo(w - 16, h - 6)
-                                ctx.lineTo(0, h - 6)
-                                ctx.closePath()
-                                ctx.fill()
-
-                                ctx.fillStyle = "#08080A"
-                                ctx.beginPath()
-                                ctx.moveTo(14, 4)
-                                ctx.lineTo(w - 10, 4)
-                                ctx.lineTo(w - 20, h - 10)
-                                ctx.lineTo(5, h - 10)
-                                ctx.closePath()
-                                ctx.fill()
-                            }
-                        }
-
-                        Rectangle {
-                            anchors.fill: parent
-                            visible: PhantomState.isP3
-                            radius: 4
-                            color: Qt.rgba(4/255, 13/255, 36/255, 0.85)
-                            border.color: searchInput.activeFocus ? "#8df6ff" : Qt.rgba(0/255, 219/255, 255/255, 0.5)
-                            border.width: 1
-                        }
+                    // Slanted Search Bar (Persona 5 style)
+                    Rectangle {
+                        id: p5SearchContainer
+                        anchors.top: p5HeaderContainer.bottom
+                        anchors.topMargin: 8
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        height: 38
+                        radius: 3
+                        color: "#0A0A0E"
+                        border.color: p5SearchInput.activeFocus ? "#FFFFFF" : "#303038"
+                        border.width: p5SearchInput.activeFocus ? 2.0 : 1.2
+                        z: 10
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 22
-                            anchors.rightMargin: 24
-                            anchors.bottomMargin: PhantomState.isP3 ? 0 : 6
-                            spacing: 10
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 8
 
-                            P5Icon {
-                                name: "search"
-                                color: PhantomState.primary
-                                size: 16
+                            Text {
+                                text: ">"
+                                font.family: "Rubik"
+                                font.pixelSize: 15
+                                font.weight: Font.Black
+                                color: "#E60012"
                             }
 
                             TextInput {
-                                id: searchInput
+                                id: p5SearchInput
                                 Layout.fillWidth: true
-                                color: "#FFFFFF"
                                 font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 17
-                                font.weight: Font.Black
-                                font.italic: !PhantomState.isP3
-                                selectionColor: PhantomState.primary
-                                selectedTextColor: "#FFFFFF"
+                                font.pixelSize: 12
+                                font.bold: true
+                                color: "#FFFFFF"
                                 clip: true
+                                selectByMouse: true
+                                selectionColor: "#E60012"
 
                                 onTextChanged: {
-                                    launcherWin.query = text
-                                    launcherWin.selectedIndex = 0
+                                    if (p5PhoneStage.activeTab === "apps") {
+                                        launcherWin.query = text
+                                        launcherWin.selectedIndex = 0
+                                    } else {
+                                        p5PhoneStage.selectedNotifIndex = 0
+                                    }
                                 }
 
                                 Keys.onPressed: (event) => {
                                     if (event.key === Qt.Key_Escape) {
-                                        PhantomState.launcherOpen = false
+                                        if (p5PhoneStage.activeDetailNotif !== null) {
+                                            p5PhoneStage.activeDetailNotif = null
+                                            p5PhoneStage.activeDetailIndex = -1
+                                            PhantomState.playSfx("close")
+                                        } else {
+                                            PhantomState.launcherOpen = false
+                                        }
                                         event.accepted = true
-                                    } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
-                                        if (launcherWin.filteredItems.length > 0) {
-                                            launcherWin.selectedIndex = (launcherWin.selectedIndex + 1) % launcherWin.filteredItems.length
+                                    } else if (event.key === Qt.Key_Tab) {
+                                        PhantomState.playSfx("select")
+                                        PhantomState.p3LauncherTab = (p5PhoneStage.activeTab === "apps" ? "mail" : "apps")
+                                        p5PhoneStage.activeDetailNotif = null
+                                        event.accepted = true
+                                    } else if (event.key === Qt.Key_Down) {
+                                        PhantomState.playSfx("select")
+                                        if (p5PhoneStage.activeDetailNotif === null) {
+                                            if (p5PhoneStage.activeTab === "apps") {
+                                                if (launcherWin.filteredItems.length > 0) {
+                                                    launcherWin.selectedIndex = (launcherWin.selectedIndex + 1) % launcherWin.filteredItems.length
+                                                }
+                                            } else {
+                                                if (PhantomState.imNotifications.count > 0) {
+                                                    p5PhoneStage.selectedNotifIndex = (p5PhoneStage.selectedNotifIndex + 1) % PhantomState.imNotifications.count
+                                                }
+                                            }
                                         }
                                         event.accepted = true
                                     } else if (event.key === Qt.Key_Up) {
-                                        if (launcherWin.filteredItems.length > 0) {
-                                            launcherWin.selectedIndex = (launcherWin.selectedIndex - 1 + launcherWin.filteredItems.length) % launcherWin.filteredItems.length
+                                        PhantomState.playSfx("select")
+                                        if (p5PhoneStage.activeDetailNotif === null) {
+                                            if (p5PhoneStage.activeTab === "apps") {
+                                                if (launcherWin.filteredItems.length > 0) {
+                                                    launcherWin.selectedIndex = (launcherWin.selectedIndex - 1 + launcherWin.filteredItems.length) % launcherWin.filteredItems.length
+                                                }
+                                            } else {
+                                                if (PhantomState.imNotifications.count > 0) {
+                                                    p5PhoneStage.selectedNotifIndex = (p5PhoneStage.selectedNotifIndex - 1 + PhantomState.imNotifications.count) % PhantomState.imNotifications.count
+                                                }
+                                            }
                                         }
                                         event.accepted = true
                                     } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                        launcherWin.executeItem(launcherWin.selectedIndex)
+                                        if (p5PhoneStage.activeTab === "apps") {
+                                            launcherWin.executeItem(launcherWin.selectedIndex)
+                                        } else {
+                                            if (p5PhoneStage.activeDetailNotif !== null) {
+                                                p5PhoneStage.activeDetailNotif = null
+                                                p5PhoneStage.activeDetailIndex = -1
+                                                PhantomState.playSfx("close")
+                                            } else if (PhantomState.imNotifications.count > 0 && p5PhoneStage.selectedNotifIndex >= 0 && p5PhoneStage.selectedNotifIndex < PhantomState.imNotifications.count) {
+                                                var n = PhantomState.imNotifications.get(p5PhoneStage.selectedNotifIndex)
+                                                if (n) {
+                                                    p5PhoneStage.activeDetailNotif = {
+                                                        "sender": n.senderName || n.sender || "New Message",
+                                                        "body": n.msgBody || n.message || "",
+                                                        "time": n.msgTime || n.time || "",
+                                                        "icon": n.msgIcon || n.appIcon || "",
+                                                        "color": "#E60012"
+                                                    }
+                                                    p5PhoneStage.activeDetailIndex = p5PhoneStage.selectedNotifIndex
+                                                    PhantomState.playSfx("open")
+                                                }
+                                            }
+                                        }
                                         event.accepted = true
+                                    } else if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
+                                        if (p5PhoneStage.activeTab === "mail") {
+                                            if (p5PhoneStage.activeDetailNotif !== null) {
+                                                if (p5PhoneStage.activeDetailIndex >= 0 && p5PhoneStage.activeDetailIndex < PhantomState.imNotifications.count) {
+                                                    PhantomState.imNotifications.remove(p5PhoneStage.activeDetailIndex)
+                                                }
+                                                p5PhoneStage.activeDetailNotif = null
+                                                p5PhoneStage.activeDetailIndex = -1
+                                                PhantomState.playSfx("select")
+                                                event.accepted = true
+                                            } else if (PhantomState.imNotifications.count > 0 && p5PhoneStage.selectedNotifIndex >= 0 && p5PhoneStage.selectedNotifIndex < PhantomState.imNotifications.count) {
+                                                PhantomState.imNotifications.remove(p5PhoneStage.selectedNotifIndex)
+                                                if (p5PhoneStage.selectedNotifIndex >= PhantomState.imNotifications.count && p5PhoneStage.selectedNotifIndex > 0) {
+                                                    p5PhoneStage.selectedNotifIndex--
+                                                }
+                                                PhantomState.playSfx("select")
+                                                event.accepted = true
+                                            }
+                                        }
                                     }
                                 }
 
                                 Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: PhantomState.isP3 ? "Search apps or system commands (>theme, >settings)..." : "Search installed apps or type >theme, >settings..."
-                                    color: "#777777"
+                                    anchors.fill: parent
+                                    text: p5PhoneStage.activeTab === "apps" ? "Search applications or >settings, >theme..." : "Filter chat messages..."
                                     font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 13
-                                    font.weight: Font.Bold
-                                    font.italic: !PhantomState.isP3
-                                    visible: searchInput.text.length === 0
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                    color: "#606070"
+                                    visible: p5SearchInput.text.length === 0
+                                    verticalAlignment: Text.AlignVCenter
                                 }
                             }
                         }
                     }
-                }
 
-                ListView {
-                    id: resultsList
-                    anchors.top: topHeaderRow.bottom
-                    anchors.topMargin: 18
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 86
-                    anchors.left: parent.left
-                    anchors.leftMargin: 36
-                    anchors.right: parent.right
-                    anchors.rightMargin: 42
-                    clip: true
-                    spacing: 10
-                    model: launcherWin.filteredItems
-                    currentIndex: launcherWin.selectedIndex
+                    // Empty state (Chat tab empty)
+                    Item {
+                        id: p5EmptyState
+                        anchors.top: p5SearchContainer.bottom
+                        anchors.bottom: p5PromptFooter.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        visible: p5PhoneStage.activeTab === "mail" && PhantomState.imNotifications.count === 0 && p5PhoneStage.activeDetailNotif === null
 
-                    onCurrentIndexChanged: {
-                        positionViewAtIndex(currentIndex, ListView.Contain)
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: "NO NEW MESSAGES"
+                                font.family: "Rubik"
+                                font.pixelSize: 18
+                                font.weight: Font.Black
+                                font.italic: true
+                                color: "#FFFFFF"
+                            }
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: "All clear in the Metaverse, Joker."
+                                font.family: "JetBrainsMono NFM"
+                                font.pixelSize: 11
+                                font.bold: true
+                                color: "#F0C0C4"
+                            }
+                        }
                     }
 
-                    delegate: Item {
-                        id: rowDelegate
-                        width: resultsList.width
-                        height: 62
-                        readonly property bool isSelected: index === launcherWin.selectedIndex
-                        readonly property bool isHovered: rowMouse.containsMouse
+                    // Persona 5 Controller Prompt Footer (Pill bar anchored to bottom)
+                    Rectangle {
+                        id: p5PromptFooter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 8
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: p5PromptRow.width + 24
+                        height: 26
+                        radius: 13
+                        color: "#E0000000"
+                        border.color: "#30FFFFFF"
+                        border.width: 1
+                        z: 20
+
+                        Row {
+                            id: p5PromptRow
+                            anchors.centerIn: parent
+                            spacing: 14
+
+                            Row {
+                                spacing: 5
+                                anchors.verticalCenter: parent.verticalCenter
+                                Rectangle {
+                                    width: 16
+                                    height: 16
+                                    radius: 8
+                                    color: "#000000"
+                                    border.color: "#FFFFFF"
+                                    border.width: 1
+                                    Text { anchors.centerIn: parent; text: "✕"; font.pixelSize: 9; font.bold: true; color: "#FFFFFF" }
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "Esc Close"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: "#FFFFFF"
+                                }
+                            }
+
+                            Row {
+                                spacing: 5
+                                anchors.verticalCenter: parent.verticalCenter
+                                Rectangle {
+                                    width: 16
+                                    height: 16
+                                    radius: 8
+                                    color: "#000000"
+                                    border.color: "#FFFFFF"
+                                    border.width: 1
+                                    Text { anchors.centerIn: parent; text: "★"; font.pixelSize: 9; font.bold: true; color: "#E60012" }
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "Enter Confirm"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: "#FFFFFF"
+                                }
+                            }
+
+                            Row {
+                                spacing: 5
+                                anchors.verticalCenter: parent.verticalCenter
+                                Rectangle {
+                                    width: 16
+                                    height: 16
+                                    radius: 8
+                                    color: "#000000"
+                                    border.color: "#FFFFFF"
+                                    border.width: 1
+                                    Text { anchors.centerIn: parent; text: "⇄"; font.pixelSize: 9; font.bold: true; color: "#FFFFFF" }
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "Tab Switch"
+                                    font.family: "JetBrainsMono NFM"
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: "#FFFFFF"
+                                }
+                            }
+                        }
+                    }
+
+                    // Application & Chat ListView (Authentic Persona 5 Slanted Black Banners)
+                    ListView {
+                        id: p5AppList
+                        anchors.top: p5SearchContainer.bottom
+                        anchors.topMargin: 8
+                        anchors.bottom: p5PromptFooter.top
+                        anchors.bottomMargin: 12
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 6
+                        anchors.rightMargin: 6
+                        clip: true
+                        spacing: 5
+                        z: 10
+                        model: p5PhoneStage.activeTab === "apps" ? launcherWin.filteredItems : PhantomState.imNotifications
+                        currentIndex: p5PhoneStage.activeTab === "apps" ? launcherWin.selectedIndex : p5PhoneStage.selectedNotifIndex
+
+                        onCurrentIndexChanged: {
+                            positionViewAtIndex(currentIndex, ListView.Contain)
+                        }
+
+                        delegate: Item {
+                            id: p5RowDelegate
+                            clip: true
+                            readonly property bool isApps: p5PhoneStage.activeTab === "apps"
+                            readonly property bool isSelected: isApps ? (index === launcherWin.selectedIndex) : (index === p5PhoneStage.selectedNotifIndex)
+                            readonly property bool isHovered: p5RowMouse.containsMouse
+
+                            width: p5AppList.width
+                            height: 52
+
+                            readonly property string itemName: isApps ? (modelData ? (modelData.name || "") : "") : (typeof senderName !== "undefined" ? senderName : (typeof sender !== "undefined" ? sender : (typeof model !== "undefined" && model ? (model.senderName || model.sender || "") : "")))
+                            readonly property string itemDesc: isApps ? (modelData ? (modelData.desc || "") : "") : (typeof msgBody !== "undefined" ? msgBody : (typeof message !== "undefined" ? message : (typeof model !== "undefined" && model ? (model.msgBody || model.message || "") : "")))
+                            readonly property string titleClean: launcherWin.cleanSnippet(p5RowDelegate.itemName)
+                            readonly property string itemPreview: launcherWin.cleanSnippet(p5RowDelegate.itemDesc)
+                            readonly property string itemIcon: isApps ? (modelData ? (modelData.appIcon || "") : "") : (typeof msgIcon !== "undefined" ? msgIcon : (typeof appIcon !== "undefined" ? appIcon : (typeof model !== "undefined" && model ? (model.msgIcon || model.appIcon || "") : "")))
+                            readonly property string itemTime: !isApps ? (typeof msgTime !== "undefined" ? msgTime : (typeof time !== "undefined" ? time : (typeof model !== "undefined" && model ? (model.msgTime || model.time || "") : ""))) : ""
+                            readonly property string resolvedIcon: {
+                                const ic = (p5RowDelegate.itemIcon || "").trim()
+                                const lowerName = (p5RowDelegate.itemName || "").toLowerCase()
+                                const lowerIcon = ic.toLowerCase()
+                                const lowerDesc = (p5RowDelegate.itemDesc || "").toLowerCase()
+                                if (lowerIcon.indexOf("whatsapp") !== -1 || lowerName.indexOf("whatsapp") !== -1 || lowerDesc.indexOf("whatsapp") !== -1) {
+                                    return "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/whatsapp.svg"
+                                }
+                                if (lowerIcon.indexOf("zen") !== -1 || lowerName.indexOf("zen") !== -1) {
+                                    return "file:///etc/profiles/per-user/sho/share/icons/hicolor/128x128/apps/zen-browser.png"
+                                }
+                                if (ic.startsWith("file://") || ic.startsWith("/")) {
+                                    return ic.startsWith("/") ? ("file://" + ic) : ic
+                                }
+                                if (ic.startsWith("image://")) {
+                                    return ic
+                                }
+                                if (ic.length > 0) {
+                                    const r = Quickshell.iconPath(ic, true)
+                                    if (r && String(r).length > 0) return r
+                                }
+                                return PhantomState.resolveAppIconUrl(p5RowDelegate.itemName)
+                            }
+
+                            x: isSelected ? 6 : (isHovered ? 3 : 0)
+                            Behavior on x { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+
+                            // Slanted Item Card Canvas (Persona 5 style)
+                            Canvas {
+                                id: p5RowCanvas
+                                anchors.fill: parent
+                                antialiasing: true
+
+                                onPaint: {
+                                    var ctx = getContext("2d");
+                                    ctx.reset();
+                                    var w = width;
+                                    var h = height;
+                                    var s = 14.0;
+
+                                    if (p5RowDelegate.isSelected) {
+                                        // 1. Black shadow polygon in back
+                                        ctx.beginPath();
+                                        ctx.moveTo(s + 3, 3);
+                                        ctx.lineTo(w, 3);
+                                        ctx.lineTo(w - s, h + 1);
+                                        ctx.lineTo(3, h + 1);
+                                        ctx.closePath();
+                                        ctx.fillStyle = "#000000";
+                                        ctx.fill();
+
+                                        // 2. Front Face (Vibrant Crimson Red with thick Black border)
+                                        ctx.beginPath();
+                                        ctx.moveTo(s, 0);
+                                        ctx.lineTo(w - 2, 0);
+                                        ctx.lineTo(w - 2 - s, h - 2);
+                                        ctx.lineTo(0, h - 2);
+                                        ctx.closePath();
+                                        ctx.fillStyle = "#E60012";
+                                        ctx.fill();
+
+                                        ctx.lineWidth = 2.5;
+                                        ctx.strokeStyle = "#000000";
+                                        ctx.stroke();
+
+                                        // 3. Black accent stripe on left
+                                        ctx.beginPath();
+                                        ctx.moveTo(s, 0);
+                                        ctx.lineTo(s + 5, 0);
+                                        ctx.lineTo(5, h - 2);
+                                        ctx.lineTo(0, h - 2);
+                                        ctx.closePath();
+                                        ctx.fillStyle = "#000000";
+                                        ctx.fill();
+                                    } else {
+                                        // Unselected slanted black banner
+                                        ctx.beginPath();
+                                        ctx.moveTo(s, 0);
+                                        ctx.lineTo(w, 0);
+                                        ctx.lineTo(w - s, h);
+                                        ctx.lineTo(0, h);
+                                        ctx.closePath();
+                                        ctx.fillStyle = p5RowDelegate.isHovered ? "#14141E" : "#0A0A0E";
+                                        ctx.fill();
+
+                                        ctx.lineWidth = 1.2;
+                                        ctx.strokeStyle = p5RowDelegate.isHovered ? "#FFFFFF" : "#222230";
+                                        ctx.stroke();
+                                    }
+                                }
+
+                                Connections {
+                                    target: p5RowDelegate
+                                    function onIsSelectedChanged() { p5RowCanvas.requestPaint() }
+                                    function onIsHoveredChanged() { p5RowCanvas.requestPaint() }
+                                    function onWidthChanged() { p5RowCanvas.requestPaint() }
+                                }
+                            }
+
+                            // Content inside the card
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 18
+                                anchors.rightMargin: 16
+                                spacing: 8
+
+                                // Sticker Badges (Persona 5 APP / NEW / HOLD + Date Chip)
+                                Row {
+                                    spacing: 4
+                                    Layout.alignment: Qt.AlignVCenter
+
+                                    Rectangle {
+                                        width: p5RowDelegate.isApps ? 34 : 38
+                                        height: 18
+                                        radius: 2
+                                        color: p5RowDelegate.isSelected ? "#000000" : "#E60012"
+                                        border.color: p5RowDelegate.isSelected ? "#FFFFFF" : "#000000"
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: p5RowDelegate.isApps ? "APP" : (index === 0 ? "NEW" : "HOLD")
+                                            font.family: p5HeadlineFont.name !== "" ? p5HeadlineFont.name : "Rubik"
+                                            font.pixelSize: 9
+                                            font.weight: Font.Black
+                                            color: "#FFFFFF"
+                                        }
+                                    }
+
+                                    // Only show date chip for messages in CHAT mode!
+                                    Rectangle {
+                                        visible: !p5RowDelegate.isApps
+                                        width: 42
+                                        height: 18
+                                        radius: 2
+                                        color: p5RowDelegate.isSelected ? "#000000" : "#FFFFFF"
+                                        border.color: p5RowDelegate.isSelected ? "#FFFFFF" : "#000000"
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: p5RowDelegate.itemTime !== "" ? p5RowDelegate.itemTime : Qt.formatDateTime(new Date(), "M/d")
+                                            font.family: "Rubik"
+                                            font.pixelSize: 9
+                                            font.weight: Font.Black
+                                            color: p5RowDelegate.isSelected ? "#FFFFFF" : "#000000"
+                                        }
+                                    }
+                                }
+
+                                // App Icon / Avatar Badge
+                                Rectangle {
+                                    width: 32
+                                    height: 32
+                                    radius: 2
+                                    Layout.alignment: Qt.AlignVCenter
+                                    color: p5RowDelegate.isSelected ? "#FFFFFF" : "#161622"
+                                    border.color: p5RowDelegate.isSelected ? "#000000" : "#323244"
+                                    border.width: 1.5
+
+                                    Image {
+                                        id: p5AvatarImg
+                                        anchors.centerIn: parent
+                                        width: 22
+                                        height: 22
+                                        source: p5RowDelegate.resolvedIcon
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                        visible: p5RowDelegate.resolvedIcon !== "" && status === Image.Ready && implicitWidth > 0
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        visible: !p5AvatarImg.visible
+                                        text: {
+                                            const n = (p5RowDelegate.itemName || "").trim()
+                                            return n.length > 0 ? n.charAt(0).toUpperCase() : "★"
+                                        }
+                                        font.family: "Rubik"
+                                        font.pixelSize: 14
+                                        font.weight: Font.Black
+                                        color: p5RowDelegate.isSelected ? "#000000" : "#FFFFFF"
+                                    }
+                                }
+
+                                // App Title and Description
+                                Column {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: 1
+
+                                    Text {
+                                        width: parent.width
+                                        text: p5RowDelegate.titleClean
+                                        color: "#FFFFFF"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 13
+                                        font.weight: p5RowDelegate.isSelected ? Font.Black : Font.Bold
+                                        maximumLineCount: 1
+                                        elide: Text.ElideRight
+                                        renderType: Text.CurveRendering
+                                    }
+
+                                    Text {
+                                        width: parent.width
+                                        text: p5RowDelegate.itemPreview
+                                        color: p5RowDelegate.isSelected ? "#FFFFFF" : "#9898AC"
+                                        opacity: p5RowDelegate.isSelected ? 0.92 : 1.0
+                                        font.family: "Rubik"
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                        maximumLineCount: 1
+                                        elide: Text.ElideRight
+                                        renderType: Text.CurveRendering
+                                    }
+                                }
+
+                                // Selection / Launch Tag (Sticker Pill)
+                                Rectangle {
+                                    visible: p5RowDelegate.isSelected
+                                    Layout.alignment: Qt.AlignVCenter
+                                    height: 22
+                                    width: 72
+                                    radius: 2
+                                    color: "#000000"
+                                    border.color: "#FFFFFF"
+                                    border.width: 1.5
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: 4
+                                        Text {
+                                            text: "★"
+                                            font.pixelSize: 9
+                                            color: "#E60012"
+                                        }
+                                        Text {
+                                            text: p5RowDelegate.isApps ? "LAUNCH" : "OPEN"
+                                            font.family: "Rubik"
+                                            font.pixelSize: 10
+                                            font.weight: Font.Black
+                                            color: "#FFFFFF"
+                                        }
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: p5RowMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onEntered: {
+                                    if (p5RowDelegate.isApps) {
+                                        if (launcherWin.selectedIndex !== index) PhantomState.playSfx("select")
+                                        launcherWin.selectedIndex = index
+                                    } else {
+                                        if (p5PhoneStage.selectedNotifIndex !== index) PhantomState.playSfx("select")
+                                        p5PhoneStage.selectedNotifIndex = index
+                                    }
+                                }
+                                onClicked: {
+                                    if (p5RowDelegate.isApps) {
+                                        launcherWin.selectedIndex = index
+                                        launcherWin.executeItem(index)
+                                    } else {
+                                        p5PhoneStage.selectedNotifIndex = index
+                                        p5PhoneStage.activeDetailNotif = {
+                                            "sender": p5RowDelegate.itemName,
+                                            "body": p5RowDelegate.itemDesc,
+                                            "time": p5RowDelegate.itemTime,
+                                            "icon": p5RowDelegate.itemIcon,
+                                            "color": "#E60012"
+                                        }
+                                        p5PhoneStage.activeDetailIndex = index
+                                        PhantomState.playSfx("open")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    
+                    // Message detail reader overlay
+                    Item {
+                        id: p5MailReaderModal
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        z: 50
+                        opacity: p5PhoneStage.activeDetailNotif !== null ? 1.0 : 0.0
+                        visible: opacity > 0.0
+                        Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
 
                         Rectangle {
                             anchors.fill: parent
-                            visible: PhantomState.isP3
+                            color: "#FA0A0A10"
                             radius: 6
-                            color: rowDelegate.isSelected 
-                                ? Qt.rgba(0/255, 219/255, 255/255, 0.18) 
-                                : (rowDelegate.isHovered ? Qt.rgba(255, 255, 255, 0.05) : "transparent")
-                            border.color: rowDelegate.isSelected ? PhantomState.primary : "transparent"
-                            border.width: 1
-
-                            Rectangle {
-                                anchors.left: parent.left
-                                anchors.top: parent.top
-                                anchors.bottom: parent.bottom
-                                width: 3
-                                radius: 1
-                                visible: rowDelegate.isSelected
-                                color: PhantomState.primary
-                            }
-                        }
-
-                        Canvas {
-                            id: rowCanvas
-                            anchors.fill: parent
-                            visible: !PhantomState.isP3
-                            property bool active: rowDelegate.isSelected || rowDelegate.isHovered
-                            property color accent: PhantomState.primary
-                            onActiveChanged: requestPaint()
-                            onAccentChanged: requestPaint()
-                            onWidthChanged: requestPaint()
-                            onHeightChanged: requestPaint()
-
-                            onPaint: {
-                                var ctx = getContext("2d")
-                                ctx.reset()
-                                var w = width
-                                var h = height
-                                var rightBoxX = w - 210
-
-                                if (active) {
-                                    ctx.fillStyle = "#08080A"
-                                    ctx.beginPath()
-                                    ctx.moveTo(18, 10)
-                                    ctx.lineTo(rightBoxX + 30, 6)
-                                    ctx.lineTo(rightBoxX + 16, h)
-                                    ctx.lineTo(4, h - 2)
-                                    ctx.closePath()
-                                    ctx.fill()
-
-                                    ctx.fillStyle = accent
-                                    ctx.beginPath()
-                                    ctx.moveTo(12, 4)
-                                    ctx.lineTo(rightBoxX + 24, 2)
-                                    ctx.lineTo(rightBoxX + 10, h - 6)
-                                    ctx.lineTo(0, h - 8)
-                                    ctx.closePath()
-                                    ctx.fill()
-
-                                    ctx.fillStyle = "#FFFFFF"
-                                    ctx.beginPath()
-                                    ctx.moveTo(0, h - 8)
-                                    ctx.lineTo(16, 4)
-                                    ctx.lineTo(25, 4)
-                                    ctx.lineTo(10, h - 8)
-                                    ctx.closePath()
-                                    ctx.fill()
-                                } else {
-                                    ctx.fillStyle = "#D0121218"
-                                    ctx.beginPath()
-                                    ctx.moveTo(56, 6)
-                                    ctx.lineTo(rightBoxX + 18, 4)
-                                    ctx.lineTo(rightBoxX + 8, h - 6)
-                                    ctx.lineTo(44, h - 6)
-                                    ctx.closePath()
-                                    ctx.fill()
-                                }
-
-                                ctx.fillStyle = "#FFFFFF"
-                                ctx.beginPath()
-                                ctx.moveTo(rightBoxX, 3)
-                                ctx.lineTo(w - 10, 1)
-                                ctx.lineTo(w - 22, h - 4)
-                                ctx.lineTo(rightBoxX - 10, h - 3)
-                                ctx.lineTo(rightBoxX - 5, h * 0.64)
-                                ctx.lineTo(rightBoxX - 22, h * 0.50)
-                                ctx.lineTo(rightBoxX - 4, h * 0.36)
-                                ctx.closePath()
-                                ctx.fill()
-
-                                ctx.fillStyle = "#08080A"
-                                ctx.beginPath()
-                                ctx.moveTo(rightBoxX + 7, 8)
-                                ctx.lineTo(w - 17, 6)
-                                ctx.lineTo(w - 28, h - 9)
-                                ctx.lineTo(rightBoxX - 3, h - 8)
-                                ctx.closePath()
-                                ctx.fill()
-                            }
-                        }
-
-                        RowLayout {
-                            anchors.left: parent.left
-                            anchors.leftMargin: (rowDelegate.isSelected || rowDelegate.isHovered) ? 34 : 68
-                            anchors.right: parent.right
-                            anchors.rightMargin: 230
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 14
-
-                            Behavior on anchors.leftMargin {
-                                NumberAnimation { duration: 120; easing.type: Easing.OutBack }
-                            }
-
-                            Rectangle {
-                                Layout.preferredWidth: 46
-                                Layout.preferredHeight: 46
-                                color: (rowDelegate.isSelected || rowDelegate.isHovered) ? "#08080A" : "#181822"
-                                border.color: "#FFFFFF"
-                                border.width: 2
-                                rotation: (rowDelegate.isSelected || rowDelegate.isHovered) ? -5 : 0
-
-                                Image {
-                                    id: realAppIcon
-                                    anchors.fill: parent
-                                    anchors.margins: 4
-                                    source: modelData.appIcon || ""
-                                    fillMode: Image.PreserveAspectFit
-                                    smooth: true
-                                    mipmap: true
-                                    visible: modelData.appIcon !== "" && status === Image.Ready
-                                }
-
-                                P5Icon {
-                                    anchors.centerIn: parent
-                                    name: modelData.iconName || "app"
-                                    color: (rowDelegate.isSelected || rowDelegate.isHovered) ? PhantomState.secondary : PhantomState.primary
-                                    size: 24
-                                    visible: !realAppIcon.visible
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 1
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: modelData.name
-                                    color: (rowDelegate.isSelected || rowDelegate.isHovered) ? "#FFFFFF" : "#F0F0F5"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: (rowDelegate.isSelected || rowDelegate.isHovered) ? 19 : 16
-                                    font.weight: Font.Black
-                                    font.italic: true
-                                    elide: Text.ElideRight
-                                }
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: modelData.desc
-                                    color: (rowDelegate.isSelected || rowDelegate.isHovered) ? "#08080A" : "#9E9EAE"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 11
-                                    font.weight: Font.Bold
-                                    elide: Text.ElideRight
-                                }
-                            }
+                            MouseArea { anchors.fill: parent }
                         }
 
                         Item {
-                            anchors.right: parent.right
-                            anchors.rightMargin: 20
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 185
-                            height: parent.height
-
-                            RowLayout {
-                                anchors.centerIn: parent
-                                spacing: 6
-
-                                P5Icon {
-                                    name: (rowDelegate.isSelected || rowDelegate.isHovered) ? "star" : "chevron-right"
-                                    color: (rowDelegate.isSelected || rowDelegate.isHovered) ? PhantomState.secondary : PhantomState.primary
-                                    size: 13
-                                }
-
-                                Text {
-                                    text: modelData.badge
-                                    color: (rowDelegate.isSelected || rowDelegate.isHovered) ? PhantomState.secondary : "#FFFFFF"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 16
-                                    font.weight: Font.Black
-                                    font.italic: true
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            id: rowMouse
                             anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                launcherWin.selectedIndex = index
-                                launcherWin.executeItem(index)
-                            }
-                        }
-                    }
-                }
+                            anchors.margins: 14
 
-                RowLayout {
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.leftMargin: 36
-                    anchors.bottomMargin: 12
-                    spacing: 14
-                    z: 20
+                            Canvas {
+                                id: p5ReaderRibbon
+                                anchors.top: parent.top
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                height: 44
+                                antialiasing: true
 
-                    Repeater {
-                        model: [
-                            { key: "↑/↓", label: "Navigate" },
-                            { key: "ENTER", label: "Launch" },
-                            { key: "CLICK OK", label: "Close" }
-                        ]
+                                onPaint: {
+                                    var ctx = getContext("2d");
+                                    ctx.reset();
+                                    var w = width;
+                                    var h = height;
 
-                        delegate: RowLayout {
-                            spacing: 6
-                            Rectangle {
-                                width: keyText.implicitWidth + 12
-                                height: 22
-                                radius: PhantomState.isP3 ? 3 : 0
-                                color: PhantomState.isP3 ? Qt.rgba(0/255, 219/255, 255/255, 0.2) : "#FFFFFF"
-                                border.color: PhantomState.isP3 ? "#00dbff" : "#08080A"
-                                border.width: PhantomState.isP3 ? 1 : 2
-                                rotation: PhantomState.isP3 ? 0 : (index % 2 === 0 ? -2 : 2)
+                                    ctx.beginPath();
+                                    ctx.moveTo(12, 0);
+                                    ctx.lineTo(w, 0);
+                                    ctx.lineTo(w - 12, h);
+                                    ctx.lineTo(0, h);
+                                    ctx.closePath();
+                                    ctx.fillStyle = "#E60012";
+                                    ctx.fill();
 
-                                Text {
-                                    id: keyText
-                                    anchors.centerIn: parent
-                                    text: modelData.key
-                                    color: PhantomState.isP3 ? "#00dbff" : "#08080A"
-                                    font.family: "JetBrainsMono NFM"
-                                    font.pixelSize: 10
-                                    font.weight: Font.Black
+                                    ctx.lineWidth = 1.5;
+                                    ctx.strokeStyle = "#FFFFFF";
+                                    ctx.stroke();
+                                }
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 16
+                                    anchors.rightMargin: 16
+
+                                    Text {
+                                        text: "★ MESSAGE DISPATCH"
+                                        font.family: "Rubik"
+                                        font.pixelSize: 14
+                                        font.weight: Font.Black
+                                        font.italic: true
+                                        color: "#FFFFFF"
+                                    }
+
+                                    Item { Layout.fillWidth: true }
+
+                                    Text {
+                                        text: p5PhoneStage.activeDetailNotif ? p5PhoneStage.activeDetailNotif.time : ""
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 11
+                                        font.bold: true
+                                        color: "#FFFFFF"
+                                    }
                                 }
                             }
-                            Text {
-                                text: modelData.label
-                                color: PhantomState.isP3 ? "#8df6ff" : "#FFFFFF"
-                                font.family: "JetBrainsMono NFM"
-                                font.pixelSize: 12
-                                font.weight: Font.Black
-                                font.italic: !PhantomState.isP3
+
+                            // Sender header card
+                            Rectangle {
+                                id: p5SenderBox
+                                anchors.top: p5ReaderRibbon.bottom
+                                anchors.topMargin: 12
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                height: 50
+                                radius: 4
+                                color: "#14141E"
+                                border.color: "#FFFFFF"
+                                border.width: 1.5
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 12
+                                    spacing: 12
+
+                                    Rectangle {
+                                        width: 32
+                                        height: 32
+                                        radius: 3
+                                        color: "#E60012"
+
+                                        Image {
+                                            id: p5DetailAvatar
+                                            anchors.centerIn: parent
+                                            width: 22
+                                            height: 22
+                                            source: {
+                                                if (!p5PhoneStage.activeDetailNotif) return ""
+                                                const ic = (p5PhoneStage.activeDetailNotif.icon || "").trim()
+                                                const s = (p5PhoneStage.activeDetailNotif.sender || "").toLowerCase()
+                                                if (s.indexOf("whatsapp") !== -1 || ic.indexOf("whatsapp") !== -1) {
+                                                    return "file://" + (Quickshell.env("HOME") || "/home/sho") + "/.config/quickshell/assets/icons/whatsapp.svg"
+                                                }
+                                                if (s.indexOf("zen") !== -1 || ic.indexOf("zen") !== -1) {
+                                                    return "file:///etc/profiles/per-user/sho/share/icons/hicolor/128x128/apps/zen-browser.png"
+                                                }
+                                                if (ic.startsWith("file://") || ic.startsWith("/")) {
+                                                    return ic.startsWith("/") ? ("file://" + ic) : ic
+                                                }
+                                                if (ic.length > 0) {
+                                                    const r = Quickshell.iconPath(ic, true)
+                                                    if (r && String(r).length > 0) return r
+                                                }
+                                                return PhantomState.resolveAppIconUrl(p5PhoneStage.activeDetailNotif.sender || "")
+                                            }
+                                            fillMode: Image.PreserveAspectFit
+                                            smooth: true
+                                            visible: status === Image.Ready && source !== ""
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            visible: !p5DetailAvatar.visible
+                                            text: {
+                                                const s = (p5PhoneStage.activeDetailNotif ? p5PhoneStage.activeDetailNotif.sender : "").trim()
+                                                return s.length > 0 ? s.charAt(0).toUpperCase() : "★"
+                                            }
+                                            font.family: "Rubik"
+                                            font.pixelSize: 16
+                                            font.weight: Font.Black
+                                            color: "#FFFFFF"
+                                        }
+                                    }
+
+                                    Column {
+                                        Layout.fillWidth: true
+                                        spacing: 2
+                                        Text {
+                                            text: "TRANSMITTER:"
+                                            font.family: "JetBrainsMono NFM"
+                                            font.pixelSize: 9
+                                            font.bold: true
+                                            color: "#E60012"
+                                        }
+                                        Text {
+                                            text: p5PhoneStage.activeDetailNotif ? p5PhoneStage.activeDetailNotif.sender : ""
+                                            font.family: "Rubik"
+                                            font.pixelSize: 14
+                                            font.weight: Font.Black
+                                            color: "#FFFFFF"
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+                                }
                             }
-                        }
-                    }
-                }
 
-                Item {
-                    id: okStampButton
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 4
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.horizontalCenterOffset: PhantomState.isP3 ? 0 : 80
-                    width: 190
-                    height: 66
-                    rotation: PhantomState.isP3 ? 0 : -6
-                    z: 30
-                    scale: okMouse.containsMouse ? 1.06 : 1.0
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+                            // Body card
+                            Rectangle {
+                                anchors.top: p5SenderBox.bottom
+                                anchors.topMargin: 10
+                                anchors.bottom: p5ReaderActionRow.top
+                                anchors.bottomMargin: 10
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                radius: 4
+                                color: "#0E0E16"
+                                border.color: "#2C2C3C"
+                                border.width: 1
 
-                    Canvas {
-                        anchors.fill: parent
-                        visible: !PhantomState.isP3
-                        property bool hovered: okMouse.containsMouse
-                        property color accent: PhantomState.primary
-                        onHoveredChanged: requestPaint()
-                        onAccentChanged: requestPaint()
-                        onPaint: {
-                            var ctx = getContext("2d")
-                            ctx.reset()
-                            var w = width
-                            var h = height
+                                Flickable {
+                                    anchors.fill: parent
+                                    anchors.margins: 14
+                                    contentWidth: width
+                                    contentHeight: p5BodyText.height
+                                    clip: true
 
-                            ctx.fillStyle = "#FFFFFF"
-                            ctx.beginPath()
-                            ctx.moveTo(14, 0)
-                            ctx.lineTo(w, 6)
-                            ctx.lineTo(w - 16, h)
-                            ctx.lineTo(0, h - 6)
-                            ctx.closePath()
-                            ctx.fill()
+                                    Text {
+                                        id: p5BodyText
+                                        width: parent.width
+                                        text: p5PhoneStage.activeDetailNotif ? p5PhoneStage.activeDetailNotif.body : ""
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 12
+                                        font.bold: true
+                                        lineHeight: 1.35
+                                        color: "#F0F0F8"
+                                        wrapMode: Text.Wrap
+                                    }
+                                }
+                            }
 
-                            ctx.fillStyle = hovered ? accent : "#08080A"
-                            ctx.beginPath()
-                            ctx.moveTo(20, 6)
-                            ctx.lineTo(w - 8, 11)
-                            ctx.lineTo(w - 22, h - 6)
-                            ctx.lineTo(6, h - 11)
-                            ctx.closePath()
-                            ctx.fill()
-                        }
-                    }
+                            // Action buttons at bottom of reader
+                            RowLayout {
+                                id: p5ReaderActionRow
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                height: 36
+                                spacing: 10
 
-                    Rectangle {
-                        anchors.fill: parent
-                        visible: PhantomState.isP3
-                        radius: 4
-                        color: okMouse.containsMouse ? "#00dbff" : Qt.rgba(4/255, 13/255, 36/255, 0.95)
-                        border.color: "#00dbff"
-                        border.width: 1
-                    }
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 34
+                                    radius: 3
+                                    color: p5DelMouse.containsMouse ? "#D0000A" : "#8A0006"
+                                    border.color: "#FFFFFF"
+                                    border.width: 1.5
 
-                    RowLayout {
-                        anchors.centerIn: parent
-                        spacing: 10
+                                    RowLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        Text {
+                                            text: "DELETE (DEL)"
+                                            font.family: "Rubik"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Black
+                                            color: "#FFFFFF"
+                                        }
+                                    }
 
-                        P5Icon {
-                            name: "star"
-                            color: PhantomState.isP3
-                                ? (okMouse.containsMouse ? "#040d24" : "#00dbff")
-                                : (okMouse.containsMouse ? "#FFFFFF" : PhantomState.primary)
-                            size: 24
-                        }
+                                    MouseArea {
+                                        id: p5DelMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (p5PhoneStage.activeDetailIndex >= 0 && p5PhoneStage.activeDetailIndex < PhantomState.imNotifications.count) {
+                                                PhantomState.imNotifications.remove(p5PhoneStage.activeDetailIndex)
+                                            }
+                                            p5PhoneStage.activeDetailNotif = null
+                                            p5PhoneStage.activeDetailIndex = -1
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
+                                }
 
-                        Text {
-                            text: "OK"
-                            color: PhantomState.isP3
-                                ? (okMouse.containsMouse ? "#040d24" : "#FFFFFF")
-                                : "#FFFFFF"
-                            font.family: "JetBrainsMono NFM"
-                            font.pixelSize: 32
-                            font.weight: Font.Black
-                            font.italic: !PhantomState.isP3
-                        }
-                    }
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 34
+                                    radius: 3
+                                    color: p5CloseMouse.containsMouse ? "#222230" : "#14141E"
+                                    border.color: "#FFFFFF"
+                                    border.width: 1.5
 
-                    MouseArea {
-                        id: okMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            PhantomState.launcherOpen = false
+                                    RowLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        Text { text: "↵"; font.pixelSize: 14; font.bold: true; color: "#FFFFFF" }
+                                        Text {
+                                            text: "CLOSE / BACK"
+                                            font.family: "Rubik"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Black
+                                            color: "#FFFFFF"
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: p5CloseMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            p5PhoneStage.activeDetailNotif = null
+                                            p5PhoneStage.activeDetailIndex = -1
+                                            PhantomState.playSfx("select")
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1067,21 +1688,13 @@ Variants {
                             border.color: p3MailStage.activeTab === "apps" ? "#00d0ff" : "#2EFFFFFF"
                             border.width: 1.5
 
-                            RowLayout {
+                            Text {
                                 anchors.centerIn: parent
-                                spacing: 6
-                                Text {
-                                    text: "⊞"
-                                    font.pixelSize: 11
-                                    color: p3MailStage.activeTab === "apps" ? "#ffffff" : "#6f8cb0"
-                                }
-                                Text {
-                                    text: "APPS"
-                                    font.family: "Rubik"
-                                    font.pixelSize: 11
-                                    font.weight: Font.Black
-                                    color: p3MailStage.activeTab === "apps" ? "#ffffff" : "#6f8cb0"
-                                }
+                                text: "APPS"
+                                font.family: "Rubik"
+                                font.pixelSize: 11
+                                font.weight: Font.Black
+                                color: p3MailStage.activeTab === "apps" ? "#ffffff" : "#6f8cb0"
                             }
 
                             MouseArea {
@@ -1109,11 +1722,6 @@ Variants {
                             RowLayout {
                                 anchors.centerIn: parent
                                 spacing: 6
-                                Text {
-                                    text: "✉"
-                                    font.pixelSize: 11
-                                    color: p3MailStage.activeTab === "mail" ? "#ffffff" : "#6f8cb0"
-                                }
                                 Text {
                                     text: "MAIL"
                                     font.family: "Rubik"
@@ -1216,7 +1824,7 @@ Variants {
                             spacing: 8
 
                             Text {
-                                text: p3MailStage.activeTab === "apps" ? "⊞" : "✉"
+                                text: p3MailStage.activeTab === "apps" ? ">" : "•"
                                 font.pixelSize: 14
                                 color: p3SearchInput.activeFocus ? "#00e5ff" : "#4e6a91"
                             }
@@ -1353,7 +1961,7 @@ Variants {
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: "✉"
+                                text: "•"
                                 font.pixelSize: 36
                                 color: Qt.rgba(0/255, 219/255, 255/255, 0.25)
                             }
@@ -1399,6 +2007,7 @@ Variants {
 
                         delegate: Item {
                             id: p3RowDelegate
+                            clip: true
                             readonly property bool isApps: p3MailStage.activeTab === "apps"
                             readonly property bool isSelected: isApps ? (index === launcherWin.selectedIndex) : (index === p3MailStage.selectedNotifIndex)
                             readonly property bool isHovered: p3RowMouse.containsMouse
@@ -1408,6 +2017,8 @@ Variants {
 
                             readonly property string itemName: isApps ? (modelData ? (modelData.name || "") : "") : (typeof senderName !== "undefined" ? senderName : (typeof sender !== "undefined" ? sender : (typeof model !== "undefined" && model ? (model.senderName || model.sender || "") : "")))
                             readonly property string itemDesc: isApps ? (modelData ? (modelData.desc || "") : "") : (typeof msgBody !== "undefined" ? msgBody : (typeof message !== "undefined" ? message : (typeof model !== "undefined" && model ? (model.msgBody || model.message || "") : "")))
+                            readonly property string titleClean: launcherWin.cleanSnippet(p3RowDelegate.itemName)
+                            readonly property string itemPreview: launcherWin.cleanSnippet(p3RowDelegate.itemDesc)
                             readonly property string itemIcon: isApps ? (modelData ? (modelData.appIcon || "") : "") : (typeof msgIcon !== "undefined" ? msgIcon : (typeof appIcon !== "undefined" ? appIcon : (typeof model !== "undefined" && model ? (model.msgIcon || model.appIcon || "") : "")))
                             readonly property string itemTime: !isApps ? (typeof msgTime !== "undefined" ? msgTime : (typeof time !== "undefined" ? time : (typeof model !== "undefined" && model ? (model.msgTime || model.time || "") : ""))) : ""
                             readonly property string resolvedIcon: {
@@ -1511,7 +2122,7 @@ Variants {
                                         anchors.centerIn: parent
                                         text: {
                                             const n = (p3RowDelegate.itemName || "").trim()
-                                            return n.length > 0 ? n.charAt(0).toUpperCase() : "✉"
+                                            return n.length > 0 ? n.charAt(0).toUpperCase() : "•"
                                         }
                                         font.family: "Rubik"
                                         font.pixelSize: 20
@@ -1600,7 +2211,7 @@ Variants {
                                         spacing: 6
 
                                         Text {
-                                            text: "✉"
+                                            text: "•"
                                             font.pixelSize: 14
                                             color: p3RowDelegate.isSelected ? "#0048d0" : "#00dbff"
                                         }
@@ -1613,11 +2224,12 @@ Variants {
                                                 width: parent.width
                                                 Text {
                                                     Layout.fillWidth: true
-                                                    text: p3RowDelegate.itemName
+                                                    text: p3RowDelegate.titleClean
                                                     color: p3RowDelegate.isSelected ? "#0038a8" : "#ffffff"
                                                     font.family: "Rubik"
                                                     font.pixelSize: 14
                                                     font.weight: p3RowDelegate.isSelected ? Font.Black : Font.Bold
+                                                    maximumLineCount: 1
                                                     elide: Text.ElideRight
                                                     renderType: Text.CurveRendering
                                                 }
@@ -1643,11 +2255,12 @@ Variants {
 
                                     Text {
                                         width: parent.width
-                                        text: p3RowDelegate.itemDesc
+                                        text: p3RowDelegate.itemPreview
                                         color: p3RowDelegate.isSelected ? "#060f22" : "#9fb4cc"
                                         font.family: "Rubik"
                                         font.pixelSize: 11
                                         font.bold: true
+                                        maximumLineCount: 1
                                         elide: Text.ElideRight
                                         renderType: Text.CurveRendering
                                     }
@@ -1739,7 +2352,7 @@ Variants {
                                     anchors.rightMargin: 24
 
                                     Text {
-                                        text: "✉ MESSAGE DETAIL"
+                                        text: "MESSAGE DETAIL"
                                         font.family: "Rubik"
                                         font.pixelSize: 13
                                         font.weight: Font.Black
@@ -1823,7 +2436,7 @@ Variants {
                                             anchors.centerIn: parent
                                             text: {
                                                 const s = (p3MailStage.activeDetailNotif ? p3MailStage.activeDetailNotif.sender : "").trim()
-                                                return s.length > 0 ? s.charAt(0).toUpperCase() : "✉"
+                                                return s.length > 0 ? s.charAt(0).toUpperCase() : "•"
                                             }
                                             font.family: "Rubik"
                                             font.pixelSize: 18
@@ -1983,6 +2596,6 @@ Variants {
                     }
                 }
             }
-        }
-    }
+}
+}
 }

@@ -10,11 +10,10 @@ import Quickshell.Hyprland
 import qs.config
 import qs.modules.background
 import qs.modules.frame
-import qs.modules.bar
+import qs.modules.calendar
 import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.osd
-import qs.modules.dashboard
 import qs.modules.session
 import qs.modules.lock
 import qs.modules.overlays
@@ -29,8 +28,8 @@ ShellRoot {
     // modul bingkai tepi layar
     ScreenFrame {}
 
-    // modul bar status utama dan dynamic island
-    PhantomBar {}
+    // modul kalender taktis Persona 3 Reload
+    PhantomCalendarPopup {}
 
     // modul pencari aplikasi dan perintah cepat
     PhantomLauncher {}
@@ -40,10 +39,6 @@ ShellRoot {
 
     // modul indikator volume dan kecerahan layar
     PhantomOsd {}
-
-    // modul pusat kontrol dan grafik statistik sistem
-    PhantomDashboard {}
-
 
     // modul menu daya dan sesi pengguna
     PhantomSession {}
@@ -66,6 +61,10 @@ ShellRoot {
 
         function toggleLauncher(): void {
             PhantomState.toggleLauncher()
+        }
+
+        function applyPreset(preset: string): void {
+            PhantomState.applyPreset(preset)
         }
 
         function toggleDashboard(): void {
@@ -184,6 +183,14 @@ ShellRoot {
             PhantomState.toggleMediaPopup()
         }
 
+        function closeMedia(): void {
+            PhantomState.mediaPopupOpen = false
+        }
+
+        function closeAllModals(): void {
+            PhantomState.closeAllModals()
+        }
+
         function toggleBar(): void {
             PhantomState.barAutoHide = !PhantomState.barAutoHide
             PhantomState.saveState()
@@ -255,6 +262,22 @@ ShellRoot {
 
         function pushImNotification(sender: string, message: string, urgency: string): void {
             PhantomState.pushImNotification(sender, message, urgency)
+        }
+    }
+
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) {
+            const evName = String(event.name || "")
+            if (evName === "activespecial" || evName === "activespecialv2") {
+                const rawData = String(event.data || "").trim()
+                const parts = rawData.split(",")
+                const spName = (evName === "activespecialv2" ? (parts[1] || "") : (parts[0] || "")).trim()
+                const isActive = (spName.length > 0 && spName !== "0")
+                if (PhantomState.specialWorkspaceActive !== isActive) {
+                    PhantomState.setSpecialWorkspaceActive(isActive)
+                }
+            }
         }
     }
 }

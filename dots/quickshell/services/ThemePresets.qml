@@ -7,6 +7,13 @@ QtObject {
     readonly property string defaultWallpaperPath: ""
 
     readonly property var availableWallpapers: [
+        "p5_joker_fire",
+        "p5_joker_finisher",
+        "p5_kasumi_rain",
+        "p5_arsene_wings",
+        "p5_makoto_johanna",
+        "p5_joker_grapple",
+        "p5_shibuya_takeyourheart",
         "train_shader",
         "velvet",
         "dorm",
@@ -20,7 +27,7 @@ QtObject {
         "p5-crimson": {
             name: "P5 Phantom Crimson",
             id: "p5-crimson",
-            wallpaper: "",
+            wallpaper: "p5_joker_fire",
             primary: "#E60012",
             secondary: "#FFD700",
             accent: "#FF1E2E",
@@ -54,7 +61,7 @@ QtObject {
         "p4-golden": {
             name: "P4 Golden Midnight",
             id: "p4-golden",
-            wallpaper: "",
+            wallpaper: "p5_makoto_johanna",
             primary: "#FFB703",
             secondary: "#FB8500",
             accent: "#FFE600",
@@ -71,7 +78,7 @@ QtObject {
         "kasumi-violet": {
             name: "Violet Kasumi",
             id: "kasumi-violet",
-            wallpaper: "",
+            wallpaper: "p5_kasumi_rain",
             primary: "#B829FF",
             secondary: "#FF70A6",
             accent: "#D96BFF",
@@ -88,7 +95,7 @@ QtObject {
         "akechi-crow": {
             name: "Crow Royal Gold",
             id: "akechi-crow",
-            wallpaper: "",
+            wallpaper: "p5_arsene_wings",
             primary: "#D4AF37",
             secondary: "#E60012",
             accent: "#FFF3B0",
@@ -105,7 +112,7 @@ QtObject {
         "futaba-matrix": {
             name: "Oracle Hacker Matrix",
             id: "futaba-matrix",
-            wallpaper: "",
+            wallpaper: "p5_shibuya_takeyourheart",
             primary: "#39FF14",
             secondary: "#FF9F1C",
             accent: "#72FF57",
@@ -122,7 +129,7 @@ QtObject {
         "monochrome": {
             name: "Phantom Monochrome",
             id: "monochrome",
-            wallpaper: "",
+            wallpaper: "p5_joker_grapple",
             primary: "#E2E2EC",
             secondary: "#A0A0B2",
             accent: "#FFFFFF",
@@ -139,7 +146,7 @@ QtObject {
         "expressive": {
             name: "Velvet Expressive",
             id: "expressive",
-            wallpaper: "",
+            wallpaper: "velvet",
             primary: "#7B61FF",
             secondary: "#00F5D4",
             accent: "#9D85FF",
@@ -156,7 +163,7 @@ QtObject {
         "tonal-spot": {
             name: "Gore Magala Ice",
             id: "tonal-spot",
-            wallpaper: "",
+            wallpaper: "tartarus",
             primary: "#8AB4F8",
             secondary: "#C58AF9",
             accent: "#A8C7FA",

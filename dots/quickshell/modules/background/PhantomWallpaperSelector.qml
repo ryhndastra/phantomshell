@@ -13,37 +13,105 @@ Scope {
     property string searchQuery: ""
     property var localFiles: []
 
+    property string ambientCategory: PhantomState.isP5 ? "p5" : "all"
+
     // Default P3R ambient wallpapers
-    readonly property var liveAmbients: [
+    readonly property var p3Ambients: [
         {
             id: "train_shader",
+            title: "Gekkoukan Train // Aigis & Makoto",
+            theme: "p3",
             thumb: Qt.resolvedUrl("../../assets/themes/p3/thumbnails/thumb_train_shader.png")
         },
         {
             id: "velvet",
+            title: "Sea of Soul // Velvet Room",
+            theme: "p3",
             thumb: Qt.resolvedUrl("../../assets/themes/p3/thumbnails/thumb_velvet.png")
         },
         {
             id: "dorm",
+            title: "Iwatodai Dormitory // Lounge",
+            theme: "p3",
             thumb: Qt.resolvedUrl("../../assets/themes/p3/thumbnails/thumb_dorm.png")
         },
         {
             id: "monorail",
+            title: "Port Island Monorail // Commute",
+            theme: "p3",
             thumb: Qt.resolvedUrl("../../assets/themes/p3/thumbnails/thumb_monorail.png")
         },
         {
             id: "fuuka",
+            title: "Gekkoukan Roof // Fuuka Yamagishi",
+            theme: "p3",
             thumb: Qt.resolvedUrl("../../assets/themes/p3/thumbnails/thumb_fuuka.png")
         },
         {
             id: "train_loop",
+            title: "Tatsumi Bay Loop // Night Monorail",
+            theme: "p3",
             thumb: Qt.resolvedUrl("../../assets/themes/p3/thumbnails/thumb_train_loop.png")
         },
         {
             id: "tartarus",
+            title: "Tartarus Abyss // The Dark Hour",
+            theme: "p3",
             thumb: Qt.resolvedUrl("../../assets/themes/p3/thumbnails/thumb_tartarus.png")
         }
     ]
+
+    // Curated P5 Royal ambient wallpapers
+    readonly property var p5Ambients: [
+        {
+            id: "p5_joker_fire",
+            title: "Joker // Checkmate (Adam Kadmon)",
+            theme: "p5",
+            thumb: Qt.resolvedUrl("../../assets/themes/p5/thumbnails/thumb_p5_joker_fire.png")
+        },
+        {
+            id: "p5_joker_finisher",
+            title: "Joker // Phantom Smirk",
+            theme: "p5",
+            thumb: Qt.resolvedUrl("../../assets/themes/p5/thumbnails/thumb_p5_joker_finisher.png")
+        },
+        {
+            id: "p5_kasumi_rain",
+            title: "Kasumi // Shibuya Rain Dance",
+            theme: "p5",
+            thumb: Qt.resolvedUrl("../../assets/themes/p5/thumbnails/thumb_p5_kasumi_rain.png")
+        },
+        {
+            id: "p5_arsene_wings",
+            title: "Arsene // Wings of Rebellion",
+            theme: "p5",
+            thumb: Qt.resolvedUrl("../../assets/themes/p5/thumbnails/thumb_p5_arsene_wings.png")
+        },
+        {
+            id: "p5_makoto_johanna",
+            title: "Queen // Johanna Ride",
+            theme: "p5",
+            thumb: Qt.resolvedUrl("../../assets/themes/p5/thumbnails/thumb_p5_makoto_johanna.png")
+        },
+        {
+            id: "p5_joker_grapple",
+            title: "Joker // Metaverse Wire Launch",
+            theme: "p5",
+            thumb: Qt.resolvedUrl("../../assets/themes/p5/thumbnails/thumb_p5_joker_grapple.png")
+        },
+        {
+            id: "p5_shibuya_takeyourheart",
+            title: "Phantom Thieves // Shibuya Calling",
+            theme: "p5",
+            thumb: Qt.resolvedUrl("../../assets/themes/p5/thumbnails/thumb_p5_shibuya_takeyourheart.png")
+        }
+    ]
+
+    readonly property var liveAmbients: {
+        if (ambientCategory === "p5") return p5Ambients
+        if (ambientCategory === "p3") return p3Ambients
+        return p5Ambients.concat(p3Ambients)
+    }
 
     readonly property var filteredLocalFiles: {
         const q = searchQuery.trim().toLowerCase()
@@ -147,7 +215,7 @@ Scope {
                 height: Math.min(740, parent.height - 64)
                 anchors.centerIn: parent
                 color: "#040A1A"
-                border.color: "#00B4D8"
+                border.color: PhantomState.isP5 ? "#E60012" : "#00B4D8"
                 border.width: 1.5
                 radius: 10
                 clip: true
@@ -207,15 +275,15 @@ Scope {
                                 width: tab0Txt.implicitWidth + 24
                                 height: 32
                                 radius: 4
-                                color: wpScope.activeTab === 0 ? "#00B4D8" : (tab0Mouse.containsMouse ? "#0E1B38" : "#070F22")
-                                border.color: wpScope.activeTab === 0 ? "#00F0FF" : "#1B2E52"
+                                color: wpScope.activeTab === 0 ? (PhantomState.isP5 ? "#E60012" : "#00B4D8") : (tab0Mouse.containsMouse ? (PhantomState.isP5 ? "#280A0A" : "#0E1B38") : "#070F22")
+                                border.color: wpScope.activeTab === 0 ? (PhantomState.isP5 ? "#FF4D4D" : "#00F0FF") : "#1B2E52"
                                 border.width: 1
 
                                 Text {
                                     id: tab0Txt
                                     anchors.centerIn: parent
                                     text: "PREINSTALLED AMBIENT"
-                                    color: wpScope.activeTab === 0 ? "#040A1A" : "#F8FBFF"
+                                    color: wpScope.activeTab === 0 ? "#FFFFFF" : "#F8FBFF"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 10
                                     font.weight: Font.Black
@@ -237,15 +305,15 @@ Scope {
                                 width: tab1Txt.implicitWidth + 24
                                 height: 32
                                 radius: 4
-                                color: wpScope.activeTab === 1 ? "#00B4D8" : (tab1Mouse.containsMouse ? "#0E1B38" : "#070F22")
-                                border.color: wpScope.activeTab === 1 ? "#00F0FF" : "#1B2E52"
+                                color: wpScope.activeTab === 1 ? (PhantomState.isP5 ? "#E60012" : "#00B4D8") : (tab1Mouse.containsMouse ? (PhantomState.isP5 ? "#280A0A" : "#0E1B38") : "#070F22")
+                                border.color: wpScope.activeTab === 1 ? (PhantomState.isP5 ? "#FF4D4D" : "#00F0FF") : "#1B2E52"
                                 border.width: 1
 
                                 Text {
                                     id: tab1Txt
                                     anchors.centerIn: parent
                                     text: "WALLPAPERS"
-                                    color: wpScope.activeTab === 1 ? "#040A1A" : "#F8FBFF"
+                                    color: wpScope.activeTab === 1 ? "#FFFFFF" : "#F8FBFF"
                                     font.family: "JetBrainsMono NFM"
                                     font.pixelSize: 10
                                     font.weight: Font.Black
@@ -260,6 +328,54 @@ Scope {
                                         PhantomState.wallpaperSelectorTab = 1
                                         wpScope.scanLocalWallpapers()
                                         PhantomState.playSfx("select")
+                                    }
+                                }
+                            }
+                        }
+
+                        // Ambient sub-filter pills
+                        Row {
+                            visible: wpScope.activeTab === 0
+                            spacing: 6
+                            Layout.alignment: Qt.AlignVCenter
+
+                            Repeater {
+                                model: [
+                                    { key: "all", label: "ALL" },
+                                    { key: "p5", label: "P5 ROYAL" },
+                                    { key: "p3", label: "P3 RELOAD" }
+                                ]
+                                delegate: Rectangle {
+                                    id: chipRect
+                                    required property var modelData
+                                    width: filterTxt.implicitWidth + 16
+                                    height: 26
+                                    radius: 3
+                                    readonly property bool isSelected: wpScope.ambientCategory === modelData.key
+                                    readonly property bool isHov: chipArea.containsMouse
+                                    color: isSelected ? (PhantomState.isP5 ? "#E60012" : "#00B4D8") : (isHov ? (PhantomState.isP5 ? "#240808" : "#162238") : "#0B1424")
+                                    border.color: isSelected ? (PhantomState.isP5 ? "#FF4D4D" : "#00F0FF") : "#1E2D48"
+                                    border.width: 1
+
+                                    Text {
+                                        id: filterTxt
+                                        anchors.centerIn: parent
+                                        text: chipRect.modelData.label
+                                        color: chipRect.isSelected ? "#FFFFFF" : "#A6B8CF"
+                                        font.family: "JetBrainsMono NFM"
+                                        font.pixelSize: 9
+                                        font.weight: Font.Bold
+                                    }
+
+                                    MouseArea {
+                                        id: chipArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            wpScope.ambientCategory = chipRect.modelData.key
+                                            PhantomState.playSfx("select")
+                                        }
                                     }
                                 }
                             }
@@ -361,9 +477,9 @@ Scope {
 
                                 readonly property bool isEquipped: {
                                     if (modelData.id === "train_shader") {
-                                        return PhantomState.p3LiveScene === "train_shader" || PhantomState.p3LiveScene === "" || PhantomState.p3LiveScene === undefined
+                                        return (PhantomState.p3LiveScene === "train_shader" || PhantomState.p3LiveScene === "" || PhantomState.p3LiveScene === undefined) && !PhantomState.isP5
                                     }
-                                    return PhantomState.p3LiveScene === modelData.id
+                                    return PhantomState.p3LiveScene === modelData.id || PhantomState.wallpaperPath === modelData.id
                                 }
                                 readonly property bool isHov: cardArea.containsMouse
 
@@ -372,7 +488,7 @@ Scope {
                                     anchors.margins: 6
                                     radius: 6
                                     color: "#030712"
-                                    border.color: liveCardDelegate.isEquipped ? "#05FFA1" : (liveCardDelegate.isHov ? "#00F0FF" : "#1A2C4C")
+                                    border.color: liveCardDelegate.isEquipped ? "#05FFA1" : (liveCardDelegate.isHov ? (PhantomState.isP5 ? "#FF4D4D" : "#00F0FF") : "#1A2C4C")
                                     border.width: liveCardDelegate.isEquipped ? 2.5 : (liveCardDelegate.isHov ? 1.5 : 1)
                                     clip: true
 
@@ -384,6 +500,46 @@ Scope {
                                         mipmap: true
                                         scale: liveCardDelegate.isHov ? 1.03 : 1.0
                                         Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                    }
+
+                                    Rectangle {
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.bottom: parent.bottom
+                                        height: 30
+                                        color: "#E6040814"
+
+                                        RowLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 8
+                                            anchors.rightMargin: 8
+                                            spacing: 6
+
+                                            Rectangle {
+                                                width: 22
+                                                height: 14
+                                                radius: 2
+                                                color: liveCardDelegate.modelData.theme === "p5" ? "#E60012" : "#00B4D8"
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: liveCardDelegate.modelData.theme === "p5" ? "P5" : "P3"
+                                                    color: "#FFFFFF"
+                                                    font.family: "JetBrainsMono NFM"
+                                                    font.pixelSize: 8
+                                                    font.weight: Font.Black
+                                                }
+                                            }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: liveCardDelegate.modelData.title || liveCardDelegate.modelData.id
+                                                color: "#F8FBFF"
+                                                font.family: "JetBrainsMono NFM"
+                                                font.pixelSize: 9
+                                                font.weight: Font.Bold
+                                                elide: Text.ElideRight
+                                            }
+                                        }
                                     }
 
                                     Rectangle {

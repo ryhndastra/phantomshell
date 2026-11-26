@@ -220,7 +220,7 @@ Singleton {
     }
 
     function toggleDashboard() {
-        if (isP3) {
+        if (isP3 || isP5) {
             toggleSession()
             return
         }
@@ -479,18 +479,18 @@ Singleton {
     property bool transparencyEnabled: true
     property bool autoScheme: false
 
-    property color primary: "#E60012"
-    property color secondary: "#FFD700"
-    property color accent: "#FF1E2E"
-    property color background: "#0B0B0E"
-    property color surface: "#141419"
-    property color surfaceAlt: "#1F1F27"
-    property color foreground: "#FFFFFF"
-    property color muted: "#9E9EAE"
-    property color borderLight: "#FFFFFF"
-    property color borderDark: "#000000"
-    property color urgent: "#FF0033"
-    property color success: "#00F59B"
+    property color primary: "#00B4D8"
+    property color secondary: "#90E0EF"
+    property color accent: "#00F0FF"
+    property color background: "#070C18"
+    property color surface: "#0E172C"
+    property color surfaceAlt: "#182544"
+    property color foreground: "#F8FBFF"
+    property color muted: "#8DA4C4"
+    property color borderLight: "#E0F7FF"
+    property color borderDark: "#040811"
+    property color urgent: "#FF2A6D"
+    property color success: "#05FFA1"
 
     Behavior on primary { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
     Behavior on secondary { ColorAnimation { duration: 650; easing.type: Easing.OutCubic } }
@@ -581,6 +581,7 @@ Singleton {
 
     // konfigurasi logo dan wallpaper aktif
     readonly property bool isP3: themeId === "p3-reload"
+    readonly property bool isP5: themeId === "p5-crimson" || themeId.startsWith("p5") || themeId === "kasumi-violet" || themeId === "akechi-crow" || themeId === "futaba-matrix" || themeId === "monochrome"
     readonly property string logoPath: themeId === "p5-crimson"
         ? Qt.resolvedUrl("../assets/pshell.png")
         : Qt.resolvedUrl("../assets/pshell-" + themeId + ".png")
@@ -632,10 +633,10 @@ Singleton {
         }
     }
 
-    function setLiveScene(sceneKey, videoPath, label) {
+    function setLiveScene(sceneKey, videoPath, label, immediate) {
         if (!sceneKey) return
         wallpaperSelectorOpen = false
-        if (root.isP3) {
+        if (root.isP3 && !immediate) {
             pendingWpSceneKey = sceneKey
             pendingWpVideoPath = (videoPath !== undefined ? videoPath : "")
             pendingWpCustomPath = ""
@@ -649,48 +650,77 @@ Singleton {
             previousWallpaperPath = wallpaperPath
             wallpaperPath = sceneKey
             saveState()
-            playSfx("select")
+            if (!immediate) playSfx("select")
         }
     }
 
-    function setWallpaper(newPath) {
+    function setWallpaper(newPath, immediate) {
         if (!newPath) return
         wallpaperSelectorOpen = false
         const lower = String(newPath).toLowerCase()
+        if (newPath === "p5_joker_fire" || lower.indexOf("p5_joker_fire") !== -1) {
+            setLiveScene("p5_joker_fire", Quickshell.shellPath("assets/themes/p5/videos/p5_joker_fire.mp4"), "Joker // Checkmate (Adam Kadmon)", immediate)
+            return
+        }
         if (newPath === "train_shader" || lower.indexOf("makoto_fg") !== -1 || lower.indexOf("bg.png") !== -1) {
-            setLiveScene("train_shader", "", "Gekkoukan Train // Aigis & Makoto")
+            setLiveScene("train_shader", "", "Gekkoukan Train // Aigis & Makoto", immediate)
             return
         }
         if (newPath === "velvet" || lower.indexOf("skills_ambient") !== -1) {
-            setLiveScene("velvet", Quickshell.shellPath("assets/themes/p3/videos/skills_ambient.mp4"), "Sea of Soul // Velvet Room")
+            setLiveScene("velvet", Quickshell.shellPath("assets/themes/p3/videos/skills_ambient.mp4"), "Sea of Soul // Velvet Room", immediate)
             return
         }
         if (newPath === "dorm" || lower.indexOf("dorm_ambient") !== -1) {
-            setLiveScene("dorm", Quickshell.shellPath("assets/themes/p3/videos/dorm_ambient.mp4"), "Iwatodai Dormitory // Lounge")
+            setLiveScene("dorm", Quickshell.shellPath("assets/themes/p3/videos/dorm_ambient.mp4"), "Iwatodai Dormitory // Lounge", immediate)
             return
         }
         if (newPath === "monorail" || lower.indexOf("makoto_train_ambient") !== -1) {
-            setLiveScene("monorail", Quickshell.shellPath("assets/themes/p3/videos/makoto_train_ambient.mp4"), "Port Island Monorail // Commute")
+            setLiveScene("monorail", Quickshell.shellPath("assets/themes/p3/videos/makoto_train_ambient.mp4"), "Port Island Monorail // Commute", immediate)
             return
         }
         if (newPath === "fuuka" || lower.indexOf("fuuka_ambient") !== -1) {
-            setLiveScene("fuuka", Quickshell.shellPath("assets/themes/p3/videos/fuuka_ambient.mp4"), "Gekkoukan Roof // Fuuka Yamagishi")
+            setLiveScene("fuuka", Quickshell.shellPath("assets/themes/p3/videos/fuuka_ambient.mp4"), "Gekkoukan Roof // Fuuka Yamagishi", immediate)
             return
         }
         if (newPath === "train_loop" || lower.indexOf("train_ambient") !== -1) {
-            setLiveScene("train_loop", Quickshell.shellPath("assets/themes/p3/videos/train_ambient.mp4"), "Tatsumi Bay Loop // Night Monorail")
+            setLiveScene("train_loop", Quickshell.shellPath("assets/themes/p3/videos/train_ambient.mp4"), "Tatsumi Bay Loop // Night Monorail", immediate)
             return
         }
         if (newPath === "tartarus") {
-            setLiveScene("tartarus", "", "Tartarus Abyss // The Dark Hour")
+            setLiveScene("tartarus", "", "Tartarus Abyss // The Dark Hour", immediate)
+            return
+        }
+        // Persona 5 Royal Live Ambients
+        if (newPath === "p5_joker_finisher" || lower.indexOf("p5_joker_finisher") !== -1) {
+            setLiveScene("p5_joker_finisher", Quickshell.shellPath("assets/themes/p5/videos/p5_joker_finisher.mp4"), "Joker // Phantom Smirk", immediate)
+            return
+        }
+        if (newPath === "p5_kasumi_rain" || lower.indexOf("p5_kasumi_rain") !== -1) {
+            setLiveScene("p5_kasumi_rain", Quickshell.shellPath("assets/themes/p5/videos/p5_kasumi_rain.mp4"), "Kasumi // Shibuya Rain Dance", immediate)
+            return
+        }
+        if (newPath === "p5_arsene_wings" || lower.indexOf("p5_arsene_wings") !== -1) {
+            setLiveScene("p5_arsene_wings", Quickshell.shellPath("assets/themes/p5/videos/p5_arsene_wings.mp4"), "Arsene // Wings of Rebellion", immediate)
+            return
+        }
+        if (newPath === "p5_makoto_johanna" || lower.indexOf("p5_makoto_johanna") !== -1) {
+            setLiveScene("p5_makoto_johanna", Quickshell.shellPath("assets/themes/p5/videos/p5_makoto_johanna.mp4"), "Queen // Johanna Ride", immediate)
+            return
+        }
+        if (newPath === "p5_joker_grapple" || lower.indexOf("p5_joker_grapple") !== -1) {
+            setLiveScene("p5_joker_grapple", Quickshell.shellPath("assets/themes/p5/videos/p5_joker_grapple.mp4"), "Joker // Metaverse Wire Launch", immediate)
+            return
+        }
+        if (newPath === "p5_shibuya_takeyourheart" || lower.indexOf("p5_shibuya_takeyourheart") !== -1) {
+            setLiveScene("p5_shibuya_takeyourheart", Quickshell.shellPath("assets/themes/p5/videos/p5_shibuya_takeyourheart.mp4"), "Phantom Thieves // Shibuya Calling", immediate)
             return
         }
         if (lower.endsWith(".mp4") || lower.endsWith(".webm") || lower.endsWith(".mkv") || lower.endsWith(".mov")) {
-            setLiveScene("video_custom", newPath, newPath.split("/").pop())
+            setLiveScene("video_custom", newPath, newPath.split("/").pop(), immediate)
             return
         }
         // Gambar kustom dari Pictures/Wallpapers
-        if (root.isP3) {
+        if (root.isP3 && !immediate) {
             pendingWpSceneKey = ""
             pendingWpVideoPath = ""
             pendingWpCustomPath = newPath
@@ -704,7 +734,7 @@ Singleton {
             wallpaperPath = newPath
             Quickshell.execDetached(["sh", "-c", "swww img '" + newPath + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
             saveState()
-            playSfx("select")
+            if (!immediate) playSfx("select")
         }
     }
 
@@ -887,6 +917,10 @@ Singleton {
         if (!presets[presetId]) return
         if (themeId === presetId && !root.isLoadingSettings) return
 
+        if (!root.isLoadingSettings) {
+            closeAllModals()
+        }
+
         if (root.isLoadingSettings) {
             commitPresetApply(presetId, skipSave)
             return
@@ -909,8 +943,12 @@ Singleton {
             // Timer di bawah hanya sebagai fallback darurat jika ScreenFrame tidak merespons.
             presetCommitTimer.interval = 1200
             presetCommitTimer.restart()
+        } else if (presetId === "p5-crimson" || presetId === "kasumi-violet" || presetId === "akechi-crow" || presetId === "futaba-matrix" || presetId === "monochrome") {
+            // Untuk P5 / P5R, commitPresetApply dipicu tepat saat sepatu Joker menendang dan memecahkan kaca (~890ms)
+            presetCommitTimer.interval = 2200
+            presetCommitTimer.restart()
         } else {
-            // P5 Crimson / tema lain: tebasan diagonal menutup tengah pada ~180ms
+            // Preset lain: tebasan diagonal menutup tengah pada ~180ms
             presetCommitTimer.interval = 180
             presetCommitTimer.restart()
         }
@@ -918,6 +956,7 @@ Singleton {
 
     function commitPresetApply(presetId, skipSave) {
         if (!presets[presetId]) return
+        closeAllModals()
         const p = presets[presetId]
         previousThemeId = themeId
         themeId = p.id
@@ -936,10 +975,14 @@ Singleton {
         urgent = p.urgent
         success = p.success
 
-        if (p.wallpaper && p.wallpaper !== wallpaperPath) {
-            previousWallpaperPath = wallpaperPath
-            wallpaperPath = p.wallpaper
-            Quickshell.execDetached(["sh", "-c", "swww img '" + p.wallpaper + "' --transition-type grow --transition-duration 1.1 --transition-fps 60 2>/dev/null || true"])
+        // Ganti wallpaper ke wallpaper bawaan tema, KECUALI jika pengguna sedang memakai wallpaper custom sendiri
+        const isCustomWp = (root.p3LiveScene === "image_custom" || 
+                            root.p3LiveScene === "video_custom" || 
+                            String(root.wallpaperPath).startsWith("/") || 
+                            String(root.wallpaperPath).startsWith("file://"))
+
+        if (!isCustomWp && p.wallpaper) {
+            setWallpaper(p.wallpaper, true)
         }
 
         const cleanHex = String(p.primary).replace("#", "")
@@ -948,12 +991,38 @@ Singleton {
             "eval",
             "hl.config({ general = { col = { active_border = 'rgba(" + cleanHex + "ff)' } } })"
         ])
+        syncColorsJson(p)
         syncAppThemes(p)
         syncHyprlandAnimations()
         if (!skipSave && !root.isLoadingSettings) {
             saveState()
             playSfx("select")
         }
+    }
+
+    function syncColorsJson(presetObj) {
+        const p = presetObj || presets[root.themeId] || {}
+        const colorsPath = Quickshell.shellPath("../phantomshell/colors.json")
+        const colorsData = {
+            name: p.name || root.themeName || "P3 Reload S.E.E.S. Blue",
+            id: p.id || root.themeId || "p3-reload",
+            primary: String(p.primary || "#00B4D8"),
+            secondary: String(p.secondary || "#90E0EF"),
+            accent: String(p.accent || "#00F0FF"),
+            background: String(p.background || "#070C18"),
+            surface: String(p.surface || "#0E172C"),
+            surfaceAlt: String(p.surfaceAlt || "#182544"),
+            foreground: String(p.foreground || "#F8FBFF"),
+            muted: String(p.muted || "#8DA4C4"),
+            borderLight: String(p.borderLight || "#E0F7FF"),
+            borderDark: String(p.borderDark || "#040811"),
+            urgent: String(p.urgent || "#FF2A6D"),
+            success: String(p.success || "#05FFA1")
+        }
+        Quickshell.execDetached([
+            "bash", "-c",
+            "cat << 'EOF' > '" + colorsPath + "'\n" + JSON.stringify(colorsData, null, 2) + "\nEOF"
+        ])
     }
 
     function setDarkMode(isDark) {
@@ -1089,21 +1158,22 @@ Singleton {
         }
         const statePath = Quickshell.shellPath("../phantomshell/settings.json")
         const colorsPath = Quickshell.shellPath("../phantomshell/colors.json")
+        const p = presets[root.themeId] || {}
         const colorsData = {
-            name: root.themeName || "P3 Reload S.E.E.S. Blue",
-            id: root.themeId || "p3-reload",
-            primary: String(root.primary || "#00B4D8"),
-            secondary: String(root.secondary || "#90E0EF"),
-            accent: String(root.accent || "#00F0FF"),
-            background: String(root.background || "#070C18"),
-            surface: String(root.surface || "#0E172C"),
-            surfaceAlt: String(root.surfaceAlt || "#182544"),
-            foreground: String(root.foreground || "#F8FBFF"),
-            muted: String(root.muted || "#8DA4C4"),
-            borderLight: String(root.borderLight || "#E0F7FF"),
-            borderDark: String(root.borderDark || "#040811"),
-            urgent: String(root.urgent || "#FF2A6D"),
-            success: String(root.success || "#05FFA1")
+            name: p.name || root.themeName || "P3 Reload S.E.E.S. Blue",
+            id: p.id || root.themeId || "p3-reload",
+            primary: String(p.primary || root.primary || "#00B4D8"),
+            secondary: String(p.secondary || root.secondary || "#90E0EF"),
+            accent: String(p.accent || root.accent || "#00F0FF"),
+            background: String(p.background || root.background || "#070C18"),
+            surface: String(p.surface || root.surface || "#0E172C"),
+            surfaceAlt: String(p.surfaceAlt || root.surfaceAlt || "#182544"),
+            foreground: String(p.foreground || root.foreground || "#F8FBFF"),
+            muted: String(p.muted || root.muted || "#8DA4C4"),
+            borderLight: String(p.borderLight || root.borderLight || "#E0F7FF"),
+            borderDark: String(p.borderDark || root.borderDark || "#040811"),
+            urgent: String(p.urgent || root.urgent || "#FF2A6D"),
+            success: String(p.success || root.success || "#05FFA1")
         }
         Quickshell.execDetached([
             "bash", "-c",
@@ -1127,7 +1197,14 @@ Singleton {
         const ffVol = Math.round(Math.max(1, Math.min(100, root.sfxVolume * 100)))
 
         var soundPath = ""
-        if (kind === "splash" || root.isP3) {
+        if (root.isP5) {
+            if (kind === "open") soundPath = Quickshell.shellPath("assets/themes/p5/sfx/openMenu.wav")
+            else if (kind === "select" || kind === "hover") soundPath = Quickshell.shellPath("assets/themes/p5/sfx/select.wav")
+            else if (kind === "confirm" || kind === "into_game" || kind === "modal") soundPath = Quickshell.shellPath("assets/themes/p5/sfx/Confirm.wav")
+            else if (kind === "close" || kind === "cancel") soundPath = Quickshell.shellPath("assets/themes/p5/sfx/cancel.wav")
+            else if (kind === "kick") soundPath = Quickshell.shellPath("assets/themes/p5/sfx/kick.wav")
+            else soundPath = Quickshell.shellPath("assets/themes/p5/sfx/select.wav")
+        } else if (kind === "splash" || root.isP3) {
             if (kind === "notif") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_toast.wav")
             else if (kind === "into_game" || kind === "splash") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_into_game_detail.wav")
             else if (kind === "achievement") soundPath = Quickshell.shellPath("assets/themes/p3/sfx/deck_ui_achievement_toast.wav")
@@ -1238,6 +1315,11 @@ Singleton {
 
     property alias workspaceApps: systemService.workspaceApps
     property alias activeWorkspaceId: systemService.activeWorkspaceId
+    onActiveWorkspaceIdChanged: {
+        if (root.specialWorkspaceActive) {
+            root.setSpecialWorkspaceActive(false)
+        }
+    }
 
     function refreshSystemDossier() {
         systemService.refreshSystemInfo()
@@ -1365,6 +1447,7 @@ Singleton {
                     }
                 } catch(e) {}
                 root.isLoadingSettings = false
+                root.syncColorsJson()
             }
         }
     }
